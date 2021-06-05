@@ -341,7 +341,7 @@
 
         const model = context.modelStore.getModel(name, !isRoot).transform(transform);
         if (hasMaterial) model.material(context.materials[materialIndex]);
-        if (hasMesh) model.data(context.meshes[meshIndex]);
+        if (hasMesh) model.mesh(context.meshes[meshIndex]);
 
         for (let i = 0; i < childCount; i++) {
             const modelIndex = context.header.getUint16(headerOffset, littleEndian);

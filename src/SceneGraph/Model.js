@@ -43,6 +43,10 @@
     }
 
     public.shader = function (value) {
+        if (shader.is3d !== private.transform.is3d){
+            const m = private.transform.is3d ? "3D" : "2D";
+            console.error("Model '" + private.name + "' has a " + m + " transform and must use a " + m + " shader");
+        }
         private.shader = value;
         return public;
     }
@@ -53,7 +57,7 @@
         return undefined;
     }
 
-    public.data = function (value) {
+    public.mesh = function (value) {
         private.meshData = value;
         return public;
     }

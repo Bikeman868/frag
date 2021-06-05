@@ -2,13 +2,13 @@ require("./Math/Vector");
 require("./Math/Triangle");
 require("./Math/Matrix");
 
-require("./Framework/_Framework");
+require("./Framework/Init");
 require("./Framework/Observable");
 require("./Framework/Transform");
 require("./Framework/Transform2D");
 require("./Framework/Framework");
 
-require("./Shaders/_Shaders");
+require("./Shaders/Shader");
 require("./Shaders/UiShader");
 
 require("./Materials/Texture");
@@ -20,6 +20,7 @@ require("./SceneGraph/MeshOptimizer");
 require("./SceneGraph/Model");
 require("./SceneGraph/ScenePosition");
 require("./SceneGraph/SceneObject");
+require("./SceneGraph/Scene");
 
 require("./Cameras/UiCamera");
 require("./Cameras/OrthographicCamera");

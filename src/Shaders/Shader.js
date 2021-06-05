@@ -37,7 +37,7 @@ window.frag.Shader = function () {
         x: 0,
         y: 0,
         z: 0,
-        matrix: "mat3",
+        matrix: "mat4",
         textureCoords: "None",
         diffuseTexture: "None",
         emmissiveTexture: "None",
@@ -133,6 +133,7 @@ window.frag.Shader = function () {
     };
 
     public.directionalLightWhite = function () {
+        public.matrix3D();
         private.directionalLight = "White";
         if (private.ambientLight === "None") private.ambientLight = "Balanced";
         if (private.normals === "None") private.normals = "vec3";
@@ -273,7 +274,8 @@ window.frag.Shader = function () {
             vSource: "",
             fSource: "precision mediump float;\n",
             attributes: {},
-            uniforms: {}
+            uniforms: {},
+            is3d: private.matrix === "mat4",
         };
 
         private.addAttributeDeclarations(shader);

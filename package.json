@@ -1,9 +1,11 @@
 {
   "name": "frag",
   "version": "1.0.0",
-  "description": "A ES5 Javascript framework for game development on WebGL",
+  "description": "An ES5 Javascript framework for game development on WebGL",
   "private": true,
   "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch"
   },
   "keywords": [],
   "author": "Martin Halliday",

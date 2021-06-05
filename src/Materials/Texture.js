@@ -89,10 +89,11 @@
         return public;
     }
 
-    public.fromUrl = function (level, url) {
+    public.fromUrl = function (level, url, crossOrigin) {
         const image = new Image();
         public.fromImage(level, image);
-        image.crossOrigin = "";
+        if (crossOrigin !== undefined)
+            image.crossOrigin = crossOrigin;
         image.src = url;
         return public;
     }
@@ -140,26 +141,20 @@
     }
 
     public.apply = function (textureType, gl, shader) {
-        if (shader.uniforms[textureType]) {
-            if (!private.glTexture) {
-                if (private.disposed)
-                    console.error("Attempt to apply disposed texture " + private.name);
-                else
-                    console.error("Texture " + private.name + " has no MIP levels");
-                return public;
-            }
-            gl.activeTexture(gl.TEXTURE0 + public.textureUnit);
-            gl.bindTexture(gl.TEXTURE_2D, private.glTexture);
+        if (!shader.uniforms[textureType]) return public;
+        if (!private.glTexture) return public;
+        
+        gl.activeTexture(gl.TEXTURE0 + public.textureUnit);
+        gl.bindTexture(gl.TEXTURE_2D, private.glTexture);
 
-            if (!private.generated) {
-                gl.generateMipmap(gl.TEXTURE_2D);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                private.generated = true;
-            }
-
-            gl.uniform1i(shader.uniforms[textureType], public.textureUnit);
+        if (!private.generated) {
+            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            private.generated = true;
         }
+
+        gl.uniform1i(shader.uniforms[textureType], public.textureUnit);
         return public;
     }
 
