@@ -82,10 +82,14 @@
     }
 
     public.fromImage = function (level, image) {
-        image.onload = function () {
+        const load = function() {
             private.setup(image.width, image.height);
             gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, private.format, private.dataType, image);
         }
+        if (image.onload)
+            load();
+        else
+            image.onload = load;
         return public;
     }
 
