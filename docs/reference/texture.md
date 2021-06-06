@@ -22,6 +22,9 @@ const texture = frag.Texture()
   fromUrl(4, 'emmissive_4x4.jpg')
   fromUrl(5, 'emmissive_2x2.jpg')
   fromUrl(6, 'emmissive_1x1.jpg');
+
+const material = frag.Material()
+  .setTexture("emmissive", texture);
 ```
 
 ## Mip levels
