@@ -1,32 +1,42 @@
-﻿// A public is a camera and a collection od meshes. The camera defines how the
+﻿// A public is a camera and a collection of meshes. The camera defines how the
 // meshes will be projected onto the viewport. Several scenes can be projecterd onto
 // the same viewport, but only one of these scenes should set the viewport and the rest
 // should adjust to the viewport.
 
-window.frag.Scene = function () {
+window.frag.Scene = function() {
     const private = {
         sceneObjects: [],
         activeCamera: null
     }
 
-    private.cameraUpdated = function () {
+    private.cameraUpdated = function() {
     }
 
     const public = {
         __private: private
     };
 
-    public.dispose = function () {
+    public.dispose = function() {
         if (private.activeCamera)
             private.activeCamera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
     }
 
-    public.addObject = function (sceneObject) {
+    public.addObject = function(sceneObject) {
         private.sceneObjects.push(sceneObject);
         return public;
     };
 
-    public.camera = function (camera) {
+    public.removeObject = function(sceneObject) {
+        for (let i = 0; i < private.sceneObjects.length; i++) {
+            if (private.sceneObjects[i] === sceneObject) {
+                private.sceneObjects.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public.camera = function(camera) {
         if (private.activeCamera)
             private.activeCamera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
 

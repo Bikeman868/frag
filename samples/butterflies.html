@@ -64,7 +64,7 @@
 
         const wingVerticies = [
             0,       0,     0,
-            0.15,    1,   0.1,
+            0.15,    1,   0.2,
             0.5,   0.7,  -0.2,
             0.5,  -0.7,  -0.3,
             0.15,   -1,   0.1
@@ -81,6 +81,38 @@
             .name('Wing')
             .shadeSmooth()
             .addTriangleFan(wingVerticies, wingColors, wingUVs);
+
+        // Create animations that flaps the wings
+
+        const fastFlyingAnimation = frag.ModelAnimation()
+            .name("flying")
+            .loop(true)
+            .frames(30)
+            .interval(2);
+        fastFlyingAnimation.addChannel({
+            channel: "rotate-y",
+            pattern: /wing/,
+            keyframes: {
+                0: { value: 0, transition: "linear" },
+                15: { value: 90 * degToRad, transition: "linear" },
+                29: { value: 0, transition: "linear" },
+            }
+        });
+
+        const slowFlyingAnimation = frag.ModelAnimation()
+            .name("flying")
+            .loop(true)
+            .frames(30)
+            .interval(4);
+        slowFlyingAnimation.addChannel({
+            channel: "rotate-y",
+            pattern: /wing/,
+            keyframes: {
+                0: { value: 0, transition: "linear" },
+                15: { value: 80 * degToRad, transition: "linear" },
+                29: { value: 0, transition: "linear" },
+            }
+        });
 
         const createRandomlyColoredButterfly = function(id) {
             // Generate a random color that is mostly one channel
@@ -132,6 +164,13 @@
             butterflyModel.addChild(leftWingModel);
             butterflyModel.addChild(rightWingModel);
 
+            // Bigger butterflies flap their wings more slowly
+
+            if (wingLength < 0.6)
+                butterflyModel.addAnimation(fastFlyingAnimation);
+            else
+                butterflyModel.addAnimation(slowFlyingAnimation);
+
             return butterflyModel;
         }
 
@@ -144,7 +183,7 @@
             butterflyModels.push(butterflyModel);
         }
 
-        const addButterflyToScene = function() {
+        const createButerflyInstance = function() {
             // Choose a random butterfly model
             const butterflyModel = butterflyModels[randomInt(butterflyModels.length)];
 
@@ -157,16 +196,75 @@
                 .rotateXYZ(randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad))
                 .translateXYZ(randomFloat(-70, 70), randomFloat(-50, 50), randomFloat(-50, 50));
             
-            // Start the flying animation. It is configured to loop forever
-            //butterfly.animations.flying.start();
+            return butterfly;
+        }
 
-            // Add the butterfly to our scene
-            scene.addObject(butterfly);
+        // Model the behavior of butterflies in this "game"
+
+        const butterflies = {};
+        let nextId = 1;
+
+        const Butterfly = function() {
+            const private = {
+                instance: createButerflyInstance(),
+                directionAndSpeed: [randomFloat(-0.3, 0.3), randomFloat(-0.3, 0.3), randomFloat(-0.3, 0.3)]
+            };
+
+            const public = {
+                __private: private,
+                id: nextId++
+            };
+
+            public.addToScene = function(scene) {
+                private.scene = scene;
+                scene.addObject(private.instance);
+            }
+
+            public.flying = function(isFlying) {
+                private.isFlying = isFlying;
+                if (isFlying)
+                    private.instance.animations.flying.start();
+                else
+                    private.instance.animations.flying.stop();
+            }
+
+            public.die = function() {
+                private.scene.removeObject(private.instance);
+                private.instance.dispose();
+                delete butterflies[public.id];
+            }
+
+            public.moveForwards = function() {
+                if (private.isFlying) {
+                    private.instance.getPosition().moveBy(private.directionAndSpeed);
+                }
+            }
+
+            butterflies[public.id] = public;
+            return public;
         }
 
         // Start with some butterflies then add more over time
 
-        for (let i = 0; i < 10; i++) addButterflyToScene();
-        setInterval(addButterflyToScene, 2000);
+        const addButterflyToScene = function() {
+            const butterfly = Butterfly();
+            butterfly.addToScene(scene);
+            butterfly.flying(true);
+            setTimeout(butterfly.die, 60000);
+        }
+
+        for (let i = 0; i < 5; i++) addButterflyToScene();
+        setInterval(addButterflyToScene, 1461);
+
+        // Move all of the butterflies that are flying
+
+        const movingAnimation = frag.Animation()
+            .repeatTicks(function () {
+                for (const id in butterflies) {
+                    butterflies[id].moveForwards();
+                }
+            }, 5);
+        movingAnimation.start();
+
     </script>
 </body>

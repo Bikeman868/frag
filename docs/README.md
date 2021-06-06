@@ -37,6 +37,7 @@ Things to mess around with on this sample:
 This [sample](../samples/butterflies.html) illustrates the following features and techniques
 * Defines some very simple bufferfly models with different colors sharing the same mesh
 * Reuses the same flying animation on all of the butterfly models
+* Configures WebGL to draw the back faces so that we can see the butterfly wings from any direction
 * Creates many butterflies based on the differently colored models and makes them fly about
 * Butterflies have limited life and get removed from the scene
 * This sample will show you the basics of meshes, models, animation and object lifetime

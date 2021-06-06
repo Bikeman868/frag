@@ -174,5 +174,13 @@
         return public;
     }
 
+    public.moveBy = function(direction){
+        public.translateXYZ(
+            private.translation.x + direction[0],
+            private.translation.y + direction[1],
+            private.translation.z + direction[2]);
+
+    }
+
     return public;
 };

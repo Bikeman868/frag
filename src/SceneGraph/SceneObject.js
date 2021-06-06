@@ -74,6 +74,11 @@
         return public;
     };
 
+    public.dispose = function() {
+        public.disable();
+        return public;
+    }
+
     public.draw = function (gl, worldToClipTransform) {
         if (!private.enabled) return public;
         const modelToWorldTransform = private.getModelToWorldTransform();
