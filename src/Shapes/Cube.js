@@ -32,11 +32,15 @@ window.frag.Cube = function (facets, options) {
 
     const verticies = [];
     const uvs = [];
+    const colors = options.color ? [] : undefined;
 
     const addVertex = function(v) {
         verticies.push(v[0]);
         verticies.push(v[1]);
         verticies.push(v[2]);
+        if (options.color) {
+            options.color.forEach(c => { colors.push(c); });
+        }
     }
 
     const addUv = function (u, v) {
@@ -109,5 +113,5 @@ window.frag.Cube = function (facets, options) {
         if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.MeshData().addTriangles(verticies, uvs);
+    return window.frag.MeshData().addTriangles(verticies, colors, uvs);
 };

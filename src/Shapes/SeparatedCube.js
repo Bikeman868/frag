@@ -30,23 +30,24 @@ window.frag.SeparatedCube = function (facets, options) {
             const uvs = [t1[0], t0[1], t1[0], t1[1], t0[0], t0[1], t0[0], t1[1]];
             const verticies = [];
             const normals = [];
+            const colors = options.color ? [] : undefined;
             for (hFacet = 0; hFacet < facets; hFacet++) {
                 for (var i = 0; i < 4; i++) {
                     verticies.push(corners[indexes[i] * 3 + 0]);
                     verticies.push(corners[indexes[i] * 3 + 1]);
                     verticies.push(corners[indexes[i] * 3 + 2]);
+
+                    if (options.color)
+                        options.color.forEach(c => colors.push(c));
+        
                     normals.push(normal[0]);
                     normals.push(normal[1]);
                     normals.push(normal[2]);
                 }
             }
-            mesh.addTriangleStrip(verticies, uvs, verticies);
+            mesh.addTriangleStrip(verticies, colors, uvs, verticies);
         }
     }
-
-    // TODO: Normals at the corners must be the same for all 3 verticies at the corner
-    //       otherwise the displacement texture will move the verticies away from each
-    //       other resulting in gaps at the corners of the cube
 
     addFace([1, 2, 0, 3], [u1, v2], [u0, v1], [0, 0, -1]); // front
     addFace([4, 1, 5, 0], [u2, v2], [u1, v1], [0, -1, 0]); // bottom

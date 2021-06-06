@@ -158,6 +158,7 @@
             const tangents = tangentFormat === 0 ? undefined : [];
             const bitangents = bitangentFormat === 0 ? undefined : [];
             const uvs = uvFormat === 0 ? undefined : [];
+            const colors = undefined;
 
             const dataArray = new Float32Array(context.data, dataOffset);
 
@@ -229,12 +230,12 @@
             const vertexData = frag.VertexData();
             if (vertexFormat === 1 || vertexFormat === 2) {
                 if (is3D)
-                    vertexData.setTriangles(verticies, uvs, normals, tangents, bitangents)
+                    vertexData.setTriangles(verticies, colors, uvs, normals, tangents, bitangents)
                 else
-                    vertexData.setTriangles2D(verticies, uvs, normals, tangents, bitangents);
+                    vertexData.setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
             }
-            else if (vertexFormat === 3) vertexData.setTriangleStrip(verticies, uvs, normals, tangents, bitangents);
-            else if (vertexFormat === 4) vertexData.setTriangleFan(verticies, uvs, normals, tangents, bitangents);
+            else if (vertexFormat === 3) vertexData.setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
+            else if (vertexFormat === 4) vertexData.setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
 
             mesh.addVertexData(vertexData);
         }

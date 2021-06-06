@@ -31,26 +31,28 @@ window.frag.createProgram = function (name, vertexShader, fragmentShader) {
 
 // This builds a custom shader based on a set of options
 window.frag.Shader = function () {
+    const none = "None";
     const private = {
         name: "Custom",
         verticies: "XYZ",
         x: 0,
         y: 0,
         z: 0,
+        colors: none,
         matrix: "mat4",
-        textureCoords: "None",
-        diffuseTexture: "None",
-        emmissiveTexture: "None",
-        displacementTexture: "None",
-        normalMap: "None",
-        roughnessTexture: "None",
-        shininessTexture: "None",
-        metalinessTexture: "None",
-        normals: "None",
-        tangents: "None",
-        bitangents: "None",
-        directionalLight: "None",
-        ambientLight: "None",
+        textureCoords: none,
+        diffuseTexture: none,
+        emmissiveTexture: none,
+        displacementTexture: none,
+        normalMap: none,
+        roughnessTexture: none,
+        shininessTexture: none,
+        metalinessTexture: none,
+        normals: none,
+        tangents: none,
+        bitangents: none,
+        directionalLight: none,
+        ambientLight: none,
     };
 
     const public = {
@@ -63,85 +65,90 @@ window.frag.Shader = function () {
     public.verticiesXZ = function (y) { private.verticies = "XZ"; private.y = y; return public; }
     public.verticiesYZ = function (x) { private.verticies = "YZ"; private.x = x; return public; }
     public.verticiesXYZ = function () { private.verticies = "XYZ"; return public; }
-    public.verticiesNone = function () { private.verticies = "None"; return public; }
+    public.verticiesNone = function () { private.verticies = none; return public; }
 
     public.matrix2D = function () { private.matrix = "mat3"; return public; }
     public.matrix3D = function () { private.matrix = "mat4"; return public; }
-    public.matrixNone = function () { private.matrix = "None"; return public; }
+    public.matrixNone = function () { private.matrix = none; return public; }
            
     public.normals = function () { private.normals = "vec3"; return public; }
 
+    public.colorsRGB = function() { private.colors = "vec3"; return public; }
+    public.colorsRGBA = function() { private.colors = "vec4"; return public; }
+    public.colorsNone = function() { private.colors = none; return public; }
+
     public.diffuseTexture = function () {
         private.diffuseTexture = "RGB";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
+        private.colors = none;
+        if (private.textureCoords === none) private.textureCoords = "vec2";
         return public; 
     };
 
     public.emmissiveTexture = function () {
         private.emmissiveTexture = "RGB";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
         return public;
     };
 
     public.normalMapStandard = function () {
         private.normalMap = "Standard";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
-        if (private.normals === "None") private.normals = "vec3";
-        if (private.tangents === "None") private.tangents = "vec3";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
+        if (private.normals === none) private.normals = "vec3";
+        if (private.tangents === none) private.tangents = "vec3";
         return public; 
     };
 
     public.normalMapOpenGL = function () {
         private.normalMap = "OpenGL";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
-        if (private.normals === "None") private.normals = "vec3";
-        if (private.tangents === "None") private.tangents = "vec3";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
+        if (private.normals === none) private.normals = "vec3";
+        if (private.tangents === none) private.tangents = "vec3";
         return public; 
     };
 
     public.displacementTextureRaised = function () {
         private.displacementTexture = "Raised";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
+        if (private.normals === none) private.normals = "vec3";
         return public;
     };
 
     public.displacementTextureSunken = function () {
         private.displacementTexture = "Sunken";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
+        if (private.normals === none) private.normals = "vec3";
         return public;
     };
 
     public.displacementTextureSigned = function () {
         private.displacementTexture = "Signed";
-        if (private.textureCoords === "None") private.textureCoords = "vec2";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.textureCoords === none) private.textureCoords = "vec2";
+        if (private.normals === none) private.normals = "vec3";
         return public;
     };
 
     public.tangents = function () {
         private.tangents = "vec3";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.normals === none) private.normals = "vec3";
         return public;
     };
 
     public.bitangents = function () {
         private.bitangents = "vec3";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.normals === none) private.normals = "vec3";
         return public; 
     };
 
     public.directionalLightWhite = function () {
         public.matrix3D();
         private.directionalLight = "White";
-        if (private.ambientLight === "None") private.ambientLight = "Balanced";
-        if (private.normals === "None") private.normals = "vec3";
+        if (private.ambientLight === none) private.ambientLight = "Balanced";
+        if (private.normals === none) private.normals = "vec3";
         return public;
     }
 
     public.directionalLightNone = function () {
-        private.directionalLight = "None";
+        private.directionalLight = none;
         return public;
     }
 
@@ -151,7 +158,7 @@ window.frag.Shader = function () {
     }
 
     public.ambientLightNone = function () {
-        private.ambientLight = "None";
+        private.ambientLight = none;
         return public;
     }
 
@@ -162,30 +169,31 @@ window.frag.Shader = function () {
 
     private.addAttributeDeclarations = function(shader) {
         if (private.verticies === "XYZ") shader.vSource += "attribute vec4 a_position;\n";
-        else if (private.verticies !== "None") shader.vSource += "attribute vec2 a_position;\n";
+        else if (private.verticies !== none) shader.vSource += "attribute vec2 a_position;\n";
 
-        if (private.textureCoords !== "None") shader.vSource += "attribute " + private.textureCoords + " a_texcoord;\n";
-        if (private.normals !== "None") shader.vSource += "attribute " + private.normals + " a_normal;\n";
-        if (private.tangents !== "None") shader.vSource += "attribute " + private.tangents + " a_tangent;\n";
-        if (private.bitangents !== "None") shader.vSource += "attribute " + private.bitangents + " a_bitangent;\n";
+        if (private.colors !== none) shader.vSource += "attribute " + private.colors + " a_color;\n";
+        if (private.textureCoords !== none) shader.vSource += "attribute " + private.textureCoords + " a_texcoord;\n";
+        if (private.normals !== none) shader.vSource += "attribute " + private.normals + " a_normal;\n";
+        if (private.tangents !== none) shader.vSource += "attribute " + private.tangents + " a_tangent;\n";
+        if (private.bitangents !== none) shader.vSource += "attribute " + private.bitangents + " a_bitangent;\n";
     }
 
     private.addUniformDeclarations = function (shader) {
-        if (private.matrix !== "None") {
-            if (private.directionalLight !== "None")
+        if (private.matrix !== none) {
+            if (private.directionalLight !== none)
                 shader.vSource += "uniform " + private.matrix + " u_modelMatrix;\n";
             shader.vSource += "uniform " + private.matrix + " u_clipMatrix;\n";
         }
-        if (private.directionalLight !== "None") shader.vSource += "uniform vec3 u_lightDirection;\n";
-        if (private.displacementTexture !== "None") shader.vSource += "uniform float u_displacementScale;\n";
-        if (private.displacementTexture !== "None" || private.roughnessTexture !== "None" || private.shininessTexture != "None") shader.vSource += "uniform sampler2D u_surface;\n";
+        if (private.directionalLight !== none) shader.vSource += "uniform vec3 u_lightDirection;\n";
+        if (private.displacementTexture !== none) shader.vSource += "uniform float u_displacementScale;\n";
+        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) shader.vSource += "uniform sampler2D u_surface;\n";
 
-        if (private.normalMap !== "None") shader.fSource += "uniform sampler2D u_normalMap;\n";
-        if (private.textureCoords !== "None") {
-            if (private.diffuseTexture !== "None") shader.fSource += "uniform sampler2D u_diffuse;\n";
-            if (private.emmissiveTexture !== "None") shader.fSource += "uniform sampler2D u_emmissive;\n";
+        if (private.normalMap !== none) shader.fSource += "uniform sampler2D u_normalMap;\n";
+        if (private.textureCoords !== none) {
+            if (private.diffuseTexture !== none) shader.fSource += "uniform sampler2D u_diffuse;\n";
+            if (private.emmissiveTexture !== none) shader.fSource += "uniform sampler2D u_emmissive;\n";
         }
-        if (private.ambientLight !== "None") shader.fSource += "uniform float u_ambientLight;\n";
+        if (private.ambientLight !== none) shader.fSource += "uniform float u_ambientLight;\n";
     }
 
     private.addVaryingDeclarations = function (shader) {
@@ -195,22 +203,23 @@ window.frag.Shader = function () {
             shader.fSource += statement;
         }
 
-        if (private.textureCoords !== "None") add(private.textureCoords, "v_texcoord");
-        if (private.directionalLight !== "None") {
+        if (private.textureCoords !== none) add(private.textureCoords, "v_texcoord");
+        if (private.colors !== none) add(private.colors, "v_color");
+        if (private.directionalLight !== none) {
             add("vec3", "v_lightDirection");
-            if (private.normalMap === "None") add(private.normals, "v_normal");
+            if (private.normalMap === none) add(private.normals, "v_normal");
         }
     }
 
     private.addLogic = function (shader) {
         if (private.verticies === "XYZ") shader.vSource += "  vec4 position = a_position;\n";
-        else if (private.verticies !== "None") shader.vSource += "  vec2 position = a_position;\n";
+        else if (private.verticies !== none) shader.vSource += "  vec2 position = a_position;\n";
 
-        if (private.displacementTexture !== "None" || private.roughnessTexture !== "None" || private.shininessTexture != "None") {
+        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) {
             shader.vSource += "  vec4 surface = texture2D(u_surface, a_texcoord);\n";
         }
 
-        if (private.displacementTexture !== "None") {
+        if (private.displacementTexture !== none) {
             if (private.verticies === "XYZ" && private.normals === "vec3") {
                 if (private.displacementTexture === "Sunken") shader.vSource += "  float displacement = -surface.r;\n";
                 else if (private.displacementTexture === "Signed") shader.vSource += "  float displacement = surface.r * 2.0 - 1.0;\n";
@@ -220,19 +229,19 @@ window.frag.Shader = function () {
         }
 
         if (private.verticies === "XYZ") shader.vSource += "  position = u_clipMatrix * position;\n";
-        else if (private.verticies !== "None") shader.vSource += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
+        else if (private.verticies !== none) shader.vSource += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
 
         if (private.verticies === "XYZ") shader.vSource += "  gl_Position = position;\n";
         else if (private.verticies === "XY") shader.vSource += "  gl_Position = vec4(position, " + private.z + ", 1);\n";
         else if (private.verticies === "XZ") shader.vSource += "  gl_Position = vec4(position.x, " + private.y + ", position.y, 1);\n";
         else if (private.verticies === "YZ") shader.vSource += "  gl_Position = vec4(" + private.x + ", position, 1);\n";
 
-        if (private.textureCoords !== "None") shader.vSource += "  v_texcoord = a_texcoord;\n";
+        if (private.textureCoords !== none) shader.vSource += "  v_texcoord = a_texcoord;\n";
 
-        if (private.directionalLight !== "None") {
-            if (private.normalMap !== "None") {
+        if (private.directionalLight !== none) {
+            if (private.normalMap !== none) {
                 shader.vSource += "  vec3 T = normalize(vec3(u_modelMatrix * vec4(a_tangent, 0.0)));\n";
-                if (private.bitangents !== "None")
+                if (private.bitangents !== none)
                     shader.vSource += "  vec3 B = normalize(vec3(u_modelMatrix * vec4(a_bitangent, 0.0)));\n";
                 else
                     shader.vSource += "  vec3 B = normalize(vec3(u_modelMatrix * vec4(cross(a_normal, a_tangent), 0.0)));\n";
@@ -248,18 +257,27 @@ window.frag.Shader = function () {
 
             shader.fSource += "  vec3 lightDirection = v_lightDirection;\n";
             shader.fSource += "  float light = max(dot(normal, lightDirection), 0.0);\n";
-            if (private.ambientLight !== "None") shader.fSource += "  light += u_ambientLight;\n";
+            if (private.ambientLight !== none) shader.fSource += "  light += u_ambientLight;\n";
         } else {
-            if (private.ambientLight !== "None") shader.fSource += "  float light = u_ambientLight;\n";
+            if (private.ambientLight !== none) shader.fSource += "  float light = u_ambientLight;\n";
         }
 
-        shader.fSource += "  gl_FragColor = vec4(0, 0, 0, 1.0);\n";
+        if (private.colors === none)
+            shader.fSource += "  gl_FragColor = vec4(0, 0, 0, 1.0);\n";
+        else if (private.colors === "vec4") {
+            shader.vSource += "  v_color = a_color;\n";
+            shader.fSource += "  gl_FragColor = v_color;\n";
+        } else {
+            shader.vSource += "  v_color = a_color;\n";
+            shader.fSource += "  gl_FragColor = vec4(v_color, 1.0);\n";
+        }
+
         if (private.textureCoords === "vec2") {
             if (private.diffuseTexture === "RGB")
                 shader.fSource += "  gl_FragColor += texture2D(u_diffuse, v_texcoord);\n";
         }
 
-        if (private.ambientLight !== "None" || private.directionalLight !== "None")
+        if (private.ambientLight !== none || private.directionalLight !== none)
             shader.fSource += "  gl_FragColor.rgb *= light;\n";
 
         if (private.textureCoords === "vec2") {
@@ -282,7 +300,7 @@ window.frag.Shader = function () {
         private.addUniformDeclarations(shader);
         private.addVaryingDeclarations(shader);
 
-        if (private.directionalLight !== "None") {
+        if (private.directionalLight !== none) {
             /*
             shader.vSource += "highp mat4 transpose(in highp mat4 inMatrix) {\n";
             shader.vSource += "    highp vec4 i0 = inMatrix[0];\n";
@@ -333,45 +351,49 @@ window.frag.Shader = function () {
         const bindList = [];
         const unbindList = [];
 
-        if (private.verticies !== "None") {
+        if (private.verticies !== none) {
             shader.attributes.position = frag.gl.getAttribLocation(shader.program, "a_position");
         }
 
-        if (private.textureCoords !== "None") {
+        if (private.colors !== none) {
+            shader.attributes.color = frag.gl.getAttribLocation(shader.program, "a_color");
+        }
+
+        if (private.textureCoords !== none) {
             shader.attributes.texture = frag.gl.getAttribLocation(shader.program, "a_texcoord");
         }
 
-        if (private.normals !== "None") {
+        if (private.normals !== none) {
             shader.attributes.normal = frag.gl.getAttribLocation(shader.program, "a_normal");
         }
 
-        if (private.tangents !== "None") {
+        if (private.tangents !== none) {
             shader.attributes.tangent = frag.gl.getAttribLocation(shader.program, "a_tangent");
         }
 
-        if (private.bitangents !== "None") {
+        if (private.bitangents !== none) {
             shader.attributes.bitangent = frag.gl.getAttribLocation(shader.program, "a_bitangent");
         }
 
-        if (private.matrix !== "None") {
-            if (private.directionalLight !== "None")
+        if (private.matrix !== none) {
+            if (private.directionalLight !== none)
                 shader.uniforms.modelMatrix = frag.gl.getUniformLocation(shader.program, "u_modelMatrix");
             shader.uniforms.clipMatrix = frag.gl.getUniformLocation(shader.program, "u_clipMatrix");
         }
 
-        if (private.diffuseTexture !== "None") {
+        if (private.diffuseTexture !== none) {
             shader.uniforms.diffuse = frag.gl.getUniformLocation(shader.program, "u_diffuse");
         }
 
-        if (private.emmissiveTexture !== "None") {
+        if (private.emmissiveTexture !== none) {
             shader.uniforms.emmissive = frag.gl.getUniformLocation(shader.program, "u_emmissive");
         }
 
-        if (private.displacementTexture !== "None" || private.roughnessTexture !== "None" || private.shininessTexture != "None") {
+        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) {
             shader.uniforms.surface = frag.gl.getUniformLocation(shader.program, "u_surface");
         }
 
-        if (private.displacementTexture !== "None") {
+        if (private.displacementTexture !== none) {
             shader.uniforms.displacementScale = frag.gl.getUniformLocation(shader.program, "u_displacementScale");
             bindList.push(function (gl) { gl.uniform1f(shader.uniforms.displacementScale, shader._displacementScale); });
             shader._displacementScale = 0.2;
@@ -381,17 +403,17 @@ window.frag.Shader = function () {
             };
         }
 
-        if (private.normalMap !== "None") {
+        if (private.normalMap !== none) {
             shader.uniforms.normalMap = frag.gl.getUniformLocation(shader.program, "u_normalMap");
         }
 
-        if (private.ambientLight !== "None") {
+        if (private.ambientLight !== none) {
             shader.uniforms.ambientLight = frag.gl.getUniformLocation(shader.program, "u_ambientLight");
             bindList.push(function (gl) { gl.uniform1f(shader.uniforms.ambientLight, shader._ambientLight); });
             shader._ambientLight = 0.5;
         }
 
-        if (private.directionalLight !== "None") {
+        if (private.directionalLight !== none) {
             shader.uniforms.lightDirection = frag.gl.getUniformLocation(shader.program, "u_lightDirection");
             bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.lightDirection, shader._lightDirection); });
 

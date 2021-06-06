@@ -14,7 +14,7 @@ window.frag.MeshData = function () {
         smoothTexture: false,
         wireframe: false,
         normalLength: 0,
-        normalColor: [0, 0, 255, 255],
+        normalColor: [0, 0, 255],
     }
 
     const public = {
@@ -102,27 +102,27 @@ window.frag.MeshData = function () {
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles2D = function (verticies, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangles2D(verticies, uvs, normals, tangents, bitangents);
+    public.addTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
+        const vertexData = frag.VertexData().setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles = function (verticies, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangles(verticies, uvs, normals, tangents, bitangents);
+    public.addTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
+        const vertexData = frag.VertexData().setTriangles(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleStrip = function (verticies, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangleStrip(verticies, uvs, normals, tangents, bitangents);
+    public.addTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
+        const vertexData = frag.VertexData().setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleFan = function (verticies, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangleFan(verticies, uvs, normals, tangents, bitangents);
+    public.addTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
+        const vertexData = frag.VertexData().setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
-    public.fromBuffer = function (buffer, size, count, primitiveType, vertexDataOffset, uvDataOffset, normalDataOffset, tangentDataOffset, bitangentDataOffset)
+    public.fromBuffer = function (buffer, size, count, primitiveType, vertexDataOffset, colorDataOffset, uvDataOffset, normalDataOffset, tangentDataOffset, bitangentDataOffset)
     {
         const vertexData = frag.VertexData();
         vertexData.vertexDimensions = size;
@@ -135,6 +135,7 @@ window.frag.MeshData = function () {
 
         fragment.renderData = vertexData;
         fragment.vertexDataOffset = vertexDataOffset;
+        fragment.colorDataOffset = colorDataOffset;
         fragment.uvDataOffset = uvDataOffset;
         fragment.normalDataOffset = normalDataOffset;
         fragment.tangentDataOffset = tangentDataOffset;
@@ -170,7 +171,7 @@ window.frag.MeshData = function () {
             const normal = fragment.renderData.getNormalVector(i);
             if (vertex) vertex.forEach(v => verticies.push(v));
             if (color) color.forEach((c) => colors.push(c));
-            else private.normalColor.forEach((c) => colors.push(c));
+            else private.normalColor.forEach(() => colors.push(0));
             if (uv) uv.forEach(t => uvs.push(t));
             if (normal) normal.forEach(n => normals.push(n));
         };
@@ -217,9 +218,9 @@ window.frag.MeshData = function () {
         });
 
         if (fragment.vertexData.vertexDimensions == 2)
-            newFragment.renderData = frag.VertexData().setLines2D(verticies, uvs, normals);
+            newFragment.renderData = frag.VertexData().setLines2D(verticies, colors, uvs, normals);
         else
-            newFragment.renderData = frag.VertexData().setLines(verticies, uvs, normals);
+            newFragment.renderData = frag.VertexData().setLines(verticies, colors, uvs, normals);
     }
 
     private.finalize = function () {

@@ -49,7 +49,8 @@
 
         const shader = frag.Shader()
             .name("My shader")
-            .diffuseTexture()
+            //.diffuseTexture()
+            .colorsRGB()
             .directionalLightWhite()
             .compile();
 
@@ -61,7 +62,7 @@
             .name('My material')
             .setTexture('diffuse', texture);
 
-        const mesh = frag.Cube(3)
+        const mesh = frag.Cube(3, { color: [0.6, 0.15, 0.2] })
             .name('My cube')
             .shadeSmooth()
             .wireframe(false)

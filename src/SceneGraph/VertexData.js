@@ -107,13 +107,16 @@
         return private.setVector(public.bitangents, public.bitangentIndex(index), v);
     };
 
-    public.setTriangles2D = function (verticies, uvs, normals, tangents, bitangents) {
+    public.setTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 2;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
 
+        public.colorDimensions = 3;
+        public.colors = colors;
+
         public.uvDimensions = 2;
         public.uvs = uvs;
 
@@ -131,13 +134,16 @@
         return public;
     }
 
-    public.setTriangles = function (verticies, uvs, normals, tangents, bitangents) {
+    public.setTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 3;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
 
+        public.colorDimensions = 3;
+        public.colors = colors;
+
         public.uvDimensions = 2;
         public.uvs = uvs;
 
@@ -155,12 +161,15 @@
         return public;
     }
 
-    public.setTriangleStrip = function (verticies, uvs, normals, tangents, bitangents) {
+    public.setTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
         public.primitiveType = gl.TRIANGLE_STRIP;
 
         public.vertexDimensions = 3;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
+
+        public.colorDimensions = 3;
+        public.colors = colors;
 
         public.uvDimensions = 2;
         public.uvs = uvs;
@@ -181,12 +190,15 @@
         return public;
     }
 
-    public.setTriangleFan = function (verticies, uvs, normals, tangents, bitangents) {
+    public.setTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
         public.primitiveType = gl.TRIANGLE_FAN;
 
         public.vertexDimensions = 3;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
+
+        public.colorDimensions = 3;
+        public.colors = colors;
 
         public.uvDimensions = 2;
         public.uvs = uvs;
@@ -206,13 +218,16 @@
         return public;
     }
 
-    public.setLines2D = function (verticies, uvs, normals) {
+    public.setLines2D = function (verticies, colors, uvs, normals) {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 2;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
 
+        public.colorDimensions = 3;
+        public.colors = colors;
+
         public.uvDimensions = 2;
         public.uvs = uvs;
 
@@ -226,13 +241,16 @@
         return public;
     }
 
-    public.setLines = function (verticies, uvs, normals) {
+    public.setLines = function (verticies, colors, uvs, normals) {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 3;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
 
+        public.colorDimensions = 3;
+        public.colors = colors;
+
         public.uvDimensions = 2;
         public.uvs = uvs;
 
@@ -246,12 +264,15 @@
         return public;
     }
 
-    public.setLineStrip = function (verticies, uvs, normals) {
+    public.setLineStrip = function (verticies, colors, uvs, normals) {
         public.primitiveType = gl.LINE_STRIP;
 
         public.vertexDimensions = 3;
         public.verticies = verticies;
         public.vertexCount = verticies.length / public.vertexDimensions;
+
+        public.colorDimensions = 3;
+        public.colors = colors;
 
         public.uvDimensions = 2;
         public.uvs = uvs;

@@ -4,10 +4,15 @@
     const top = [0, 0, -1];
     const topUvs = [0.5, 0.5];
     const topNormals = [0, 0, -1];
+    const topColors = options.color ? Array.from(options.color) : undefined;
+
     const bottom = [0, 0, 1];
     const bottomUvs = [0.5, 0.5];
     const bottomNormals = [0, 0, 1];
+    const bottomColors = options.color ? Array.from(options.color) : undefined;
+
     const side = [];
+    const sideColors = options.color ? [] : undefined;
     const sideUvs = [];
     const sideNormals = [];
 
@@ -22,6 +27,9 @@
         top.push(y);
         top.push(-1);
 
+        if (options.color) 
+            options.color.forEach(c => topColors.push(c));
+
         topUvs.push((x + 1) * 0.5);
         topUvs.push((y + 1) * 0.5);
 
@@ -35,6 +43,11 @@
         side.push(x);
         side.push(y);
         side.push(1);
+
+        if (options.color) {
+            options.color.forEach(c => sideColors.push(c));
+            options.color.forEach(c => sideColors.push(c));
+        }
 
         sideUvs.push((x + 1) * 0.5);
         sideUvs.push((y + 1) * 0.5);
@@ -58,6 +71,9 @@
         bottom.push(y);
         bottom.push(1);
 
+        if (options.color) 
+            options.color.forEach(c => bottomColors.push(c));
+
         bottomUvs.push((x + 1) * 0.5);
         bottomUvs.push((y + 1) * 0.5);
 
@@ -69,6 +85,9 @@
     side.push(0);
     side.push(1);
     side.push(1);
+    
+    if (options.color) 
+        options.color.forEach(c => sideColors.push(c));
 
     sideUvs.push(0.5);
     sideUvs.push(1);
@@ -78,7 +97,7 @@
     sideNormals.push(0);
 
     return window.frag.MeshData()
-        .addTriangleFan(top, topUvs, topNormals)
-        .addTriangleFan(bottom, bottomUvs, bottomNormals)
-        .addTriangleStrip(side, sideUvs, sideNormals);
+        .addTriangleFan(top, topColors, topUvs, topNormals)
+        .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
+        .addTriangleStrip(side, sideColors, sideUvs, sideNormals);
 };

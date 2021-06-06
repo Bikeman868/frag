@@ -1,9 +1,12 @@
 ﻿window.frag.Plane = function (facets, options) {
     facets = facets || 1;
+    options = options || {};
 
     if (facets === 1) {
+        const c = options.color || [0, 0, 0];
         const data = new Float32Array([
             1, -1, 0, 1, 1, 0, -1, -1, 0, -1, 1, 0, // verticies
+            c[0], c[1], c[2], c[0], c[1], c[2], c[0], c[1], c[2], c[0], c[1], c[2],  // colors
             1, 0, 1, 1, 0, 0, 0, 1, // uvs
             0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, // normals 
             1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, // tangents
@@ -14,20 +17,25 @@
             data.buffer, 3, 4, window.frag.gl.TRIANGLE_STRIP,
             0 * Float32Array.BYTES_PER_ELEMENT,
             12 * Float32Array.BYTES_PER_ELEMENT,
-            20 * Float32Array.BYTES_PER_ELEMENT,
+            24 * Float32Array.BYTES_PER_ELEMENT,
             32 * Float32Array.BYTES_PER_ELEMENT,
             44 * Float32Array.BYTES_PER_ELEMENT,
+            56 * Float32Array.BYTES_PER_ELEMENT,
         );
     }
  
     const verticies = [];
     const uvs = [];
     const normals = [];
+    const colors = options.color ? [] : undefined;
 
     const add = function (x, y) {
         verticies.push(x);
         verticies.push(y);
         verticies.push(0);
+
+        if (options.color)
+            options.color.forEach(c => colors.push(c));
 
         uvs.push((x + 1) * 0.5);
         uvs.push((y + 1) * 0.5);
@@ -63,5 +71,5 @@
         }
     }
 
-    return window.frag.MeshData().addTriangleStrip(verticies, uvs, normals);
+    return window.frag.MeshData().addTriangleStrip(verticies, colors, uvs, normals);
 };
