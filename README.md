@@ -6,11 +6,43 @@ Right now we are still making breaking changes, so this should be considered an
 alpha release for people who are interested in tracking the development of this
 project. We do not recommend using this for writing production games yet.
 
-# Concepts
+# Who is this for?
 Frag is a low level WebGL framework that is designed for independent game developers
 wanting to write 2D or 3D rendered games that can be played in a browser on any 
 device.
 
+Note that this framework is designed to make your life easier when it comes to
+everything to do with graphics, but does not attempt to provide everything that you
+need to produce a game. For example this framework does not include a physics
+engine. There are a number of physics engines that you can choose to integrate if
+you need that functionality.
+
+The functioanllity that is provided:
+* Drawing stuff to the screen with high refresh rate and minimum load on the hardware
+* Support for old devices that only support OpenGL 1.1
+* Bulk loading of models and materials designed in tools like Blender and Substance Player
+* Separation of models from materials so that the same models can be used with different
+  skins in different parts of the game.
+* Powerful animation engine that can run many parallel animations on the same model
+* Efficient reuse of assets. For example you can draw a wheel mesh once then scale it 
+  and paint it differetly on various models to create all the different types of wheel 
+  that you need without duplicating the mesh. Meshes, textures, materials, and animations
+  can all be reused.
+* Animations apply to model sub-components using regular expressions so that you can
+  for example define a rotating animation and apply it to any wheel in any model.
+* A shader builder that can create a shader with only the features that you need.
+* Full support for custom shaders and granular application of shaders to model
+  components so for example you only need the shader that supports light emmissions
+  for drawing the parts of the model that emit light.
+
+This framework is great is you have an original game idea and want to fast track the
+graphics development. If you want to create a world in which you have a character 
+that can run around and do stuff, then a better starting point would be Unreal Engine.
+
+There is nothing out there that is better if you have limited resources, want to
+target the widest possible audience, and your game has some unique gameplay.
+
+# Concepts
 These are the main elements that you will be working with
 
 ## Canvas
@@ -155,7 +187,10 @@ There are other samples for you to explore in the [samples folder](./samples)
             .directionalLightWhite()
             .compile();
 
-        // This texture will be used to paint the sides of the cube
+        // This texture will be used to paint the sides of the cube. Note that
+        // using larger textures will have dramatic impact on the performance of 
+        // your game, so you will have to compromise on visuals to target lower 
+        // performance devices
         const texture = frag.Texture()
             .name('My texture')
             .dataFormat(frag.gl.RGB)

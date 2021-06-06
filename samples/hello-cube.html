@@ -28,9 +28,6 @@
         // Frag and is not required
         window.frag = {
             canvas: document.getElementById("scene"),
-            init: function(frag){
-                frag.debugShaderBuilder = true;
-            }
         }
     </script>
     <script src='../dist/frag.min.js'></script>
@@ -60,7 +57,10 @@
             .directionalLightWhite()
             .compile();
 
-        // This texture will be used to paint the sides of the cube
+        // This texture will be used to paint the sides of the cube. Note that
+        // using larger textures will have dramatic impact on the performance of 
+        // your game, so you will have to compromise on visuals to target lower 
+        // performance devices
         const texture = frag.Texture()
             .name('My texture')
             .dataFormat(frag.gl.RGB)

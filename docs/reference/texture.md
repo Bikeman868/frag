@@ -87,7 +87,7 @@ const height = 1;
 const red = 167;
 const green = 89;
 const blue = 54;
-const pixelData = new UInt8Array([red, green, blue]);
+const pixelData = new Uint8Array([red, green, blue]);
 
 const texture = window.frag.Texture()
   .dataFormat(window.frag.gl.RGB)

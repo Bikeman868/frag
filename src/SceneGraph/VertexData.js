@@ -11,6 +11,8 @@
         vertexCount: 0,
         verticies: undefined,
         vertexDimensions: 3,
+        colors: undefined,
+        colorDimensions: 3,
         uvs: undefined,
         uvDimensions: 2,
         normals: undefined,
@@ -25,11 +27,13 @@
         clone.primitiveType = public.primitiveType;
         clone.vertexCount = public.vertexCount;
         clone.vertexDimensions = public.vertexDimensions;
+        clone.colorDimensions = public.colorDimensions;
         clone.uvDimensions = public.uvDimensions;
         clone.normalDimensions = public.normalDimensions;
 
         clone.verticies = public.verticies;
 
+        if (public.colors) clone.colors = Array.from(public.colors);
         if (public.uvs) clone.uvs = Array.from(public.uvs);
         if (public.normals) clone.normals = Array.from(public.normals);
         if (public.tangents) clone.tangents = Array.from(public.tangents);
@@ -39,6 +43,7 @@
     }
 
     public.vertexIndex = function (index, coord) { return index * public.vertexDimensions + (coord || 0); };
+    public.colorIndex = function (index, coord) { return index * public.colorDimensions + (coord || 0); };
     public.uvIndex = function (index, coord) { return index * public.uvDimensions + (coord || 0); };
     public.normalIndex = function (index, coord) { return index * public.normalDimensions + (coord || 0); };
     public.tangentIndex = function (index, coord) { return index * public.normalDimensions + (coord || 0); };
@@ -60,6 +65,14 @@
 
     public.setVertexVector = function (index, v) {
         return private.setVector(public.verticies, public.vertexIndex(index), v);
+    };
+
+    public.getColor = function (index) {
+        return private.getVector(public.colors, public.colorIndex(index), public.colorDimensions);
+    };
+
+    public.setColor = function (index, v) {
+        return private.setVector(public.colors, public.colorIndex(index), v);
     };
 
     public.getUvVector = function (index) {
@@ -93,7 +106,6 @@
     public.setBitangentVector = function (index, v) {
         return private.setVector(public.bitangents, public.bitangentIndex(index), v);
     };
-
 
     public.setTriangles2D = function (verticies, uvs, normals, tangents, bitangents) {
         public.primitiveType = gl.TRIANGLES;

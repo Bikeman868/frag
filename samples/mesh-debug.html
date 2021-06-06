@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+<head>
+    <title>Mesh debug</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #scene {
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='scene'></canvas>
+    <script>
+        // This script provides an oportunity to customize 
+        // Frag and is not required
+        window.frag = {
+            init: function(frag){
+                frag.debugShaderBuilder = true;
+            }
+        }
+    </script>
+    <script src='../dist/frag.min.js'></script>
+    <script>
+        const frag = window.frag;
+        const degToRad = Math.PI / 180;
+
+        const camera = frag.PerspectiveCamera()
+            .frustrum(35 * degToRad, -100, 100)
+            .scaleX(100)
+            .moveToZ(-120);
+
+        const scene = frag.Scene()
+            .camera(camera);
+
+        frag.mainScene(scene);
+
+        const shader = frag.Shader()
+            .name("My shader")
+            .diffuseTexture()
+            .directionalLightWhite()
+            .compile();
+
+        const texture = window.frag.Texture()
+            .dataFormat(window.frag.gl.RGB)
+            .fromArrayBuffer(0, new Uint8Array([212, 54, 99]), 0, 1, 1);
+
+        const material = frag.Material()
+            .name('My material')
+            .setTexture('diffuse', texture);
+
+        const mesh = frag.Cube(3)
+            .name('My cube')
+            .shadeSmooth()
+            .wireframe(false)
+            .drawNormals(0.2);
+
+        const transform = frag.Transform()
+            .identity();
+
+        const model = frag.Model()
+            .name('My model')
+            .mesh(mesh)
+            .material(material)
+            .transform(transform)
+            .shader(shader);
+
+        const cube = frag.SceneObject(model)
+            .enable();
+        cube.getPosition()
+            .scale(40);
+        scene.addObject(cube);
+
+        const spinningAnimation = frag.Animation()
+            .sequence([
+                frag.ValueAnimationAction()
+                    .setDuration(2000)
+                    .onStep((a, r) => {
+                        const angle = Math.PI * 2 * r;
+                        cube.getPosition().rotateXYZ(angle, -angle, 0)
+                    }),
+                ],
+                true);
+        spinningAnimation.start();
+    </script>
+</body>

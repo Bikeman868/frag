@@ -7,11 +7,14 @@ window.frag.MeshData = function () {
     const private = {
         glBuffer: gl.createBuffer(),
         meshFragments: [],
+        debugFragments: [],
         finalized: false,
         fromBuffer: false,
         smoothShading: true,
         smoothTexture: false,
         wireframe: false,
+        normalLength: 0,
+        normalColor: [0, 0, 255, 255],
     }
 
     const public = {
@@ -69,16 +72,28 @@ window.frag.MeshData = function () {
         return public;
     }
 
-    private.addFragment = function (vertexData) {
-        private.meshFragments.push({
+    public.drawNormals = function (length, color) {
+        private.normalLength = length;
+        if (color !== undefined) private.normalColor = color;
+        private.finalized = false;
+        return public;
+    }
+
+    private.Fragment = function(vertexData) {
+        return {
             vertexData,
             renderData: null,
             vertexDataOffset: undefined,
+            colorDataOffset: undefined,
             uvDataOffset: undefined,
             normalDataOffset: undefined,
             tangentDataOffset: undefined,
             bitangentDataOffset: undefined,
-        });
+        };
+    }
+
+    private.addFragment = function (vertexData) {
+        private.meshFragments.push(private.Fragment(vertexData));
         private.finalized = false;
         return public;
     }
@@ -134,6 +149,79 @@ window.frag.MeshData = function () {
         return public;
     }
 
+    private.addFragmentDebugInfo = function(fragment) {
+        if (!private.wireframe && private.normalLength == 0) return;
+
+        let newFragment = fragment;
+        if (!private.wireframe) {
+            newFragment = private.Fragment(fragment.vertexData)
+            private.debugFragments.push(newFragment);
+        }
+
+        const verticies = [];
+        const colors = [];
+        const uvs = [];
+        const normals = [];
+
+        const addVertex = function (i) {
+            const vertex = fragment.renderData.getVertexVector(i);
+            const color = fragment.renderData.getColor(i);
+            const uv = fragment.renderData.getUvVector(i);
+            const normal = fragment.renderData.getNormalVector(i);
+            if (vertex) vertex.forEach(v => verticies.push(v));
+            if (color) color.forEach((c) => colors.push(c));
+            else private.normalColor.forEach((c) => colors.push(c));
+            if (uv) uv.forEach(t => uvs.push(t));
+            if (normal) normal.forEach(n => normals.push(n));
+        };
+
+        const addNormal = function (i) {
+            const vertex = fragment.renderData.getVertexVector(i);
+            const uv = fragment.renderData.getUvVector(i);
+            const normal = fragment.renderData.getNormalVector(i);
+
+            if (vertex) {
+                for (let j = 0; j < vertex.length; j++) {
+                    verticies.push(vertex[j])
+                }
+                for (let j = 0; j < vertex.length; j++) {
+                    verticies.push(vertex[j] + normal[j] * private.normalLength)
+                }
+            }
+
+            private.normalColor.forEach((c) => colors.push(c));
+            private.normalColor.forEach((c) => colors.push(c));
+
+            if (uv) {
+                uv.forEach(t => uvs.push(t));
+                uv.forEach(t => uvs.push(t));
+            }
+
+            if (normal) {
+                normal.forEach(n => normals.push(n));
+                normal.forEach(n => normals.push(n));
+            }
+        };
+
+        fragment.vertexData.extractTriangles(function (a, b, c) {
+            if (private.wireframe) {
+                addVertex(a); addVertex(b);
+                addVertex(b); addVertex(c);
+                addVertex(c); addVertex(a);
+            }
+            if (private.normalLength > 0) {
+                addNormal(a);
+                addNormal(b);
+                addNormal(b);
+            }
+        });
+
+        if (fragment.vertexData.vertexDimensions == 2)
+            newFragment.renderData = frag.VertexData().setLines2D(verticies, uvs, normals);
+        else
+            newFragment.renderData = frag.VertexData().setLines(verticies, uvs, normals);
+    }
+
     private.finalize = function () {
         private.finalized = true;
 
@@ -147,41 +235,26 @@ window.frag.MeshData = function () {
         if (public.calcNormals) optimizer.calcNormalsFromGeometry();
         if (public.calcBitangents) optimizer.calcBitangentsFromCross();
 
-        if (private.wireframe) {
-            private.meshFragments.forEach((m) => {
-                const verticies = [];
-                const uvs = [];
-                const normals = [];
-                const add = function (i) {
-                    const vertex = m.renderData.getVertexVector(i);
-                    const uv = m.renderData.getUvVector(i);
-                    const normal = m.renderData.getNormalVector(i);
-                    if (vertex) vertex.forEach(v => verticies.push(v));
-                    if (uv) uv.forEach(t => uvs.push(t));
-                    if (normal) normal.forEach(n => normals.push(n));
-                };
-                m.vertexData.extractTriangles(function (a, b, c) {
-                    add(a); add(b);
-                    add(b); add(c);
-                    add(c); add(a);
-                });
-                if (m.vertexData.vertexDimensions == 2)
-                    m.renderData = frag.VertexData().setLines2D(verticies, uvs, normals);
-                else
-                    m.renderData = frag.VertexData().setLines(verticies, uvs, normals);
-            });
-        }
-
-        let length = 0;
-        private.meshFragments.forEach((m) => {
-            length += m.renderData.verticies.length;
-            if (m.renderData.uvs) length += m.renderData.uvs.length;
-            if (m.renderData.normals) length += m.renderData.normals.length;
-            if (m.renderData.tangents) length += m.renderData.tangents.length;
-            if (m.renderData.bitangents) length += m.renderData.bitangents.length;
+        private.debugFragments = [];
+        private.meshFragments.forEach((f) => {
+            private.addFragmentDebugInfo(f);
         });
 
+        let length = 0;
+        const countFragmentLength = function(fragment){
+            length += fragment.renderData.verticies.length;
+            if (fragment.renderData.colors) length += fragment.renderData.colors.length;
+            if (fragment.renderData.uvs) length += fragment.renderData.uvs.length;
+            if (fragment.renderData.normals) length += fragment.renderData.normals.length;
+            if (fragment.renderData.tangents) length += fragment.renderData.tangents.length;
+            if (fragment.renderData.bitangents) length += fragment.renderData.bitangents.length;
+        }
+        private.meshFragments.forEach(countFragmentLength);
+        private.debugFragments.forEach(countFragmentLength);
+        
         const buffer = new Float32Array(length);
+
+        let offset = 0;
 
         const copy = function (arr) {
             if (!arr) return undefined;
@@ -194,19 +267,97 @@ window.frag.MeshData = function () {
             return o * Float32Array.BYTES_PER_ELEMENT;
         };
 
-        let offset = 0;
-        private.meshFragments.forEach((m) => {
-            m.vertexDataOffset = copy(m.renderData.verticies);
-            m.uvDataOffset = copy(m.renderData.uvs);
-            m.normalDataOffset = copy(m.renderData.normals);
-            m.tangentDataOffset = copy(m.renderData.tangents);
-            m.bitangentDataOffset = copy(m.renderData.bitangents);
-        });
+        const copyFragmentData = function(fragment) {
+            fragment.vertexDataOffset = copy(fragment.renderData.verticies);
+            fragment.colorDataOffset = copy(fragment.renderData.colors);
+            fragment.uvDataOffset = copy(fragment.renderData.uvs);
+            fragment.normalDataOffset = copy(fragment.renderData.normals);
+            fragment.tangentDataOffset = copy(fragment.renderData.tangents);
+            fragment.bitangentDataOffset = copy(fragment.renderData.bitangents);
+        };
+        private.meshFragments.forEach(copyFragmentData);
+        private.debugFragments.forEach(copyFragmentData);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
 
         return public;
+    }
+
+    private.drawFragmentPosition = function(shader, fragment) {
+        if (shader.attributes.position >= 0) {
+            if (fragment.vertexDataOffset != undefined) {
+                gl.enableVertexAttribArray(shader.attributes.position)
+                gl.vertexAttribPointer(shader.attributes.position, fragment.renderData.vertexDimensions, gl.FLOAT, false, 0, fragment.vertexDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.position)
+            }
+        }
+    }
+
+    private.drawFragmentColor = function(shader, fragment) {
+        if (shader.attributes.color >= 0) {
+            if (fragment.colorDataOffset != undefined) {
+                gl.enableVertexAttribArray(shader.attributes.color)
+                gl.vertexAttribPointer(shader.attributes.color, fragment.renderData.colorDimensions, gl.FLOAT, false, 0, fragment.colorDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.color)
+            }
+        }
+    }
+
+    private.drawFragmentTexture = function(shader, fragment) {
+        if (shader.attributes.texture >= 0) {
+            if (fragment.uvDataOffset != undefined) {
+                gl.enableVertexAttribArray(shader.attributes.texture);
+                gl.vertexAttribPointer(shader.attributes.texture, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.texture)
+            }
+        }
+    }
+
+    private.drawFragmentNormals = function(shader, fragment) {
+        if (shader.attributes.normal >= 0) {
+            if (fragment.normalDataOffset != null) {
+                gl.enableVertexAttribArray(shader.attributes.normal);
+                gl.vertexAttribPointer(shader.attributes.normal, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.normalDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.normal)
+            }
+        }
+    }
+
+    private.drawFragmentTangents = function(shader, fragment) {
+        if (shader.attributes.tangent >= 0) {
+            if (fragment.tangentDataOffset != null) {
+                gl.enableVertexAttribArray(shader.attributes.tangent);
+                gl.vertexAttribPointer(shader.attributes.tangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.tangentDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.tangent)
+            }
+        }
+    }
+
+    private.drawFragmentBitangents = function(shader, fragment) {
+        if (shader.attributes.bitangent >= 0) {
+            if (fragment.bitangentDataOffset != null) {
+                gl.enableVertexAttribArray(shader.attributes.bitangent);
+                gl.vertexAttribPointer(shader.attributes.bitangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.bitangentDataOffset);
+            } else {
+                gl.disableVertexAttribArray(shader.attributes.bitangent)
+            }
+        }
+    }
+
+    private.drawFragment = function(shader, fragment) {
+        private.drawFragmentPosition(shader, fragment);
+        private.drawFragmentColor(shader, fragment);
+        private.drawFragmentTexture(shader, fragment);
+        private.drawFragmentNormals(shader, fragment);
+        private.drawFragmentTangents(shader, fragment);
+        private.drawFragmentBitangents(shader, fragment);
+        gl.drawArrays(fragment.renderData.primitiveType, 0, fragment.renderData.vertexCount);
     }
 
     public.draw = function (gl, shader) {
@@ -216,53 +367,12 @@ window.frag.MeshData = function () {
 
         for (let i = 0; i < private.meshFragments.length; i++) {
             const fragment = private.meshFragments[i];
+            private.drawFragment(shader, fragment);
+        }
 
-            if (shader.attributes.position >= 0) {
-                if (fragment.vertexDataOffset != undefined) {
-                    gl.enableVertexAttribArray(shader.attributes.position)
-                    gl.vertexAttribPointer(shader.attributes.position, fragment.renderData.vertexDimensions, gl.FLOAT, false, 0, fragment.vertexDataOffset);
-                } else {
-                    gl.disableVertexAttribArray(shader.attributes.position)
-                }
-            }
-
-            if (shader.attributes.texture >= 0) {
-                if (fragment.uvDataOffset != undefined) {
-                    gl.enableVertexAttribArray(shader.attributes.texture);
-                    gl.vertexAttribPointer(shader.attributes.texture, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
-                } else {
-                    gl.disableVertexAttribArray(shader.attributes.texture)
-                }
-            }
-
-            if (shader.attributes.normal >= 0) {
-                if (fragment.normalDataOffset != null) {
-                    gl.enableVertexAttribArray(shader.attributes.normal);
-                    gl.vertexAttribPointer(shader.attributes.normal, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.normalDataOffset);
-                } else {
-                    gl.disableVertexAttribArray(shader.attributes.normal)
-                }
-            }
-
-            if (shader.attributes.tangent >= 0) {
-                if (fragment.tangentDataOffset != null) {
-                    gl.enableVertexAttribArray(shader.attributes.tangent);
-                    gl.vertexAttribPointer(shader.attributes.tangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.tangentDataOffset);
-                } else {
-                    gl.disableVertexAttribArray(shader.attributes.tangent)
-                }
-            }
-
-            if (shader.attributes.bitangent >= 0) {
-                if (fragment.bitangentDataOffset != null) {
-                    gl.enableVertexAttribArray(shader.attributes.bitangent);
-                    gl.vertexAttribPointer(shader.attributes.bitangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.bitangentDataOffset);
-                } else {
-                    gl.disableVertexAttribArray(shader.attributes.bitangent)
-                }
-            }
-
-            gl.drawArrays(fragment.renderData.primitiveType, 0, fragment.renderData.vertexCount);
+        for (let i = 0; i < private.debugFragments.length; i++) {
+            const fragment = private.debugFragments[i];
+            private.drawFragment(shader, fragment);
         }
 
         return public;
