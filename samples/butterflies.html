@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+<head>
+    <title>Butterflies</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #scene {
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='scene'></canvas>
+    <script>
+        window.frag = {
+            init: function(frag) {
+                // We want to be able to see the back of the wings
+                frag.gl.disable(frag.gl.CULL_FACE);
+            }
+        }
+    </script>
+    <script src='../dist/frag.min.js'></script>
+    <script>
+        const frag = window.frag;
+        const degToRad = Math.PI / 180;
+
+        const camera = frag.PerspectiveCamera()
+            .frustrum(35 * degToRad, -100, 100)
+            .scaleX(100)
+            .moveToZ(-120);
+
+        const scene = frag.Scene()
+            .camera(camera);
+
+        frag.mainScene(scene);
+
+        const shader = frag.Shader()
+            .name("My shader")
+            .diffuseTexture()
+            .directionalLightWhite()
+            .compile();
+
+        const randomInt = function(limit) {
+            return Math.floor(Math.random() * limit);
+        }
+
+        const randomFloat = function(low, high) {
+            return Math.random() * (high - low) + low;
+        }
+
+        // Define a wing shape. Each butterfly will have two.
+
+        const wingVerticies = [
+            0,       0,     0,
+            0.15,    1,   0.1,
+            0.5,   0.7,  -0.2,
+            0.5,  -0.7,  -0.3,
+            0.15,   -1,   0.1
+        ];
+        const wingColors = undefined;
+        const wingUVs = [
+            0,    0.5,
+            0.3,    1,
+            1,   0.85,
+            1,   0.35,
+            0.3,    0
+        ];
+        const wingMesh = frag.MeshData()
+            .name('Wing')
+            .shadeSmooth()
+            .addTriangleFan(wingVerticies, wingColors, wingUVs);
+
+        const createRandomlyColoredButterfly = function(id) {
+            // Generate a random color that is mostly one channel
+
+            let red = randomInt(128) + 50;
+            let green = randomInt(128) + 50;
+            let blue = randomInt(128) + 50;
+
+            switch (randomInt(3)){
+                case 0: red = 255; break;
+                case 1: green = 255; break;
+                case 2: blue = 255; break;
+            }
+
+            // Create a 1x1 pixel texture using this color
+
+            const diffuseTexture = frag.Texture()
+                .name("Texture " + id)
+                .dataFormat(window.frag.gl.RGB)
+                .fromArrayBuffer(0, new Uint8Array([red, green, blue]), 0, 1, 1);
+
+            // Create a material that has this diffuse texture
+
+            const butterflyMaterial = frag.Material()
+                .name("Material " + id)
+                .setTexture("diffuse", diffuseTexture)
+                .disposeTextures(true);
+
+            // Create left and right wing models using the same mesh
+
+            const wingLength = randomFloat(0.5, 0.7);
+            const leftWingModel = frag.Model()
+                .name('Left wing ' + id)
+                .mesh(wingMesh)
+                .transform(frag.Transform().rotateZ(180 * degToRad).rotateY(-45 * degToRad).scaleY(wingLength));
+
+            const rightWingModel = frag.Model()
+                .name('Right wing ' + id)
+                .mesh(wingMesh)
+                .transform(frag.Transform().rotateY(-45 * degToRad).scaleY(wingLength));
+
+            // Create a butterfly model with 2 wings
+
+            const butterflyModel = frag.Model()
+                .name('Butterfly ' + id)
+                .transform(frag.Transform().identity())
+                .material(butterflyMaterial)
+                .shader(shader);
+            butterflyModel.addChild(leftWingModel);
+            butterflyModel.addChild(rightWingModel);
+
+            return butterflyModel;
+        }
+
+        // Create butterfly models in different colors
+
+        const butterflyModels = [];
+
+        for (let i = 0; i < 50; i++) {
+            const butterflyModel = createRandomlyColoredButterfly(i);
+            butterflyModels.push(butterflyModel);
+        }
+
+        const addButterflyToScene = function() {
+            // Choose a random butterfly model
+            const butterflyModel = butterflyModels[randomInt(butterflyModels.length)];
+
+            // Create an instance of the model
+            const butterfly = frag.SceneObject(butterflyModel);
+
+            // Position the butterfly randomly in the scene
+            butterfly.getPosition()
+                .scale(randomFloat(25, 40))
+                .rotateXYZ(randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad))
+                .translateXYZ(randomFloat(-70, 70), randomFloat(-50, 50), randomFloat(-50, 50));
+            
+            // Start the flying animation. It is configured to loop forever
+            //butterfly.animations.flying.start();
+
+            // Add the butterfly to our scene
+            scene.addObject(butterfly);
+        }
+
+        // Start with some butterflies then add more over time
+
+        for (let i = 0; i < 10; i++) addButterflyToScene();
+        setInterval(addButterflyToScene, 2000);
+    </script>
+</body>

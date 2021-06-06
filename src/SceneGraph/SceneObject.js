@@ -1,7 +1,7 @@
 ﻿window.frag.SceneObject = function (model) {
     const private = {
         model,
-        enabled: false,
+        enabled: true,
         position: null,
         animationPosition: null,
         animationMap: {}

@@ -100,10 +100,8 @@
         // that you need. Each instance can be independently moved,
         // rotated, scaled and animated but they all share the same
         // mesh, material and shader defined bu the model.
-        const cube = frag.SceneObject(model)
-            .enable();
-        cube.getPosition()
-            .scale(40);
+        const cube = frag.SceneObject(model);
+        cube.getPosition().scale(40);
         scene.addObject(cube);
 
         // There are several animation option available including

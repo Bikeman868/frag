@@ -32,8 +32,9 @@ elements just to make one triangle! Don't try to define your meshes
 like this.
 
 `MeshData` objects are returned by the various shape building methods
-in the framework. After calling one of these methods, you can change
-the behaviour of the mesh by calling functions like `smoothShading()`
+in the framework (for example `window.frag.Cube()`). After calling 
+one of these methods, you can change the behaviour of the mesh by 
+calling functions like `smoothShading()`
 
 The most common way to get meshes into your game is to draw them
 in Blender and load them using a model loader. This not only bring
@@ -72,6 +73,15 @@ The other kinds of data are:
   the normal vector and the tangent, or you can supply the values to
   avoid some calculations.
 
+The `MeshData` objects have properties that control which of the missing
+data is added by calculation. These properties are all booleans as follows:
+* `calcNormals` is true by default but you can turn it off
+* `calcTangents` is true by default but needs UV coordinates to work
+* `calcBitangents` is false by default on the assumption that bitangemts 
+  will be computed in the shader. The Frag shader builder does build shaders
+  that compute bitangebts only when needed.
+
+
 ## dispose()
 Frees resources consumed by the mesh.
 
@@ -107,24 +117,32 @@ location on the surface of the mesh will have the same texture.
 Instructs the mesh to use the original UV coordinates. This can lead to jarring
 changes in texture at triangle boundaries, which of course maybe what you want.
 
-## wireframe()
+## wireframe(wireframe: bool)
 This is a useful debugging tool. It makes the mesh draw as lines connecting
 the verticies instead of flat surfaces. This allows you to see inside the model,
 allows you to see faces that might otherwise be hidden, and can reveal issues
 with you mesh geometries.
 
-## drawNormals()
+## drawNormals(length: float, color?: float[])
 This is another useful debugging tool. It adds short lines to the mesh that start
 at a vertex and go outwards in the direction of the normal vector. This can
 be very useful if you are seeing strange lighting effects and you want to
 visually check the normal vectors for your model. You can also enable this mode
 to see the effect of smooth and flat shading on the normal vectors.
 
-## addVertexData()
-Takes function the following parameters:
-* vertexData: VertexData
+The `length` parameter is the length of the line to draw. If you use the convention
+of building models that are 1x1x1 in size and scaling them up to the size required
+by the scene, then a value of `0.2` works well.
 
-Adds a fragment of mesh from a pre-prepared `VertexData` object.
+The optional `color` parameter should be passed as an array of 3 floats for red,
+green and blue components of the color. As usual with WebGL floating point colors
+are always expressed in the range 0 to 1, i.e. [1,0,0] is bright red.
+
+## addVertexData(vertexData: VertexData)
+Adds a fragment of mesh from a pre-prepared `VertexData` object. `VertexData` objects
+allow you to define the data needed to create a mesh. It also allows you to 
+modify individual verticies, colors, UV coordinates etc and then re-create or
+re-populate the mesh.
 
 ## addTriangles2D()
 Takes function the following parameters:

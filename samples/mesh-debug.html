@@ -66,10 +66,8 @@
             .transform(transform)
             .shader(shader);
 
-        const cube = frag.SceneObject(model)
-            .enable();
-        cube.getPosition()
-            .scale(40);
+        const cube = frag.SceneObject(model);
+        cube.getPosition().scale(40);
         scene.addObject(cube);
 
         const spinningAnimation = frag.Animation()
