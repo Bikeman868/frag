@@ -24,8 +24,6 @@
 <body>
     <canvas id='scene'></canvas>
     <script>
-        // This script provides an oportunity to customize 
-        // Frag and is not required
         window.frag = {
             init: function(frag){
                 frag.debugShaderBuilder = true;
@@ -49,23 +47,14 @@
 
         const shader = frag.Shader()
             .name("My shader")
-            //.diffuseTexture()
             .colorsRGB()
             .directionalLightWhite()
             .compile();
 
-        const texture = window.frag.Texture()
-            .dataFormat(window.frag.gl.RGB)
-            .fromArrayBuffer(0, new Uint8Array([212, 54, 99]), 0, 1, 1);
-
-        const material = frag.Material()
-            .name('My material')
-            .setTexture('diffuse', texture);
-
-        const mesh = frag.Cube(3, { color: [0.6, 0.15, 0.2] })
+        const mesh = frag.Cube(5, { color: [0.8, 0.1, 0.4] })
             .name('My cube')
             .shadeSmooth()
-            .wireframe(false)
+            .wireframe(true)
             .drawNormals(0.2);
 
         const transform = frag.Transform()
@@ -74,7 +63,6 @@
         const model = frag.Model()
             .name('My model')
             .mesh(mesh)
-            .material(material)
             .transform(transform)
             .shader(shader);
 

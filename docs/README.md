@@ -6,8 +6,15 @@ achieve particular effects and are also used to test and debug the framework its
 before each release.
 
 ### Hello Cube
-This [sample](../samples/hello-cube.html) is the nearest thing to a "Hello, World" application for WebGL.
-This is a great starting point if you are new to the framework
+This [sample](../samples/hello-cube.html) is the nearest thing to a "Hello, World" 
+application for WebGL. This is a great starting point if you are new to the framework
+
+### Mesh debug
+This [sample](../samples/mesh-debug.html) illustrates the following features and techniques
+* Only draws colored verticies - no textures or materials
+* Displays a cube in wireframe mode so that the mesh can be visualized
+* Displays normal vectors as short blue lines sticking out from the vertices
+* Spins the cube using a `ValueAnimationAction` instance
 
 ## Subjects
 The following documents are general discussions around a specific topic
