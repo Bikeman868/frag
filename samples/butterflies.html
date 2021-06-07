@@ -190,11 +190,17 @@
             // Create an instance of the model
             const butterfly = frag.SceneObject(butterflyModel);
 
-            // Position the butterfly randomly in the scene
+            // Place the butterfly in a random size, position and orientation
             butterfly.getPosition()
                 .scale(randomFloat(25, 40))
-                .rotateXYZ(randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad), randomFloat(0, 90 * degToRad))
-                .translateXYZ(randomFloat(-70, 70), randomFloat(-50, 50), randomFloat(-50, 50));
+                .rotateXYZ(
+                    randomFloat(0, 90 * degToRad), 
+                    randomFloat(0, 90 * degToRad), 
+                    randomFloat(0, 90 * degToRad))
+                .translateXYZ(
+                    randomFloat(-70, 70), 
+                    randomFloat(-50, 50), 
+                    randomFloat(-50, 50));
             
             return butterfly;
         }
