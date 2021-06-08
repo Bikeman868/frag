@@ -71,14 +71,13 @@
         scene.addObject(cube);
 
         const spinningAnimation = frag.Animation()
-            .sequence([
+            .perform(
                 frag.ValueAnimationAction()
                     .setDuration(2000)
                     .onStep((a, r) => {
                         const angle = Math.PI * 2 * r;
                         cube.getPosition().rotateXYZ(angle, -angle, 0)
                     }),
-                ],
                 true);
         spinningAnimation.start();
     </script>

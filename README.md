@@ -155,9 +155,6 @@ There are other samples for you to explore in the [samples folder](./samples)
         // Frag and is not required
         window.frag = {
             canvas: document.getElementById("scene"),
-            init: function(frag){
-                frag.debugShaderBuilder = true;
-            }
         }
     </script>
     <script src='../dist/frag.min.js'></script>
@@ -230,10 +227,8 @@ There are other samples for you to explore in the [samples folder](./samples)
         // that you need. Each instance can be independently moved,
         // rotated, scaled and animated but they all share the same
         // mesh, material and shader defined bu the model.
-        const cube = frag.SceneObject(model)
-            .enable();
-        cube.getPosition()
-            .scale(40);
+        const cube = frag.SceneObject(model);
+        cube.getPosition().scale(40);
         scene.addObject(cube);
 
         // There are several animation option available including

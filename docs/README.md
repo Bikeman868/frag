@@ -70,6 +70,7 @@ The following classes are documented at detailed technical level
 * [ModelAnimation](./reference/model-animation.md)
 * [ModelLoader](./reference/model-loader.md)
 * [OrthographicCamera](./reference/orthographic-camera.md)
+* [ParallelAnimationAction](./reference/parallel-animation-action.md)
 * [PerspectiveCamera](./reference/perspective-camrea.md)
 * [Scene](./reference/scene.md)
 * [SceneObject](./reference/scene-object.md)
@@ -80,4 +81,4 @@ The following classes are documented at detailed technical level
 * [Transform2D](./reference/transform-2d.md)
 * [UiCamera](./reference/ui-camera.md)
 * [UiShader](./reference/ui-shader.md)
-* [ValueAnimation](./reference/value-animation.md)
+* [ValueAnimationAction](./reference/value-animation-action.md)

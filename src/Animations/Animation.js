@@ -4,7 +4,7 @@
 // and it will be embelished with proprties and methods to make it into an animation.
 // This allows you to store custom fields relating to your animation and access them
 // within the animation steps.
-window.frag.Animation = function (obj) {
+window.frag.Animation = function (obj, isChild) {
     const private = {
         stopAfter: 0
     }
@@ -19,7 +19,7 @@ window.frag.Animation = function (obj) {
 
     // This is called internally by the framework. You should not call this
     // from your application code.
-    public.execute = function (gameTick, frameTick) {
+    public.action = function (parent, gameTick, frameTick) {
         if (private.stopAfter !== undefined) {
             private.stopAt = gameTick + private.stopAfter;
             delete private.stopAfter;
@@ -72,10 +72,18 @@ window.frag.Animation = function (obj) {
     // - optionally have an interval field that defines the number of game ticks between executions of this action
     // - optionally have an action() function that will be called to perform tge animation function
     public.sequence = function (actions, loop) {
-        private.sequence = actions;
+        if (Array.isArray(actions)) 
+            private.sequence = actions;
+        else
+            private.sequence = [actions];
         private.sequenceIndex = 0;
         private.autoRestart = loop;
         return public;
+    }
+
+    // Syntactic sugar for a sequence of one action
+    public.perform = function(action, loop) {
+        return public.sequence(action, loop);
     }
 
     // Starts the animation running
@@ -123,7 +131,7 @@ window.frag.Animation = function (obj) {
         return public;
     }
 
-    window.frag.addAnimation(public);
+    if (!isChild) window.frag.addAnimation(public);
 
     public.dispose = function () {
         window.frag.removeAnimation(public);

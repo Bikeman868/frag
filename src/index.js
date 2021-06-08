@@ -29,6 +29,7 @@ require("./Cameras/PerspectiveCamera");
 require("./Animations/Animation");
 require("./Animations/ValueAnimationAction");
 require("./Animations/KeyframeAnimationAction");
+require("./Animations/ParallelAnimationAction");
 require("./Animations/ObjectAnimationState");
 require("./Animations/ModelAnimation");
 require("./Animations/SceneObjectAnimation");

@@ -3,10 +3,19 @@
 
     const scenes = [];
     const animations = [];
-    const startTime = performance.now();
+    let startTime = performance.now();
     let gameTick = 0;
     let frameTick = 0;
     let mainScene = null;
+
+    frag.correctClock = function(serverTick) {
+        let difference = serverTick - gameTick;
+        if (difference > 0) {
+            startTime += frag.gameTickMs;
+        } else if (difference < 0) {
+            startTime -= frag.gameTickMs;
+        }
+    }
 
     frag.mainScene = function (scene) {
         if (mainScene) mainScene.dispose();
@@ -52,12 +61,12 @@
             if (animation.nextFrameTick !== undefined) {
                 if (frameTick >= animation.nextFrameTick) {
                     animation.nextFrameTick = frameTick + 10;
-                    animation.execute(gameTick, frameTick);
+                    animation.action(null, gameTick, frameTick);
                 }
             } else if (animation.nextGameTick != undefined) {
                 if (gameTick >= animation.nextGameTick) {
                     animation.nextGameTick = gameTick + 5;
-                    animation.execute(gameTick, frameTick);
+                    animation.action(null, gameTick, frameTick);
                 }
             } else {
                 animation.nextGameTick = gameTick + 5;
