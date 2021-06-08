@@ -209,7 +209,7 @@ window.tests.transform = {
     run: function (test) {
         test.check("Identity matrix", test.t1, [9, 13, 56, 1], [9, 13, 56, 1]);
         test.check("Scale+translate matrix", test.t2, [1, 1, 1, 1], [4, 9, 16, 1]);
-        test.check("Ttranslate+scale matrix", test.t3, [1, 1, 1, 1], [3, 5, 7, 1]);
+        test.check("Translate+scale matrix", test.t3, [1, 1, 1, 1], [3, 5, 7, 1]);
     }
 };
 

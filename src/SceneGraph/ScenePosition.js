@@ -98,6 +98,22 @@
         return public;
     }
 
+    public.scaleBy = function(scales){
+        public.rotateXYZ(
+            private.scale.x * scales[0],
+            private.scale.y * scales[1],
+            private.scale.z * scales[2]);
+
+    }
+
+    public.scaleByXYZ = function(xScale, yScale, zScale){
+        public.rotateXYZ(
+            private.scale.x * xScale,
+            private.scale.y * yScale,
+            private.scale.z * zScale);
+
+    }
+
     public.getRotateX = function () {
         return private.rotation.x;
     }
@@ -136,19 +152,35 @@
         return public;
     }
 
-    public.getTranslateX = function () {
+    public.rotateBy = function(euler){
+        public.rotateXYZ(
+            private.rotation.x + euler[0],
+            private.rotation.y + euler[1],
+            private.rotation.z + euler[2]);
+
+    }
+
+    public.rotateByXYZ = function(x, y, z){
+        public.rotateXYZ(
+            private.rotation.x + x,
+            private.rotation.y + y,
+            private.rotation.z + z);
+
+    }
+
+    public.getPositionX = function () {
         return private.translation.x;
     }
 
-    public.getTranslateY = function () {
+    public.getPositionY = function () {
         return private.translation.y;
     }
 
-    public.getTranslateZ = function () {
+    public.getPositionZ = function () {
         return private.translation.z;
     }
 
-    public.translateXYZ = function (x, y, z) {
+    public.positionXYZ = function (x, y, z) {
         private.translation.x = x;
         private.translation.y = y;
         private.translation.z = z;
@@ -156,29 +188,37 @@
         return public;
     }
 
-    public.translateX = function (x) {
+    public.positionX = function (x) {
         private.translation.x = x;
         private.isDirty = true;
         return public;
     }
 
-    public.translateY = function (y) {
+    public.positionY = function (y) {
         private.translation.y = y;
         private.isDirty = true;
         return public;
     }
 
-    public.translateZ = function (z) {
+    public.positionZ = function (z) {
         private.translation.z = z;
         private.isDirty = true;
         return public;
     }
 
     public.moveBy = function(direction){
-        public.translateXYZ(
+        public.positionXYZ(
             private.translation.x + direction[0],
             private.translation.y + direction[1],
             private.translation.z + direction[2]);
+
+    }
+
+    public.moveByXYZ = function(x, y, z){
+        public.positionXYZ(
+            private.translation.x + x,
+            private.translation.y + y,
+            private.translation.z + z);
 
     }
 

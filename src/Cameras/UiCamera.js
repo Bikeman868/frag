@@ -10,7 +10,7 @@ window.frag.UiCamera = function () {
         worldToClipTransform: window.frag.Transform2D().identity()
     };
 
-    public.scale = function (horizontalScale) {
+    public.scaleX = function (horizontalScale) {
         var matrix = public.worldToClipTransform.getMatrix();
         matrix[0] = 1 / horizontalScale;
         public.worldToClipTransform.setMatrix(matrix);
