@@ -24,10 +24,30 @@ const pos = obj.getPosition();
 const animation = frag.Animation()
   .sequence([
     frag.ParallelAnimationAction([
-      frag.ValueAnimationAction().onStep((a, r) => pos.rotateZ(r * Math.PI)),
-      frag.ValueAnimationAction().onStep((a, r) => pos.positionY(r * 100))
+      frag.ValueAnimationAction().onStep((a, r) => { pos.rotateZ(r * Math.PI); }),
+      frag.ValueAnimationAction().onStep((a, r) => { pos.positionY(r * 100); })
     ]),
-    frag.ValueAnimationAction().onStep((a, r) => pos.rotateX(r * Math.PI))
+    frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
+  ]);
+```
+
+Note that you should not need the `ParallelAnimationAction` very often. The
+example above can be rewritten more efficiently as:
+
+```javascript
+const frag = window.frag;
+
+const model = frag.Model();
+const obj = frag.SceneObject(model);
+const pos = obj.getPosition();
+
+const animation = frag.Animation()
+  .sequence([
+    frag.ValueAnimationAction().onStep((a, r) => { 
+      pos.rotateZ(r * Math.PI);
+      pos.positionY(r * 100);
+    }),
+    frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
   ]);
 ```
 

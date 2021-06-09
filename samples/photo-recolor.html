@@ -72,7 +72,7 @@
                 '  vec2 position = a_position;\n' +
                 '  position = (u_clipMatrix * vec3(position, 1)).xy;\n' +
                 '  gl_Position = vec4(position, 0, 1);\n' +
-                '  v_texcoord = vec2(a_texcoord.x, 1.0 - a_texcoord.y);\n' +
+                '  v_texcoord = a_texcoord;\n' +
                 '  v_color = rgb2hsv(u_color);\n' +
                 '}';
 
@@ -103,7 +103,7 @@
                 '}\n' +
 
                 'void main() {\n' +
-                '  vec3 photoPixel = texture2D(u_photo, v_texcoord).rgb;\n' +
+                '  vec3 photoPixel = texture2D(u_photo, vec2(v_texcoord.x, 1.0 - v_texcoord.y)).rgb;\n' +
                 '  vec3 maskPixel = texture2D(u_mask, v_texcoord).rgb;\n' +
                 '  vec3 photoPixelHsv = rgb2hsv(photoPixel);\n' +
                 '  vec3 recoloredPixelHsv = vec3(v_color.x, v_color.y, photoPixelHsv.z);\n' +
@@ -273,6 +273,7 @@
                 .scale(95);
 
             let color = [1, 0, 0.498];
+            app.photoShader.color(color);
             const changeColor = function() {
                 const r = Math.floor(Math.random() * 3);
                 let v = color[r] + Math.random() * 0.1;

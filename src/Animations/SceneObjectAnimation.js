@@ -27,7 +27,7 @@ window.frag.SceneObjectAnimation = function (animation, animationMap) {
     }
 
     const action = window.frag.KeyframeAnimationAction()
-        .set(modelAnimation.getInterval(), modelAnimation.getFrames());
+        .setFrames(modelAnimation.getInterval(), modelAnimation.getFrames());
 
     for (let frame = 0; frame < modelAnimation.getFrames(); frame++) {
         action.add(frame, frameAction);

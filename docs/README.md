@@ -71,7 +71,7 @@ The following classes are documented at detailed technical level
 * [ModelLoader](./reference/model-loader.md)
 * [OrthographicCamera](./reference/orthographic-camera.md)
 * [ParallelAnimationAction](./reference/parallel-animation-action.md)
-* [PerspectiveCamera](./reference/perspective-camrea.md)
+* [PerspectiveCamera](./reference/perspective-camera.md)
 * [Scene](./reference/scene.md)
 * [SceneObject](./reference/scene-object.md)
 * [ScenePosition](./reference/scene-position.md)

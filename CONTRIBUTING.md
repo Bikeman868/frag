@@ -17,7 +17,7 @@ If you are doing development on Windows then I strongly recommend installing
 Windows Subsystem for Linux so that you can run bash scripts.
 
 # Production build
-To build this package run this command:
+To build this package, run this command:
 
 ```bash
 npx webpack
@@ -36,4 +36,4 @@ This will build the production package and source maps into the `dist` folder,
 and update them if any source files change.
 
 You can open one of the pages in the `./samples` folder to test specific features
-if the framework.
+in the framework.

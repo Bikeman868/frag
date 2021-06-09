@@ -99,7 +99,8 @@ The actions that you pass are Javascript objects that have the following shape:
 }
 ```
 
-Every element of this structure is optional.
+Everything in this object is optional, so for example you can just pass the `action` 
+function if that's all you want.
 
 If the action has a `duration` property this defines how long this step it in the
 sequence. If the `duration` property is not provied then it defaults to 100 game ticks.
@@ -134,3 +135,9 @@ Starts the animation if it is currently stopped.
 ## stop()
 Stops the animation if it is currently running.
 
+## disposeOnStop(dispose: bool)
+Calling this method on an animation will make the animation dispose of itself as soon as
+the animation has completed. This is useful in situations where we want a vehicle to move
+to a specific location and stop when it gets there. It's unlikely that we will need that
+exact same animation again in the future, so we can just fire and forget by setting the
+auto-dispose.

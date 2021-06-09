@@ -7,23 +7,37 @@ For example you might want to transition gradually from one color to another
 or smoothly rotate an object in the scene.
 
 This object is an animation action, which means that you must pass it
-to the `sequence()` function of an `Animation` object. The `Animation` 
-object that you pass it to will invoke this action as part of the sequence.
+to the `sequence()` function of an `Animation` object.
 
 ## Examples
-This is an example of moving an object then rotating it.
+This is an example of enabling a scene object, then slowly rotating it on
+the Z axis from 0 to 2 x pi radians, then slowly rotating it on the X axis
+from 0 to 2 x pi radians, then disabling the object.
+
+Note that this example does not configure the model or the scene object, but
+focuses on the `ValueAnimationAction` class.
 
 ```javascript
 const frag = window.frag;
 
 const model = frag.Model();
-const obj = frag.SceneObject(model);
-const pos = obj.getPosition();
+const sceneObject = frag.SceneObject(model);
 
-const animation = frag.Animation()
+const animation = frag.Animation({ 
+    obj: sceneObject, 
+    pos: sceneObject.getPosition() 
+  })
   .sequence([
-    frag.ValueAnimationAction().onStep((a, r) => pos.rotateZ(r * Math.PI)),
-    frag.ValueAnimationAction().onStep((a, r) => pos.positionY(r * 100))
+    frag.ValueAnimationAction()
+      .setDuration(500)
+      .setInterval(20)
+      .onStart((animation) => { animation.obj.enable(); } )
+      .onStep((animation, ratio) => { animation.pos.rotateZ(ratio * Math.PI); }),
+    frag.ValueAnimationAction()
+      .setDuration(1000)
+      .setInterval(50)
+      .onStep((animation, ratio) => { animation.pos.rotateX(ratio * Math.PI); })
+      .onStop((animation) => { animation.obj.disable(); } )
   ]);
 ```
 

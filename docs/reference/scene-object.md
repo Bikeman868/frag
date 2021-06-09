@@ -20,7 +20,7 @@ object to a scene.
 ```javascript
 const frag = window.frag;
 const model = frag.Model();
-const scene = grag.Scene();
+const scene = frag.Scene();
 
 const sceneObject = frag.SceneObject(model);
 sceneObject.getPosition().scale(40);

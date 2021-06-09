@@ -26,6 +26,7 @@ window.frag.Animation = function (obj, isChild) {
         }
 
         if (private.stopAt !== undefined && gameTick >= private.stopAt) {
+            if (private.disposeOnStop) public.dispose();
             return;
         }
 
@@ -129,6 +130,10 @@ window.frag.Animation = function (obj, isChild) {
         private.stopAfter = gameTicks;
         delete private.stopAt;
         return public;
+    }
+
+    public.disposeOnStop = function(dispose){
+        private.disposeOnStop = dispose;
     }
 
     if (!isChild) window.frag.addAnimation(public);

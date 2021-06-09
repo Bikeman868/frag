@@ -36,7 +36,7 @@ window.frag.KeyframeAnimationAction = function () {
         return public;
     }
 
-    public.set = function(interval, frames){
+    public.setFrames = function(interval, frames){
         public.interval = interval;
         public.frames = frames || public.frames;
         return public;
