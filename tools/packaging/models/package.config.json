@@ -1,36 +1,27 @@
 {
     "root": "C:\\Users\\marti\\Dropbox\\Private\\Freelance\\Collonizer\\Git\\GameServer\\Assets\\Models\\",
     "packages":[{
-        "output": "models_little.pkg",
-        "littleEndian": true,
-        "types":[{
+        "variants":[{
+            "output": "models_little.pkg",
+            "littleEndian": true,
+            "version": 1
+        },{
+            "output": "models_big.pkg",
+            "littleEndian": true,
+            "version": 1
+        }],
+        "groups":[{
             "modelName": "connector_{type}{size}",
-            "include": ["Connector\\{type}\\{size}.frag"],
-            "exclude": []
+            "include": "Connector\\{type}\\{size}.frag",
+            "exclude": ""
         },{
             "modelName": "building_{type}{size}",
-            "include": ["Building\\{type}\\{size}.frag"],
-            "exclude": []
+            "include": "Building\\{type}\\{size}.frag",
+            "exclude": ""
         },{
             "modelName": "robot_{type}",
-            "include": ["Robot\\{type}.frag"],
-            "exclude": []
-        }]
-    },{
-        "output": "models_big.pkg",
-        "littleEndian": false,
-        "types":[{
-            "modelName": "connector_{type}{size}",
-            "include": ["Connector\\{type}\\{size}.frag"],
-            "exclude": []
-        },{
-            "modelName": "building_{type}{size}",
-            "include": ["Building\\{type}\\{size}.frag"],
-            "exclude": []
-        },{
-            "modelName": "robot_{type}",
-            "include": ["Robot\\{type}.frag"],
-            "exclude": []
+            "include": "Robot\\{type}.frag",
+            "exclude": ""
         }]
     }]
 }

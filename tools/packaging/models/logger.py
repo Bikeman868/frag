@@ -65,6 +65,6 @@ class Logger:
     @staticmethod
     def log(msg, tabCount = 1, newLineCount = 1):
         if Logger.instance is None: return
-        if tabCount > 0: sys.stdout.write('\t' * tabCount)
+        if tabCount > 0: sys.stdout.write('  ' * tabCount)
         if len(msg) > 0: sys.stdout.write(msg)
         if newLineCount > 0: sys.stdout.write('\n' * newLineCount)
