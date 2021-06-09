@@ -1,7 +1,7 @@
 {
     "root": "C:\\Users\\marti\\Dropbox\\Private\\Freelance\\Collonizer\\Git\\GameServer\\Assets\\Models\\",
     "packages":[{
-        "output": "package_le.pkg",
+        "output": "models_little.pkg",
         "littleEndian": true,
         "types":[{
             "modelName": "connector_{type}{size}",
@@ -17,7 +17,7 @@
             "exclude": []
         }]
     },{
-        "output": "package_be.pkg",
+        "output": "models_big.pkg",
         "littleEndian": false,
         "types":[{
             "modelName": "connector_{type}{size}",
