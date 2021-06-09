@@ -69,16 +69,12 @@ class FragSerializer:
 
 
     def serializePosition(self, v):
-        # Convert RH Z-up to LH Y-up coordinate system
-        return [round(v.x, 4), round(v.z, 4), round(-v.y, 4)]
+        return [round(v.x, 4), round(v.y, 4), round(v.z, 4)]
 
     def serializeColor(self, v):
         return [round(v.r, 4), round(v.g, 4), round(v.b, 4)]
 
     def serializeCurveCoord(self, v, axis):
-        if axis == 0:
-            # Negate x axis to convert RH to LH coordinates
-            return [round(v.x, 4), round(-v.y, 4)]
         return [round(v.x, 4), round(v.y, 4)]
 
     def serializeRange(self, v):

@@ -1,0 +1,36 @@
+{
+    "root": "C:\\Users\\marti\\Dropbox\\Private\\Freelance\\Collonizer\\Git\\GameServer\\Assets\\Models\\",
+    "packages":[{
+        "output": "package_le.pkg",
+        "littleEndian": true,
+        "types":[{
+            "modelName": "connector_{type}{size}",
+            "include": ["Connector\\{type}\\{size}.frag"],
+            "exclude": []
+        },{
+            "modelName": "building_{type}{size}",
+            "include": ["Building\\{type}\\{size}.frag"],
+            "exclude": []
+        },{
+            "modelName": "robot_{type}",
+            "include": ["Robot\\{type}.frag"],
+            "exclude": []
+        }]
+    },{
+        "output": "package_be.pkg",
+        "littleEndian": false,
+        "types":[{
+            "modelName": "connector_{type}{size}",
+            "include": ["Connector\\{type}\\{size}.frag"],
+            "exclude": []
+        },{
+            "modelName": "building_{type}{size}",
+            "include": ["Building\\{type}\\{size}.frag"],
+            "exclude": []
+        },{
+            "modelName": "robot_{type}",
+            "include": ["Robot\\{type}.frag"],
+            "exclude": []
+        }]
+    }]
+}
