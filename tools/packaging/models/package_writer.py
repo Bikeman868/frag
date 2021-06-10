@@ -1,5 +1,6 @@
 from struct import Struct, pack
 from byte_array import ByteArray
+from config import config
 
 class PackageWriter:
     _filename: str
@@ -33,17 +34,21 @@ class PackageWriter:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        file = open(self._filename, 'wb')
-        try:
-            for i in range(self._head.getLength()): 
-                file.write(bytes([self._head.getByte(i)]))
-            for i in range(self._index.getLength()): 
-                file.write(bytes([self._index.getByte(i)]))
-            for i in range(self._data.getLength()): 
-                file.write(bytes([self._data.getByte(i)]))
-        finally:
-            file.close()
-        return self
+        self.close()
+        return False
+
+    def close(self):
+        if not config['dryRun']:
+            file = open(self._filename, 'wb')
+            try:
+                for i in range(self._head.getLength()): 
+                    file.write(bytes([self._head.getByte(i)]))
+                for i in range(self._index.getLength()): 
+                    file.write(bytes([self._index.getByte(i)]))
+                for i in range(self._data.getLength()): 
+                    file.write(bytes([self._data.getByte(i)]))
+            finally:
+                file.close()
 
     def getLittleEndian(self):
         return self._littleEndian

@@ -122,4 +122,4 @@ class ByteArray:
 
     def _addChunks(self, count: int):
         for i in range(count): 
-            self. _byteArrays.append(b'\0' * self._chunkSize)
+            self. _byteArrays.append(bytearray(self._chunkSize))
