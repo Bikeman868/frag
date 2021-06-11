@@ -6,6 +6,10 @@ Right now we are still making breaking changes, so this should be considered an
 alpha release for people who are interested in tracking the development of this
 project. We do not recommend using this for writing production games yet.
 
+# Documentation
+This page provides a brief introduction. If you want to dig deeper then the two
+best sources are [the samples folder](./samples) and [the docs folder](./docs)
+
 # Who is this for?
 Frag is a low level WebGL framework that is designed for independent game developers
 wanting to write 2D or 3D rendered games that can be played in a browser on any 
