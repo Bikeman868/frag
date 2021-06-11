@@ -6,13 +6,14 @@ from model_writer_v1 import ModelWriter as ModelWriterV1
 
 logger = Logger()
 try:
-    rootPath = config['root']
-    logger.log('Packaging models exported from Blender in ' + rootPath, 0)
+    inputPath = config['input']
+    outputPath = config['output']
+    logger.log('Packaging Blender models from ' + inputPath + ' to ' + outputPath, 0)
     logger.logStart()
 
     for package in config['packages']:
         for variant in package['variants']:
-            output = variant['output']
+            output = outputPath + variant['output']
             littleEndian = variant['littleEndian']
             version = variant["version"]
             if version == 0: version = 1 # Most recent version
@@ -38,7 +39,7 @@ try:
                     include = group['include']
                     exclude = group['exclude']
                     logger.log('Adding ' + modelName + ' models to the package', 1)
-                    for model in Model.enumerateModels(rootPath, modelName, include, exclude):
+                    for model in Model.enumerateModels(inputPath, modelName, include, exclude):
                         logger.log('Adding ' + model.name + ' from ' + model.filename, 2)
                         modelWriter.write(model, 3)
 

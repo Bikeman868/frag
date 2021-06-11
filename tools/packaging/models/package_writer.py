@@ -41,17 +41,23 @@ class PackageWriter:
         if not config['dryRun']:
             file = open(self._filename, 'wb')
             try:
-                for i in range(self._head.getLength()): 
-                    file.write(bytes([self._head.getByte(i)]))
-                for i in range(self._index.getLength()): 
-                    file.write(bytes([self._index.getByte(i)]))
-                for i in range(self._data.getLength()): 
-                    file.write(bytes([self._data.getByte(i)]))
+                self._head.writeTo(file)
+                self._index.writeTo(file)
+                self._data.writeTo(file)
             finally:
                 file.close()
 
-    def getLittleEndian(self):
-        return self._littleEndian
+    # Materials
+
+    def getOrAddMaterial(self, materialName: str):
+        if materialName in self._materials:
+            return self._materials[materialName]
+
+        materialIndex = self.startHeader(1)
+        self.writeIndexStr(materialName)
+        self.endHeader()
+        self._materials[materialName] = materialIndex
+        return materialIndex
 
     # Creating headers in the index
 
@@ -93,8 +99,12 @@ class PackageWriter:
         self._indexOffset = self._index.setFloat(self._indexOffset, value)
 
     def writeIndexStr(self, value: str):
-        self.writeIndexByte(len(value))
-        for ch in value: self.writeIndexByte(int(ch))
+        strBytes = value.encode('utf-8')
+        self.writeIndexByte(len(strBytes))
+        for strByte in strBytes: self.writeIndexByte(strByte)
+
+    def writeDataOffset(self):
+        self.writeIndexUInt(self._dataOffset)
 
     # writing to the data area
 
@@ -117,6 +127,7 @@ class PackageWriter:
         self._dataOffset = self._data.setFloat(self._dataOffset, value)
 
     def writeDataStr(self, value: str):
-        self.writeDataByte(len(value))
-        for ch in value: self.writeDataByte(int(ch))
+        strBytes = value.encode('utf-8')
+        self.writeIndexByte(len(strBytes))
+        for strByte in strBytes: self.writeDataByte(strByte)
 

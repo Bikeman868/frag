@@ -1,5 +1,6 @@
 {
     "root": "",
+    "output": "",
     "packages":[{
         "variants":[{
             "output": "models_little.pkg",
@@ -7,7 +8,7 @@
             "version": 1
         },{
             "output": "models_big.pkg",
-            "littleEndian": true,
+            "littleEndian": false,
             "version": 1
         }],
         "groups":[{
@@ -16,7 +17,7 @@
             "exclude": ""
         },{
             "modelName": "building_{type}{size}",
-            "include": "Building\\{type}\\{size}.frag",
+            "include": "_Building\\{type}\\{size}.frag",
             "exclude": ""
         },{
             "modelName": "robot_{type}",

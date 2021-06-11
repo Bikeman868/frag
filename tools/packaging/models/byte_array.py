@@ -34,6 +34,17 @@ class ByteArray:
             self._uintStruct = Struct('>I')
             self._floatStruct = Struct('>f')
 
+    # Write buffered bytes
+
+    def writeTo(self, file):
+        bytesRemaining = self._length
+        for buffer in self._byteArrays:
+            if len(buffer) <= bytesRemaining:
+                file.write(buffer)
+            else:
+                file.write(buffer[:bytesRemaining])
+            bytesRemaining -= len(buffer)
+
     # Setting the length resizes the array
 
     def setLength(self, length: int):
