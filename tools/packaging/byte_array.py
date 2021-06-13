@@ -1,6 +1,10 @@
 from struct import Struct
 
 class ByteArray:
+    '''A dynamically sized container for binary data. Can be expanded and 
+    shrunk as needed. Internally maintains a list of fixed length blocks 
+    of binary data. Can write the data to binary file. The whole array must
+    be either little-endian or big endian'''
     MAX_CHUNK_SIZE = 65536
 
     _littleEndian: bool

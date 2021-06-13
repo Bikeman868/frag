@@ -1,7 +1,7 @@
 {
     "root": "",
     "output": "",
-    "packages":[{
+    "model-packages":[{
         "variants":[{
             "output": "models_little.pkg",
             "littleEndian": true,
@@ -17,12 +17,13 @@
             "exclude": ""
         },{
             "modelName": "building_{type}{size}",
-            "include": "_Building\\{type}\\{size}.frag",
+            "include": "Building\\{type}\\{size}.frag",
             "exclude": ""
         },{
             "modelName": "robot_{type}",
             "include": "Robot\\{type}.frag",
             "exclude": ""
         }]
-    }]
+    }],
+    "material-packages":[]
 }

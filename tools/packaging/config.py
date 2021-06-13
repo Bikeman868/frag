@@ -12,16 +12,16 @@ with open(args.configFile, 'rt', encoding='utf-8') as file:
     global config
     config = json.load(file)
 
-if (not 'input' in config or len(config['input']) == 0):
-    config['input'] = '.\\'
-
-if (not 'output' in config or len(config['output']) == 0):
-    config['output'] = '.\\'
-
-if (args.input is not None):
+if args.input is None:
+    if not 'input' in config or len(config['input']) == 0:
+        config['input'] = '.\\'
+else:
     config['input'] = args.input[0]
 
-if (args.output is not None):
+if args.output is None:
+    if not 'output' in config or len(config['output']) == 0:
+        config['output'] = '.\\'
+else:
     config['output'] = args.output[0]
 
 config['dryRun'] = args.dryRun

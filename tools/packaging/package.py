@@ -11,7 +11,7 @@ try:
     logger.log('Packaging Blender models from ' + inputPath + ' to ' + outputPath, 0)
     logger.logStart()
 
-    for package in config['packages']:
+    for package in config['model-packages']:
         for variant in package['variants']:
             output = outputPath + variant['output']
             littleEndian = variant['littleEndian']
@@ -25,9 +25,9 @@ try:
             with PackageWriter(output, littleEndian) as writer:
                 writer.writeHeadByte(1) # version number
                 if littleEndian: 
-                    writer.writeHeadByte(1)
+                    writer.writeHeadByte(1) # Little-endian
                 else: 
-                    writer.writeHeadByte(2)
+                    writer.writeHeadByte(2) # Big-endian
                 writer.writeHeadByte(0) # Word alignment padding
                 writer.writeHeadByte(0) # Word alignment padding
 

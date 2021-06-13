@@ -17,7 +17,7 @@ class PackageWriter:
     _headerIndex: int
     _headerStart: int
 
-    _materials: map
+    _materials: dict
 
     def __init__(self, filename, littleEndian):
         self._filename = filename
@@ -29,34 +29,34 @@ class PackageWriter:
         self._indexOffset = 0
         self._dataOffset = 0
         self._headerIndex = -1
+        self._materials = dict()
 
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, errorType, error, stack):
         self.close()
         return False
 
     def close(self):
-        if not config['dryRun']:
-            file = open(self._filename, 'wb')
-            try:
-                self._head.writeTo(file)
-                self._index.writeTo(file)
-                self._data.writeTo(file)
-            finally:
-                file.close()
+        if config['dryRun']: return
+        file = open(self._filename, 'wb')
+        try:
+            self._head.writeTo(file)
+            self._index.writeTo(file)
+            self._data.writeTo(file)
+        finally:
+            file.close()
 
     # Materials
 
     def getOrAddMaterial(self, materialName: str):
-        if materialName in self._materials:
-            return self._materials[materialName]
-
-        materialIndex = self.startHeader(1)
-        self.writeIndexStr(materialName)
-        self.endHeader()
-        self._materials[materialName] = materialIndex
+        materialIndex = self._materials.get(materialName, None)
+        if materialIndex == None:
+            materialIndex = self.startHeader(1)
+            self.writeIndexStr(materialName)
+            self.endHeader()
+            self._materials[materialName] = materialIndex
         return materialIndex
 
     # Creating headers in the index

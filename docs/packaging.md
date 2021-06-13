@@ -22,7 +22,7 @@ This sample script will:
 
 ```json
 {
-    "packages":[{
+    "model-packages":[{
         "variants":[{
             "output": "models_little.pkg",
             "littleEndian": true,
@@ -42,7 +42,8 @@ This sample script will:
             "modelName": "robot_{type}",
             "include": "Robot\\{type}.frag",
         }]
-    }]
+    }],
+    "material-packages":[]
 }
 ```
 
