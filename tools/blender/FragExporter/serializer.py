@@ -62,11 +62,7 @@ class FragSerializer:
                 "groups": groups })
 
     def serializeAxis(self, v):
-        # Convert Z-up to Y-up
-        if v == 1: return 2
-        if v == 2: return 1
-        return 0
-
+        return v
 
     def serializePosition(self, v):
         return [round(v.x, 4), round(v.y, 4), round(v.z, 4)]

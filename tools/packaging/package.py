@@ -35,9 +35,9 @@ try:
                 else: raise NotImplementedError()
 
                 for group in package['groups']:
-                    modelName = group['modelName']
-                    include = group['include']
-                    exclude = group['exclude']
+                    modelName = group.get('modelName', r'{filename}')
+                    include = group.get('include', r'{filename}.frag_model')
+                    exclude = group.get('exclude', '')
                     logger.log('Adding ' + modelName + ' models to the package', 1)
                     for model in Model.enumerateModels(inputPath, modelName, include, exclude):
                         logger.log('Adding ' + model.name + ' from ' + model.filename, 2)

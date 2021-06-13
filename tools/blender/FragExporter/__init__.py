@@ -15,10 +15,10 @@ class JsonMain(Operator, ExportHelper):
     bl_idname = 'export.frag'
     bl_label = 'Export Frag Model'
     bl_options = {'REGISTER', 'UNDO'}
-    filename_ext = '.frag'
+    filename_ext = '.frag_model'
 
     filepath: bpy.props.StringProperty(subtype = 'FILE_PATH')
-    filter_glob: bpy.props.StringProperty(name='.frag',default='*.frag', options={'HIDDEN'})
+    filter_glob: bpy.props.StringProperty(name = filename_ext, default = '*' + filename_ext, options = {'HIDDEN'})
 
     def execute(self, context):
         from .json_exporter import JsonExporter

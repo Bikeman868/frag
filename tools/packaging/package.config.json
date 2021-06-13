@@ -1,6 +1,4 @@
 {
-    "root": "",
-    "output": "",
     "model-packages":[{
         "variants":[{
             "output": "models_little.pkg",
@@ -12,17 +10,8 @@
             "version": 1
         }],
         "groups":[{
-            "modelName": "connector_{type}{size}",
-            "include": "Connector\\{type}\\{size}.frag",
-            "exclude": ""
-        },{
-            "modelName": "building_{type}{size}",
-            "include": "Building\\{type}\\{size}.frag",
-            "exclude": ""
-        },{
-            "modelName": "robot_{type}",
-            "include": "Robot\\{type}.frag",
-            "exclude": ""
+            "modelName": "{type}",
+            "include": "{type}.frag_model"
         }]
     }],
     "material-packages":[]
