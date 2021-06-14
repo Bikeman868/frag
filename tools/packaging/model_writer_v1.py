@@ -120,14 +120,14 @@ class ModelWriter:
 
                 for vertex in mesh['vertices']:
                     self._writer.writeDataFloat(vertex[0])
-                    self._writer.writeDataFloat(vertex[1])
                     self._writer.writeDataFloat(vertex[2])
+                    self._writer.writeDataFloat(vertex[1])
 
                 for triangle in mesh['triangles']:
                     normal = triangle['normal']
                     self._writer.writeDataFloat(normal[0])
-                    self._writer.writeDataFloat(normal[1])
                     self._writer.writeDataFloat(normal[2])
+                    self._writer.writeDataFloat(normal[1])
             finally:
                 self._writer.endHeader()
 
@@ -156,11 +156,11 @@ class ModelWriter:
 
                     self._writer.writeIndexStr(pattern)
                     if (dataPath == 'location'): 
-                        self._writer.writeIndexStr('translate-' + 'xyz'[dataIndex])
+                        self._writer.writeIndexStr('translate-' + 'xzy'[dataIndex])
                     elif (dataPath == 'rotation_euler'): 
-                        self._writer.writeIndexStr('rotate-' + 'xyz'[dataIndex])
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex])
                     elif (dataPath == 'delta_rotation_euler'):
-                        self._writer.writeIndexStr('rotate-' + 'xyz'[dataIndex])
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex])
                     else: 
                         Logger.warn('Unsupported data path ' + dataPath)
                         self._writer.writeIndexStr('')
