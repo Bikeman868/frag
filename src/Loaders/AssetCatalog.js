@@ -5,7 +5,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
         0x7F, 0x7F, 0x7F, 0xFF, // Opaque medium grey
         0x00, 0x00, 0xFF, 0x00, // Very shinny
         0x00, 0x00, 0x00,       // No light emmission
-        0x7F, 0x7F, 0x00]);     // Normal (0, 0, -1)
+        0x7F, 0x7F, 0xFF]);     // Normal (0, 0, 1)
     
     if (!defaultTextures) defaultTextures = {};
     if (!defaultTextures.diffuse) defaultTextures.diffuse = frag.Texture()
@@ -31,11 +31,8 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
             .verticiesXYZ()
             .matrix3D()
             .diffuseTexture()
-            .emmissiveTexture()
-            .displacementTextureSunken()
-            .directionalLightWhite()
-            .compile()
-            .displacementScale(0.4);
+            .directionalLightGrey()
+            .compile();
     };
 
     const private = {
@@ -74,6 +71,6 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
         }
         return model;
     }
-    
+
     return public;
 }

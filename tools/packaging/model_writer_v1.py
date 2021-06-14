@@ -31,15 +31,15 @@ class ModelWriter:
 
         Logger.log('{} animations @{}fps, {} meshes, {} models'.format(len(animations), fps, len(meshes), len(models)), logIndent)
 
-        self._transformData(models, animations, meshes)
+        self._transformData(logIndent, models, animations, meshes)
 
         Logger.log('Model animations: {}'.format(', '.join([animation['name'] for animation in animations])), logIndent)
 
-        self._writeMeshes(meshes)
-        self._writeAnimations(animations, msPerFrame)
-        self._writeModels(models, model.name)
+        self._writeMeshes(logIndent, meshes)
+        self._writeAnimations(logIndent, animations, msPerFrame)
+        self._writeModels(logIndent, models, model.name)
 
-    def _transformData(self, models, animations, meshes):
+    def _transformData(self, logIndent, models, animations, meshes):
         meshesById = {mesh['id'] : mesh for mesh in meshes}
         animationsByName = {animation['name'] : animation for animation in animations}
         modelsByName = {model['name'] : model for model in models}
@@ -57,6 +57,7 @@ class ModelWriter:
             modelName = model['name']
             animationName = model.get('animation', None)
             meshId = model.get('mesh', None)
+            Logger.debug('Model {} animation={} mesh={}'.format(modelName, animationName, meshId), logIndent)
 
             children = [modelsByName[childName] for childName in model['children']]
             for child in children: child['parentModel'] = model
@@ -77,18 +78,24 @@ class ModelWriter:
                     channel['pattern'] = '^' + modelName + '$'
                 if modelAnimationName in animationsByName:
                     existing = animationsByName[modelAnimationName]
+                    Logger.debug('Adding {} channels to existing {} animation'.format(len(animation['channels']), modelAnimationName), logIndent + 1)
                     for channel in animation['channels']:
                         existing['channels'].append(channel)
                 else:
+                    Logger.debug('New {} animation with {} channels'.format(modelAnimationName, len(animation['channels'])), logIndent + 1)
                     animationsByName[modelAnimationName] = animation
                     animations.append(animation)
                 del animationsByName[animationName]
+
+        Logger.debug('Animation channels extracted:', logIndent)
+        for animation in animations:
+            Logger.debug('{} animation has {} channels'.format(animation['name'], len(animation['channels'])), logIndent + 1)
 
         for model in models: 
             if not 'parentModel' in model:
                 model['animations'] = animations
 
-    def _writeMeshes(self, meshes):
+    def _writeMeshes(self, logIndent, meshes):
         for mesh in meshes:
             mesh['headerIndex'] = self._writer.startHeader(2)
             try:
@@ -124,7 +131,7 @@ class ModelWriter:
             finally:
                 self._writer.endHeader()
 
-    def _writeAnimations(self, animations, msPerFrame):
+    def _writeAnimations(self, logIndent, animations, msPerFrame):
         for animation in animations:
             animation['headerIndex'] = self._writer.startHeader(3)
             try:
@@ -152,6 +159,8 @@ class ModelWriter:
                         self._writer.writeIndexStr('translate-' + 'xyz'[dataIndex])
                     elif (dataPath == 'rotation_euler'): 
                         self._writer.writeIndexStr('rotate-' + 'xyz'[dataIndex])
+                    elif (dataPath == 'delta_rotation_euler'):
+                        self._writer.writeIndexStr('rotate-' + 'xyz'[dataIndex])
                     else: 
                         Logger.warn('Unsupported data path ' + dataPath)
                         self._writer.writeIndexStr('')
@@ -176,15 +185,15 @@ class ModelWriter:
             finally:
                 self._writer.endHeader()
 
-    def _writeModels(self, models, rootName):
+    def _writeModels(self, logIndent, models, rootName):
         for model in models: 
             if not 'parentModel' in model: rootModel = model
-        self._writeModelHeirachy(rootModel, rootName)
+        self._writeModelHeirachy(logIndent, rootModel, rootName)
 
-    def _writeModelHeirachy(self, model, modelName):
+    def _writeModelHeirachy(self, logIndent, model, modelName):
         children = model['childModels']
         for child in children:
-            self._writeModelHeirachy(child, child['name'])
+            self._writeModelHeirachy(logIndent, child, child['name'])
 
         isRoot = not 'parentModel' in model
         flags = 0

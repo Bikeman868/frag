@@ -110,8 +110,16 @@
             .start();
         }
 
+        shader = frag.Shader()
+            .name("Model")
+            .diffuseTexture()
+            .directionalLightWhite()
+            .compile()
+            .lightDirection([0.5, -0.1, -0.5]);
+        const assetCatalog = frag.AssetCatalog(shader);
+
         const packageUrl = frag.ModelLoader.littleEndian ? 'assets/models_little.pkg' : 'assets/models_big.pkg';
-        frag.ModelLoader.loadModelsFromUrl(packageUrl, undefined, modelsLoaded)
+        frag.ModelLoader.loadModelsFromUrl(packageUrl, assetCatalog, modelsLoaded)
 
     </script>
 </body>

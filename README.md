@@ -185,7 +185,7 @@ There are other samples for you to explore in the [samples folder](./samples)
         const shader = frag.Shader()
             .name("My shader")
             .diffuseTexture()
-            .directionalLightWhite()
+            .directionalLightGrey()
             .compile();
 
         // This texture will be used to paint the sides of the cube. Note that

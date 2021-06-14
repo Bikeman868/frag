@@ -3,6 +3,7 @@ from math import floor
 from time import time, ctime
 from sys import exc_info
 from traceback import format_tb
+from config import config
 
 class Logger:
     instance = None # singleton
@@ -16,20 +17,20 @@ class Logger:
 
     def close(self):
         if self.nErrors > 0:
-            Logger.log('Packaging failed', 0)
+            Logger._write('Packaging failed', 0)
         else:
-            Logger.log('Packaging succeeded', 0)
+            Logger._write('Packaging succeeded', 0)
 
         elapsed_time = time() - self.start_time
         minutes = floor(elapsed_time / 60)
         seconds = elapsed_time - (minutes * 60)
-        Logger.log('Elapsed time:  {} min, {:.2f} sec'.format(minutes, seconds))
+        Logger._write('Elapsed time:  {} min, {:.2f} sec'.format(minutes, seconds))
 
         if self.nWarnings > 0:
-            Logger.log('Warnings:  ' + str(self.nWarnings))
+            Logger._write('Warnings:  ' + str(self.nWarnings))
 
         if self.nErrors > 0:
-            Logger.log('Errors:  ' + str(self.nErrors))
+            Logger._write('Errors:  ' + str(self.nErrors))
 
         Logger.instance = None
 
@@ -38,7 +39,7 @@ class Logger:
 
     @staticmethod
     def exception(exception = None):
-        Logger.log('\n========= EXCEPTION =========', 0)
+        Logger._write('\n========= EXCEPTION =========', 0)
         Logger.instance.nErrors += 1
 
         ex = exc_info()
@@ -47,23 +48,34 @@ class Logger:
 
         stack = format_tb(ex[2])
         for line in stack:
-           Logger.log(line, 1, 0)
+           Logger._write(line, 1, 0)
 
-        Logger.log('Error:  ' + str(exception), 1)
-        Logger.log('=========================', 0, 2)
+        Logger._write('Error:  ' + str(exception), 1)
+        Logger._write('=========================', 0, 2)
 
     @staticmethod
     def error(msg):
         Logger.instance.nErrors += 1
-        Logger.log('\nERROR: ' + msg.upper(), 0, 2)
+        Logger._write('\nERROR: ' + msg.upper(), 0, 2)
 
     @staticmethod
     def warn(msg, tabCount = 1, newLineCount = 1):
         Logger.instance.nWarnings += 1
-        Logger.log('WARNING: ' + msg, tabCount, newLineCount)
+        if config['logLevel'] < 1: return
+        Logger._write('WARNING: ' + msg, tabCount, newLineCount)
 
     @staticmethod
     def log(msg, tabCount = 1, newLineCount = 1):
+        if config['logLevel'] < 2: return
+        Logger._write(msg, tabCount, newLineCount)
+
+    @staticmethod
+    def debug(msg, tabCount = 1, newLineCount = 1):
+        if config['logLevel'] < 3: return
+        Logger._write(msg, tabCount, newLineCount)
+
+    @staticmethod
+    def _write(msg, tabCount = 1, newLineCount = 1):
         if Logger.instance is None: return
         if tabCount > 0: sys.stdout.write('  ' * tabCount)
         if len(msg) > 0: sys.stdout.write(msg)

@@ -62,7 +62,7 @@ window.frag.ObjectAnimationState = function () {
             case "translate-z":
                 if (private.is3d)
                     return function (value) {
-                        private.translateY = value;
+                        private.translateZ = value;
                         if (private.matrix) private.matrix[14] = value;
                     }
 

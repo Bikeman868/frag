@@ -139,9 +139,25 @@ window.frag.Shader = function () {
         return public; 
     };
 
+    public.directionalLightColor = function () {
+        public.matrix3D();
+        private.directionalLight = "Color";
+        if (private.ambientLight === none) private.ambientLight = "Balanced";
+        if (private.normals === none) private.normals = "vec3";
+        return public;
+    }
+
     public.directionalLightWhite = function () {
         public.matrix3D();
         private.directionalLight = "White";
+        if (private.ambientLight === none) private.ambientLight = none;
+        if (private.normals === none) private.normals = "vec3";
+        return public;
+    }
+
+    public.directionalLightGrey = function () {
+        public.matrix3D();
+        private.directionalLight = "Grey";
         if (private.ambientLight === none) private.ambientLight = "Balanced";
         if (private.normals === none) private.normals = "vec3";
         return public;
@@ -185,6 +201,7 @@ window.frag.Shader = function () {
             shader.vSource += "uniform " + private.matrix + " u_clipMatrix;\n";
         }
         if (private.directionalLight !== none) shader.vSource += "uniform vec3 u_lightDirection;\n";
+        if (private.directionalLight === "Color") shader.vSource += "uniform vec3 u_lightColor;\n";
         if (private.displacementTexture !== none) shader.vSource += "uniform float u_displacementScale;\n";
         if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) shader.vSource += "uniform sampler2D u_surface;\n";
 
@@ -207,6 +224,7 @@ window.frag.Shader = function () {
         if (private.colors !== none) add(private.colors, "v_color");
         if (private.directionalLight !== none) {
             add("vec3", "v_lightDirection");
+            if (private.directionalLight === "Color") add("vec3", "v_lightColor");
             if (private.normalMap === none) add(private.normals, "v_normal");
         }
     }
@@ -261,6 +279,9 @@ window.frag.Shader = function () {
         } else {
             if (private.ambientLight !== none) shader.fSource += "  float light = u_ambientLight;\n";
         }
+
+        if (private.directionalLight === "Color") 
+            shader.vSource += "  v_lightColor = u_lightColor;\n";
 
         if (private.colors === none)
             shader.fSource += "  gl_FragColor = vec4(0, 0, 0, 1.0);\n";
@@ -417,6 +438,16 @@ window.frag.Shader = function () {
             shader.uniforms.lightDirection = frag.gl.getUniformLocation(shader.program, "u_lightDirection");
             bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.lightDirection, shader._lightDirection); });
 
+            if (private.directionalLight === "Color"){
+                shader.uniforms.lightColor = frag.gl.getUniformLocation(shader.program, "u_lightColor");
+                bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.lightColor, shader._lightColor); });
+
+                shader.lightColor = function(color) {
+                    shader._lightColor = color;
+                    return shader;
+                }
+            }
+
             const balanceAmbient = private.ambientLight === "Balanced";
             shader.lightDirection = function (direction) {
                 const length = window.frag.Vector.length(direction);
@@ -429,7 +460,10 @@ window.frag.Shader = function () {
                 }
                 return shader;
             };
-            shader.lightDirection([-0.25, -0.5, 0.4]);
+            if (private.directionalLight === "White")
+                shader.lightDirection([0.8, -0.2, 0.8]);
+            else if (private.directionalLight === "Grey")
+                shader.lightDirection([0.5, -0.1, 0.5]);
         }
 
         shader.bind = function (gl) {
