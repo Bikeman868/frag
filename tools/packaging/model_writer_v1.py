@@ -96,13 +96,15 @@ class ModelWriter:
                 model['animations'] = animations
 
     def _writeMeshes(self, logIndent, meshes):
+        includeNormals = True
         for mesh in meshes:
             mesh['headerIndex'] = self._writer.startHeader(2)
             try:
                 self._writer.writeIndexUShort(1) # Only 1 fragment
                 self._writer.writeIndexByte(1) # Distinct triangles
                 self._writer.writeIndexByte(3) # Indexed 3D vertices
-                self._writer.writeIndexByte(3) # One normal vector per triangle
+                if includeNormals: self._writer.writeIndexByte(3) # One normal vector per triangle
+                else: self._writer.writeIndexByte(0) # No normal vectors
                 self._writer.writeIndexByte(0) # No tangent vectors
                 self._writer.writeIndexByte(0) # No bitangent vectors
                 self._writer.writeIndexByte(0) # No UV coordinates
@@ -123,11 +125,12 @@ class ModelWriter:
                     self._writer.writeDataFloat(vertex[2])
                     self._writer.writeDataFloat(vertex[1])
 
-                for triangle in mesh['triangles']:
-                    normal = triangle['normal']
-                    self._writer.writeDataFloat(normal[0])
-                    self._writer.writeDataFloat(normal[2])
-                    self._writer.writeDataFloat(normal[1])
+                if includeNormals:
+                    for triangle in mesh['triangles']:
+                       normal = triangle['normal']
+                       self._writer.writeDataFloat(normal[0])
+                       self._writer.writeDataFloat(normal[2])
+                       self._writer.writeDataFloat(normal[1])
             finally:
                 self._writer.endHeader()
 

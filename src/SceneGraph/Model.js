@@ -83,6 +83,60 @@
         return child;
     }
 
+    public.shadeSmooth = function (depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.shadeSmooth();
+        
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.shadeSmooth(depth-1); });
+        return public;
+    }
+
+    public.shadeFlat = function (depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.shadeFlat();
+        
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.shadeFlat(depth-1); });
+        return public;
+    }
+
+    public.textureSmooth = function (depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.textureSmooth();
+        
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.textureSmooth(depth-1); });
+        return public;
+    }
+
+    public.textureFlat = function (depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.textureFlat();
+        
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.textureFlat(depth-1); });
+        return public;
+    }
+
+    public.wireframe = function (drawWireframe, depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.wireframe();
+        
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.wireframe(depth-1); });
+        return public;
+    }
+
+    public.drawNormals = function(length, color, depth) {
+        if (depth === undefined) depth = -1;
+        if (private.meshData) private.meshData.drawNormals(length, color);
+
+        if (depth === 0) return public;
+        private.children.forEach((c) => { c.drawNormals(length, color, depth-1); });
+        return public;
+    }
+
     public.addAnimation = function (modelAnimation) {
         const children = [];
         public.addFlattenedChildren(children, function (child) { return child.getName(); });
