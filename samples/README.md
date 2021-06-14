@@ -9,19 +9,16 @@ To try most of these samples, clone this repository onto your computer and open 
 html file in your browser. I highly recommend playing around with these samples
 to get a much better understanding of how the framework works.
 
-Fpr the samples that load assets, you cannot simply open the html file in your browser
+For the samples that load assets, you cannot simply open the html file in your browser
 because the asset loading will be blocked by CORS. There is no way around this, you
 have to run a web server locally.
 
-The simplest way to run a web server is to install Python then run this command
-from within the `./samples/` folder:
-
-```bash
-python -m http.server
-```
-
-After running this command you can try out the samples using URLs like
-`http://localhost:8000/model-loader.html`
+To run a web server and try the samples that load assets:
+1. Open a command line, shell or VS Code terminal window
+2. Navigate to the `./samples/` folder
+3. Install Python 3 if you don't already have it
+4. Execute the command `python -m http.server` and leave the command running
+5. Open the samples in your browser at `http://localhost:8000/`
 
 ## Hello Cube
 This [sample](hello-cube.html) is the nearest thing to a "Hello, World" 
@@ -76,3 +73,17 @@ Things to mess around with on this sample:
 * Instead of rendering a square, render a more complex scene to define the mask
 * The mask can be a greyscale to blend smoothly between original and recolored pixels, use this to soften the edges
 * The shader currently uses the red channel only. Use the blue and green channels to recolor two other areas of the photo with different colors
+
+## Model loader
+This [sample](model-loader.html) illustrates the following features and techniques:
+Note that this sample must be hosted by a web server - see above.
+Once you have a Python http server running you can see this sample running at this url http://localhost:8000/model-loader.html
+* Loads a package of models that were exported from Blender
+* Defines the materials to use to paint the models as 1x1 pixel textures
+* Creates an animation sequence that combines model movements within the scene with animations imported from Blender
+
+Things to mess around with on this sample:
+* Modify the animation sequence to create a different behavior for the excavator
+* Create a material package that paints the model in PBR materials exported from Substance Player
+* Add some terrain for the excavator to move on
+* Update the model in Blender. Export a Frag model and rebuild the model package

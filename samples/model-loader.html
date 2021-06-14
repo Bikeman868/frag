@@ -64,7 +64,50 @@
             excavator.getPosition().scale(5).rotateZ(-15 * degToRad).rotateX(-115 * degToRad);
             scene.addObject(excavator);
 
-            excavator.animations.moving.start();
+            // Start a sequence of actions and repeat forever
+            frag.Animation()
+            .sequence([
+                // Move the excavator from 0 to -100 on the x-axis
+                // whilst running the "moving" animation
+                frag.ValueAnimationAction()
+                    .setDuration(500)
+                    .onStart(excavator.animations.moving.start)
+                    .onStop(excavator.animations.moving.stop)
+                    .onStep((a, r) =>{
+                        excavator.getPosition().positionX(r * -100)
+                    }),
+                // Run the "excavating" animation for a while
+                {
+                    duration: 2000,
+                    start: excavator.animations.excavating.start,
+                    stop: excavator.animations.excavating.stop,
+                },
+                // Move the excavator from -100 to +50 on the x-axis
+                // whilst running the "moving" animation
+                frag.ValueAnimationAction()
+                    .setDuration(750)
+                    .onStart(excavator.animations.moving.start)
+                    .onStop(excavator.animations.moving.stop)
+                    .onStep((a, r) =>{
+                        excavator.getPosition().positionX(r * 150 - 100)
+                    }),
+                // Run the "tipping" animation for a while
+                {
+                    duration: 500,
+                    start: excavator.animations.tipping.start,
+                    stop: excavator.animations.tipping.stop,
+                },
+                // Move the excavator from 50 to 0 on the x-axis
+                // whilst running the "moving" animation
+                frag.ValueAnimationAction()
+                    .setDuration(250)
+                    .onStart(excavator.animations.moving.start)
+                    .onStop(excavator.animations.moving.stop)
+                    .onStep((a, r) =>{
+                        excavator.getPosition().positionX((1-r) * 50)
+                    }),
+            ], true)
+            .start();
         }
 
         const packageUrl = frag.ModelLoader.littleEndian ? 'assets/models_little.pkg' : 'assets/models_big.pkg';
