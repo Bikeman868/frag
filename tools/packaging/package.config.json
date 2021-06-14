@@ -11,7 +11,7 @@
         }],
         "groups":[{
             "modelName": "{type}",
-            "include": "{type}.frag_model"
+            "include": "{type}_dope.frag_model"
         }]
     }],
     "material-packages":[]

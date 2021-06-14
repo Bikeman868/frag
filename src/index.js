@@ -41,5 +41,6 @@ require("./Shapes/BasicCube");
 require("./Shapes/Cube");
 require("./Shapes/SeparatedCube");
 
+require("./Loaders/AssetCatalog");
 require("./Loaders/MaterialLoader");
 require("./Loaders/ModelLoader");

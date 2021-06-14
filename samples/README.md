@@ -5,9 +5,23 @@ also used to test and debug the framework itself before each release.
 If you are new to this framework I recommend studying the samples in the order
 presented here.
 
-To try these samples, clone this repository onto your computer and open the
+To try most of these samples, clone this repository onto your computer and open the
 html file in your browser. I highly recommend playing around with these samples
 to get a much better understanding of how the framework works.
+
+Fpr the samples that load assets, you cannot simply open the html file in your browser
+because the asset loading will be blocked by CORS. There is no way around this, you
+have to run a web server locally.
+
+The simplest way to run a web server is to install Python then run this command
+from within the `./samples/` folder:
+
+```bash
+python -m http.server
+```
+
+After running this command you can try out the samples using URLs like
+`http://localhost:8000/model-loader.html`
 
 ## Hello Cube
 This [sample](hello-cube.html) is the nearest thing to a "Hello, World" 

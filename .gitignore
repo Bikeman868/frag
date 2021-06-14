@@ -6,3 +6,4 @@ dist/*
 !dist/frag.min.js
 
 *.blend1
+*.log

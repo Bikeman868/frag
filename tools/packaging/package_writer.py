@@ -39,7 +39,13 @@ class PackageWriter:
         return False
 
     def close(self):
+        padBytes = 4 - (self._index.getLength() & 3)
+        if padBytes < 4: 
+            for i in range(padBytes): self.writeIndexByte(0)
+        self.writeHeadUInt(self._index.getLength())
+
         if config['dryRun']: return
+        
         file = open(self._filename, 'wb')
         try:
             self._head.writeTo(file)
@@ -77,6 +83,9 @@ class PackageWriter:
 
     def writeHeadByte(self, value: int):
         self._headOffset = self._head.setByte(self._headOffset, value)
+
+    def writeHeadUInt(self, value: int):
+        self._headOffset = self._head.setUInt(self._headOffset, value)
 
     # Writing to the index area
 

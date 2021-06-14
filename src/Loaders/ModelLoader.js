@@ -19,7 +19,7 @@
         for (let i = 0; i < nameLength; i++) {
             name += String.fromCharCode(context.header.getUint8(headerOffset++));
         }
-        const material = context.materialStore.getMaterial(name);
+        const material = context.assetCatalog.getMaterial(name);
         if (frag.debugModelLoader)
             console.log("Object[" + objectIndex + "] is material " + name);
         return material;
@@ -340,7 +340,7 @@
         if (frag.debugModelLoader)
             console.log("Object[" + objectIndex + "] is " + (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations. Paint mesh " + meshIndex + " with material " + materialIndex);
 
-        const model = context.modelStore.getModel(name, !isRoot).transform(transform);
+        const model = context.assetCatalog.getModel(name, !isRoot).transform(transform);
         if (hasMaterial) model.material(context.materials[materialIndex]);
         if (hasMesh) model.mesh(context.meshes[meshIndex]);
 
@@ -374,7 +374,9 @@
         return model;
     };
 
-    public.loadModelsFromBuffer = function(modelStore, materialStore, buffer){
+    public.loadModelsFromBuffer = function(buffer, assetCatalog){
+        if (!assetCatalog) assetCatalog = frag.AssetCatalog();
+
         const bytes = new Uint8Array(buffer);
         const header = new DataView(buffer, 0, bytes.length);
 
@@ -387,8 +389,7 @@
             console.log("Model pack V" + version + " is " + bytes.length + " bytes with " + headerLength + " header bytes");
 
         const context = {
-            modelStore,
-            materialStore,
+            assetCatalog,
             header,
             data: buffer,
             dataOffset,
@@ -433,14 +434,16 @@
         } else {
             console.error("Version " + version + " model packs are not supported");
         }
+        return assetCatalog
     };
 
-    public.loadModelsFromUrl = function (modelStore, materialStore, url) {
+    public.loadModelsFromUrl = function (url, assetCatalog, onload) {
         var xhttp = new XMLHttpRequest();
         xhttp.responseType = "arraybuffer";
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                public.loadModelsFromBuffer(modelStore, materialStore, this.response);
+                assetCatalog = public.loadModelsFromBuffer(this.response, assetCatalog);
+                if (onload) onload(assetCatalog)
             }
         };
         xhttp.open("GET", url, true);

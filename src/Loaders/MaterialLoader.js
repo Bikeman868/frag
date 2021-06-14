@@ -101,7 +101,9 @@
     }
 
 
-    public.loadMaterialsFromBuffer = function(materialStore, buffer){
+    public.loadMaterialsFromBuffer = function(buffer, assetCatalog){
+        if (!assetCatalog) assetCatalog = frag.AssetCatalog();
+
         const bytes = new Uint8Array(buffer);
         const header = new DataView(buffer, 0, bytes.length);
 
@@ -123,20 +125,21 @@
         } else {
             console.error("Version " + version + " texture packs are not supported");
         }
+        return assetCatalog;
     };
 
-    public.loadMaterialsFromUrl = function (materialStore, url) {
+    public.loadMaterialsFromUrl = function (url, assetCatalog, onload) {
         var xhttp = new XMLHttpRequest();
         xhttp.responseType = "arraybuffer";
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                public.loadMaterialsFromBuffer(materialStore, this.response);
+                assetCatalog = public.loadMaterialsFromBuffer(this.response, assetCatalog);
+                if (onload) onload(assetCatalog);
             }
         };
         xhttp.open("GET", url, true);
         xhttp.send();
     };
-
 
     return public;
 })();

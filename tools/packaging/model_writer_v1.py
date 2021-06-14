@@ -29,9 +29,12 @@ class ModelWriter:
         else: fps = 30
         msPerFrame = int(1000 / fps)
 
-        Logger.log(str(len(animations)) + ' animations @' + str(fps) + 'fps, ' + str(len(meshes)) + ' meshes, ' + str(len(models)) + ' models', logIndent)
+        Logger.log('{} animations @{}fps, {} meshes, {} models'.format(len(animations), fps, len(meshes), len(models)), logIndent)
 
         self._transformData(models, animations, meshes)
+
+        Logger.log('Model animations: {}'.format(', '.join([animation['name'] for animation in animations])), logIndent)
+
         self._writeMeshes(meshes)
         self._writeAnimations(animations, msPerFrame)
         self._writeModels(models, model.name)
@@ -47,6 +50,8 @@ class ModelWriter:
                 for channel in group['channels']:
                     animation['channels'].append(channel)
             del animation['groups']
+
+        animations.clear()
 
         for model in models: 
             modelName = model['name']
@@ -76,7 +81,12 @@ class ModelWriter:
                         existing['channels'].append(channel)
                 else:
                     animationsByName[modelAnimationName] = animation
+                    animations.append(animation)
                 del animationsByName[animationName]
+
+        for model in models: 
+            if not 'parentModel' in model:
+                model['animations'] = animations
 
     def _writeMeshes(self, meshes):
         for mesh in meshes:
@@ -121,8 +131,9 @@ class ModelWriter:
                 name = animation['name'].lower()
                 frameStart = animation['frames'][0]
                 frameEnd = animation['frames'][1]
-                flags = 0
+                flags = 1 # TODO: Set to zero when we find the loop flag in Blender
                 if 'loop' in animation and animation['loop']: flags |= 1
+                if 'rewind' in animation and animation['rewind']: flags |= 2
                 channelCount = len(animation['channels'])
 
                 self._writer.writeIndexStr(name)
@@ -150,16 +161,18 @@ class ModelWriter:
                         x = keyframe['co'][0]
                         y = keyframe['co'][1]
                         interpolation = keyframe['interpolation']
-                        handleLeftX = keyframe['handle_left'][0]
-                        handleLeftY = keyframe['handle_left'][1]
-                        handleRightX = keyframe['handle_right'][0]
-                        handleRightY = keyframe['handle_right'][1]
+                        # handleLeftX = keyframe['handle_left'][0]
+                        # handleLeftY = keyframe['handle_left'][1]
+                        # handleRightX = keyframe['handle_right'][0]
+                        # handleRightY = keyframe['handle_right'][1]
 
+                        self._writer.writeIndexUShort(int(x))
                         if interpolation == 'CONSTANT': self._writer.writeIndexByte(0)
                         elif interpolation == 'LINEAR': self._writer.writeIndexByte(1)
                         elif interpolation == 'BEZIER': self._writer.writeIndexByte(2)
                         else: self._writer.writeIndexByte(1)
 
+                        self._writer.writeIndexFloat(y)
             finally:
                 self._writer.endHeader()
 
@@ -217,6 +230,5 @@ class ModelWriter:
 
             for animation in animations:
                 self._writer.writeIndexUShort(animation['headerIndex'])
-
         finally:
             self._writer.endHeader()
