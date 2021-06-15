@@ -95,13 +95,15 @@ window.frag.Animation = function (obj, isChild) {
         private.sequenceIndex = 0;
         private.autoRestart = loop;
 
-        public.duration = 0;
-        private.sequence.forEach(action => {
-            if (action.duration)
-                public.duration += action.duraton;
+        let duration = 0;
+        for (let i = 0; i < private.sequence.length; i++) {
+            const action = private.sequence[i];
+            if (action.duration !== undefined)
+                duration = duration + action.duration;
             else
-                public.duration += DEFAULT_STEP_DURATION;
-        });
+                duration = duration + DEFAULT_STEP_DURATION;
+        }
+        public.duration = duration;
         return public;
     }
 

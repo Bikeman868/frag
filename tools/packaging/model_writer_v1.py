@@ -122,15 +122,15 @@ class ModelWriter:
 
                 for vertex in mesh['vertices']:
                     self._writer.writeDataFloat(vertex[0])
-                    self._writer.writeDataFloat(vertex[2])
-                    self._writer.writeDataFloat(vertex[1])
+                    self._writer.writeDataFloat(vertex[2]) # Blander has Z-up
+                    self._writer.writeDataFloat(-vertex[1]) # Blender uses RH coordinate system
 
                 if includeNormals:
                     for triangle in mesh['triangles']:
                        normal = triangle['normal']
                        self._writer.writeDataFloat(normal[0])
-                       self._writer.writeDataFloat(normal[2])
-                       self._writer.writeDataFloat(normal[1])
+                       self._writer.writeDataFloat(normal[2]) # Blander has Z-up
+                       self._writer.writeDataFloat(-normal[1]) # Blender uses RH coordinate system
             finally:
                 self._writer.endHeader()
 
@@ -159,11 +159,11 @@ class ModelWriter:
 
                     self._writer.writeIndexStr(pattern)
                     if (dataPath == 'location'): 
-                        self._writer.writeIndexStr('translate-' + 'xzy'[dataIndex])
+                        self._writer.writeIndexStr('translate-' + 'xzy'[dataIndex]) # Blander has Z-up
                     elif (dataPath == 'rotation_euler'): 
-                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex])
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blander has Z-up
                     elif (dataPath == 'delta_rotation_euler'):
-                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex])
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blander has Z-up
                     else: 
                         Logger.warn('Unsupported data path ' + dataPath)
                         self._writer.writeIndexStr('')
@@ -172,7 +172,10 @@ class ModelWriter:
                     for keyframe in channel['keyframes']:
                         x = keyframe['co'][0]
                         y = keyframe['co'][1]
+                        if dataIndex == 1: y = -y # Blender uses RH coordinate system
                         interpolation = keyframe['interpolation']
+
+                        # TODO: Process bezier curves with handles
                         # handleLeftX = keyframe['handle_left'][0]
                         # handleLeftY = keyframe['handle_left'][1]
                         # handleRightX = keyframe['handle_right'][0]
