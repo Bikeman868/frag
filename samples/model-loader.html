@@ -55,11 +55,12 @@
             const excavatorModel = assetCatalog.getModel('excavator')
                 //.drawNormals(0.5, [255, 0, 0], 1)
                 //.shadeFlat()
+                .shadeSmooth()
                 ;
 
             // Create an excavator from the model and add it to the scene
             const excavator = frag.SceneObject(excavatorModel);
-            excavator.getPosition().scale(10).rotateY(-15 * degToRad).rotateX(-15 * degToRad);
+            excavator.getPosition().scale(10).rotateY(-15 * degToRad).rotateX(-15 * degToRad).moveByXYZ(0, -30, 0);
             scene.addObject(excavator);
 
             // Next we are going to define an animation sequence for
@@ -80,10 +81,10 @@
             const step2 = frag.RepeatAnimationAction(excavator.animations.excavating, 4)
 
             // Step 3 in the animation sequence
-            // Move the excavator from -80 to +30 on the x-axis
+            // Move the excavator from -80 to +20 on the x-axis
             // whilst running the "moving" animation
             const step3 = frag.PositionAnimationAction(excavator.getPosition(), ticksPerDistance)
-                .moveBy([110, 0, 0])
+                .moveBy([100, 0, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
@@ -92,10 +93,10 @@
             const step4 = excavator.animations.tipping;
 
             // Step 5 in the animation sequence
-            // Move the excavator from 30 back to 0 on the x-axis so that the animation can loop
+            // Move the excavator from +30 back to 0 on the x-axis so that the animation can loop
             // whilst running the "moving" animation
             const step5 = frag.PositionAnimationAction(excavator.getPosition(), ticksPerDistance)
-                .moveBy([-30, 0, 0])
+                .moveBy([-20, 0, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
