@@ -17,6 +17,20 @@ window.frag.Animation = function (obj, isChild) {
     const DEFAULT_REPEAT_TICKS = 20;
     const DEFAULT_REPEAT_FRAMES = 1;
 
+    // If you set the duration it should be done before passing this
+    // animation to the sequence() method of another animation
+    public.setDuration = function (gameTicks) {
+        public.duration = gameTicks;
+        return public;
+    }
+
+    // If you set the interval it should be done before passing this
+    // animation to the sequence() method of another animation
+    public.setInterval = function (gameTicks) {
+        public.interval = gameTicks;
+        return public;
+    }
+
     // This is called internally by the framework. You should not call this
     // from your application code.
     public.action = function (parent, gameTick, frameTick) {
@@ -48,6 +62,7 @@ window.frag.Animation = function (obj, isChild) {
                     } else {
                         step = private.sequence[private.sequenceIndex];
                         if (step.start) step.start(public, gameTick);
+                        public.interval = step.interval;
                         private.nextStepTick = gameTick + (step.duration || DEFAULT_STEP_DURATION);
                     }
                 }
@@ -79,6 +94,14 @@ window.frag.Animation = function (obj, isChild) {
             private.sequence = [actions];
         private.sequenceIndex = 0;
         private.autoRestart = loop;
+
+        public.duration = 0;
+        private.sequence.forEach(action => {
+            if (action.duration)
+                public.duration += action.duraton;
+            else
+                public.duration += DEFAULT_STEP_DURATION;
+        });
         return public;
     }
 

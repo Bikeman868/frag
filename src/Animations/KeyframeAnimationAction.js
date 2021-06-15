@@ -16,7 +16,6 @@ window.frag.KeyframeAnimationAction = function () {
 
     // This function is used internally
     public.start = function (animation, gameTick) {
-        public.duration = public.interval * public.frames;
         private.startTick = gameTick;
         private.currentFrame = -1;
         return public;
@@ -39,6 +38,7 @@ window.frag.KeyframeAnimationAction = function () {
     public.setFrames = function(interval, frames){
         public.interval = interval;
         public.frames = frames || public.frames;
+        public.duration = public.interval * public.frames;
         return public;
     }
 

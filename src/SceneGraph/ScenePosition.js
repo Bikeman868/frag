@@ -103,7 +103,6 @@
             private.scale.x * scales[0],
             private.scale.y * scales[1],
             private.scale.z * scales[2]);
-
     }
 
     public.scaleByXYZ = function(xScale, yScale, zScale){
@@ -111,7 +110,6 @@
             private.scale.x * xScale,
             private.scale.y * yScale,
             private.scale.z * zScale);
-
     }
 
     public.getRotateX = function () {
@@ -124,6 +122,21 @@
 
     public.getRotateZ = function () {
         return private.rotation.z;
+    }
+
+    public.getRotate = function() {
+        if (private.transform.is3d)
+            return [private.rotation.x, private.rotation.y, private.rotation.z];
+        else
+            return [private.rotation.x, private.rotation.y];
+    }
+
+    public.rotate = function(v) {
+        private.rotation.x = v[0];
+        if (v.length > 1) private.rotation.y = v[1];
+        if (v.length > 2) private.rotation.z = v[2];
+        private.isDirty = true;
+        return public;
     }
 
     public.rotateXYZ = function (x, y, z) {
@@ -157,7 +170,6 @@
             private.rotation.x + euler[0],
             private.rotation.y + euler[1],
             private.rotation.z + euler[2]);
-
     }
 
     public.rotateByXYZ = function(x, y, z){
@@ -165,22 +177,36 @@
             private.rotation.x + x,
             private.rotation.y + y,
             private.rotation.z + z);
-
     }
 
-    public.getPositionX = function () {
+    public.getLocationX = function () {
         return private.translation.x;
     }
 
-    public.getPositionY = function () {
+    public.getLocationY = function () {
         return private.translation.y;
     }
 
-    public.getPositionZ = function () {
+    public.getLocationZ = function () {
         return private.translation.z;
     }
 
-    public.positionXYZ = function (x, y, z) {
+    public.getLocation = function() {
+        if (private.transform.is3d)
+            return [private.translation.x, private.translation.y, private.translation.z];
+        else
+            return [private.translation.x, private.translation.y];
+    }
+
+    public.location = function(v) {
+        private.translation.x = v[0];
+        if (v.length > 1) private.translation.y = v[1];
+        if (v.length > 2) private.translation.z = v[2];
+        private.isDirty = true;
+        return public;
+    }
+
+    public.locationXYZ = function (x, y, z) {
         private.translation.x = x;
         private.translation.y = y;
         private.translation.z = z;
@@ -188,34 +214,33 @@
         return public;
     }
 
-    public.positionX = function (x) {
+    public.locationX = function (x) {
         private.translation.x = x;
         private.isDirty = true;
         return public;
     }
 
-    public.positionY = function (y) {
+    public.locationY = function (y) {
         private.translation.y = y;
         private.isDirty = true;
         return public;
     }
 
-    public.positionZ = function (z) {
+    public.locationZ = function (z) {
         private.translation.z = z;
         private.isDirty = true;
         return public;
     }
 
     public.moveBy = function(direction){
-        public.positionXYZ(
+        public.locationXYZ(
             private.translation.x + direction[0],
             private.translation.y + direction[1],
             private.translation.z + direction[2]);
-
     }
 
     public.moveByXYZ = function(x, y, z){
-        public.positionXYZ(
+        public.locationXYZ(
             private.translation.x + x,
             private.translation.y + y,
             private.translation.z + z);

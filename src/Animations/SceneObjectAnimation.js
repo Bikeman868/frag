@@ -33,5 +33,6 @@ window.frag.SceneObjectAnimation = function (animation, animationMap) {
         action.add(frame, frameAction);
     }
 
-    return window.frag.Animation().sequence([action], modelAnimation.getLoop());
+    return window.frag.Animation()
+        .perform(action, modelAnimation.getLoop());
 }

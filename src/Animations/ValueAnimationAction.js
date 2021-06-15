@@ -38,7 +38,7 @@ window.frag.ValueAnimationAction = function () {
 
     public.start = function (animation, gameTick) {
         private.startTick = gameTick;
-        private.endTick = gameTick + public.duraction;
+        private.endTick = gameTick + public.duration;
         if (private.onStart) private.onStart(animation, public, gameTick);
         return public;
     }

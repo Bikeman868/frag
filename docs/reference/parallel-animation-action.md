@@ -25,7 +25,7 @@ const animation = frag.Animation()
   .sequence([
     frag.ParallelAnimationAction([
       frag.ValueAnimationAction().onStep((a, r) => { pos.rotateZ(r * Math.PI); }),
-      frag.ValueAnimationAction().onStep((a, r) => { pos.positionY(r * 100); })
+      frag.ValueAnimationAction().onStep((a, r) => { pos.locationY(r * 100); })
     ]),
     frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
   ]);
@@ -45,7 +45,7 @@ const animation = frag.Animation()
   .sequence([
     frag.ValueAnimationAction().onStep((a, r) => { 
       pos.rotateZ(r * Math.PI);
-      pos.positionY(r * 100);
+      pos.locationY(r * 100);
     }),
     frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
   ]);

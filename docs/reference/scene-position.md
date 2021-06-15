@@ -81,12 +81,12 @@ These methods affect the rotating effect of the matrix transform:
 
 ## Position
 These methods affect the translating effect of the matrix transform:
-* `getPositionX()` returns the position along the X axis
-* `getPositionY()` returns the position along the Y axis
-* `getPositionZ()` returns the position along the Z axis
-* `positionX(value: float)` sets the position along the X axis
-* `positionY(value: float)` sets the position along the Y axis
-* `positionZ(value: float)` sets the position along the Z axis
-* `positionXYZ(x: float, y: float, z: float)` sets the position along all 3 axes indepenently
+* `getLocationX()` returns the position along the X axis
+* `getLocationY()` returns the position along the Y axis
+* `getLocationZ()` returns the position along the Z axis
+* `locationX(value: float)` sets the position along the X axis
+* `locationY(value: float)` sets the position along the Y axis
+* `locationZ(value: float)` sets the position along the Z axis
+* `locationXYZ(x: float, y: float, z: float)` sets the position along all 3 axes indepenently
 * `moveBy(angles: float[])` moves the object on all 3 axes
 * `moveByXYZ(x: float, y: float, z: float)` moves the object along all 3 axes
