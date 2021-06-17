@@ -96,8 +96,11 @@ class ModelWriter:
                 model['animations'] = animations
 
     def _writeMeshes(self, logIndent, meshes):
-        includeNormals = True
         for mesh in meshes:
+            if len(mesh['triangles']) == 0: continue
+            firstTriangle = mesh['triangles'][0]
+            includeNormals = 'normal' in firstTriangle and len(firstTriangle['normal']) == 3
+
             mesh['headerIndex'] = self._writer.startHeader(2)
             try:
                 self._writer.writeIndexUShort(1) # Only 1 fragment

@@ -36,17 +36,19 @@ class FragSerializer:
                 channels = []
                 for channel in group.channels:
                     keyframes = []
+                    baseY = 0
                     for keyframe in channel.keyframe_points:
+                        if len(keyframes) == 0: baseY = keyframe.co.y
                         keyframes.append({
                             "type": keyframe.type,
-                            "co": self.serializeCurveCoord(keyframe.co, channel.array_index),
-                            "amplitude": keyframe.amplitude,
-                            "back": keyframe.back,
+                            "co": self.serializeCurveCoord(keyframe.co, baseY),
+                            # "amplitude": self.serializeFloat(keyframe.amplitude),
+                            # "back": self.serializeFloat(keyframe.back),
                             "interpolation": keyframe.interpolation,
-                            "handle_left": self.serializeCurveCoord(keyframe.handle_left, channel.array_index),
-                            "handle_left_type": keyframe.handle_left_type,
-                            "handle_right": self.serializeCurveCoord(keyframe.handle_right, channel.array_index),
-                            "handle_right_type": keyframe.handle_right_type,
+                            # "handle_left": self.serializeCurveCoord(keyframe.handle_left, baseY),
+                            # "handle_left_type": keyframe.handle_left_type,
+                            # "handle_right": self.serializeCurveCoord(keyframe.handle_right, baseY),
+                            # "handle_right_type": keyframe.handle_right_type,
                         })
                     channels.append({ 
                         "data_path": channel.data_path,
@@ -64,17 +66,20 @@ class FragSerializer:
     def serializeAxis(self, v):
         return v
 
-    def serializePosition(self, v):
-        return [round(v.x, 4), round(v.y, 4), round(v.z, 4)]
+    def serializePosition(self, v, baseX, baseY, baseZ):
+        return [round(v.x - baseX, 4), round(v.y - baseY, 4), round(v.z - baseZ, 4)]
 
     def serializeColor(self, v):
         return [round(v.r, 4), round(v.g, 4), round(v.b, 4)]
 
-    def serializeCurveCoord(self, v, axis):
-        return [round(v.x, 4), round(v.y, 4)]
+    def serializeCurveCoord(self, v, baseY):
+        return [round(v.x, 4), round(v.y - baseY, 4)]
 
     def serializeRange(self, v):
         return [round(v.x, 4), round(v.y, 4)]
+
+    def serializeFloat(self, v):
+        return round(v, 4)
 
     def serializeObject(self, obj):
         for child in obj.children:
@@ -85,25 +90,63 @@ class FragSerializer:
             Logger.log('Applying unsaved edits in ' + obj.name)
             obj.update_from_editmode()
 
+        locationX = obj.location.x + obj.delta_location.x
+        locationY = obj.location.y + obj.delta_location.y 
+        locationZ = obj.location.z + obj.delta_location.z
+
+        rotationX = obj.rotation_euler.x + obj.delta_rotation_euler.x
+        rotationY = obj.rotation_euler.y + obj.delta_rotation_euler.y
+        rotationZ = obj.rotation_euler.z + obj.delta_rotation_euler.z
+
+        scaleX = obj.scale.x * obj.delta_scale.x
+        scaleY = obj.scale.y * obj.delta_scale.y
+        scaleZ = obj.scale.z * obj.delta_scale.z
+
+        if obj.parent:
+            locationX -= obj.parent.location.x + obj.parent.delta_location.x
+            locationY -= obj.parent.location.y + obj.parent.delta_location.y
+            locationZ -= obj.parent.location.z + obj.parent.delta_location.z
+
+            rotationX -= obj.parent.rotation_euler.x + obj.parent.delta_rotation_euler.x
+            rotationY -= obj.parent.rotation_euler.y + obj.parent.delta_rotation_euler.y
+            rotationZ -= obj.parent.rotation_euler.z + obj.parent.delta_rotation_euler.z
+
+            scaleX /= obj.parent.scale.x * obj.parent.delta_scale.x
+            scaleY /= obj.parent.scale.y * obj.parent.delta_scale.y
+            scaleZ /= obj.parent.scale.z * obj.parent.delta_scale.z
+
         serialization = { 
             'name': obj.name, 
+            'location': [
+                round(locationX, 4), 
+                round(locationY, 4), 
+                round(locationZ, 4)], 
+            'rotation': [
+                round(rotationX, 4), 
+                round(rotationY, 4), 
+                round(rotationZ, 4)], 
+            'scale': [
+                round(scaleX, 4), 
+                round(scaleY, 4), 
+                round(scaleZ, 4)], 
             'children': [ child.name for child in obj.children ]
             }
 
         if obj.type == 'MESH':
-            serialization['mesh'] = self.serializeMesh(obj)
-
             # Only 1 action can be assigned to an object via animation data
             # Multiple actions are only possible via NLA tracks
+            action = None
             ad = obj.animation_data
             if not ad is None:
                 action = obj.animation_data.action
                 if not action is None:
                     serialization["animation"] = action.name
 
+            serialization['mesh'] = self.serializeMesh(obj, action)
+
         self.objects.append(serialization)
 
-    def serializeMesh(self, obj):
+    def serializeMesh(self, obj, action):
         try:
             mesh = obj.to_mesh()
         except RuntimeError:
@@ -111,6 +154,24 @@ class FragSerializer:
 
         if mesh is None:
             return ''
+
+        baseX = obj.location.x + obj.delta_location.x
+        baseY = obj.location.y + obj.delta_location.y
+        baseZ = obj.location.z + obj.delta_location.z
+
+        if obj.parent:
+            baseX += obj.parent.location.x + obj.parent.delta_location.x
+            baseY += obj.parent.location.y + obj.parent.delta_location.y
+            baseZ += obj.parent.location.z + obj.parent.delta_location.z
+
+        if action != None:
+            for group in action.groups:
+                for channel in group.channels:
+                    if channel.data_path == 'delta_location' or channel.data_path == 'location':
+                        firstKeyframe = channel.keyframe_points[0]
+                        if channel.array_index == 0: baseX += firstKeyframe.co.y
+                        elif channel.array_index == 1: baseY += firstKeyframe.co.y
+                        elif channel.array_index == 2: baseZ += firstKeyframe.co.y
 
         id = mesh.name
         mat = obj.matrix_world
@@ -127,10 +188,10 @@ class FragSerializer:
         serialization = { 
             'id': mesh.name,
             'materials': [material.name for material in mesh.materials],
-            'vertices': [self.serializePosition(v.co) for v in vertices],
+            'vertices': [self.serializePosition(v.co, baseX, baseY, baseZ) for v in vertices],
             'triangles': [{
                 "vertices": [tri.vertices[0], tri.vertices[1], tri.vertices[2]], 
-                "normal": self.serializePosition(tri.normal)
+                "normal": self.serializePosition(tri.normal, 0, 0, 0)
                 } for tri in triangles], 
         }
 
