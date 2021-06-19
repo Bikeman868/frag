@@ -87,13 +87,11 @@
         // A model combines
         // - A mesh defines the shape of the model
         // - A material defines how to paint the surface of the model
-        // - A transform defines the postition and orientation of the model
         // - A shader defines how to turn the other things into pixels
         const model = frag.Model()
             .name('My model')
             .mesh(mesh)
             .material(material)
-            .transform(frag.Transform().identity())
             .shader(shader);
 
         // You can create as many instances of each model in the scene

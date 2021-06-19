@@ -230,10 +230,9 @@
             const maskScene = frag.Scene()
                 .camera(camera);
 
-            const maskModel = frag.Model()
+            const maskModel = frag.Model(false)
                 .name('mask')
                 .mesh(frag.Plane(1).name('mask'))
-                .transform(frag.Transform2D().identity())
                 .shader(app.maskShader);
 
             const maskObject = frag.SceneObject(maskModel)
@@ -259,11 +258,10 @@
                 .setTexture('mask', maskTexture)
                 .disposeTextures(false);
 
-            const photoModel = frag.Model()
+            const photoModel = frag.Model(false)
                 .name('photo')
                 .mesh(frag.Plane(1).name('photo'))
                 .material(photoMaterial)
-                .transform(frag.Transform2D().identity())
                 .shader(app.photoShader);
 
             const photoObject = frag.SceneObject(photoModel)

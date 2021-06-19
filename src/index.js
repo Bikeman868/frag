@@ -6,6 +6,7 @@ require("./Framework/Init");
 require("./Framework/Observable");
 require("./Framework/Transform");
 require("./Framework/Transform2D");
+require("./Framework/Location");
 require("./Framework/Framework");
 
 require("./Shaders/Shader");

@@ -1,4 +1,6 @@
 ﻿window.frag.SceneObject = function (model) {
+    const frag = window.frag;
+
     const private = {
         model,
         enabled: true,
@@ -29,39 +31,23 @@
         public.animations[animation.modelAnimation.getName()] = objectAnimation;
     };
 
-    const combineTransforms = function (parent, child) {
-        const parentMatrix = parent.getMatrix();
-        const childMatrix = child.getMatrix();
-        if (parent.is3d) return frag.Transform(frag.Matrix.m4Xm4(parentMatrix, childMatrix));
-        return frag.Transform2D(frag.Matrix.m3Xm3(parentMatrix, childMatrix));
-    };
-
     public.getPosition = function () {
         if (private.position) return private.position;
-        const modelTransform = private.model.getTransform();
-        private.position = window.frag.ScenePosition(modelTransform.clone());
+        if (!private.model.location) return null;
+        private.position = frag.ScenePosition(frag.Location(private.model.location.is3d));
         return private.position;
     };
 
     public.ensureAnimationPosition = function () {
         if (private.animationPosition) return private.animationPosition;
-        const modelTransform = private.model.getTransform();
-        if (!modelTransform) return null;
-        private.animationPosition = window.frag.ScenePosition(modelTransform.clone());
+        if (!private.model.location) return null;
+        private.animationPosition = frag.ScenePosition(frag.Location(private.model.location.is3d));
         return private.animationPosition;
     };
 
     public.deleteAnimationPosition = function () {
         private.animationPosition = null;
         return public;
-    };
-
-    private.getModelToWorldTransform = function () {
-        const position = public.getPosition();
-        let transform = combineTransforms(private.model.getTransform(), position.getTransform());
-        if (!private.animationPosition) return transform;
-        const animationTransform = private.animationPosition.getTransform();
-        return combineTransforms(transform, animationTransform);
     };
 
     public.enable = function () {
@@ -81,11 +67,21 @@
 
     public.draw = function (gl, worldToClipTransform) {
         if (!private.enabled) return public;
-        const modelToWorldTransform = private.getModelToWorldTransform();
-        if (!modelToWorldTransform) return public;
 
-        let modelToClipTransform = combineTransforms(worldToClipTransform, modelToWorldTransform);
-        private.model.draw(gl, modelToWorldTransform, modelToClipTransform, private.animationMap);
+        let position = public.getPosition();
+        if (!position) return public;
+
+        if (private.animationPosition) {
+            position = position.clone().add(private.animationPosition);
+        }
+
+        const worldToClipMatrix = worldToClipTransform.getMatrix();
+        const modelToWorldMatrix = position.getMatrix();
+        const modelToClipMatrix = worldToClipTransform.is3d
+            ? frag.Matrix.m4Xm4(worldToClipMatrix, modelToWorldMatrix)
+            : frag.Matrix.m3Xm3(worldToClipMatrix, modelToWorldMatrix);
+
+        private.model.draw(gl, modelToWorldMatrix, modelToClipMatrix, private.animationMap);
 
         return public;
     };

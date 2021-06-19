@@ -227,7 +227,7 @@
                 //}
             }
 
-            if (frag.debugModelLoader) {
+            if (frag.debugModelLoader && frag.debugMeshes) {
                 let msg = "  vertices[";
                 for (var i = 0; i < verticies.length; i++) {
                     if (i > 0) msg += ', ';
@@ -343,24 +343,18 @@
         const meshIndex = context.header.getUint16(headerOffset + 3, littleEndian);
         headerOffset += 5;
 
-        const translateX = context.header.getFloat32(headerOffset + 0, littleEndian);
-        const translateY = context.header.getFloat32(headerOffset + 4, littleEndian);
-        const translateZ = context.header.getFloat32(headerOffset + 8, littleEndian);
-
-        const rotateX = context.header.getFloat32(headerOffset + 12, littleEndian);
-        const rotateY = context.header.getFloat32(headerOffset + 16, littleEndian);
-        const rotateZ = context.header.getFloat32(headerOffset + 20, littleEndian);
-
-        const scaleX = context.header.getFloat32(headerOffset + 24, littleEndian);
-        const scaleY = context.header.getFloat32(headerOffset + 28, littleEndian);
-        const scaleZ = context.header.getFloat32(headerOffset + 32, littleEndian);
-
+        const location = frag.Location(true); // Loaded models are always 3D
+        location.translateX = context.header.getFloat32(headerOffset + 0, littleEndian);
+        location.translateY = context.header.getFloat32(headerOffset + 4, littleEndian);
+        location.translateZ = context.header.getFloat32(headerOffset + 8, littleEndian);
+        location.rotateX = context.header.getFloat32(headerOffset + 12, littleEndian);
+        location.rotateY = context.header.getFloat32(headerOffset + 16, littleEndian);
+        location.rotateZ = context.header.getFloat32(headerOffset + 20, littleEndian);
+        location.scaleX = context.header.getFloat32(headerOffset + 24, littleEndian);
+        location.scaleY = context.header.getFloat32(headerOffset + 28, littleEndian);
+        location.scaleZ = context.header.getFloat32(headerOffset + 32, littleEndian);
+        location.isModified = true;
         headerOffset += 36;
-
-        const transform = frag.Transform()
-            .translateXYZ(translateX, translateY, translateZ)
-            .rotateXYZ(rotateX, rotateY, rotateZ)
-            .scaleXYZ(scaleX, scaleY, scaleZ);
 
         const childCount = context.header.getUint16(headerOffset, littleEndian);
         const animationCount = context.header.getUint16(headerOffset + 2, littleEndian);
@@ -372,10 +366,12 @@
 
         if (frag.debugModelLoader) {
             console.log("Object[" + objectIndex + "] is " + (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
-            console.log("Object[" + objectIndex + "] at (" + translateX + "," + translateY + "," + translateZ +").["+ rotateX + "," + rotateY + "," + rotateZ+"]x(" + scaleX + "," + scaleY + "," + scaleZ + ")");
+            console.log("Object[" + objectIndex + "] at (" + location.translateX + "," + location.translateY + "," + location.translateZ +").["+ location.rotateX + "," + location.rotateY + "," + location.rotateZ+"]x(" + location.scaleX + "," + location.scaleY + "," + location.scaleZ + ")");
         }
 
-        const model = context.assetCatalog.getModel(name, !isRoot).transform(transform);
+        const model = context.assetCatalog.getModel(name, !isRoot);
+        model.location = location;
+
         if (hasMaterial) model.material(context.materials[materialIndex]);
         if (hasMesh) model.mesh(context.meshes[meshIndex]);
 

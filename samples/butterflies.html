@@ -141,28 +141,29 @@
                 .setTexture("diffuse", diffuseTexture)
                 .disposeTextures(true);
 
-            // Create left and right wing models using the same mesh
+            // Create a butterfly model with 2 wings
 
             const wingLength = randomFloat(0.5, 0.7);
-            const leftWingModel = frag.Model()
-                .name('Left wing ' + id)
-                .mesh(wingMesh)
-                .transform(frag.Transform().rotateZ(180 * degToRad).rotateY(-45 * degToRad).scaleY(wingLength));
-
-            const rightWingModel = frag.Model()
-                .name('Right wing ' + id)
-                .mesh(wingMesh)
-                .transform(frag.Transform().rotateY(-45 * degToRad).scaleY(wingLength));
-
-            // Create a butterfly model with 2 wings
 
             const butterflyModel = frag.Model()
                 .name('Butterfly ' + id)
-                .transform(frag.Transform().identity())
                 .material(butterflyMaterial)
                 .shader(shader);
-            butterflyModel.addChild(leftWingModel);
-            butterflyModel.addChild(rightWingModel);
+
+            butterflyModel.addChild()
+                .name('Left wing ' + id)
+                .mesh(wingMesh)
+                .getPosition()
+                    .scaleY(wingLength)
+                    .rotateY(-45 * degToRad)
+                    .rotateZ(180 * degToRad);
+
+            butterflyModel.addChild()
+                .name('Right wing ' + id)
+                .mesh(wingMesh)
+                .getPosition()
+                    .scaleY(wingLength)
+                    .rotateY(-45 * degToRad);
 
             // Bigger butterflies flap their wings more slowly
 

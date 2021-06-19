@@ -1,5 +1,12 @@
-﻿window.frag.Model = function (parent) {
+﻿window.frag.Model = function (is3d, parent) {
     const frag = window.frag;
+
+    if (is3d === undefined) {
+        if (parent && parent.location)
+            is3d = parent.location.is3d;
+        else
+            is3d = true;
+    }
 
     const private = {
         name: null,
@@ -8,11 +15,11 @@
         meshData: null,
         shader: null,
         material: null,
-        transform: frag.Transform().identity(), // assume 3D
     }
 
     const public = {
         __private: private,
+        location: frag.Location(is3d),
         animations: []
     };
 
@@ -24,6 +31,10 @@
         }
     }
 
+    public.getPosition = function() {
+        return frag.ScenePosition(public.location);
+    }
+
     public.name = function (value) {
         private.name = value;
         return public;
@@ -33,19 +44,10 @@
         return private.name;
     }
 
-    public.transform = function (value) {
-        private.transform = value;
-        return public;
-    }
-
-    public.getTransform = function () {
-        return private.transform;
-    }
-
     public.shader = function (value) {
-        if (value.is3d !== private.transform.is3d){
-            const m = private.transform.is3d ? "3D" : "2D";
-            console.error("Model '" + private.name + "' has a " + m + " transform and must use a " + m + " shader");
+        if (value.is3d !== public.location.is3d){
+            const m = public.location.is3d ? "3D" : "2D";
+            console.error("Model '" + private.name + "' has a " + m + " location and must use a " + m + " shader");
         }
         private.shader = value;
         return public;
@@ -77,7 +79,7 @@
         if (child) {
             child.__private.parent = public;
         } else {
-            child = window.frag.Model(public);
+            child = window.frag.Model(undefined, public);
         }
         private.children.push(child);
         return child;
@@ -163,23 +165,16 @@
         return public;
     }
 
-    public.draw = function (gl, modelToWorldTransform, modelToClipTransform, animationMap) {
-        let animationMatrix;
-        if (animationMap && private.name) {
-            const animationState = animationMap[private.name];
-            if (animationState) animationMatrix = animationState.getMatrix();
-        }
+    public.draw = function (gl, modelToWorldMatrix, modelToClipMatrix, animationMap) {
+        if (!public.location) return public;
 
-        let localMatrix = private.transform.getMatrix();
-        if (animationMatrix) {
-            if (private.transform.is3d) localMatrix = frag.Matrix.m4Xm4(localMatrix, animationMatrix);
-            else localMatrix = frag.Matrix.m3Xm3(localMatrix, animationMatrix);
-        }
+        const animationState = animationMap && private.name ? animationMap[private.name] : null;
+        const location = animationState
+            ? public.location.clone().add(animationState.location)
+            : public.location;
+        const localMatrix = location.getMatrix();
 
-        const modelToWorldMatrix = modelToWorldTransform.getMatrix();
-        const modelToClipMatrix = modelToClipTransform.getMatrix();
-
-        if (private.transform.is3d) {
+        if (location.is3d) {
             modelToWorldTransform = frag.Transform(frag.Matrix.m4Xm4(modelToWorldMatrix, localMatrix));
             modelToClipTransform = frag.Transform(frag.Matrix.m4Xm4(modelToClipMatrix, localMatrix));
         } else {
@@ -209,7 +204,7 @@
         }
 
         for (let i = 0; i < private.children.length; i++)
-            private.children[i].draw(gl, modelToWorldTransform, modelToClipTransform, animationMap);
+            private.children[i].draw(gl, modelToWorldTransform.getMatrix(), modelToClipTransform.getMatrix(), animationMap);
 
         return public;
     }

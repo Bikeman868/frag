@@ -64,7 +64,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
     public.getModel = function (name, isChild) {
         var model = isChild ? undefined : private.models[name];
         if (!model) {
-            model = frag.Model()
+            model = frag.Model(public.shader.is3d)
                 .name(name)
                 .shader(public.shader);
             if (!isChild) private.models[name] = model;

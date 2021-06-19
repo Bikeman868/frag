@@ -12,8 +12,8 @@
             "version": 1
         }],
         "groups":[{
-            "modelName": "{type}",
-            "include": "{type}_dope.frag_model"
+            "modelName": "excavator",
+            "include": "playground.frag_model"
         }]
     }],
     "material-packages":[]

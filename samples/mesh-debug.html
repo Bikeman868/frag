@@ -57,13 +57,9 @@
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
 
-        const transform = frag.Transform()
-            .identity();
-
         const model = frag.Model()
             .name('My model')
             .mesh(mesh)
-            .transform(transform)
             .shader(shader);
 
         const cube = frag.SceneObject(model);

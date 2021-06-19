@@ -1,6 +1,8 @@
 # Model
 To construct a new model object call the `Model` method, then use
-fluent syntax to configure the attributes of the model.
+fluent syntax to configure the attributes of the model. This method accepts
+a boolean parameter that is true for 3D models and false for 2D models. The 
+default is 3D.
 
 A model combines a mesh, material and transform. You cannot draw a mesh directly
 onto the screen because the mesh does not know where it it within the scene,
@@ -49,23 +51,26 @@ move both butterfly wings together.
 
 ```javascript
 const wingLength = randomFloat(0.5, 0.7);
-const leftWingModel = frag.Model()
-    .name('Left wing ' + id)
-    .mesh(wingMesh)
-    .transform(frag.Transform().rotateZ(180 * degToRad).rotateY(-45 * degToRad).scaleY(wingLength));
-
-const rightWingModel = frag.Model()
-    .name('Right wing ' + id)
-    .mesh(wingMesh)
-    .transform(frag.Transform().rotateY(-45 * degToRad).scaleY(wingLength));
 
 const butterflyModel = frag.Model()
     .name('Butterfly ' + id)
-    .transform(frag.Transform().identity())
     .material(butterflyMaterial)
     .shader(shader);
-butterflyModel.addChild(leftWingModel);
-butterflyModel.addChild(rightWingModel);
+
+butterflyModel.addChild()
+    .name('Left wing ' + id)
+    .mesh(wingMesh)
+    .getPosition()
+        .rotateY(-45 * degToRad)
+        .scaleY(wingLength)
+        .rotateZ(180 * degToRad);
+
+butterflyModel.addChild()
+    .name('Right wing ' + id)
+    .mesh(wingMesh)
+    .getPosition()
+        .rotateY(-45 * degToRad)
+        .scaleY(wingLength);
 ```
 
 ## dispose()
@@ -80,21 +85,10 @@ then you can define an animation channel that targets any model whose name start
 with 'wheel'. This avoids having to define the same animation multiple times, and makes
 the game run more efficiently because there are fewer animation channels.
 
-## transform(transform: Transform)
-You can pass either a `Transform` or `Transform2D` object to this method. This defines
-whether the model is a 2-dimensional or 3-dimensional model. It also positions, scales
-and orients the model relative to its parent.
-
-You should keep 2D and 3D content separate. Shaders are designed to draw 2D or 3D content
-and you should only use a 2D shader with a 2D model and visa versa or you might get
-unexpected results.
-
-For the parent model you can also use this transform to scale the mesh. This can be useful if 
-meshes were drawn on different scales and you want to normalize them within the game. It
-is also useful if the same mesh is used at different sizes within different parts of the
-game.
-
-You must call the `transform` method for every model that you create.
+## getPosition()
+Returns a `ScenePosition` object that can be used to manipulate the location of the
+model. Note that you do not have to get a `ScenePosition` object, this is just a 
+more convenient way of modifying the `location` property of the model.
 
 ## shader(shader: Shader)
 You must call the `shader` method for root level models to define how this model should
@@ -104,6 +98,8 @@ call the `shader` method on a child to override this.
 Some shaders are much more expensive than others to run, and models typically need
 specific shader features to draw correctly. By optimizing the shader that you use for
 each model, you can maximize the frame rate of your game and make it more fun to play.
+
+Note that 2D shaders only work with 2D models and 3D shaders only work with 3D models.
 
 ## mesh(mesh: MeshData)
 You can call this method on any Model to define its shape. Models don't have to have
