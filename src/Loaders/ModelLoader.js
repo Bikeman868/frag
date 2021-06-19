@@ -227,6 +227,16 @@
                 //}
             }
 
+            if (frag.debugModelLoader) {
+                let msg = "  vertices[";
+                for (var i = 0; i < verticies.length; i++) {
+                    if (i > 0) msg += ', ';
+                    msg += verticies[i];
+                }
+                msg += "]";
+                console.log(msg);
+            }
+
             const vertexData = frag.VertexData();
             if (vertexFormat === 1 || vertexFormat === 2) {
                 if (is3D)
@@ -260,7 +270,7 @@
         const reverse = (flags & 0x2) === 0x2;
 
         if (frag.debugModelLoader) {
-            let msg = "Object[" + objectIndex + "] is '" + name + "' animation which runs for " + frames + "x" + interval + " frames";
+            let msg = "Object[" + objectIndex + "] is '" + name + "' animation which runs for " + frames + "x" + interval + " ms";
             if (loop) msg += ". Repeats until stopped";
             if (reverse) msg += ". Plays in reverse after playing forwards";
             console.log(msg);
@@ -285,6 +295,11 @@
                 channelName += String.fromCharCode(context.header.getUint8(headerOffset++));
             }
 
+            if (frag.debugModelLoader && frag.debugAnimations) {
+                msg = "  Channel " + channelName + " applies to " + pattern + " children"
+                console.log(msg);
+            }
+
             const keyframes = {};
             const keyframeCount = context.header.getUint16(headerOffset, littleEndian);
             headerOffset += 2;
@@ -299,6 +314,11 @@
                 if (transitionEnum === 1) transition = "linear";
                 else if (transitionEnum === 2) transition = "spline";
                 keyframes[frame] = { value, transition };
+
+                if (frag.debugModelLoader && frag.debugAnimations) {
+                    msg = "    Keyframe[" + frame + "] = " + value + " " + transition;
+                    console.log(msg);
+                }
             }
 
             modelAnimation.addChannel({
@@ -323,11 +343,24 @@
         const meshIndex = context.header.getUint16(headerOffset + 3, littleEndian);
         headerOffset += 5;
 
-        const transform = frag.Transform()
-            .translateXYZ(context.header.getFloat32(headerOffset + 0, littleEndian), context.header.getFloat32(headerOffset + 4, littleEndian), context.header.getFloat32(headerOffset + 8, littleEndian))
-            .rotateXYZ(context.header.getFloat32(headerOffset + 12, littleEndian), context.header.getFloat32(headerOffset + 16, littleEndian), context.header.getFloat32(headerOffset + 20, littleEndian))
-            .scaleXYZ(context.header.getFloat32(headerOffset + 24, littleEndian), context.header.getFloat32(headerOffset + 28, littleEndian), context.header.getFloat32(headerOffset + 32, littleEndian));
+        const translateX = context.header.getFloat32(headerOffset + 0, littleEndian);
+        const translateY = context.header.getFloat32(headerOffset + 4, littleEndian);
+        const translateZ = context.header.getFloat32(headerOffset + 8, littleEndian);
+
+        const rotateX = context.header.getFloat32(headerOffset + 12, littleEndian);
+        const rotateY = context.header.getFloat32(headerOffset + 16, littleEndian);
+        const rotateZ = context.header.getFloat32(headerOffset + 20, littleEndian);
+
+        const scaleX = context.header.getFloat32(headerOffset + 24, littleEndian);
+        const scaleY = context.header.getFloat32(headerOffset + 28, littleEndian);
+        const scaleZ = context.header.getFloat32(headerOffset + 32, littleEndian);
+
         headerOffset += 36;
+
+        const transform = frag.Transform()
+            .translateXYZ(translateX, translateY, translateZ)
+            .rotateXYZ(rotateX, rotateY, rotateZ)
+            .scaleXYZ(scaleX, scaleY, scaleZ);
 
         const childCount = context.header.getUint16(headerOffset, littleEndian);
         const animationCount = context.header.getUint16(headerOffset + 2, littleEndian);
@@ -337,8 +370,10 @@
         const hasMaterial = (modelFlags & 2) === 2;
         const hasMesh = (modelFlags & 4) === 4;
 
-        if (frag.debugModelLoader)
-            console.log("Object[" + objectIndex + "] is " + (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations. Paint mesh " + meshIndex + " with material " + materialIndex);
+        if (frag.debugModelLoader) {
+            console.log("Object[" + objectIndex + "] is " + (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
+            console.log("Object[" + objectIndex + "] at (" + translateX + "," + translateY + "," + translateZ +").["+ rotateX + "," + rotateY + "," + rotateZ+"]x(" + scaleX + "," + scaleY + "," + scaleZ + ")");
+        }
 
         const model = context.assetCatalog.getModel(name, !isRoot).transform(transform);
         if (hasMaterial) model.material(context.materials[materialIndex]);

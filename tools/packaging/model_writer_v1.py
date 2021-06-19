@@ -102,6 +102,7 @@ class ModelWriter:
             includeNormals = 'normal' in firstTriangle and len(firstTriangle['normal']) == 3
 
             mesh['headerIndex'] = self._writer.startHeader(2)
+            Logger.debug('Writing mesh #{} of {} triangles. Normals={}'.format(mesh['headerIndex'], len(mesh['triangles']), includeNormals), logIndent)
             try:
                 self._writer.writeIndexUShort(1) # Only 1 fragment
                 self._writer.writeIndexByte(1) # Distinct triangles
@@ -125,15 +126,16 @@ class ModelWriter:
 
                 for vertex in mesh['vertices']:
                     self._writer.writeDataFloat(vertex[0])
-                    self._writer.writeDataFloat(vertex[2]) # Blander has Z-up
-                    self._writer.writeDataFloat(-vertex[1]) # Blender uses RH coordinate system
+                    self._writer.writeDataFloat(vertex[2]) # Blender has Z-up
+                    self._writer.writeDataFloat(vertex[1]) 
+                    Logger.debug('({}, {}, {})'.format(vertex[0], vertex[2], vertex[1]), logIndent + 1)
 
                 if includeNormals:
                     for triangle in mesh['triangles']:
                        normal = triangle['normal']
                        self._writer.writeDataFloat(normal[0])
-                       self._writer.writeDataFloat(normal[2]) # Blander has Z-up
-                       self._writer.writeDataFloat(-normal[1]) # Blender uses RH coordinate system
+                       self._writer.writeDataFloat(normal[2]) # Blender has Z-up
+                       self._writer.writeDataFloat(normal[1])
             finally:
                 self._writer.endHeader()
 
@@ -149,6 +151,7 @@ class ModelWriter:
                 if 'rewind' in animation and animation['rewind']: flags |= 2
                 channelCount = len(animation['channels'])
 
+                Logger.debug('Writing {} animation'.format(name), logIndent)
                 self._writer.writeIndexStr(name)
                 self._writer.writeIndexByte(flags)
                 self._writer.writeIndexUShort(int(frameEnd - frameStart + 1))
@@ -160,22 +163,25 @@ class ModelWriter:
                     dataPath = channel['data_path']
                     dataIndex = channel['array_index']
 
+                    Logger.debug('Writing {}[{}] channel matching '.format(dataPath, 'xzy'[dataIndex], pattern), logIndent + 1)
                     self._writer.writeIndexStr(pattern)
+                    scale = 1
                     if (dataPath == 'location'): 
-                        self._writer.writeIndexStr('translate-' + 'xzy'[dataIndex]) # Blander has Z-up
+                        self._writer.writeIndexStr('translate-' + 'xzy'[dataIndex]) # Blender has Z-up
                     elif (dataPath == 'rotation_euler'): 
-                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blander has Z-up
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blender has Z-up
+                        scale = -1
                     elif (dataPath == 'delta_rotation_euler'):
-                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blander has Z-up
+                        self._writer.writeIndexStr('rotate-' + 'xzy'[dataIndex]) # Blender has Z-up
+                        scale = -1
                     else: 
                         Logger.warn('Unsupported data path ' + dataPath)
                         self._writer.writeIndexStr('')
                     self._writer.writeIndexUShort(len(channel['keyframes']))
 
                     for keyframe in channel['keyframes']:
-                        x = keyframe['co'][0]
-                        y = keyframe['co'][1]
-                        if dataIndex == 1: y = -y # Blender uses RH coordinate system
+                        x = int(keyframe['co'][0])
+                        y = keyframe['co'][1] * scale
                         interpolation = keyframe['interpolation']
 
                         # TODO: Process bezier curves with handles
@@ -184,7 +190,8 @@ class ModelWriter:
                         # handleRightX = keyframe['handle_right'][0]
                         # handleRightY = keyframe['handle_right'][1]
 
-                        self._writer.writeIndexUShort(int(x))
+                        Logger.debug('Keyframe[{}]={}'.format(x, y), logIndent + 2)
+                        self._writer.writeIndexUShort(x)
                         if interpolation == 'CONSTANT': self._writer.writeIndexByte(0)
                         elif interpolation == 'LINEAR': self._writer.writeIndexByte(1)
                         elif interpolation == 'BEZIER': self._writer.writeIndexByte(2)
@@ -210,14 +217,18 @@ class ModelWriter:
         if 'materialIndex' in model: flags |= 2
         if 'mesh' in model: flags |= 4
 
-        translation = (0, 0, 0)
-        rotation = (0, 0, 0)
-        scale = (1, 1, 1)
+        translation = (model['location'][0], model['location'][2], model['location'][1])
+        rotation = (-model['rotation'][0], -model['rotation'][2], -model['rotation'][1])
+        scale = (model['scale'][0], model['scale'][2], model['scale'][1])
 
         if isRoot and 'animations' in model: animations = model['animations']
         else: animations = list()
 
         model['headerIndex'] = self._writer.startHeader(4)        
+        Logger.debug('Writing {} model with {}'.format(modelName, 'mesh #' + str(model['mesh']['headerIndex']) if 'mesh' in model else 'no mesh'), logIndent)
+        Logger.debug('Location ({}, {}, {})'.format(translation[0], translation[1], translation[2]), logIndent + 1)
+        Logger.debug('Rotation ({}, {}, {})'.format(rotation[0], rotation[1], rotation[2]), logIndent + 1)
+        Logger.debug('Scale ({}, {}, {})'.format(scale[0], scale[1], scale[2]), logIndent + 1)
         try:
             self._writer.writeIndexStr(modelName)
             self._writer.writeIndexByte(flags)
