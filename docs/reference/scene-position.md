@@ -1,29 +1,29 @@
 # ScenePosition
 To construct a new scene position object call the `ScenePosition` method, passing
-either a `Transform` or `Transform2D` object as a paremeter, then use fluent syntax 
-to configure the attributes of the scene position object.
+a `Location` object as a paremeter, then use fluent syntax to configure the attributes 
+of the scene position object.
 
 `ScenePosition` objects are wrappers that provide convenient methods for manipulating
-a `Transform` or`Transform2D` object. The Scene Position remembers a size, position
-and orientation, lets you modify these things easily, then lazily updates the transformation
-with a new transformation matrix.
+a `Location` object. The Scene Position lets you modify the translation, scale and
+orientation easily, and flags the `Location` as modified to that the next time the
+`getMatrix()` funtion is called hte matrix will be rebuilt.
 
-The scene position always constructs the transformation matrix by applying scaling first,
+The `Location` always constructs the transformation matrix by applying scaling first,
 then rotation, then translation last. This means that for example you cannot rotate about
-an arbitary point in space by translating, rotating and translating back again. The scale
-and rotate will always occur around the origin of the model and the translation will place
-it within the scene. This is the behaviour you want for scene positioning.
+an arbitary point in space (which requires translating, rotating and translating back again).
+The scale and rotate will always occur around the origin of the model and the translation 
+will place it within the scene. This is the behaviour you want for scene positioning.
 
 ## Examples
 You would not normally construct scene positions in your code, but you can if you want
-to have convenient syntax for updating the matrix in a `Transform` or `Transform2D` object.
+to have convenient syntax for updating the matrix in a `Location` object.
 
 The most common use of a Scene Position is to use the `getPosition()` function of a
-`SceneObject` which returns a Scene Position that can be used to manipulate the scale,
-position and orientation of the object within the scene.
+`Model` or `SceneObject` which returns a Scene Position that can be used to manipulate 
+the scale, position and orientation of the object within the scene.
 
 This is an example of getting a scene object's position and using that to scale the
-object to 40x its current size.
+object to 40x its original size.
 
 ```javascript
 const frag = window.frag;
@@ -35,11 +35,16 @@ sceneObject.getPosition().scale(40);
 scene.addObject(sceneObject);
 ```
 
-## transform(transform: Transform | Transform2D)
-Changes the transform that will be updated by this scene position object.
+## setLocation(location: Location)
+Changes the location that will be updated by this scene position object.
 
-## getTransform(): Transform | Transform2D
-Returns the transform that is being updated by this scene position object.
+## getMatrix()
+Calls the `getMatrix()` function of the enclosed `Location` object. This matrix can be
+used to transform coordinates according to the translation, rotation and scale defined
+by the location.
+
+If you use the `ScenePosition` to manipulate the `Location` then the matrix will be
+updated only when necessary.
 
 ## Scaling
 Scaling is a multipier, so a scaling factor of 1 means leave it at its current size.
@@ -79,7 +84,7 @@ These methods affect the rotating effect of the matrix transform:
 * `rotateBy(angles: float[])` adds some rotation around all 3 axes
 * `rotateByXYZ(xAngle: float, yAngle: float, zAngle: float)` rotates the object in all 3 axes relative to its current orientation
 
-## Position
+## Location
 These methods affect the translating effect of the matrix transform:
 * `getLocationX()` returns the position along the X axis
 * `getLocationY()` returns the position along the Y axis

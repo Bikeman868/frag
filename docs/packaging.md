@@ -126,6 +126,8 @@ This sample script will:
 
 ```json
 {
+    "input": "..\\assets\\",
+    "output": "..\\assets\\",
     "model-packages":[{
         "variants":[{
             "output": "models_little.pkg",

@@ -53,37 +53,46 @@ const carWheelMesh = frag.Cylinder(6).name("car wheel");
 // car in the scene. It has no mesh and draws nothing to the viewport
 const carModel = frag.Model()
     .name('car')
-    .shader(shader)
-    .transform(frag.Transform().identity())
+    .shader(shader);
 
 // Add the car body to the car
 carModel.addChild()
     .name("body")
     .data(carBodyMesh)
     .material(carMaterial);
-    .transform(frag.Transform().scaleXYZ(20, 8, 5));
 
 // Add the wheels to the car - note that the wheel names have a pattern so that
 // we can target them with regex in the model animation
 carModel.addChild()
     .name("wheel-fl")
     .data(carWheelMesh)
-    .transform(frag.Transform().translateXYZ(14, -11, 5).scaleXYZ(4, 4, 1));
+    .getPosition()
+        .translateXYZ(14, -11, 5)
+        .scaleXYZ(4, 4, 1));
+
 carModel.addChild()
     .name("wheel-fr")
     .data(carWheelMesh)
     .material(wheelMaterial);
-    .transform(frag.Transform().translateXYZ(14, -11, -5).scaleXYZ(4, 4, 1));
+    .getPosition()
+        .translateXYZ(14, -11, -5)
+        .scaleXYZ(4, 4, 1));
+
 carModel.addChild()
     .name("wheel-bl")
     .data(carWheelMesh)
     .material(wheelMaterial);
-    .transform(frag.Transform().translateXYZ(-16, -11, 5).scaleXYZ(4, 4, 1));
+    .getPosition()
+        .translateXYZ(-16, -11, 5)
+        .scaleXYZ(4, 4, 1));
+        
 carModel.addChild()
     .name("wheel-br")
     .data(carWheelMesh)
     .material(wheelMaterial);
-    .transform(frag.Transform().translateXYZ(-16, -11, -5).scaleXYZ(4, 4, 1));
+    .getPosition()
+        .translateXYZ(-16, -11, -5)
+        .scaleXYZ(4, 4, 1));
 
 // Define a "moving" animation that turns all of the wheels and add this to the car model
 const wheelTurning = frag.ModelAnimation()

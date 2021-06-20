@@ -23,6 +23,9 @@
         animations: []
     };
 
+    public.dispose = function(){
+    }
+
     public.addFlattenedChildren = function (flattenedChildren, predicate) {
         for (let i = 0; i < private.children.length; i++) {
             let child = private.children[i];
@@ -123,10 +126,10 @@
 
     public.wireframe = function (drawWireframe, depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.wireframe();
+        if (private.meshData) private.meshData.wireframe(drawWireframe);
         
         if (depth === 0) return public;
-        private.children.forEach((c) => { c.wireframe(depth-1); });
+        private.children.forEach((c) => { c.wireframe(drawWireframe, depth-1); });
         return public;
     }
 

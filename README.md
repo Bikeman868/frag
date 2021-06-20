@@ -224,7 +224,6 @@ There are other samples for you to explore in the [samples folder](./samples)
             .name('My model')
             .mesh(mesh)
             .material(material)
-            .transform(frag.Transform().identity())
             .shader(shader);
 
         // You can create as many instances of each model in the scene

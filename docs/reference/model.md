@@ -106,12 +106,87 @@ You can call this method on any Model to define its shape. Models don't have to 
 a mesh, in which case they are just being used to group children so that they can be
 manipulated together (by an animation for example).
 
+## material(material: Material)
+This defines the material that will be used to paint the surface of the mesh. You don't
+have to assign materials, you can set vertex colors instead if you prefer.
+
+Child models will inherit the material of their parents untill you override this by
+callng the `material` function on the child models.
+
 ## addChild(model: Model)
 Call this method to build a heirarchy of models. For example a car model might have
 4 wheel models contained within it.
 
 Animations can only be applied to descendents, so anything that you want to animate
 must be a child.
+
+## shadeSmooth(depth)
+Configures the mesh for this model to use smooth shading. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
+
+## shadeFlat(depth)
+Configures the mesh for this model to use flat shading. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
+
+## textureSmooth(depth)
+Configures the mesh for this model to use smooth textures. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
+
+## textureFlat(depth)
+Configures the mesh for this model to use flat textures. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
+
+## wireframe(drawWireframe, depth)
+Turns wireframe drawing on/off for the mesh for this model. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
+
+## drawNormals(length, color, depth)
+Configuring normal drawing for the mesh for this model. If the mesh is shared by
+multiple models, then these models will be affected.
+
+The length parameter defines the length of the normal lines that are drawn. Pass
+zero to turn off normal drawing. The length is in model space, and is affected by
+the scale of the model.
+
+The color parameter is optional, When provided it should be an array of 3 floating
+point numbers between 0 and 1 representing the proportion of red, green and blue.
+This color will only work if the shader drawing the model supports vertex colors.
+
+The depth parameter defines how many levels of the model hierarchy to traverse. Pass
+0 to change this model without affecting any if its descendents. Pass a value
+of 1 to change this model and its immediate children.
+
+To traverse the entire object heirarchy omit the depth parameter.
 
 ## addAnimation(animation: ModelAnimation)
 Adds an animation to a model. The animation will affect all descendents whose names
