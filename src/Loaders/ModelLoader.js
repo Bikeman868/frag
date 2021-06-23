@@ -5,6 +5,8 @@
     const uInt8 = new Uint8Array(uInt32.buffer);
     const littleEndian = uInt8[0] === 0x44;
 
+    const round4 = function(n) { return Math.round(n * 10000) / 10000; }
+
     const private = {
     }
 
@@ -231,7 +233,7 @@
                 let msg = "  vertices[";
                 for (var i = 0; i < verticies.length; i++) {
                     if (i > 0) msg += ', ';
-                    msg += verticies[i];
+                    msg += round4(verticies[i]);
                 }
                 msg += "]";
                 console.log(msg);
@@ -316,7 +318,7 @@
                 keyframes[frame] = { value, transition };
 
                 if (frag.debugModelLoader && frag.debugAnimations) {
-                    msg = "    Keyframe[" + frame + "] = " + value + " " + transition;
+                    msg = "    Keyframe[" + frame + "] = " + round4(value) + " " + transition;
                     console.log(msg);
                 }
             }
@@ -365,8 +367,13 @@
         const hasMesh = (modelFlags & 4) === 4;
 
         if (frag.debugModelLoader) {
-            console.log("Object[" + objectIndex + "] is " + (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
-            console.log("Object[" + objectIndex + "] at (" + location.translateX + "," + location.translateY + "," + location.translateZ +").["+ location.rotateX + "," + location.rotateY + "," + location.rotateZ+"]x(" + location.scaleX + "," + location.scaleY + "," + location.scaleZ + ")");
+            console.log("Object[" + objectIndex + "] is " + 
+                (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + 
+                (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
+            console.log("Object[" + objectIndex + "] at (" + 
+                round4(location.translateX) + "," + round4(location.translateY) + "," + round4(location.translateZ) +").["+ 
+                round4(location.rotateX) + "," + round4(location.rotateY) + "," + round4(location.rotateZ) + "]x(" + 
+                round4(location.scaleX) + "," + round4(location.scaleY) + "," + round4(location.scaleZ) + ")");
         }
 
         const model = context.assetCatalog.getModel(name, !isRoot);

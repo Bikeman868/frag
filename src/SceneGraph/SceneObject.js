@@ -4,8 +4,8 @@
     const private = {
         model,
         enabled: true,
-        position: null,
-        animationPosition: null,
+        location: null,
+        animationLocation: null,
         animationMap: {}
     };
 
@@ -31,52 +31,97 @@
         public.animations[animation.modelAnimation.getName()] = objectAnimation;
     };
 
+    private.getLocation = function () {
+        if (private.location) return private.location;
+        if (!private.model.location) return null;
+        private.location = frag.Location(private.model.location.is3d);
+        return private.location;
+    };
+
+    private.getAnimationLocation = function () {
+        if (private.animationLocation) return private.animationLocation;
+        if (!private.model.location) return null;
+        private.animationLocation = frag.Location(private.model.location.is3d);
+        return private.animationLocation;
+    };
+
+    /**
+     * @returns a ScemePosition object that can be used to manipulate the position
+     * scale and orientation of this object in the scene
+     */
     public.getPosition = function () {
-        if (private.position) return private.position;
-        if (!private.model.location) return null;
-        private.position = frag.ScenePosition(frag.Location(private.model.location.is3d));
-        return private.position;
+        const location = private.getLocation();
+        if (!location) return null;
+        return frag.ScenePosition(location);
     };
 
-    public.ensureAnimationPosition = function () {
-        if (private.animationPosition) return private.animationPosition;
-        if (!private.model.location) return null;
-        private.animationPosition = frag.ScenePosition(frag.Location(private.model.location.is3d));
-        return private.animationPosition;
+    /**
+     * @returns a ScenePosition object that can be used to change the animation
+     * position of the scene object. The animation position is added to the scene
+     * object's static position to create a temporary animation effect
+     */
+    public.getAnimationPosition = function () {
+        const location = private.getAnimationLocation();
+        if (!location) return null;
+        return frag.ScenePosition(location);
     };
 
-    public.deleteAnimationPosition = function () {
-        private.animationPosition = null;
+    /**
+     * Clears any animation position that was set. This is more efficient
+     * than setting the animation location to zero
+     */
+    public.clearAnimationPosition = function () {
+        private.animationLocation = null;
         return public;
     };
 
+    /**
+     * Includes this object in the scene. Call this function when the object
+     * could possibly be seen by the player. The engine will go through the
+     * process of transforming the mesh into screen space and clip anything
+     * that is not within the screen bounds. To avoid this expensive operations
+     * for objects that you know cannot be seen by the player, call the disable() 
+     * function.
+     */
     public.enable = function () {
         private.enabled = true;
         return public;
     };
 
-    public.disable = function () {
+    /**
+     * Excludes this object in the scene. Call this function when the object
+     * is not viewable through the player's viewport - for example it moved
+     * behind the player's point of view.
+     */
+     public.disable = function () {
         private.enabled = false;
         return public;
     };
 
+    /**
+     * Frees any resources consumed by this scene object and removes it from
+     * the scene.
+     */
     public.dispose = function() {
         public.disable();
         return public;
     }
 
+    /**
+     * This is used internally by the engine. Don't call this from your game code
+     */
     public.draw = function (gl, worldToClipTransform) {
         if (!private.enabled) return public;
 
-        let position = public.getPosition();
-        if (!position) return public;
+        let location = private.getLocation();
+        if (!location) return public;
 
-        if (private.animationPosition) {
-            position = position.clone().add(private.animationPosition);
+        if (private.animationLocation) {
+            location = location.clone().add(private.animationLocation);
         }
 
         const worldToClipMatrix = worldToClipTransform.getMatrix();
-        const modelToWorldMatrix = position.getMatrix();
+        const modelToWorldMatrix = location.getMatrix();
         const modelToClipMatrix = worldToClipTransform.is3d
             ? frag.Matrix.m4Xm4(worldToClipMatrix, modelToWorldMatrix)
             : frag.Matrix.m3Xm3(worldToClipMatrix, modelToWorldMatrix);

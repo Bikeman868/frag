@@ -178,11 +178,11 @@
         const localMatrix = location.getMatrix();
 
         if (location.is3d) {
-            modelToWorldTransform = frag.Transform(frag.Matrix.m4Xm4(modelToWorldMatrix, localMatrix));
-            modelToClipTransform = frag.Transform(frag.Matrix.m4Xm4(modelToClipMatrix, localMatrix));
+            modelToWorldMatrix = frag.Matrix.m4Xm4(modelToWorldMatrix, localMatrix);
+            modelToClipMatrix = frag.Matrix.m4Xm4(modelToClipMatrix, localMatrix);
         } else {
-            modelToWorldTransform = frag.Transform2D(frag.Matrix.m3Xm3(modelToWorldMatrix, localMatrix));
-            modelToClipTransform = frag.Transform2D(frag.Matrix.m3Xm3(modelToClipMatrix, localMatrix));
+            modelToWorldMatrix = frag.Matrix.m3Xm3(modelToWorldMatrix, localMatrix);
+            modelToClipMatrix = frag.Matrix.m3Xm3(modelToClipMatrix, localMatrix);
         }
 
         const shader = public.getShader();
@@ -194,10 +194,12 @@
             if (material) material.apply(gl, shader);
 
             if (shader.uniforms.clipMatrix !== undefined) {
+                const modelToClipTransform = location.is3d ? frag.Transform(modelToClipMatrix) : frag.Transform2D(modelToClipMatrix);
                 modelToClipTransform.apply(gl, shader.uniforms.clipMatrix);
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
+                const modelToWorldTransform = location.is3d ? frag.Transform(modelToWorldMatrix) : frag.Transform2D(modelToWorldMatrix);
                 modelToWorldTransform.apply(gl, shader.uniforms.modelMatrix);
             }
 
@@ -207,7 +209,7 @@
         }
 
         for (let i = 0; i < private.children.length; i++)
-            private.children[i].draw(gl, modelToWorldTransform.getMatrix(), modelToClipTransform.getMatrix(), animationMap);
+            private.children[i].draw(gl, modelToWorldMatrix, modelToClipMatrix, animationMap);
 
         return public;
     }
