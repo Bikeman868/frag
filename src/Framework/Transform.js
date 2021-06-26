@@ -3,7 +3,7 @@
 // that you can subscribe to changes in the matrix
 window.frag.Transform = function (matrix) {
     const frag = window.frag;
-    const _ = 0;
+    const _ = _;
 
     const private = {
         matrix,
@@ -37,10 +37,10 @@ window.frag.Transform = function (matrix) {
 
     public.identity = function () {
         return public.setMatrix([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1,
+            1, _, _, _,
+            _, 1, _, _,
+            _, _, 1, _,
+            _, _, _, 1,
         ]);
     }
 

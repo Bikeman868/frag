@@ -91,10 +91,19 @@
             .interval(2);
         fastFlyingAnimation.addChannel({
             channel: "rotate-y",
-            pattern: /wing/,
+            pattern: /Right wing/,
             keyframes: {
                 0: { value: 0, transition: "linear" },
-                15: { value: 90 * degToRad, transition: "linear" },
+                15: { value: 60 * degToRad, transition: "linear" },
+                29: { value: 0, transition: "linear" },
+            }
+        });
+        fastFlyingAnimation.addChannel({
+            channel: "rotate-y",
+            pattern: /Left wing/,
+            keyframes: {
+                0: { value: 0, transition: "linear" },
+                15: { value: -60 * degToRad, transition: "linear" },
                 29: { value: 0, transition: "linear" },
             }
         });
@@ -106,11 +115,20 @@
             .interval(4);
         slowFlyingAnimation.addChannel({
             channel: "rotate-y",
-            pattern: /wing/,
+            pattern: /Right wing/,
             keyframes: {
-                0: { value: 0, transition: "linear" },
-                15: { value: 80 * degToRad, transition: "linear" },
-                29: { value: 0, transition: "linear" },
+                0: { value: -15 * degToRad, transition: "linear" },
+                15: { value: 45 * degToRad, transition: "linear" },
+                29: { value: -15 * degToRad, transition: "linear" },
+            }
+        });
+        slowFlyingAnimation.addChannel({
+            channel: "rotate-y",
+            pattern: /Left wing/,
+            keyframes: {
+                0: { value: 15 * degToRad, transition: "linear" },
+                15: { value: -45 * degToRad, transition: "linear" },
+                29: { value: 15 * degToRad, transition: "linear" },
             }
         });
 
