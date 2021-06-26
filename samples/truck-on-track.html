@@ -23,7 +23,7 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
-    <script src='../dist/frag.js'></script>
+    <script src='../dist/frag.min.js'></script>
     <script>
         const frag = window.frag;
         const degToRad = Math.PI / 180;
@@ -119,23 +119,41 @@
         addAxle(truckModel, 4, 0.5);
         addAxle(truckModel, 5, 2.5);
 
+        // Add a "moving" animation to the truck that rotates all of the wheels.
+        // Gradually rotating by 60 degrees then flipping back to zero looks like
+        // continuous rotation because the wheels are hexagonal.
+        const wheelTurningAnimation = frag.ModelAnimation()
+            .name("moving")
+            .loop(true)
+            .frames(15)
+            .interval(5);
+        wheelTurningAnimation.addChannel({
+            channel: "rotate-z",
+            pattern: /Wheel/,
+            keyframes: {
+                0: { value: 60 * degToRad, transition: "step" },
+                14: { value: 0, transition: "linear" },
+            }
+        });
+        truckModel.addAnimation(wheelTurningAnimation);
+
         // Create an instance of the truck model and add it to the scene
         const truck = frag.SceneObject(truckModel);
-        truck.getPosition().scale(8).locationZ(200);
+        truck.getPosition().scale(8);
         scene.addObject(truck);
 
         // Define a track that the truck will move along. This is just a list
         // of x, y, z coordinates in the scene
         const track = [
             0, 0, 0,
-            40, 20, 10,
-            80, 20, 10,
-            10, -20, 60,
-            -60, -100, 30,
-            -20, -80, 5
+            40, 20, 30,
+            80, 20, 40,
+            10, -20, 160,
+            -60, -65, 30,
+            -20, -40, 5
         ];
 
-        // Create and start a looping animation that will move thr truck around the track
+        // Start a looping animation that will move the truck around the track
         const actions = [];
         const ticksPerDistance = 3;
         for (let iCurrent = 0; iCurrent < track.length; iCurrent += 3) {
@@ -150,5 +168,8 @@
             actions.push(action);
         }
         frag.Animation().sequence(actions, true).start();
+
+        // Start the wheels turning on the truck
+        truck.animations.moving.start();
     </script>
 </body>
