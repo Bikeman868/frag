@@ -1,5 +1,6 @@
 ﻿window.frag.Disc = function (facets, options) {
     facets = facets || 32;
+    options = options || {};
 
     const verticies = [0, 0, 0];
     const uvs = [0.5, 0.5];

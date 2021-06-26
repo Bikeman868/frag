@@ -1,7 +1,4 @@
-﻿// Provides a mechanism to change a value over time. For example smoothly change
-// one color into another or smoothly move an object within the scene.
-// ValueAnimationAction objects can be passed to an Animation object as the action
-// to take in one of the steps in an animation sequence
+﻿// Provides a mechanism to move an object in the scene at a specific speed
 window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance) {
     const frag = window.frag;
     const Vector = frag.Vector;
@@ -13,6 +10,8 @@ window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance)
         startRotate: undefined,
         moveBy: undefined,
         rotateBy: undefined,
+        moveTo: undefined,
+        rotateTo: undefined,
     };
 
     const public = {
@@ -45,8 +44,7 @@ window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance)
     }
 
     public.moveTo = function (location) {
-        let current = private.scenePosition.getLocation();
-        public.moveBy(Vector.sub(current, location));
+        private.moveTo = location;
         return public;
     }
 
@@ -56,6 +54,11 @@ window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance)
 
     public.moveToXY = function (x, y) {
         return public.moveTo([x, y]);
+    }
+
+    public.rotateTo = function (vector) {
+        private.rotateTo = vector;
+        return public;
     }
 
     public.onStart = function (onStart) {
@@ -71,6 +74,12 @@ window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance)
     public.start = function (animation, gameTick) {
         private.startLocation = private.scenePosition.getLocation();
         private.startRotate = private.scenePosition.getRotate();
+
+        if (private.moveTo) {
+            let distance = Vector.length(Vector.sub(private.moveTo - private.startLocation));
+            public.duration = Math.floor(private.ticksPerDistance * distance + 1);
+        }
+
         private.startTick = gameTick;
         private.endTick = gameTick + public.duration;
         if (private.onStart) private.onStart(animation, public, gameTick);
@@ -79,12 +88,25 @@ window.frag.PositionAnimationAction = function (scenePosition, ticksPerDistance)
 
     public.action = function (animation, gameTick) {
         const r = (gameTick - private.startTick) / public.duration;
-        if (private.moveBy) {
-            private.scenePosition.location(Vector.add(private.startLocation, Vector.mult(private.moveBy, r)));
+        let moveBy = private.moveBy;
+        let rotateBy = private.rotateBy;
+
+        if (private.moveTo) {
+            moveBy = Vector.sub(private.moveTo - private.startLocation);
         }
-        if (private.rotateBy) {
-            private.scenePosition.rotate(Vector.add(private.startRotate, Vector.mult(private.rotateBy, r)));
+        
+        if (private.rotateTo) {
+            rotateBy = Vector.sub(private.rotateTo - private.startRotate);
         }
+
+        if (moveBy) {
+            private.scenePosition.location(Vector.add(private.startLocation, Vector.mult(moveBy, r)));
+        }
+
+        if (rotateBy) {
+            private.scenePosition.rotate(Vector.add(private.startRotate, Vector.mult(rotateBy, r)));
+        }
+
         return public;
     }
 

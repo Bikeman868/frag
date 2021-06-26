@@ -1,6 +1,8 @@
 ﻿// This cube has the minimum vertex count but only texture maps correctly on 4 sides
 // http://www.cs.umd.edu/gvil/papers/av_ts.pdf
 window.frag.BasicCube = function (options) {
+    options = options || {};
+
     const u0 = 0;
     const u1 = 1;
 

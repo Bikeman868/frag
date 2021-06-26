@@ -1,5 +1,6 @@
 ﻿window.frag.Cylinder = function (facets, options) {
     facets = facets || 32;
+    options = options || {};
 
     const top = [0, 0, -1];
     const topUvs = [0.5, 0.5];

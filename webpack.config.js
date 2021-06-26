@@ -1,10 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './src/index.js',
   output: {
-    filename: 'frag.min.js',
+    filename: 'frag.js',
     path: path.resolve(__dirname, 'dist')
   },
   devtool: 'source-map',

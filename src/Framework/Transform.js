@@ -3,7 +3,7 @@
 // that you can subscribe to changes in the matrix
 window.frag.Transform = function (matrix) {
     const frag = window.frag;
-    const _ = _;
+    const _ = 0;
 
     const private = {
         matrix,

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+<head>
+    <title>Truck on a track</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #scene {
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='scene'></canvas>
+    <script src='../dist/frag.js'></script>
+    <script>
+        const frag = window.frag;
+        const degToRad = Math.PI / 180;
+
+        // The perspective camera makes objects further from the camera look smaller
+        const camera = frag.PerspectiveCamera()
+            .frustrum(35 * degToRad, -100, 100)
+            .scaleX(100)
+            .moveToZ(-120);
+
+        // We always need at least one scene
+        const scene = frag.Scene()
+            .camera(camera);
+
+        // The camera attached to the main scene defines the size of the
+        // viewport. Other scenes will adapt their size to size of the viewport
+        frag.mainScene(scene);
+
+        // We need a shader to draw onto the screen. The more features you
+        // enable the lower the frame rate will be for your game
+        const shader = frag.Shader()
+            .name("Model shader")
+            .diffuseTexture()
+            .directionalLightGrey()
+            .compile();
+
+        // For this demo I am using simple hard-coded 1x1 pixel textures,
+        // but a real game would likely load texture bitmaps. I didn't do
+        // this just to make this demo run stand-alone single html file.
+        const singleColorMaterial = function(name, rgba) {
+            texture = frag.Texture()
+                .dataFormat(frag.gl.RGBA)
+                .fromArrayBuffer(0, new Uint8Array(rgba), 0, 1, 1);
+            return frag.Material()
+                .name(name)
+                .setTexture('diffuse', texture);
+        }
+        const trailerMaterial = singleColorMaterial("trailer", [210, 210, 255, 255]);
+        const cabMaterial = singleColorMaterial("cab", [220, 175, 175, 255]);
+        const engineMaterial = singleColorMaterial("engine", [220, 185, 175, 255]);
+        const wheelMaterial = singleColorMaterial("wheel", [120, 90, 90, 255]);
+
+        // Make a simple truck shape using scaled geometric shapes
+        const cubeMesh = frag.Cube(12)
+            .name("cube")
+            .shadeSmooth();
+        
+        const wheelMesh = frag.Cylinder(6)
+            .name("wheel");
+
+        const truckModel = frag.Model()
+            .name('Truck')
+            .shader(shader);
+
+        truckModel.addChild()
+            .name("Trailer")
+            .mesh(cubeMesh)
+            .material(trailerMaterial)
+            .getPosition().scaleXYZ(3, 1, 1).locationX(-3.1);
+
+        truckModel.addChild()
+            .name("Cab")
+            .mesh(cubeMesh)
+            .material(cabMaterial)
+            .getPosition().scaleXYZ(0.5, 1, 1).locationX(0.6);
+
+        truckModel.addChild()
+            .name("Engine")
+            .mesh(cubeMesh)
+            .material(engineMaterial)
+            .getPosition().scaleXYZ(1, 0.5, 1).locationXYZ(2.1, -0.5, 0);
+
+        const addAxle = function(parent, axle, x) {
+            const radius = 0.4;
+            const thickness = 0.25;
+            const y = -1.5;
+            const z = 0.75;
+            parent.addChild()
+                .name("Wheel_" + axle + "_left")
+                .mesh(wheelMesh)
+                .material(wheelMaterial)
+                .getPosition().scaleXYZ(radius, radius, thickness).locationXYZ(x, y, z)
+            parent.addChild()
+                .name("Wheel_" + axle + "_right")
+                .mesh(wheelMesh)
+                .material(wheelMaterial)
+                .getPosition().scaleXYZ(radius, radius, thickness).locationXYZ(x, y, -z)
+        }
+
+        addAxle(truckModel, 1, -5.3);
+        addAxle(truckModel, 2, -4.3);
+        addAxle(truckModel, 3, -1);
+        addAxle(truckModel, 4, 0.5);
+        addAxle(truckModel, 5, 2.5);
+
+        // Create an instance of the truck model and add it to the scene
+        const truck = frag.SceneObject(truckModel);
+        truck.getPosition().scale(8).locationZ(200);
+        scene.addObject(truck);
+
+        // Define a track that the truck will move along. This is just a list
+        // of x, y, z coordinates in the scene
+        const track = [
+            0, 0, 0,
+            40, 20, 10,
+            80, 20, 10,
+            10, -20, 60,
+            -60, -100, 30,
+            -20, -80, 5
+        ];
+
+        // Create and start a looping animation that will move thr truck around the track
+        const actions = [];
+        const ticksPerDistance = 3;
+        for (let iCurrent = 0; iCurrent < track.length; iCurrent += 3) {
+            const iNext = iCurrent + 3 >= track.length ? 0 : iCurrent + 3;
+            const current = [track[iCurrent], track[iCurrent+1], track[iCurrent+2]];
+            const next = [track[iNext], track[iNext+1], track[iNext+2]];
+            const vector = frag.Vector.sub(next, current);
+            const angle = [0, Math.atan2(vector[2], vector[0]), 0];
+            const action = frag.PositionAnimationAction(truck.getPosition(), ticksPerDistance)
+                .rotateTo(angle)
+                .moveBy(vector);
+            actions.push(action);
+        }
+        frag.Animation().sequence(actions, true).start();
+    </script>
+</body>

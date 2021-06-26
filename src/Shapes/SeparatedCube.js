@@ -1,6 +1,8 @@
 ﻿// This cube has a separate sub-mesh for each face of the cube.
 window.frag.SeparatedCube = function (facets, options) {
     facets = 1;
+    options = options || {};
+
     const mesh = window.frag.MeshData();
     
     const u0 = 0;
