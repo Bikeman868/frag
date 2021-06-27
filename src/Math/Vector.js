@@ -1,10 +1,10 @@
 ﻿window.frag = window.frag || {};
 window.frag.Vector = {
-    makeVectorFromArray2D: function (array, offset) {
+    extract2D: function (array, offset) {
         if (!array) return null;
         return [array[offset], array[offset + 1]];
     },
-    makeVectorFromArray3D: function (array, offset) {
+    extract3D: function (array, offset) {
         if (!array) return null;
         return [array[offset], array[offset + 1], array[offset + 2]];
     },
@@ -62,6 +62,12 @@ window.frag.Vector = {
             a[0] * b[1] - a[1] * b[0],
         ];
     },
+    dot: function (a, b) {
+        let result = 0;
+        for (let i = 0; i < a.length; i++)
+            result += a[i] * b[i];
+        return result;
+    },
     normalize: function (a) {
         const length = window.frag.Vector.length(a);
         if (length < 1e-5) return a;
@@ -70,4 +76,7 @@ window.frag.Vector = {
         for (let i = 0; i < a.length; i++) result.push(a[i] / length);
         return result;
     },
+    append: function(a, v) {
+        for (let i = 0; i < v.length; i++) a.push(v[i]);
+    }
 }

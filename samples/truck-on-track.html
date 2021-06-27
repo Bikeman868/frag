@@ -23,9 +23,18 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
+    <script>
+        window.frag = {
+            init: function(frag) {
+                // We want to be able to see the underside of the track
+                frag.gl.disable(frag.gl.CULL_FACE);
+            }
+        }
+    </script>
     <script src='../dist/frag.min.js'></script>
     <script>
         const frag = window.frag;
+        const Vector = frag.Vector;
         const degToRad = Math.PI / 180;
 
         // The perspective camera makes objects further from the camera look smaller
@@ -37,13 +46,9 @@
         // We always need at least one scene
         const scene = frag.Scene()
             .camera(camera);
-
-        // The camera attached to the main scene defines the size of the
-        // viewport. Other scenes will adapt their size to size of the viewport
         frag.mainScene(scene);
 
-        // We need a shader to draw onto the screen. The more features you
-        // enable the lower the frame rate will be for your game
+        // We need a shader to draw something onto the screen
         const shader = frag.Shader()
             .name("Model shader")
             .diffuseTexture()
@@ -51,20 +56,21 @@
             .compile();
 
         // For this demo I am using simple hard-coded 1x1 pixel textures,
-        // but a real game would likely load texture bitmaps. I didn't do
-        // this just to make this demo run stand-alone single html file.
-        const singleColorMaterial = function(name, rgba) {
+        // but a real game would likely load texture bitmaps. I did it like
+        // this so that this demo will run as a stand-alone single html file.
+        const singleColorMaterial = function(name, rgb) {
             texture = frag.Texture()
-                .dataFormat(frag.gl.RGBA)
-                .fromArrayBuffer(0, new Uint8Array(rgba), 0, 1, 1);
+                .name(name)
+                .dataFormat(frag.gl.RGB)
+                .fromArrayBuffer(0, new Uint8Array(rgb), 0, 1, 1);
             return frag.Material()
                 .name(name)
                 .setTexture('diffuse', texture);
         }
-        const trailerMaterial = singleColorMaterial("trailer", [210, 210, 255, 255]);
-        const cabMaterial = singleColorMaterial("cab", [220, 175, 175, 255]);
-        const engineMaterial = singleColorMaterial("engine", [220, 185, 175, 255]);
-        const wheelMaterial = singleColorMaterial("wheel", [120, 90, 90, 255]);
+        const trailerMaterial = singleColorMaterial("trailer", [210, 210, 255]);
+        const cabMaterial = singleColorMaterial("cab", [220, 175, 175]);
+        const engineMaterial = singleColorMaterial("engine", [220, 185, 175]);
+        const wheelMaterial = singleColorMaterial("wheel", [120, 90, 90]);
 
         // Make a simple truck shape using scaled geometric shapes
         const cubeMesh = frag.Cube(12)
@@ -139,38 +145,105 @@
 
         // Create an instance of the truck model and add it to the scene
         const truck = frag.SceneObject(truckModel);
-        truck.getPosition().scale(8);
+        truck.getPosition().scale(6);
         scene.addObject(truck);
 
         // Define a track that the truck will move along. This is just a list
         // of x, y, z coordinates in the scene
         const track = [
-            0, 0, 0,
-            40, 7, 30,
-            80, 15, 40,
-            10, 5, 160,
-            -60, -2, 30,
-            -20, -7, 5
+               0,  -50,    0,
+              40,  -65,   10,
+              90,  -35,   60,
+              10,  -15,  250,
+             -60,  -40,  130,
+            -120,  -35,   30,
+             -20,  -57,    5
         ];
+        const trackLength = track.length / 3;
+
+        // Calculate a polygon that envelops the track
+        const trackPolygon = [];
+        const trackWidth = 5;
+        for (let i = 0; i < trackLength; i++) {
+            const iThis = i * 3;
+            const iPrev = i === 0 ? (trackLength - 1) * 3 : iThis - 3;
+            const iNext = i + 1 === trackLength ? 0 : iThis + 3;
+
+            const thisLocation = Vector.extract3D(track, iThis);
+            const prevLocation = Vector.extract3D(track, iPrev);
+            const nextLocation = Vector.extract3D(track, iNext);
+
+            const nextDirection = Vector.sub(nextLocation, thisLocation);
+            const prevDirection = Vector.normalize(Vector.sub(prevLocation, thisLocation));
+            const bisect = Vector.normalize(Vector.add(Vector.normalize(nextDirection), Vector.normalize(prevDirection)));
+
+            const angle = Math.acos(Vector.dot(nextDirection, bisect) / (Vector.length(nextDirection) * Vector.length(bisect)));
+            const scale = trackWidth / Math.sin(angle);
+            const scaledBisect = Vector.mult(bisect, scale);
+
+            const insideVertex = Vector.add(thisLocation, scaledBisect);
+            const outsideVertex = Vector.sub(thisLocation, scaledBisect);
+
+            if (angle < 0) {
+                Vector.append(trackPolygon, outsideVertex);
+                Vector.append(trackPolygon, insideVertex);
+            } else {
+                Vector.append(trackPolygon, insideVertex);
+                Vector.append(trackPolygon, outsideVertex);
+            }
+        }
+
+        // Draw the track ploygon as a ribbon
+        const trackVertices = [];
+        for (let i = 0; i <= trackLength; i++) {
+            const polygonIndex = i === trackLength ? 0 : i * 6;
+            const leftVertex = Vector.extract3D(trackPolygon, polygonIndex);
+            const rightVertex = Vector.extract3D(trackPolygon, polygonIndex + 3);
+
+            if (i === 0) {
+                Vector.append(trackVertices, leftVertex);
+                Vector.append(trackVertices, rightVertex);
+            } else {
+                if (i % 2 === 0) {
+                    Vector.append(trackVertices, rightVertex);
+                    Vector.append(trackVertices, leftVertex);
+                } else {
+                    Vector.append(trackVertices, leftVertex);
+                    Vector.append(trackVertices, rightVertex);
+                }
+            }
+        }
+        const trackMaterial = singleColorMaterial("track", [120, 220, 90]);
+        const trackMesh = frag.MeshData()
+            .name("Track")
+            .shadeFlat()
+            .addTriangleStrip(trackVertices);
+        const trackModel = frag.Model()
+            .name("Track")
+            .mesh(trackMesh)
+            .material(trackMaterial)
+            .shader(shader);
+        scene.addObject(frag.SceneObject(trackModel));
 
         // Start a looping animation that will move the truck around the track
         const actions = [];
         const invLinearVelocity = 3;
         const invAngularVelocity = 30;
         const position = truck.getPosition();
-        for (let iCurrent = 0; iCurrent < track.length; iCurrent += 3) {
-            const iNext = iCurrent + 3 >= track.length ? 0 : iCurrent + 3;
+        const truckPosition = [0, 15, 0];
+        for (let iThis = 0; iThis < track.length; iThis += 3) {
+            const iNext = iThis + 3 >= track.length ? 0 : iThis + 3;
 
-            const currentLocation = [track[iCurrent], track[iCurrent+1], track[iCurrent+2]];
-            const nextLocation = [track[iNext], track[iNext+1], track[iNext+2]];
+            const thisTrackLocation = Vector.extract3D(track, iThis);
+            const nextTracklocation = Vector.extract3D(track, iNext);
 
-            const vector = frag.Vector.sub(nextLocation, currentLocation);
+            const vector = Vector.sub(nextTracklocation, thisTrackLocation);
             const angleY = Math.atan2(vector[2], vector[0]);
             const angleZ = Math.atan2(vector[1], vector[0]);
             const nextAngle = [0, angleY, angleZ];
 
             actions.push(frag.PositionAnimationAction(position).rotateTo(nextAngle, invAngularVelocity));
-            actions.push(frag.PositionAnimationAction(position).moveTo(nextLocation, invLinearVelocity));
+            actions.push(frag.PositionAnimationAction(position).moveTo(Vector.add(nextTracklocation, truckPosition), invLinearVelocity));
         }
         frag.Animation().sequence(actions, true).start();
 

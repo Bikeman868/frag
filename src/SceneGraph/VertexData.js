@@ -50,8 +50,8 @@
     public.bitangentIndex = function (index, coord) { return index * public.normalDimensions + (coord || 0); };
 
     private.getVector = function (array, index, dimensions) {
-        if (dimensions === 2) return frag.Vector.makeVectorFromArray2D(array, index);
-        return frag.Vector.makeVectorFromArray3D(array, index);
+        if (dimensions === 2) return frag.Vector.extract2D(array, index);
+        return frag.Vector.extract3D(array, index);
     };
 
     private.setVector = function (array, index, v) {
