@@ -25,7 +25,7 @@ window.frag.PositionAnimationAction = function (scenePosition, invLinearVelocity
     }
 
     public.moveBy = function (vector, invLinearVelocity) {
-        invLinearVelocity = invLinearVelocity || private.invLinearVelocity;
+        invLinearVelocity = invLinearVelocity || private.invLinearVelocity || 1;
         let distance = Vector.length(vector);
         public.duration = Math.floor(invLinearVelocity * distance + 1);
         private.moveBy = vector;
@@ -40,7 +40,7 @@ window.frag.PositionAnimationAction = function (scenePosition, invLinearVelocity
     }
 
     public.rotateBy = function (vector, invAngularVelocity) {
-        invAngularVelocity = invAngularVelocity || private.invAngularVelocity;
+        invAngularVelocity = invAngularVelocity || private.invAngularVelocity || 10;
         let distance = Vector.length(vector);
         public.duration = Math.floor(invAngularVelocity * distance + 1);
         private.rotateBy = vector;
@@ -49,7 +49,7 @@ window.frag.PositionAnimationAction = function (scenePosition, invLinearVelocity
 
     public.rotateTo = function (eulerAngles, invAngularVelocity) {
         if (invAngularVelocity) private.invLinearVelocity = undefined;
-        private.invAngularVelocity = invAngularVelocity || private.invAngularVelocity || 0.1;
+        private.invAngularVelocity = invAngularVelocity || private.invAngularVelocity || 10;
         private.rotateTo = eulerAngles;
         return public;
     }
