@@ -67,12 +67,13 @@
             // Next we are going to define an animation sequence for
             // the excavator that has five steps as follows:
 
-            const ticksPerDistance = 1.5;
+            const invLinearVelocity = 1.5;
+            const position = excavator.getPosition();
 
             // Step 1 in the animation sequence
             // Move the excavator from 0 to -80 on the x-axis
             // whilst running the "moving" animation
-            const step1 = frag.PositionAnimationAction(excavator.getPosition(), ticksPerDistance)
+            const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([-80, 0, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
@@ -84,7 +85,7 @@
             // Step 3 in the animation sequence
             // Move the excavator from -80 to +20 on the x-axis
             // whilst running the "moving" animation
-            const step3 = frag.PositionAnimationAction(excavator.getPosition(), ticksPerDistance)
+            const step3 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([100, 0, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
@@ -96,7 +97,7 @@
             // Step 5 in the animation sequence
             // Move the excavator from +30 back to 0 on the x-axis so that the animation can loop
             // whilst running the "moving" animation
-            const step5 = frag.PositionAnimationAction(excavator.getPosition(), ticksPerDistance)
+            const step5 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([-20, 0, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);

@@ -146,26 +146,31 @@
         // of x, y, z coordinates in the scene
         const track = [
             0, 0, 0,
-            40, 20, 30,
-            80, 20, 40,
-            10, -20, 160,
-            -60, -65, 30,
-            -20, -40, 5
+            40, 7, 30,
+            80, 15, 40,
+            10, 5, 160,
+            -60, -2, 30,
+            -20, -7, 5
         ];
 
         // Start a looping animation that will move the truck around the track
         const actions = [];
-        const ticksPerDistance = 3;
+        const invLinearVelocity = 3;
+        const invAngularVelocity = 30;
+        const position = truck.getPosition();
         for (let iCurrent = 0; iCurrent < track.length; iCurrent += 3) {
             const iNext = iCurrent + 3 >= track.length ? 0 : iCurrent + 3;
-            const current = [track[iCurrent], track[iCurrent+1], track[iCurrent+2]];
-            const next = [track[iNext], track[iNext+1], track[iNext+2]];
-            const vector = frag.Vector.sub(next, current);
-            const angle = [0, Math.atan2(vector[2], vector[0]), 0];
-            const action = frag.PositionAnimationAction(truck.getPosition(), ticksPerDistance)
-                .rotateTo(angle)
-                .moveBy(vector);
-            actions.push(action);
+
+            const currentLocation = [track[iCurrent], track[iCurrent+1], track[iCurrent+2]];
+            const nextLocation = [track[iNext], track[iNext+1], track[iNext+2]];
+
+            const vector = frag.Vector.sub(nextLocation, currentLocation);
+            const angleY = Math.atan2(vector[2], vector[0]);
+            const angleZ = Math.atan2(vector[1], vector[0]);
+            const nextAngle = [0, angleY, angleZ];
+
+            actions.push(frag.PositionAnimationAction(position).rotateTo(nextAngle, invAngularVelocity));
+            actions.push(frag.PositionAnimationAction(position).moveTo(nextLocation, invLinearVelocity));
         }
         frag.Animation().sequence(actions, true).start();
 
