@@ -154,16 +154,18 @@ There are other samples for you to explore in the [samples folder](./samples)
 </head>
 <body>
     <canvas id='scene'></canvas>
-    <script>
-        // This script provides an oportunity to customize 
-        // Frag and is not required
-        window.frag = {
-            canvas: document.getElementById("scene"),
-        }
-    </script>
-    <script src='../dist/frag.min.js'></script>
+    <script src='frag.min.js'></script>
     <script>
         const frag = window.frag;
+
+        // The default behavior is to look for an element with am id of "scene" so this
+        // code is redundent, but shows how you would do it if your canvas is identified
+        // some other way
+        frag.canvas = document.getElementById("scene");
+
+        // After configuring frag you need to call the `init()` function to get things going.
+        frag.init();
+
         const degToRad = Math.PI / 180;
 
         // The perspective camera makes objects further from the camera look smaller
@@ -218,7 +220,6 @@ There are other samples for you to explore in the [samples folder](./samples)
         // A model combines
         // - A mesh defines the shape of the model
         // - A material defines how to paint the surface of the model
-        // - A transform defines the postition and orientation of the model
         // - A shader defines how to turn the other things into pixels
         const model = frag.Model()
             .name('My model')

@@ -24,6 +24,8 @@ Camera to it.
 const frag = window.frag;
 const degToRad = Math.PI / 180;
 
+frag.init();
+
 const camera = frag.PerspectiveCamera()
   .frustrum(35 * degToRad, -100, 100)
   .scaleX(100)

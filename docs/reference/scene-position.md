@@ -27,6 +27,8 @@ object to 40x its original size.
 
 ```javascript
 const frag = window.frag;
+frag.init();
+
 const model = frag.Model();
 const scene = grag.Scene();
 

@@ -12,6 +12,7 @@ to not dispose of the textures.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const material = frag.Material()
   .name('My material')

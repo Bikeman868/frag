@@ -11,6 +11,7 @@ a material as the 'emmissive' characteristic of the model surface.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const texture = frag.Texture()
   .name('My emmissive texture')

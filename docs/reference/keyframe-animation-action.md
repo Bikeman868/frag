@@ -25,6 +25,7 @@ focuses on the `KeyframeAnimationAction` class.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const model = frag.Model();
 const objectA = frag.SceneObject(model);

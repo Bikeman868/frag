@@ -25,6 +25,7 @@ in front of other content.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const uiCamera = frag.UiCamera();
 

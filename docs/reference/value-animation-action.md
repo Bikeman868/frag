@@ -19,6 +19,7 @@ focuses on the `ValueAnimationAction` class.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const model = frag.Model();
 const sceneObject = frag.SceneObject(model);

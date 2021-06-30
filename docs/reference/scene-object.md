@@ -19,6 +19,8 @@ object to a scene.
 
 ```javascript
 const frag = window.frag;
+frag.init();
+
 const model = frag.Model();
 const scene = frag.Scene();
 

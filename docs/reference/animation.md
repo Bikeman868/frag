@@ -41,6 +41,7 @@ animation will repeat every 5 game ticks for 200 ticks then stop.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const interval = 5;
 const limit = 200;

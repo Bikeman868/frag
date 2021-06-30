@@ -1,18 +1,17 @@
-﻿/* To customize Frag for your application, assign an object
-   to window.frag before loading the Frag library. The object you 
-   assign can contain the canvas to draw on and an initialization 
-   function as illustrated by the following example:
+﻿/* To customize Frag for your application, set properties of the
+   frag object before calling `window.frag.init()` as illustrated 
+   by the following example:
 
-window.frag = {
-    canvas: document.getElementById("my-canvas"),
-    config: function(frag) {
-        frag.gl.clearColor(0, 0, 0, 1);
-        frag.debugShaderBuilder = true;
-        frag.renderInterval = 10;
-        frag.gameTickMs = 50;
-    }
-};
+window.frag.canvas = document.getElementById("my-canvas");
+window.frag.config = function(frag) {
+    frag.gl.clearColor(0, 0, 0, 1);
+    frag.debugShaderBuilder = true;
+    frag.renderInterval = 10;
+    frag.gameTickMs = 50;
+}
+window.frag.init();
 */
+
 window.frag = window.frag || {};
 
 window.frag.startFunctions = [];

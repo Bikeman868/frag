@@ -16,6 +16,7 @@ the Z axis at the same time, then rotating it about the X axis.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const model = frag.Model();
 const obj = frag.SceneObject(model);

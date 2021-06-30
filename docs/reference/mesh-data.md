@@ -15,6 +15,7 @@ This is an example of creating a new mesh adding a triangle to it.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 const vertices = [
   0, 0, 0, 

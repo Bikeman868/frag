@@ -36,6 +36,7 @@ you import the model from Blender.
 
 ```javascript
 const frag = window.frag;
+frag.init();
 
 // Set these up any way you want
 const scene = frag.Scene();

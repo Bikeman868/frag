@@ -40,6 +40,8 @@ to it.
 const frag = window.frag;
 const degToRad = Math.PI / 180;
 
+frag.init();
+
 const camera = frag.UiCamera()
   .scaleX(100);
 
