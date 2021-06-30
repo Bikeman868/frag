@@ -1,6 +1,5 @@
-﻿(function () {
+﻿(function() {
     const frag = window.frag;
-
     const scenes = [];
     const animations = [];
     let startTime = performance.now();
@@ -99,5 +98,5 @@
         }
         setTimeout(render, frag.renderInterval);
     }
-    render();
+    window.frag.startFunctions.push(render);
 })();

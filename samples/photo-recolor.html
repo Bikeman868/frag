@@ -24,18 +24,16 @@
 
 <body>
     <canvas id='scene'></canvas>
+    <script src='frag.min.js'></script>
     <script>
-        window.frag = {
-            init: function(frag) {
-                // By default Frag clears the background to white. For our
-                // mask we want this to be black instead. WebGL will still
-                // render the web page with a white background.
-                frag.gl.clearColor(0, 0, 0, 1);
-            }
+        window.frag.config = function() {
+            // By default Frag clears the background to white. For our
+            // mask we want this to be black instead. WebGL will still
+            // render the web page with a white background.
+            frag.gl.clearColor(0, 0, 0, 1);
         }
-    </script>
-    <script src='../dist/frag.min.js'></script>
-    <script>
+        window.frag.init();
+
         window.app = {};
         window.app.photoShader = (function () {
             const frag = window.frag;

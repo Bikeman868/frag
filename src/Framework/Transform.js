@@ -194,7 +194,7 @@ window.frag.Transform = function (matrix) {
 };
 
 // Unit tests for Transform
-
+/*
 window.tests = window.tests || {};
 
 window.tests.transform = {
@@ -214,3 +214,4 @@ window.tests.transform = {
 };
 
 window.tests.transform.run(window.tests.transform);
+*/

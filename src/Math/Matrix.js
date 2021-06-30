@@ -189,7 +189,7 @@ window.frag.Matrix = {
         ];
     },
 }
-
+/*
 // Unit tests framework
 
 window.tests = window.tests || {};
@@ -223,3 +223,4 @@ window.tests.matrix = {
 }
 
 window.tests.matrix.run(window.tests.matrix);
+*/

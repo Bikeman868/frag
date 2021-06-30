@@ -5,7 +5,7 @@
 
 window.frag = {
     canvas: document.getElementById("my-canvas"),
-    init: function(frag) {
+    config: function(frag) {
         frag.gl.clearColor(0, 0, 0, 1);
         frag.debugShaderBuilder = true;
         frag.renderInterval = 10;
@@ -13,8 +13,12 @@ window.frag = {
     }
 };
 */
+window.frag = window.frag || {};
 
-window.frag = (function (frag) {
+window.frag.startFunctions = [];
+
+window.frag.init = function () {
+    const frag = window.frag;
     frag.canvas = frag.canvas || document.getElementById("scene");
     if (!frag.canvas){
         console.error('No canvas with id of "scene" in the page');
@@ -49,7 +53,10 @@ window.frag = (function (frag) {
         return result;
     };
 
-    if (frag.init) frag.init(frag);
+    if (frag.config) frag.config(frag);
+
+    for (var i = 0; i < frag.startFunctions.length; i++)
+        frag.startFunctions[i](frag);
 
     return frag;
-})(window.frag || {});
+};

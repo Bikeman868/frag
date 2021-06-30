@@ -23,18 +23,17 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
-    <script>
-        window.frag = {
-            init: function(frag){
-                frag.debugModelLoader = true;
-                frag.debugAnimations = true;
-                frag.debugShaderBuilder = true;
-            }
-        }
-    </script>
     <script src='frag.min.js'></script>
     <script>
         const frag = window.frag;
+
+        frag.config = function() {
+            frag.debugModelLoader = true;
+            frag.debugAnimations = true;
+            frag.debugShaderBuilder = true;
+        }
+        frag.init();
+
         const degToRad = Math.PI / 180;
 
         const camera = frag.PerspectiveCamera()
