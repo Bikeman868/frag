@@ -40,6 +40,7 @@ window.frag.Animation = function (obj, isChild) {
         }
 
         if (private.stopAt !== undefined && gameTick >= private.stopAt) {
+            window.frag.deactivateAnimation(public);
             if (private.disposeOnStop) public.dispose();
             return;
         }
@@ -117,6 +118,7 @@ window.frag.Animation = function (obj, isChild) {
         delete private.nextStepTick;
         delete private.stopAfter;
         delete private.stopAt;
+        window.frag.activateAnimation(public);
         return public;
     }
 

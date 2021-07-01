@@ -11,7 +11,7 @@ The mesh itself only defines the shaps of an object in the scene,
 and not the color, lighting or texture detail.
 
 ## Examples
-This is an example of creating a new mesh adding a triangle to it.
+This is an example of creating a new mesh and adding a triangle to it.
 
 ```javascript
 const frag = window.frag;
@@ -38,7 +38,7 @@ one of these methods, you can change the behaviour of the mesh by
 calling functions like `smoothShading()`
 
 The most common way to get meshes into your game is to draw them
-in Blender and load them using a model loader. This not only bring
+in Blender and load them using a model loader. This not only brings
 in the mesh, but also imports all of the animations for each model.
 
 ## Mesh data

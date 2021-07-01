@@ -5,11 +5,11 @@ fluent syntax to configure the attributes of the animation.
 You can optionally pass an object to the `Animation` method to hold
 animation state. The `Animation` function will add methods and properties
 to the state that you pass to make it into an animation object. When the
-animation object is passed tp animation actions you can access these
-properties to maintain animation state and even call you own functions.
+animation object is passed to animation actions you can access these
+properties to maintain animation state and call your own functions.
 
 This object provides the lowest level access to the animation engine.
-This is great is you want to do something very custom, but is harder
+This is great if you want to do something very custom, but is harder
 to use than the layers that exist on top of it.
 
 ## Time
@@ -65,16 +65,16 @@ the animation object, the current game tick and the current frame tick.
 
 The function can set the following properties of the `animation` parameter before
 it returns:
-* `nextGameTick` specifies the next game tick where this animation should run
-* `nextFrameTick` specifies the next frame tick where this animation should run
+* `nextGameTick` specifies the next game tick where this animation wants to run
+* `nextFrameTick` specifies the next frame tick where this animation wants to run
 
 ## repeatFrames(action: function(animation, gameTick, frameTick), interval: int)
 Executes a function at regular frame render intervals. See above for details
 of the `action` parameter.
 
 ## stopAfter(gameTicks: int)
-Causes the animation to stop automatically after the specified number of game ticks
-the next time it is started.
+Causes the animation to stop automatically after the specified number of game ticks.
+This comes into effect the next time it is started.
 
 If you want the animation to stop automatically every time it is started, then
 you need to call `stopAfter()` before each call to `start()`.
@@ -105,6 +105,7 @@ function if that's all you want.
 
 If the action has a `duration` property this defines how long this step it in the
 sequence. If the `duration` property is not provied then it defaults to 100 game ticks.
+The `start()` function can set the `duration` property before it returns.
 
 If the action has an `interval` property this defines how frequently the `action` function
 is called during this step in the animation sequence. If the `interval` property is not 
@@ -125,7 +126,8 @@ take any `Animation` and pass it as one of the steps in the sequence list of som
 
 The Frag framework contains a number of action objects that you can construct and
 pass to the `sequence()` function including `ValueAnimationAction`,
-`ParallelAnimationAction` and `KeyframeAnimationAction`.
+`ParallelAnimationAction`, `PositionAnimationAction`, `RepeatAnimationAction` and
+`KeyframeAnimationAction`.
 
 ## perform(action: AnimationAction, loop: bool)
 This is exactly like calling the `sequence()` function passing an array of just one action.

@@ -1,11 +1,13 @@
 ﻿(function() {
     const frag = window.frag;
     const scenes = [];
-    const animations = [];
+    const activeAnimations = {};
+    const inactiveAnimations = {};
     let startTime = performance.now();
     let gameTick = 0;
     let frameTick = 0;
     let mainScene = null;
+    let nextAnimationId = 0;
 
     frag.correctClock = function(serverTick) {
         let difference = serverTick - gameTick;
@@ -37,26 +39,31 @@
         return false;
     };
 
+    frag.activateAnimation = function(animation) {
+        activeAnimations[animation.id] = animation;
+        delete inactiveAnimations[animation.id];
+    }
+
+    frag.deactivateAnimation = function(animation) {
+        inactiveAnimations[animation.id] = animation;
+        delete activeAnimations[animation.id];
+    }
+
     frag.addAnimation = function (animation) {
-        animations.push(animation);
+        animation.id = nextAnimationId++;
+        inactiveAnimations[animation.id] = animation;
         return frag;
     };
 
     frag.removeAnimation = function (animation) {
-        for (let i = 0; i < animations.length; i++) {
-            if (animations[i] === animation) {
-                animations.splice(i, 1);
-                return true;
-            }
-        }
-        return false;
+        delete inactiveAnimations[animation.id];
+        delete activeAnimations[animation.id];
+        return frag;
     };
 
     const playAnimations = function (gameTick, frameTick) {
-        for (let i = 0; i < animations.length; i++) {
-            // TODO: sort animations into buckets according to how far away from next step
-            // TODO: keep a separate list of animations that are stopped
-            let animation = animations[i];
+        for (let id in activeAnimations) {
+            let animation = activeAnimations[id];
             if (animation.nextFrameTick !== undefined) {
                 if (frameTick >= animation.nextFrameTick) {
                     animation.nextFrameTick = frameTick + 10;
