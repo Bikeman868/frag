@@ -9,7 +9,7 @@ parser.add_argument('-d', '--dryRun', dest='dryRun', action='store_true', requir
 parser.add_argument('-l', '--logLevel', metavar='L', type=str, nargs=1, required=False, choices=['error', 'warn', 'info', 'debug'], default=['info'], help='logging level')
 args = parser.parse_args()
 
-with open(args.configFile, 'rt', encoding='utf-8') as file:
+with open(args.configFile, 'rt', encoding='utf-8-sig') as file:
     global config
     config = json.load(file)
 

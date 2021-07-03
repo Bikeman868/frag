@@ -64,13 +64,13 @@
         return headerOffset;
     }
 
-    private.loadMaterialV1 = function (materialStore, header, headerOffset, data, dataOffset) {
+    private.loadMaterialV1 = function (assetCatalog, header, headerOffset, data, dataOffset) {
         const nameLength = header.getUint8(headerOffset++);
         var name = "";
         for (let i = 0; i < nameLength; i++) {
             name += String.fromCharCode(header.getUint8(headerOffset++));
         }
-        const material = materialStore.getMaterial(name);
+        const material = assetCatalog.getMaterial(name);
         if (frag.debugMaterialLoader) {
             console.log("");
             console.log("Loading " + name + " material textures");
@@ -118,7 +118,7 @@
         if (version === 1) {
             var textureSize = header.getUint16(headerOffset, littleEndian);
             while (textureSize !== 0) {
-                private.loadMaterialV1(materialStore, header, headerOffset + 2, buffer, dataOffset);
+                private.loadMaterialV1(assetCatalog, header, headerOffset + 2, buffer, dataOffset);
                 headerOffset += textureSize;
                 textureSize = header.getUint16(headerOffset, littleEndian);
             }
