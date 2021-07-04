@@ -23,8 +23,10 @@ class JsonExporter:
 
         logger = Logger(filepath.rpartition('.')[0] + '.log')
         try:
+            obj = context.object
+            while obj.parent: obj = obj.parent
             serializer = FragSerializer(context)
-            data = serializer.serialize(context.object)
+            data = serializer.serialize(obj)
             return self.write_json(filepath, data)
         except BaseException as error:
             self.fatalError = str(error)

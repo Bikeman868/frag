@@ -1,4 +1,5 @@
 import bpy
+import mathutils
 from .logger import Logger
 
 class FragSerializer:
@@ -87,48 +88,26 @@ class FragSerializer:
 
         Logger.log('Serializing object ' + obj.name)
         if obj.mode == 'EDIT':
-            Logger.log('Applying unsaved edits in ' + obj.name)
+            Logger.log('Applying unsaved edits in ' + obj.name, 2)
             obj.update_from_editmode()
 
-        locationX = obj.location.x + obj.delta_location.x
-        locationY = obj.location.y + obj.delta_location.y 
-        locationZ = obj.location.z + obj.delta_location.z
-
-        rotationX = obj.rotation_euler.x + obj.delta_rotation_euler.x
-        rotationY = obj.rotation_euler.y + obj.delta_rotation_euler.y
-        rotationZ = obj.rotation_euler.z + obj.delta_rotation_euler.z
-
-        scaleX = obj.scale.x * obj.delta_scale.x
-        scaleY = obj.scale.y * obj.delta_scale.y
-        scaleZ = obj.scale.z * obj.delta_scale.z
-
-        if obj.parent:
-            locationX -= obj.parent.location.x + obj.parent.delta_location.x
-            locationY -= obj.parent.location.y + obj.parent.delta_location.y
-            locationZ -= obj.parent.location.z + obj.parent.delta_location.z
-
-            rotationX -= obj.parent.rotation_euler.x + obj.parent.delta_rotation_euler.x
-            rotationY -= obj.parent.rotation_euler.y + obj.parent.delta_rotation_euler.y
-            rotationZ -= obj.parent.rotation_euler.z + obj.parent.delta_rotation_euler.z
-
-            scaleX /= obj.parent.scale.x * obj.parent.delta_scale.x
-            scaleY /= obj.parent.scale.y * obj.parent.delta_scale.y
-            scaleZ /= obj.parent.scale.z * obj.parent.delta_scale.z
+        location, rotation, scale = (obj.matrix_local).decompose()
+        Logger.log('Loc, rot, scale ' + str(location) + str(rotation) + str(scale), 2)
 
         serialization = { 
             'name': obj.name, 
             'location': [
-                round(locationX, 4), 
-                round(locationY, 4), 
-                round(locationZ, 4)], 
+                round(location.x, 4), 
+                round(location.y, 4), 
+                round(location.z, 4)], 
             'rotation': [
-                round(rotationX, 4), 
-                round(rotationY, 4), 
-                round(rotationZ, 4)], 
+                round(rotation.x, 4), 
+                round(rotation.y, 4), 
+                round(rotation.z, 4)], 
             'scale': [
-                round(scaleX, 4), 
-                round(scaleY, 4), 
-                round(scaleZ, 4)], 
+                round(scale.x, 4), 
+                round(scale.y, 4), 
+                round(scale.z, 4)], 
             'children': [ child.name for child in obj.children ]
             }
 
@@ -155,29 +134,18 @@ class FragSerializer:
         if mesh is None:
             return ''
 
-        baseX = obj.location.x + obj.delta_location.x
-        baseY = obj.location.y + obj.delta_location.y
-        baseZ = obj.location.z + obj.delta_location.z
-
-        if obj.parent:
-            baseX += obj.parent.location.x + obj.parent.delta_location.x
-            baseY += obj.parent.location.y + obj.parent.delta_location.y
-            baseZ += obj.parent.location.z + obj.parent.delta_location.z
+        base = mathutils.Vector()
 
         if action != None:
             for group in action.groups:
                 for channel in group.channels:
                     if channel.data_path == 'delta_location' or channel.data_path == 'location':
                         firstKeyframe = channel.keyframe_points[0]
-                        if channel.array_index == 0: baseX += firstKeyframe.co.y
-                        elif channel.array_index == 1: baseY += firstKeyframe.co.y
-                        elif channel.array_index == 2: baseZ += firstKeyframe.co.y
+                        if channel.array_index == 0: base.x += firstKeyframe.co.y
+                        elif channel.array_index == 1: base.y += firstKeyframe.co.y
+                        elif channel.array_index == 2: base.z += firstKeyframe.co.y
 
         id = mesh.name
-        mat = obj.matrix_world
-        mesh.transform(mat)
-        if mat.is_negative:
-            mesh.flip_normals()
         mesh.calc_loop_triangles()
 
         vertices = mesh.vertices
@@ -188,8 +156,9 @@ class FragSerializer:
         serialization = { 
             'id': mesh.name,
             'materials': [material.name for material in mesh.materials],
-            'vertices': [self.serializePosition(v.co, baseX, baseY, baseZ) for v in vertices],
+            'vertices': [self.serializePosition(v.co, base.x, base.y, base.z) for v in vertices],
             'triangles': [{
+                "smooth": tri.use_smooth,
                 "vertices": [tri.vertices[0], tri.vertices[1], tri.vertices[2]], 
                 "normal": self.serializePosition(tri.normal, 0, 0, 0)
                 } for tri in triangles], 

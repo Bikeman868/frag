@@ -272,11 +272,11 @@
             const butterfly = Butterfly();
             butterfly.addToScene(scene);
             butterfly.flying(true);
-            setTimeout(butterfly.die, 60000);
+            setTimeout(butterfly.die, 5 * 60 * 1000);
         }
 
         for (let i = 0; i < 5; i++) addButterflyToScene();
-        setInterval(addButterflyToScene, 1461);
+        setInterval(addButterflyToScene, 321);
 
         // Move all of the butterflies that are flying
 

@@ -1,7 +1,6 @@
 # Things that need to be added or improved
 
 ## Bug fixes
-* Some Blender models don't export correctly.
 * The truck tips upside down in the truck-on-a-track sample.
 
 ## Core features that are missing
@@ -12,10 +11,10 @@
 * Shader support for full PBR model
 * Armatures and character animation
 * Bitmap font textures and text rendering
-* Vector fonts as 2D mesh for each character
+* Vector fonts as 2D mesh per ASCII character
 
 ## Optional nice to have features
 * Play sounds synced with animations.
 * Input methods - touch screen, mouse, keyboard.
-* Large dynamic ground where graphics only show the player locale
+* Dynamic ground where only the player locale is rendered
 * UI widgets such as menus, dockable panels, modal popups etc

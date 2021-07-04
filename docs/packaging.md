@@ -33,6 +33,35 @@ Note that we do not export materials from Blender. This doesn't work for games b
 * The same model should look different for each player, i.e. same model with different materials
 * The materials used typically vary by level or scenario within your game
 
+When creating models in Blender follow these guidelines
+* Start by creating an "Empty" and position it on the groumd where you want the origin of your 
+model to be.
+* When you scale or rotate your model in the game, the "Empty" at the root of the obejct hierarchy 
+will be the centre of rotation and scaling.
+* When you position your object within the game scene, the "Empty" at the root of the object hierarchy
+will be placed at this location, and the rest of the model will be drawn relative to this.
+* Parent all of the other parts of your model to the "Empty". Each part of the model can contain
+child objects etc to any depth.
+* The name of the "Empty" is irrelevant, so call it anything you like.
+* Name any objects within your model that you want to annimate. Objects that are not animated do not
+need to be named, but naming them can help with debugging issues.
+* If you creat animations using the "Dope Sheet" then each object can only have one animation. Since
+dope sheet actions must have unique names, but you might want multiple objects to move when an animation
+is started. To make this work, you must name your actions by combining the name of the object and the
+name of the animation. For example if you have wheels on your model that should all turn together when 
+the "Moving" animation is started, and if your wheels are named "Wheel1" and "Wheel2", then the dope sheet
+actions must be called "Wheel1Moving" and "Wheel2Moving" for them to work.
+* If you push dope sheet actions down onto NLA action strips, then you should name the action strips
+with whatever you want the animation to be called within the gaem. For example if you create an action 
+strip called "Moving" then scene objects created from this model will have an `animations.moving` property
+that can be used to start and stop the animation.
+* Material names are exported from Blender but not the materials themselves. This means that you can
+create materials in Blender with any characterstics you like, only the name of the material matters. Frag
+works this way because it is much more efficient to reuse materials accross multiple models. The assumption
+is that you will draw many models using the same material names in each model, then import the materials
+into the game once only and apply them to all of the models within the game. You can also define your materials
+in code if you like rather than importing them.
+
 ## 2. Install the Frag exporter addon for Blender
 To install the exporter you can copy the Python code from `./tools/blender/FragExporter` in this
 repository into the Blender `addons` folder. Alternatively you can Zip this folder and use the "Install Addon"
