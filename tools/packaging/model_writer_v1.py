@@ -39,10 +39,26 @@ class ModelWriter:
         self._writeAnimations(logIndent, animations, msPerFrame)
         self._writeModels(logIndent, models, model.name)
 
+
+
     def _transformData(self, logIndent, models, animations, meshes):
         meshesById = {mesh['id'] : mesh for mesh in meshes}
         animationsByName = {animation['name'] : animation for animation in animations}
         modelsByName = {model['name'] : model for model in models}
+
+        def _addOrUpdateAnimation(animation, modelName,):
+            for channel in animation['channels']:
+                channel['pattern'] = '^' + modelName + '$'
+            if modelAnimationName in animationsByName:
+                existing = animationsByName[modelAnimationName]
+                Logger.debug('Adding {} channels to existing {} animation'.format(len(animation['channels']), modelAnimationName), logIndent + 1)
+                for channel in animation['channels']:
+                    existing['channels'].append(channel)
+            else:
+                Logger.debug('New {} animation with {} channels'.format(modelAnimationName, len(animation['channels'])), logIndent + 1)
+                animationsByName[modelAnimationName] = animation
+                animations.append(animation)
+            del animationsByName[animationName]
 
         for animation in animations:
             animation['channels'] = list()
@@ -57,6 +73,7 @@ class ModelWriter:
             modelName = model['name']
             animationName = model.get('animation', None)
             meshId = model.get('mesh', None)
+            tracks = model.get('tracks', {})
             Logger.debug('Model {} animation={} mesh={}'.format(modelName, animationName, meshId), logIndent)
 
             children = [modelsByName[childName] for childName in model['children']]
@@ -74,18 +91,13 @@ class ModelWriter:
                 animation = animationsByName[animationName]
                 modelAnimationName = animation['name'][len(modelName):]
                 animation['name'] = modelAnimationName
-                for channel in animation['channels']:
-                    channel['pattern'] = '^' + modelName + '$'
-                if modelAnimationName in animationsByName:
-                    existing = animationsByName[modelAnimationName]
-                    Logger.debug('Adding {} channels to existing {} animation'.format(len(animation['channels']), modelAnimationName), logIndent + 1)
-                    for channel in animation['channels']:
-                        existing['channels'].append(channel)
-                else:
-                    Logger.debug('New {} animation with {} channels'.format(modelAnimationName, len(animation['channels'])), logIndent + 1)
-                    animationsByName[modelAnimationName] = animation
-                    animations.append(animation)
-                del animationsByName[animationName]
+                _addOrUpdateAnimation(animation, modelName)
+            
+            if len(tracks):
+                for modelAnimationName, animationName in tracks.items():
+                    animation = animationsByName[animationName]
+                    animation['name'] = modelAnimationName
+                    _addOrUpdateAnimation(animation, modelName)
 
         Logger.debug('Animation channels extracted:', logIndent)
         for animation in animations:

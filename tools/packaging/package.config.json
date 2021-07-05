@@ -13,6 +13,9 @@
         }],
         "groups":[{
             "modelName": "{type}",
+            "include": "{type}_nla.frag_model"
+        },{
+            "modelName": "{type}_dope",
             "include": "{type}_dope.frag_model"
         }]
     }],

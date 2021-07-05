@@ -30,7 +30,7 @@
         frag.config = function() {
             frag.debugModelLoader = true;
             frag.debugAnimations = true;
-            frag.debugShaderBuilder = true;
+            frag.debugShaderBuilder = false;
         }
         frag.init();
 
@@ -66,7 +66,7 @@
             // Next we are going to define an animation sequence for
             // the excavator that has five steps as follows:
 
-            const invLinearVelocity = 1.5;
+            const invLinearVelocity = 3;
             const position = excavator.getPosition();
 
             // Step 1 in the animation sequence
