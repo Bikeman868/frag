@@ -45,16 +45,21 @@ child objects etc to any depth.
 * The name of the "Empty" is irrelevant, so call it anything you like.
 * Name any objects within your model that you want to annimate. Objects that are not animated do not
 need to be named, but naming them can help with debugging issues.
-* If you creat animations using the "Dope Sheet" then each object can only have one animation. Since
-dope sheet actions must have unique names, but you might want multiple objects to move when an animation
-is started. To make this work, you must name your actions by combining the name of the object and the
-name of the animation. For example if you have wheels on your model that should all turn together when 
-the "Moving" animation is started, and if your wheels are named "Wheel1" and "Wheel2", then the dope sheet
-actions must be called "Wheel1Moving" and "Wheel2Moving" for them to work.
+* If you create animations by adding "Actions" to the "Dope Sheet" then each object can only have one 
+animation. Since dope sheet actions must have unique names, but you might want multiple objects to move 
+when an animation is started. To make this work, you must name your actions by combining the name of the 
+object and the name of the animation. For example if you have wheels on your model that should all turn 
+together when the "Moving" animation is started, and if your wheels are named "Wheel1" and "Wheel2", 
+then the dope sheet actions must be called "Wheel1Moving" and "Wheel2Moving" for them to work.
 * If you push dope sheet actions down onto NLA action strips, then you should name the action strips
-with whatever you want the animation to be called within the gaem. For example if you create an action 
+with whatever you want the animation to be called within the game. For example if you create an action 
 strip called "Moving" then scene objects created from this model will have an `animations.moving` property
-that can be used to start and stop the animation.
+that can be used to start and stop the animation. In this case it doesn't matter how you name the Actions.
+Pushing Actions down onto Action Strips allows you to define multiple animations for the same object.
+* You can mix NLA Action Strips and Dope Sheet Actions in the same Blender file. For Actions that are
+not pushed onto Action Strips, the name of the Action defines the name of the animation in Frag after
+stripping off the object name prefix. For Actions that are pushed down onto Action Strips, the name of the 
+action strip will be the name of the animation in Frag.
 * Material names are exported from Blender but not the materials themselves. This means that you can
 create materials in Blender with any characterstics you like, only the name of the material matters. Frag
 works this way because it is much more efficient to reuse materials accross multiple models. The assumption
