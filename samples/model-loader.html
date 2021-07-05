@@ -52,7 +52,7 @@
         const modelsLoaded = function(assetCatalog) {
 
             // Get the "excavator" model that was loaded
-            const excavatorModel = assetCatalog.getModel('excavator')
+            const excavatorModel = assetCatalog.getModel('excavator_nla')
                 //.drawNormals(0.5, [255, 0, 0], 1)
                 //.shadeFlat()
                 .shadeSmooth()
@@ -94,7 +94,7 @@
             const step4 = excavator.animations.tipping;
 
             // Step 5 in the animation sequence
-            // Move the excavator from +30 back to 0 on the x-axis so that the animation can loop
+            // Move the excavator from +20 back to 0 on the x-axis so that the animation can loop
             // whilst running the "moving" animation
             const step5 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([-20, 0, 0])

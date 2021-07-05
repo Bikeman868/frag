@@ -39,18 +39,18 @@ class ModelWriter:
         self._writeAnimations(logIndent, animations, msPerFrame)
         self._writeModels(logIndent, models, model.name)
 
-
-
     def _transformData(self, logIndent, models, animations, meshes):
         meshesById = {mesh['id'] : mesh for mesh in meshes}
         animationsByName = {animation['name'] : animation for animation in animations}
         modelsByName = {model['name'] : model for model in models}
 
-        def _addOrUpdateAnimation(animation, modelName,):
+        def addOrUpdateAnimation(animation, modelName, animationName):
             for channel in animation['channels']:
                 channel['pattern'] = '^' + modelName + '$'
             if modelAnimationName in animationsByName:
                 existing = animationsByName[modelAnimationName]
+                if animation['frames'][0] < existing['frames'][0]: existing['frames'][0] = animation['frames'][0]
+                if animation['frames'][1] > existing['frames'][1]: existing['frames'][1] = animation['frames'][1]
                 Logger.debug('Adding {} channels to existing {} animation'.format(len(animation['channels']), modelAnimationName), logIndent + 1)
                 for channel in animation['channels']:
                     existing['channels'].append(channel)
@@ -91,13 +91,13 @@ class ModelWriter:
                 animation = animationsByName[animationName]
                 modelAnimationName = animation['name'][len(modelName):]
                 animation['name'] = modelAnimationName
-                _addOrUpdateAnimation(animation, modelName)
+                addOrUpdateAnimation(animation, modelName, animationName)
             
             if len(tracks):
                 for modelAnimationName, animationName in tracks.items():
                     animation = animationsByName[animationName]
                     animation['name'] = modelAnimationName
-                    _addOrUpdateAnimation(animation, modelName)
+                    addOrUpdateAnimation(animation, modelName, animationName)
 
         Logger.debug('Animation channels extracted:', logIndent)
         for animation in animations:
@@ -175,7 +175,7 @@ class ModelWriter:
                     dataPath = channel['data_path']
                     dataIndex = channel['array_index']
 
-                    Logger.debug('Writing {}[{}] channel matching '.format(dataPath, 'xzy'[dataIndex], pattern), logIndent + 1)
+                    Logger.debug('Writing {}[{}] channel matching {}'.format(dataPath, 'xzy'[dataIndex], pattern), logIndent + 1)
                     self._writer.writeIndexStr(pattern)
                     scale = 1
                     if (dataPath == 'location'): 

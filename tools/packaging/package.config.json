@@ -12,7 +12,7 @@
             "version": 1
         }],
         "groups":[{
-            "modelName": "{type}",
+            "modelName": "{type}_nla",
             "include": "{type}_nla.frag_model"
         },{
             "modelName": "{type}_dope",

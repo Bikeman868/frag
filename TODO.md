@@ -5,7 +5,6 @@
 
 ## Core features that are missing
 * Creating material packages.
-* Export NLA strips from Blender.
 * Detecting the model closest to the camera at specific pixel coordinates.
 * Particle system
 * Shader support for full PBR model
