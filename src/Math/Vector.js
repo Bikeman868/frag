@@ -52,7 +52,7 @@ window.frag.Vector = {
     },
     average: function (a, b) {
         const result = [];
-        for (let i = 0; i < a.length; i++) result.push((a[i] + b[i]) / 2);
+        for (let i = 0; i < a.length; i++) result.push((a[i] + b[i]) * 0.5);
         return result;
     },
     cross: function (a, b) {
