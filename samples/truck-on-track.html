@@ -142,7 +142,7 @@
 
         // Create an instance of the truck model and add it to the scene
         const truck = frag.SceneObject(truckModel);
-        truck.getPosition().scale(6).location([0, -50, 0]);
+        truck.getPosition().scale(6).location([-10, -50, 0]);
         scene.addObject(truck);
 
         // Define a track that the truck will move along. This is just a list
@@ -224,11 +224,14 @@
         const position = truck.getPosition();
         const truckPosition = [0, 15, 0]; // This is the position of the truck relative to the track
         for (let iThis = 0; iThis < track.length; iThis += 3) {
-            const iNext = iThis + 3 >= track.length ? 0 : iThis + 3;
-
             const thisTrackLocation = Vector.extract3D(track, iThis);
-            const nextTracklocation = Vector.extract3D(track, iNext);
+            
+            if (iThis === 0){
+                actions.push(frag.PositionAnimationAction(position).moveTo(Vector.add(thisTrackLocation, truckPosition), invLinearVelocity));
+            }
 
+            const iNext = iThis + 3 >= track.length ? 0 : iThis + 3;
+            const nextTracklocation = Vector.extract3D(track, iNext);
             const angle = Vector.eulerAngles(Vector.sub(nextTracklocation, thisTrackLocation));
             angle[1] -= Math.PI * 0.5;
 
