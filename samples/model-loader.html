@@ -73,7 +73,7 @@
             // Move the excavator from 0 to -80 on the x-axis
             // whilst running the "moving" animation
             const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
-                .moveBy([-80, 0, 0])
+                .moveTo([-80, -30, 0])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 

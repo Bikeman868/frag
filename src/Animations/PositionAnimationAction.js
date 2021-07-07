@@ -102,8 +102,8 @@ window.frag.PositionAnimationAction = function (scenePosition, invLinearVelocity
     const angularDelta = function(a, b) {
         const delta = Vector.sub(a, b);
         for (let i = 0; i < delta.length; i++) {
-            if (delta[i] < -Math.PI) delta[i] = Math.PI * 2 + delta[i];
-            if (delta[i] > Math.PI) delta[i] = -Math.PI * 2 + delta[i];
+            while (delta[i] < -Math.PI) delta[i] += Math.PI * 2;
+            while (delta[i] > Math.PI) delta[i] -= Math.PI * 2;
         }
         return delta;
     }

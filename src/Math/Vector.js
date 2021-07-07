@@ -78,5 +78,21 @@ window.frag.Vector = {
     },
     append: function(a, v) {
         for (let i = 0; i < v.length; i++) a.push(v[i]);
+    },
+    eulerAngles: function(directionVector, upVector) {
+        const Vector = window.frag.Vector;
+        if (!upVector) upVector = [0, 1, 0];
+
+        const dir = Vector.normalize(directionVector);
+        const up = Vector.normalize(upVector);
+
+        const pitch = Math.asin(dir[1]);
+        const yaw = Math.atan2(dir[0], dir[2]);
+
+        const wingDir = [-dir[2], 0, dir[0]];
+        const vertical = Vector.cross(wingDir, dir);
+        const roll = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
+
+        return [roll, yaw, pitch];
     }
 }

@@ -86,4 +86,17 @@ Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator
 * Create a material package that paints the model in PBR materials exported from Substance Player
 * Add some terrain for the excavator to move on
-* Update the model in Blender. Export a Frag model and rebuild the model package
+* Update the model in Blender. Export a Frag model from Blender and rebuild the model package
+
+## Truck on a Track
+This [sample](truck-on-track.html) illustrates the following features and techniques:
+* Creating complex animations in code. In this case the truck moves along a 3D path in the scene at constant speed
+* Combining scene position animation with model animations in a sequence
+* applying the same animation to multiple child objects (turning the wheels)
+* Drawing complex shapes in code. In this case the track is drawn as a 3D ribbon
+
+Things to mess around with on this sample:
+* Alter the shape and length of the track
+* Improve the appearence of the truck
+* Make the truck and trailor pivot when it goes around corners
+* Make the front wheels of the truck turn when it is turning
