@@ -1,4 +1,4 @@
-﻿window.frag = window.frag || {};
+window.frag = window.frag || {};
 window.frag.Vector = {
     extract2D: function (array, offset) {
         if (!array) return null;

@@ -1,4 +1,4 @@
-﻿// This is a wrapper around a 4x4 matrix. It provides methods to operate on the matrix
+// This is a wrapper around a 4x4 matrix. It provides methods to operate on the matrix
 // and can appply the matrix to a shader for rendering. It also provides an observable
 // that you can subscribe to changes in the matrix
 window.frag.Transform = function (matrix) {

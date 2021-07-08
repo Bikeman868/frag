@@ -1,4 +1,4 @@
-﻿// This camera draws objects in their actual size regardless of how far from the camera they are.
+// This camera draws objects in their actual size regardless of how far from the camera they are.
 // The frustrum affects z clip space and XY scaling to the viewport but does not scale objects in the scene
 
 window.frag.OrthographicCamera = function () {

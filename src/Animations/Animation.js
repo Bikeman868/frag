@@ -1,4 +1,4 @@
-﻿// The framework maintains a list of these animations and runs the animations
+// The framework maintains a list of these animations and runs the animations
 // efficiently within the rendering cycle. All animation mechanisms use this
 // implementation as a base. Note that an object can be passed into the constructor
 // and it will be embelished with proprties and methods to make it into an animation.

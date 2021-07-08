@@ -1,4 +1,4 @@
-﻿// Defines an animation that can be applied to scene objects based on a particular model
+// Defines an animation that can be applied to scene objects based on a particular model
 window.frag.ModelAnimation = function () {
     const private = {
         loop: false,

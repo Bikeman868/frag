@@ -1,4 +1,4 @@
-﻿// Provides a mechanism to execute animation actions at specific keyframes
+// Provides a mechanism to execute animation actions at specific keyframes
 // KeyframeAnimationAction objects can be passed to an Animation object as the action
 // to take in one of the steps in an animation sequence
 window.frag.KeyframeAnimationAction = function () {

@@ -1,4 +1,4 @@
-﻿// This public makes objects closer to the public appear larger. The frustrum
+// This public makes objects closer to the public appear larger. The frustrum
 // defines clipping and scaling of the scene
 
 window.frag.PerspectiveCamera = function () {

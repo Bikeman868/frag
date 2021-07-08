@@ -1,4 +1,4 @@
-﻿window.frag.ParallelAnimationAction = function ([actions]) {
+window.frag.ParallelAnimationAction = function ([actions]) {
     const private = {
         actions
     };

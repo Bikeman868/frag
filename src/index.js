@@ -37,12 +37,10 @@ require("./Animations/ParallelAnimationAction");
 require("./Animations/RepeatAnimationAction");
 require("./Animations/PositionAnimationAction");
 
-require("./Shapes/Plane");
-require("./Shapes/Disc");
-require("./Shapes/Cylinder");
-require("./Shapes/BasicCube");
 require("./Shapes/Cube");
-require("./Shapes/SeparatedCube");
+require("./Shapes/Cylinder");
+require("./Shapes/Disc");
+require("./Shapes/Plane");
 
 require("./Loaders/AssetCatalog");
 require("./Loaders/MaterialLoader");

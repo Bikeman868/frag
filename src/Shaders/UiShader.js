@@ -1,4 +1,4 @@
-﻿window.frag.startFunctions.push(function(frag) {
+window.frag.startFunctions.push(function(frag) {
     frag.uiShader = frag.Shader()
         .name("UI")
         .verticiesXY(-1)  // Renders in xy plane with z = -1

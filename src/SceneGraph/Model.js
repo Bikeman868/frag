@@ -1,4 +1,4 @@
-﻿window.frag.Model = function (is3d, parent) {
+window.frag.Model = function (is3d, parent) {
     const frag = window.frag;
 
     if (is3d === undefined) {

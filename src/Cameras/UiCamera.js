@@ -1,4 +1,4 @@
-﻿// This public draws 2D shapes scaled to the width of the viewport.
+// This public draws 2D shapes scaled to the width of the viewport.
 // It is designed to be used in conjunction with the UiShader which will project onto the front of the viewport.
 
 window.frag.UiCamera = function () {

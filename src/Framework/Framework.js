@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
     const frag = window.frag;
     const scenes = [];
     const activeAnimations = {};

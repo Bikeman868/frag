@@ -1,4 +1,4 @@
-﻿// Applies mesh smoothing and calculates normals and binormals where required
+// Applies mesh smoothing and calculates normals and binormals where required
 window.frag.MeshOptimizer = function () {
     const frag = window.frag;
 

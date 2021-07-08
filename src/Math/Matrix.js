@@ -1,4 +1,4 @@
-﻿window.frag = window.frag || {};
+window.frag = window.frag || {};
 window.frag.Matrix = {
     m3Identity: function () {
         return [

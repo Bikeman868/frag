@@ -1,4 +1,4 @@
-﻿window.frag.Material = function () {
+window.frag.Material = function () {
     const private = {
         textures: {},
         disposeTextures: false

@@ -1,4 +1,4 @@
-﻿window.frag.createShader = function (name, type, source) {
+window.frag.createShader = function (name, type, source) {
     const frag = window.frag;
     const gl = frag.gl;
 

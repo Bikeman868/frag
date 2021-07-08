@@ -1,4 +1,4 @@
-﻿window.frag.SceneObject = function (model) {
+window.frag.SceneObject = function (model) {
     const frag = window.frag;
 
     const private = {

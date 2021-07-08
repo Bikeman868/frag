@@ -1,4 +1,4 @@
-﻿window.frag.VertexData = function() {
+window.frag.VertexData = function() {
     const frag = window.frag;
     const gl = frag.gl;
 

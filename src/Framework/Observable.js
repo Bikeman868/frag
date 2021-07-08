@@ -1,4 +1,4 @@
-﻿window.frag.Observable = function (notify) {
+window.frag.Observable = function (notify) {
     const private = {
         notify,
         observers: []

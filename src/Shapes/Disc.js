@@ -1,4 +1,4 @@
-﻿window.frag.Disc = function (facets, options) {
+window.frag.Disc = function (facets, options) {
     facets = facets || 32;
     options = options || {};
 

@@ -1,4 +1,4 @@
-﻿// A public is a camera and a collection of meshes. The camera defines how the
+// A public is a camera and a collection of meshes. The camera defines how the
 // meshes will be projected onto the viewport. Several scenes can be projecterd onto
 // the same viewport, but only one of these scenes should set the viewport and the rest
 // should adjust to the viewport.

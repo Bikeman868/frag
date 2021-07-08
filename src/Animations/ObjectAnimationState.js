@@ -1,4 +1,4 @@
-﻿// Represents the current state of an object being animated
+// Represents the current state of an object being animated
 window.frag.ObjectAnimationState = function () {
     const private = {
     };

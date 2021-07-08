@@ -1,4 +1,4 @@
-﻿window.frag.Cylinder = function (facets, options) {
+window.frag.Cylinder = function (facets, options) {
     facets = facets || 32;
     options = options || {};
 

@@ -1,4 +1,4 @@
-﻿window.frag.Texture = function () {
+window.frag.Texture = function () {
     const frag = window.frag;
     const gl = frag.gl;
 

@@ -1,4 +1,4 @@
-﻿window.frag.ModelLoader = (function () {
+window.frag.ModelLoader = (function () {
     const frag = window.frag;
 
     const uInt32 = new Uint32Array([0x11223344]);

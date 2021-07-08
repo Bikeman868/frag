@@ -1,4 +1,4 @@
-﻿// Represents a collection of mesh fragments where each
+// Represents a collection of mesh fragments where each
 // fragment is a collection of triangles
 window.frag.MeshData = function () {
     const frag = window.frag;

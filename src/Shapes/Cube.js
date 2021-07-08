@@ -1,4 +1,4 @@
-﻿// This cube consists of a single sub-mesh so that smooth shading works correctly
+// This cube consists of a single sub-mesh so that smooth shading works correctly
 window.frag.Cube = function (facets, options) {
     options = options || {};
     if (options.drawFront === undefined) options.drawFront = true;

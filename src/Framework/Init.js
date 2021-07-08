@@ -1,4 +1,4 @@
-﻿/* To customize Frag for your application, set properties of the
+/* To customize Frag for your application, set properties of the
    frag object before calling `window.frag.init()` as illustrated 
    by the following example:
 

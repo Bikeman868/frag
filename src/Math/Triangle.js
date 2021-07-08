@@ -1,4 +1,4 @@
-﻿window.frag = window.frag || {};
+window.frag = window.frag || {};
 window.frag.Triangle = {
     makeTriangleFromVectors: function (a, b, c) {
         return { a, b, c };

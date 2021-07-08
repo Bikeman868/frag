@@ -1,4 +1,4 @@
-﻿// Constructs a model animation in the context of a scene object
+// Constructs a model animation in the context of a scene object
 // For example this could be the "moving" animation for a model. Constructing this
 // object enables you to start and stop this animation on a specific scene object
 window.frag.SceneObjectAnimation = function (animation, animationMap) {

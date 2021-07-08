@@ -1,4 +1,4 @@
-﻿// Provides a mechanism to execute another animation action a specific
+// Provides a mechanism to execute another animation action a specific
 // number of times
 window.frag.RepeatAnimationAction = function (action, count) {
     return {

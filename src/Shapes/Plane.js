@@ -1,4 +1,4 @@
-﻿window.frag.Plane = function (facets, options) {
+window.frag.Plane = function (facets, options) {
     facets = facets || 1;
     options = options || {};
 

@@ -1,4 +1,4 @@
-﻿// This class provides a set of helper methods for
+// This class provides a set of helper methods for
 // manipulating a Location object
 window.frag.ScenePosition = function (location) {
     const private = {

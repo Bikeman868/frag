@@ -1,4 +1,4 @@
-﻿// Provides a mechanism to change a value over time. For example smoothly change
+// Provides a mechanism to change a value over time. For example smoothly change
 // one color into another or smoothly move an object within the scene.
 // ValueAnimationAction objects can be passed to an Animation object as the action
 // to take in one of the steps in an animation sequence
