@@ -81,6 +81,7 @@ Once you have a Python http server running you can see this sample running at th
 * Loads a package of models that were exported from Blender
 * Defines the materials to use to paint the models as 1x1 pixel textures
 * Creates an animation sequence that combines model movements within the scene with animations imported from Blender
+* Adds a mouse down event listener and logs the name of the object that was clicked by the mouse
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator

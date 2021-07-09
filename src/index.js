@@ -47,3 +47,6 @@ require("./Loaders/MaterialLoader");
 require("./Loaders/ModelLoader");
 
 require("./Input/HitTest");
+require("./Input/InputMethod");
+require("./Input/DigitalInput");
+require("./Input/AnalogInput");

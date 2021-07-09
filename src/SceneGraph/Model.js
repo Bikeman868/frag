@@ -67,6 +67,10 @@ window.frag.Model = function (is3d, parent) {
         return public;
     }
 
+    public.getMesh = function() {
+        return private.meshData;
+    }
+
     public.material = function (value) {
         private.material = value;
         return public;

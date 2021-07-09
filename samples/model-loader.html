@@ -143,12 +143,26 @@
         // When loading completes, the modelsLoaded() function will be called
         frag.ModelLoader.loadModelsFromUrl(packageUrl, assetCatalog, modelsLoaded)
 
-        frag.canvas.addEventListener(
-            "mousedown", 
-            function(evt) {
-                const hit = frag.hitTest(evt.clientX, evt.clientY);
-                console.log(evt.clientX, evt.clientY, hit.model.getName());
-            }, 
-            false);
+        // Show wireframe when middle mouse button is down
+        let selectedModel = null;
+        const inputs = frag.InputMethod()
+            .add(frag.DigitalInput(
+                "middle-mouse", 
+                function(isDown, input, evt) {
+                    if (isDown) {
+                        const hit = frag.hitTest(evt.clientX, evt.clientY);
+                        if (hit) {
+                            selectedModel = hit.model;
+                            selectedModel.getMesh().wireframe(true);
+                        }
+                    } else {
+                        if (selectedModel) {
+                            selectedModel.getMesh().wireframe(false);
+                            selectedModel = null;
+                        }
+                    }
+                }
+            ));
+        inputs.enable();
     </script>
 </body>
