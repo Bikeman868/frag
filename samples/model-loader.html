@@ -28,9 +28,9 @@
         const frag = window.frag;
 
         frag.config = function() {
-            frag.debugModelLoader = true;
-            frag.debugAnimations = true;
-            frag.debugShaderBuilder = false;
+            frag.debugModelLoader = false;
+            frag.debugAnimations = false;
+            frag.debugShaderBuilder = true;
         }
         frag.init();
 
@@ -143,5 +143,12 @@
         // When loading completes, the modelsLoaded() function will be called
         frag.ModelLoader.loadModelsFromUrl(packageUrl, assetCatalog, modelsLoaded)
 
+        frag.canvas.addEventListener(
+            "mousedown", 
+            function(evt) {
+                const hit = frag.hitTest(evt.clientX, evt.clientY);
+                console.log(evt.clientX, evt.clientY, hit.model.getName());
+            }, 
+            false);
     </script>
 </body>

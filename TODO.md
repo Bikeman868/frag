@@ -1,11 +1,10 @@
 # Things that need to be added or improved
 
 ## Bug fixes
-* The truck tips upside down in the truck-on-a-track sample.
+No known bugs at this time.
 
 ## Core features that are missing
 * Creating material packages.
-* Detecting the model closest to the camera at specific pixel coordinates.
 * Particle system
 * Shader support for full PBR model
 * Armatures and character animation

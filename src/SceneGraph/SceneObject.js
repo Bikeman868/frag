@@ -113,7 +113,7 @@ window.frag.SceneObject = function (model) {
     /**
      * This is used internally by the engine. Don't call this from your game code
      */
-    public.draw = function (gl, worldToClipTransform) {
+    public.draw = function (drawContext) {
         if (!private.enabled) return public;
 
         let location = private.getLocation();
@@ -123,13 +123,17 @@ window.frag.SceneObject = function (model) {
             location = location.clone().add(private.animationLocation);
         }
 
-        const worldToClipMatrix = worldToClipTransform.getMatrix();
+        const worldToClipMatrix = drawContext.worldToClipTransform.getMatrix();
         const modelToWorldMatrix = location.getMatrix();
-        const modelToClipMatrix = worldToClipTransform.is3d
+        const modelToClipMatrix = drawContext.worldToClipTransform.is3d
             ? frag.Matrix.m4Xm4(worldToClipMatrix, modelToWorldMatrix)
             : frag.Matrix.m3Xm3(worldToClipMatrix, modelToWorldMatrix);
 
-        private.model.draw(gl, modelToWorldMatrix, modelToClipMatrix, private.animationMap);
+        if (drawContext.isHitTest) {
+            drawContext.sceneObjects.push(public);
+        }
+
+        private.model.draw(drawContext, modelToWorldMatrix, modelToClipMatrix, private.animationMap);
 
         return public;
     };

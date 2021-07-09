@@ -24,6 +24,10 @@
         return frag;
     }
 
+    frag.getMainScene = function () {
+        return mainScene;
+    }
+
     frag.addScene = function (scene) {
         scenes.push(scene);
         return frag;
@@ -82,7 +86,7 @@
 
     const render = function () {
         if (mainScene) {
-            let gl = frag.gl;
+            const gl = frag.gl;
 
             const t0 = performance.now();
             gameTick = Math.floor((t0 - startTime) / window.frag.gameTickMs);
@@ -93,11 +97,13 @@
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             mainScene.setViewport(gl);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            mainScene.draw(gl);
+
+            const drawContext = { gl };
+            mainScene.draw(drawContext);
 
             for (let i = 0; i < scenes.length; i++) {
                 scenes[i].adjustToViewport(gl);
-                scenes[i].draw(gl);
+                scenes[i].draw(drawContext);
             }
 
             const t1 = performance.now();

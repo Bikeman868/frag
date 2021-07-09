@@ -60,10 +60,11 @@ window.frag.Scene = function() {
         return public;
     }
 
-    public.draw = function (gl) {
+    public.draw = function (drawContext) {
         if (private.activeCamera) {
+            drawContext.worldToClipTransform = private.activeCamera.worldToClipTransform;
             for (let i = 0; i < private.sceneObjects.length; i++)
-                private.sceneObjects[i].draw(gl, private.activeCamera.worldToClipTransform);
+                private.sceneObjects[i].draw(drawContext);
         }
     }
 

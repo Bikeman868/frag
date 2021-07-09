@@ -45,3 +45,5 @@ require("./Shapes/Plane");
 require("./Loaders/AssetCatalog");
 require("./Loaders/MaterialLoader");
 require("./Loaders/ModelLoader");
+
+require("./Input/HitTest");

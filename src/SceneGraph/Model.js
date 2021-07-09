@@ -168,7 +168,7 @@ window.frag.Model = function (is3d, parent) {
         return public;
     }
 
-    public.draw = function (gl, modelToWorldMatrix, modelToClipMatrix, animationMap) {
+    public.draw = function (drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap) {
         if (!public.location) return public;
 
         const animationState = animationMap && private.name ? animationMap[private.name] : null;
@@ -185,31 +185,43 @@ window.frag.Model = function (is3d, parent) {
             modelToClipMatrix = frag.Matrix.m3Xm3(modelToClipMatrix, localMatrix);
         }
 
-        const shader = public.getShader();
+        const shader = drawContext.shader || public.getShader();
 
         if (shader !== undefined && private.meshData) {
-            shader.bind(gl);
+            shader.bind(drawContext.gl);
+
+            if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
+                const sceneObjectId = drawContext.sceneObjects.length - 1;
+                const modelId = drawContext.models.length;
+                drawContext.models.push(public);
+
+                const red = sceneObjectId >> 4;
+                const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
+                const blue = (modelId & 0xff00) >> 8;
+                const alpha = modelId & 0xff;
+                drawContext.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
+            }
 
             var material = public.getMaterial();
-            if (material) material.apply(gl, shader);
+            if (material) material.apply(drawContext.gl, shader);
 
             if (shader.uniforms.clipMatrix !== undefined) {
                 const modelToClipTransform = location.is3d ? frag.Transform(modelToClipMatrix) : frag.Transform2D(modelToClipMatrix);
-                modelToClipTransform.apply(gl, shader.uniforms.clipMatrix);
+                modelToClipTransform.apply(drawContext.gl, shader.uniforms.clipMatrix);
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
                 const modelToWorldTransform = location.is3d ? frag.Transform(modelToWorldMatrix) : frag.Transform2D(modelToWorldMatrix);
-                modelToWorldTransform.apply(gl, shader.uniforms.modelMatrix);
+                modelToWorldTransform.apply(drawContext.gl, shader.uniforms.modelMatrix);
             }
 
-            private.meshData.draw(gl, shader);
+            private.meshData.draw(drawContext.gl, shader);
 
-            shader.unbind(gl);
+            shader.unbind(drawContext.gl);
         }
 
         for (let i = 0; i < private.children.length; i++)
-            private.children[i].draw(gl, modelToWorldMatrix, modelToClipMatrix, animationMap);
+            private.children[i].draw(drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap);
 
         return public;
     }

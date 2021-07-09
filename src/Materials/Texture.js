@@ -117,7 +117,7 @@ window.frag.Texture = function () {
             gl.viewport(0, 0, private.width, private.height);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             private.scene.adjustToViewport(gl);
-            private.scene.draw(gl);
+            private.scene.draw({ gl });
         }
 
         return public;
