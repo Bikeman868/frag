@@ -1,45 +1,38 @@
 // Represents an input that can only be on or off. For example keyboard keys or mouse buttons
-window.frag.DigitalInput = function (inputName, onChange, isOn) {
+window.frag.DigitalInput = function (inputName, digitalState) {
     const frag = window.frag;
 
     const private = {
         inputName,
-        onChange,
+        digitalState,
         toggle: false,
         inverted: false,
+        setOn: false,
+        setOff: false,
     }
 
     const public = {
         __private: private,
-        isOn: !!isOn
     }
 
     const splits = inputName.split("-");
 
-    const change = function(evt) {
-        if (private.onChange) {
-            if (Array.isArray(private.onChange)) {
-                for (let i = 0; i < private.onChange.length; i++)
-                    private.onChange[i](public, evt);
-            } else {
-                private.onChange(public, evt);
-            }
-        }
-    }
-
-    const setIsOn = function (isOn, evt) {
+    const setIsOn = function (evt, isOn) {
         if (private.inverted) isOn = !isOn;
+        if (frag.debugInputs) console.log("Digital input", private.inputName, "is", isOn ? "on" : "off");
         if (private.toggle) {
-            if (isOn) {
-                public.isOn = !public.isOn;
-                if (frag.debugInputs) console.log("Toggling digital input", inputName, public.isOn ? "on" : "off");
-                change(evt);
-            }
+            if (isOn) private.digitalState.toggle(evt);
         } else {
-            if (isOn !== public.isOn) {
-                public.isOn = isOn;
-                if (frag.debugInputs) console.log("Digital input", inputName, "turned", public.isOn ? "on" : "off");
-                change(evt);
+            if (private.setOn || private.setOff) {
+                if (isOn) {
+                    // Note that it is deliberate that you can set both on and off.
+                    // In this case each time you press the key down the digital
+                    // state will go on and off again very quickly
+                    if (private.setOn) private.digitalState.setIsOn(evt, true);
+                    if (private.setOff) private.digitalState.setIsOn(evt, false);
+                }
+            } else {
+                private.digitalState.setIsOn(evt, isOn);
             }
         }
     }
@@ -50,6 +43,8 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         for (let i = 0; i < splits.length; i++) {
             if ((/^toggle$/i).test(splits[i])) private.toggle = true;
             if ((/^inverted$/i).test(splits[i])) private.inverted = true;
+            if ((/^on$/i).test(splits[i])) private.setOn = true;
+            if ((/^off$/i).test(splits[i])) private.setOff = true;
             if ((/^left$/i).test(splits[i])) buttons = 1;
             if ((/^right$/i).test(splits[i])) buttons = 2;
             if ((/^middle$/i).test(splits[i])) buttons = 4;
@@ -59,7 +54,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         }
 
         const handler = function (evt) {
-            setIsOn((evt.buttons & buttons) !== 0, evt);
+            setIsOn(evt, (evt.buttons & buttons) !== 0);
             return true;
         }
 
@@ -72,7 +67,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
             frag.canvas.removeEventListener("mousedown", handler, false);
             frag.canvas.removeEventListener("mouseup", handler, false);
         }
-        
+
         return public;
     }
 
@@ -86,6 +81,8 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         for (let i = 0; i < splits.length; i++) {
             if ((/^toggle$/i).test(splits[i])) private.toggle = true;
             else if ((/^inverted$/i).test(splits[i])) private.inverted = true;
+            else if ((/^on$/i).test(splits[i])) private.setOn = true;
+            else if ((/^off$/i).test(splits[i])) private.setOff = true;
             else if (/^ctrl$/i.test(splits[i])) ctrl = true;
             else if (/^shift$/i.test(splits[i])) shift = true;
             else if (/^alt$/i.test(splits[i])) alt = true;
@@ -103,7 +100,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
                 return true;
 
             evt.preventDefault();
-            setIsOn(isDown, evt);
+            setIsOn(evt, isDown);
 
             return true;
         }

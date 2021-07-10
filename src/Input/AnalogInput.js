@@ -1,69 +1,18 @@
 // Represents an input that can be moved up and down in value. For example
 // the scroll wheel on the mouse or a joystick axis
-window.frag.AnalogInput = function(inputName, onChange, config) {
+window.frag.AnalogInput = function(inputName, analogState) {
     const frag = window.frag;
-
-    if (!config) config = {};
-    config.value = config.value || 0;
-    config.minValue = config.minValue || 0;
-    config.maxValue = config.maxValue == undefined ? 100 : config.maxValue;
-    config.maxVelocity = config.maxVelocity || 5;
-    config.acceleration = config.acceleration || 0.25;
-    config.deceleration = config.deceleration || 1;
 
     const private = {
         inputName,
-        onChange,
-        config,
-        inverted: false,
+        analogState,
     }
 
     const public = {
         __private: private,
-        value: config.value,
-        velocity: 0,
     }
 
     const splits = inputName.split("-");
-
-    const change = function(evt) {
-        if (private.onChange) {
-            if (Array.isArray(private.onChange)) {
-                for (let i = 0; i < private.onChange.length; i++)
-                    private.onChange[i](public, evt);
-            } else {
-                private.onChange(public, evt);
-            }
-        }
-    }
-
-    const setValue = function(value, evt) {
-        if (value < config.minValue) {
-            value = config.minValue;
-            public.velocity = 0;
-        }
-        if (value > config.maxValue) {
-            value = config.maxValue;
-            public.velocity = 0;
-        }
-        if (Math.abs(public.value - value) > 1e-5) {
-            public.value = value;
-            if (frag.debugInputs) console.log("Analog input", inputName, "changed to", value);
-            change(evt);
-        }
-    }
-
-    const increment = function(evt) {
-        public.velocity += public.velocity >= 0 ? config.acceleration : config.deceleration;
-        if (public.velocity > config.maxVelocity) public.velocity = config.maxVelocity;
-        setValue(public.value + public.velocity, evt);
-    }
-
-    const decrement = function(evt) {
-        public.velocity -= public.velocity <= 0 ? config.acceleration : config.deceleration;
-        if (public.velocity < -config.maxVelocity) public.velocity = -config.maxVelocity;
-        setValue(public.value + public.velocity, evt);
-    }
 
     if ((/mouse/i).test(inputName)) {
         let buttons = 0;
@@ -90,14 +39,16 @@ window.frag.AnalogInput = function(inputName, onChange, config) {
             if (buttons === 0) {
                 let fraction = vertical ? evt.clientY / frag.canvas.clientHeight : evt.clientX / frag.canvas.clientWidth;
                 if (inverted) fraction = 1 - fraction;
-                const value = ((config.maxValue - config.minValue) * fraction) + config.minValue;
-                setValue(value, evt);
+                const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
+                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                private.analogState.setValue(evt, value, true);
             } else if ((evt.buttons & buttons) !== 0) {
                 let fraction = vertical 
                     ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / frag.canvas.clientHeight
                     : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / frag.canvas.clientWidth;
-                const value = downValue + ((config.maxValue - config.minValue) * fraction);
-                setValue(value, evt);
+                const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
+                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                private.analogState.setValue(evt, value, true);
             }
             return true;
         }
@@ -105,15 +56,16 @@ window.frag.AnalogInput = function(inputName, onChange, config) {
         const downHandler = function(evt) {
             if ((evt.buttons & buttons) !== 0) {
                 downPosition = vertical ? evt.clientY : evt.clientX;
-                downValue = public.value;
+                downValue = private.analogState.value;
             }
         }
 
         const wheelHandler = function(evt) {
+            if (frag.debugInputs) console.log("Analog input", private.inputName, "delta", evt.deltaY);
             if (inverted) {
-                if (evt.deltaY > 0) decrement(evt); else increment(evt);
+                if (evt.deltaY > 0) private.analogState.decrement(evt); else private.analogState.increment(evt);
             } else {
-                if (evt.deltaY < 0) decrement(evt); else increment(evt);
+                if (evt.deltaY < 0) private.analogState.decrement(evt); else private.analogState.increment(evt);
             }
             evt.preventDefault();
             return true;
@@ -148,10 +100,12 @@ window.frag.AnalogInput = function(inputName, onChange, config) {
 
         const handler = function (evt) {
             if (evt.key === leftKey) {
-                decrement(evt);
+                if (frag.debugInputs) console.log("Analog input", private.inputName, "decrement");
+                private.analogState.decrement(evt);
                 evt.preventDefault();
             } else if (evt.key === rightKey) {
-                increment(evt);
+                if (frag.debugInputs) console.log("Analog input", private.inputName, "increment");
+                private.analogState.increment(evt);
                 evt.preventDefault();
             }
             return true;

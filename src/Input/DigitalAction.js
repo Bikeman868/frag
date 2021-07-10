@@ -4,16 +4,16 @@ window.frag.DigitalAction = function(actionName, context) {
 
     if (context && context.animation) {
         if (/^animation$/i.test(actionName)) {
-            return function(input) {
-                if (frag.debugInputs) console.log("Turning animation", input.isOn ? "on" : "off");
-                if (input.isOn) context.animation.start();
+            return function(digitalState) {
+                if (frag.debugInputs) console.log("Turning animation", digitalState.isOn ? "on" : "off");
+                if (digitalState.isOn) context.animation.start();
                 else context.animation.stop();
             }
         }
 
         if (/^animation-start$/i.test(actionName)) {
-            return function(input) {
-                if (!input.isOn) {
+            return function(digitalState) {
+                if (!digitalState.isOn) {
                     if (frag.debugInputs) console.log("Starting animation");
                     context.animation.start();
                 }
@@ -21,8 +21,8 @@ window.frag.DigitalAction = function(actionName, context) {
         }
 
         if (/^animation-stop$/i.test(actionName)) {
-            return function(input) {
-                if (!input.isOn) {
+            return function(digitalState) {
+                if (!digitalState.isOn) {
                     if (frag.debugInputs) console.log("Stopping animation");
                     context.animation.stop();
                 }
@@ -32,9 +32,9 @@ window.frag.DigitalAction = function(actionName, context) {
 
     if (context && context.sceneObject) {
         if (/^sceneobject$/i.test(actionName)) {
-            return function(input) {
-                if (frag.debugInputs) console.log("Turning scene object", input.isOn ? "on" : "off");
-                if (input.isOn) context.sceneObject.enable();
+            return function(digitalState) {
+                if (frag.debugInputs) console.log("Turning scene object", digitalState.isOn ? "on" : "off");
+                if (digitalState.isOn) context.sceneObject.enable();
                 else context.sceneObject.disable();
             }
         }
@@ -42,9 +42,9 @@ window.frag.DigitalAction = function(actionName, context) {
 
     if (context && context.model) {
         if (/^model$/i.test(actionName)) {
-            return function(input) {
-                if (frag.debugInputs) console.log("Turning", context.model.getName(), "model", input.isOn ? "on" : "off");
-                if (input.isOn) context.model.enable();
+            return function(digitalState) {
+                if (frag.debugInputs) console.log("Turning", context.model.getName(), "model", digitalState.isOn ? "on" : "off");
+                if (digitalState.isOn) context.model.enable();
                 else context.model.disable();
             }
         }

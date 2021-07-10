@@ -45,7 +45,7 @@ window.frag.init = function () {
     frag.debugShaderBuilder = false;
     frag.debugAnimations = false;
     frag.debugMeshes = false;
-    frag.debugInputs = true;
+    frag.debugInputs = false;
 
     frag.maxTextureUnits = frag.gl.getParameter(frag.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     frag.nextTextureUnit = 0;

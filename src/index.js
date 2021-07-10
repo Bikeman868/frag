@@ -48,6 +48,8 @@ require("./Loaders/ModelLoader");
 
 require("./Input/HitTest");
 require("./Input/InputMethod");
+require("./Input/DigitalState");
+require("./Input/AnalogState");
 require("./Input/DigitalInput");
 require("./Input/AnalogInput");
 require("./Input/DigitalAction");

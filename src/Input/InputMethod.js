@@ -1,7 +1,5 @@
 // A collection of inputs that can be turned on and off.
 window.frag.InputMethod = function() {
-    const frag = window.frag;
-
     const private = {
         inputs: [],
         enabled: false

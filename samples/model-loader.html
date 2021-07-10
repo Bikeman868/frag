@@ -28,9 +28,10 @@
         const frag = window.frag;
 
         frag.config = function() {
-            frag.debugModelLoader = false;
+            frag.debugModelLoader = true;
             frag.debugAnimations = false;
-            frag.debugShaderBuilder = true;
+            frag.debugShaderBuilder = false;
+            frag.debugInputs = true;
         }
         frag.init();
 
@@ -105,115 +106,111 @@
             const animation = frag.Animation().sequence([step1, step2, step3, step4, step5], true);
             animation.start();
 
-            // Define some user inputs
+            // Define a custom wireframe display on/off state
             let wireframeModel = null;
-            let normalsModel = null;
-            const inputs = frag.InputMethod()
-                // Show wireframe when middle mouse button is down
-                .add(frag.DigitalInput(
-                    "middle-mouse", 
-                    (input, evt) => {
-                        if (input.isOn) {
-                            const hit = frag.hitTest(evt.clientX, evt.clientY);
-                            if (hit) {
-                                wireframeModel = hit.model;
-                                wireframeModel.wireframe(true);
-                            }
-                        } else {
-                            if (wireframeModel) {
-                                wireframeModel.wireframe(false);
-                                wireframeModel = null;
-                            }
-                        }
+            const wireframeStateChange = function(state, evt) {
+                if (state.isOn) {
+                    const hit = frag.hitTest(evt.clientX, evt.clientY);
+                    if (hit) {
+                        wireframeModel = hit.model;
+                        wireframeModel.wireframe(true);
                     }
-                ))
-                // Show normal vectors when right mouse button is down
-                .add(frag.DigitalInput(
-                    "right-mouse", 
-                    (input, evt) => {
-                        if (input.isOn) {
-                            const hit = frag.hitTest(evt.clientX, evt.clientY);
-                            if (hit) {
-                                normalsModel = hit.model;
-                                normalsModel.drawNormals(1);
-                            }
-                        } else {
-                            if (normalsModel) {
-                                normalsModel.drawNormals(0);
-                                normalsModel = null;
-                            }
-                        }
+                } else {
+                    if (wireframeModel) {
+                        wireframeModel.wireframe(false);
+                        wireframeModel = null;
                     }
-                ))
-                // Log Ctrl-A key presses to the console
-                .add(frag.DigitalInput(
-                    "key-ctrl-a", 
-                    (input) => { console.log("Ctrl-A " + (input.isOn ? "down" : "up")) }
-                ))
-                // Toggle excavator visibility with the Q key toggle
-                .add(frag.DigitalInput(
-                    "key-q-toggle", 
-                    frag.DigitalAction("sceneobject", { sceneObject: excavator }),
-                    true
-                ))
-                // Toggle the animation on and off with the E key
-                .add(frag.DigitalInput(
-                    "key-e-toggle", 
-                    frag.DigitalAction("animation", { animation }),
-                    true
-                ))
-                // Pause animation while the R key is held down
-                .add(frag.DigitalInput(
-                    "key-r-inverted", 
-                    frag.DigitalAction("animation", { animation })
-                ))
-                // Start animation when the T key is pressed
-                .add(frag.DigitalInput(
-                    "key-t", 
-                    frag.DigitalAction("animation-start", { animation })
-                ))
-                // Stop animation when the Y key is pressed
-                .add(frag.DigitalInput(
-                    "key-y", 
-                    frag.DigitalAction("animation-stop", { animation })
-                ));
+                }
+            };
+            const wireframeState = frag.DigitalState(wireframeStateChange, { isOn: false }, "wireframe");
 
-            // Hide the bucket on the excavator by toggling the W key
+            // Define a custom normals display on/off state
+            let normalsModel = null;
+            const normalsStateChange = function(state, evt) {
+                if (state.isOn) {
+                    const hit = frag.hitTest(evt.clientX, evt.clientY);
+                    if (hit) {
+                        normalsModel = hit.model;
+                        normalsModel.drawNormals(1);
+                    }
+                } else {
+                    if (normalsModel) {
+                        normalsModel.drawNormals(0);
+                        normalsModel = null;
+                    }
+                }
+            }
+            const normalsState = frag.DigitalState(normalsStateChange, { isOn: false }, "normals");
+
+            // Use DigitalAction to define some other on/off states that the player can control with inputs
+
+            const excavatorVisibilityState = frag.DigitalState(
+                frag.DigitalAction("sceneobject", { sceneObject: excavator }), 
+                { isOn: true }, 
+                "excavator visibility");
+
             const excavatorModelChildren = [];
             excavatorModel.addFlattenedChildren(excavatorModelChildren, (child) => child.getName() === "bucket");
-            inputs.add(frag.DigitalInput(
-                "key-w-toggle", 
-                frag.DigitalAction("model", { model: excavatorModelChildren[0] }),
-                true
-            ));
+            const bucketVisibilityState = frag.DigitalState(
+                frag.DigitalAction("model", { model: excavatorModelChildren[0] }), 
+                { isOn: true }, 
+                "bucket visibility");
 
-            // Zoom in and out with the mouse wheel
-            inputs.add(frag.AnalogInput("mouse-wheel", (input) => {
-                camera.moveToZ(input.value);
-            }, {
-                value: -120,
-                minValue: -500,
-                maxValue: 0,
-                maxVelocity: 20,
-                acceleration: 0.5,
-                deceleration: 2,
-            }));
+            const customState = frag.DigitalState(
+                (digitalState) => { console.log("Custom digital state is " + (digitalState.isOn ? "on" : "off")) },
+                { isOn: false },
+                "custom flag");
 
-            // Roll the camera around with left mouse drag
-            inputs.add(frag.AnalogInput("mouse-left-horizontal-inverted", (input) => {
-                camera.moveToX(input.value);
-            }, {
-                value: 0,
-                minValue: -100,
-                maxValue: 100,
-            }))
-            .add(frag.AnalogInput("mouse-left-vertical", (input) => {
-                camera.moveToY(input.value);
-            }, {
-                value: 0,
-                minValue: -100,
-                maxValue: 100,
-            }));
+            const animationState = frag.DigitalState(
+                frag.DigitalAction("animation", { animation }),
+                { isOn: true },
+                "animation running");
+
+            // Use AnalogState to define some continuously variable states that the player can control with inputs
+
+            const cameraZoomState = frag.AnalogState(
+                (analogState) => { camera.moveToZ(analogState.value); },
+                {   value: -120,
+                    minValue: -500,
+                    maxValue: 0,
+                    maxVelocity: 20,
+                    acceleration: 0.5,
+                    deceleration: 2,
+                },
+                "camera zoom");
+
+            const cameraPanXState = frag.AnalogState(
+                (analogState) => { camera.moveToX(analogState.value); },
+                {   value: 0,
+                    minValue: -100,
+                    maxValue: 100,
+                },
+                "camera pan X");
+
+            const cameraPanYState = frag.AnalogState(
+                (analogState) => { camera.moveToY(analogState.value); },
+                {   value: 0,
+                    minValue: -100,
+                    maxValue: 100,
+                },
+                "camera pan Y");
+
+            // Group inputs together so that they can be turned on and off as a set
+            const inputs = frag.InputMethod()
+                .add(frag.DigitalInput("middle-mouse", wireframeState))
+                .add(frag.DigitalInput("right-mouse", normalsState))
+                .add(frag.DigitalInput("key-ctrl-a", customState))
+                .add(frag.DigitalInput("key-q-toggle", excavatorVisibilityState))
+                .add(frag.DigitalInput("key-e-toggle", bucketVisibilityState))
+                .add(frag.DigitalInput("key-r-toggle", animationState))
+                .add(frag.DigitalInput("key-t-inverted", animationState))
+                .add(frag.DigitalInput("key-y-off", animationState))
+                .add(frag.DigitalInput("key-u-on", animationState))
+                .add(frag.AnalogInput("mouse-wheel", cameraZoomState))
+                .add(frag.AnalogInput("mouse-left-horizontal-inverted", cameraPanXState))
+                .add(frag.AnalogInput("mouse-left-vertical", cameraPanYState))
+                .add(frag.AnalogInput("keys-d-a", cameraPanXState))
+                .add(frag.AnalogInput("keys-w-s", cameraPanYState));
 
             // Bind inputs to event listeners
             inputs.enable();
