@@ -185,7 +185,35 @@
                 "key-w-toggle", 
                 frag.DigitalAction("model", { model: excavatorModelChildren[0] }),
                 true
-            ))
+            ));
+
+            // Zoom in and out with the mouse wheel
+            inputs.add(frag.AnalogInput("mouse-wheel", (input) => {
+                camera.moveToZ(input.value);
+            }, {
+                value: -120,
+                minValue: -500,
+                maxValue: 0,
+                maxVelocity: 20,
+                acceleration: 0.5,
+                deceleration: 2,
+            }));
+
+            // Roll the camera around with left mouse drag
+            inputs.add(frag.AnalogInput("mouse-left-horizontal-inverted", (input) => {
+                camera.moveToX(input.value);
+            }, {
+                value: 0,
+                minValue: -100,
+                maxValue: 100,
+            }))
+            .add(frag.AnalogInput("mouse-left-vertical", (input) => {
+                camera.moveToY(input.value);
+            }, {
+                value: 0,
+                minValue: -100,
+                maxValue: 100,
+            }));
 
             // Bind inputs to event listeners
             inputs.enable();

@@ -20,7 +20,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         if (private.onChange) {
             if (Array.isArray(private.onChange)) {
                 for (let i = 0; i < private.onChange.length; i++)
-                    private.onChange[i](evt);
+                    private.onChange[i](public, evt);
             } else {
                 private.onChange(public, evt);
             }
@@ -44,18 +44,18 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         }
     }
 
-    if ((/mouse/).test(inputName)) {
+    if ((/mouse/i).test(inputName)) {
         let buttons = 1;
 
         for (let i = 0; i < splits.length; i++) {
-            if ((/^toggle$/).test(splits[i])) private.toggle = true;
-            if ((/^inverted$/).test(splits[i])) private.inverted = true;
-            if ((/^left$/).test(splits[i])) buttons = 1;
-            if ((/^right$/).test(splits[i])) buttons = 2;
-            if ((/^middle$/).test(splits[i])) buttons = 4;
-            if ((/^back$/).test(splits[i])) buttons = 8;
-            if ((/^forward$/).test(splits[i])) buttons = 16;
-            if ((/^any$/).test(splits[i])) buttons = 31;
+            if ((/^toggle$/i).test(splits[i])) private.toggle = true;
+            if ((/^inverted$/i).test(splits[i])) private.inverted = true;
+            if ((/^left$/i).test(splits[i])) buttons = 1;
+            if ((/^right$/i).test(splits[i])) buttons = 2;
+            if ((/^middle$/i).test(splits[i])) buttons = 4;
+            if ((/^back$/i).test(splits[i])) buttons = 8;
+            if ((/^forward$/i).test(splits[i])) buttons = 16;
+            if ((/^any$/i).test(splits[i])) buttons = 31;
         }
 
         const handler = function (evt) {
@@ -72,6 +72,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
             frag.canvas.removeEventListener("mousedown", handler, false);
             frag.canvas.removeEventListener("mouseup", handler, false);
         }
+        
         return public;
     }
 
@@ -83,8 +84,8 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         let meta = false;
 
         for (let i = 0; i < splits.length; i++) {
-            if ((/^toggle$/).test(splits[i])) private.toggle = true;
-            else if ((/^inverted$/).test(splits[i])) private.inverted = true;
+            if ((/^toggle$/i).test(splits[i])) private.toggle = true;
+            else if ((/^inverted$/i).test(splits[i])) private.inverted = true;
             else if (/^ctrl$/i.test(splits[i])) ctrl = true;
             else if (/^shift$/i.test(splits[i])) shift = true;
             else if (/^alt$/i.test(splits[i])) alt = true;
@@ -124,6 +125,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
             document.removeEventListener("keydown", keyDownHandler, false);
             document.removeEventListener("keyup", keyUpHandler, false);
         }
+
         return public;
     }
 

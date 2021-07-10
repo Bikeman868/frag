@@ -108,6 +108,20 @@ window.frag.PerspectiveCamera = function () {
         return public;
     }
 
+    public.moveToX = function (x) {
+        private.x = x;
+
+        private.computeCameraTransforms();
+        return public;
+    }
+
+    public.moveToY = function (y) {
+        private.y = y;
+
+        private.computeCameraTransforms();
+        return public;
+    }
+
     public.moveToZ = function (z) {
         private.z = z;
 
