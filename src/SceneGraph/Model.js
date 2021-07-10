@@ -15,6 +15,7 @@ window.frag.Model = function (is3d, parent) {
         meshData: null,
         shader: null,
         material: null,
+        enabled: true
     }
 
     const public = {
@@ -74,6 +75,14 @@ window.frag.Model = function (is3d, parent) {
     public.material = function (value) {
         private.material = value;
         return public;
+    }
+
+    public.enable = function() {
+        private.enabled = true;
+    }
+
+    public.disable = function() {
+        private.enabled = false;
     }
 
     public.getMaterial = function () {
@@ -191,7 +200,7 @@ window.frag.Model = function (is3d, parent) {
 
         const shader = drawContext.shader || public.getShader();
 
-        if (shader !== undefined && private.meshData) {
+        if (shader !== undefined && private.meshData && private.enabled) {
             shader.bind(drawContext.gl);
 
             if (drawContext.isHitTest && shader.uniforms.color !== undefined) {

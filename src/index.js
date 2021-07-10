@@ -50,3 +50,5 @@ require("./Input/HitTest");
 require("./Input/InputMethod");
 require("./Input/DigitalInput");
 require("./Input/AnalogInput");
+require("./Input/DigitalAction");
+require("./Input/AnalogAction");

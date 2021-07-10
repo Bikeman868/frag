@@ -31,6 +31,8 @@ window.frag.init = function () {
     }
     frag.gl = gl;
 
+    frag.canvas.addEventListener('contextmenu', event => event.preventDefault());
+
     gl.clearColor(1, 1, 1, 1);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.DEPTH_TEST);
@@ -43,6 +45,7 @@ window.frag.init = function () {
     frag.debugShaderBuilder = false;
     frag.debugAnimations = false;
     frag.debugMeshes = false;
+    frag.debugInputs = true;
 
     frag.maxTextureUnits = frag.gl.getParameter(frag.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     frag.nextTextureUnit = 0;

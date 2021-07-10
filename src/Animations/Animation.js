@@ -6,7 +6,8 @@
 // within the animation steps.
 window.frag.Animation = function (obj, isChild) {
     const private = {
-        stopAfter: 0
+        stopAfter: 0,
+        isRunning: false
     }
 
     const public = obj || {};
@@ -16,6 +17,10 @@ window.frag.Animation = function (obj, isChild) {
     const DEFAULT_STEP_INTERVAL = 5;
     const DEFAULT_REPEAT_TICKS = 20;
     const DEFAULT_REPEAT_FRAMES = 1;
+
+    public.getIsRunning = function() {
+        return private.isRunning;
+    }
 
     // If you set the duration it should be done before passing this
     // animation to the sequence() method of another animation
@@ -40,8 +45,13 @@ window.frag.Animation = function (obj, isChild) {
         }
 
         if (private.stopAt !== undefined && gameTick >= private.stopAt) {
+            if (private.sequence) {
+                let step = private.sequence[private.sequenceIndex];
+                if (step.stop) step.stop(public, gameTick);
+            }
             window.frag.deactivateAnimation(public);
             if (private.disposeOnStop) public.dispose();
+            private.isRunning = false;
             return;
         }
 
@@ -119,6 +129,7 @@ window.frag.Animation = function (obj, isChild) {
         delete private.stopAfter;
         delete private.stopAt;
         window.frag.activateAnimation(public);
+        private.isRunning = true;
         return public;
     }
 

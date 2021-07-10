@@ -102,8 +102,74 @@
                 .onStop(excavator.animations.moving.stop);
 
             // Add the animation sequence and start it running
-            frag.Animation().sequence([step1, step2, step3, step4, step5], true)
-               .start();
+            const animation = frag.Animation().sequence([step1, step2, step3, step4, step5], true);
+            animation.start();
+
+            // Define some user inputs
+            let selectedModel = null;
+            const inputs = frag.InputMethod()
+                // Show wireframe when middle mouse button is down
+                .add(frag.DigitalInput(
+                    "middle-mouse", 
+                    (input, evt) => {
+                        if (input.isOn) {
+                            const hit = frag.hitTest(evt.clientX, evt.clientY);
+                            if (hit) {
+                                selectedModel = hit.model;
+                                selectedModel.getMesh().wireframe(true);
+                            }
+                        } else {
+                            if (selectedModel) {
+                                selectedModel.getMesh().wireframe(false);
+                                selectedModel = null;
+                            }
+                        }
+                    }
+                ))
+                // Log Ctrl-A key presses to the console
+                .add(frag.DigitalInput(
+                    "key-ctrl-a", 
+                    (input) => { console.log("Ctrl-A " + (input.isOn ? "down" : "up")) }
+                ))
+                // Toggle excavator visibility with the Q key toggle
+                .add(frag.DigitalInput(
+                    "key-q-toggle", 
+                    frag.DigitalAction("sceneobject", { sceneObject: excavator }),
+                    true
+                ))
+                // Toggle the animation on and off with the E key
+                .add(frag.DigitalInput(
+                    "key-e-toggle", 
+                    frag.DigitalAction("animation", { animation }),
+                    true
+                ))
+                // Pause animation while the R key is held down
+                .add(frag.DigitalInput(
+                    "key-r-inverted", 
+                    frag.DigitalAction("animation", { animation })
+                ))
+                // Start animation when the T key is pressed
+                .add(frag.DigitalInput(
+                    "key-t", 
+                    frag.DigitalAction("animation-start", { animation })
+                ))
+                // Stop animation when the Y key is pressed
+                .add(frag.DigitalInput(
+                    "key-y", 
+                    frag.DigitalAction("animation-stop", { animation })
+                ));
+
+            // Hide the bucket on the excavator by toggling the W key
+            const excavatorModelChildren = [];
+            excavatorModel.addFlattenedChildren(excavatorModelChildren, (child) => child.getName() === "bucket");
+            inputs.add(frag.DigitalInput(
+                "key-w-toggle", 
+                frag.DigitalAction("model", { model: excavatorModelChildren[0] }),
+                true
+            ))
+
+            // Bind inputs to event listeners
+            inputs.enable();
         }
 
         // This shader will be used to draw models imported from the package. If you
@@ -143,26 +209,5 @@
         // When loading completes, the modelsLoaded() function will be called
         frag.ModelLoader.loadModelsFromUrl(packageUrl, assetCatalog, modelsLoaded)
 
-        // Show wireframe when middle mouse button is down
-        let selectedModel = null;
-        const inputs = frag.InputMethod()
-            .add(frag.DigitalInput(
-                "middle-mouse", 
-                function(isDown, input, evt) {
-                    if (isDown) {
-                        const hit = frag.hitTest(evt.clientX, evt.clientY);
-                        if (hit) {
-                            selectedModel = hit.model;
-                            selectedModel.getMesh().wireframe(true);
-                        }
-                    } else {
-                        if (selectedModel) {
-                            selectedModel.getMesh().wireframe(false);
-                            selectedModel = null;
-                        }
-                    }
-                }
-            ));
-        inputs.enable();
     </script>
 </body>
