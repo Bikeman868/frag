@@ -48,6 +48,10 @@ window.frag.Scene = function() {
         return public;
     }
 
+    public.getCamera = function() {
+        return private.activeCamera;
+    }
+
     public.setViewport = function (gl) {
         if (private.activeCamera)
             private.activeCamera.setViewport(gl);

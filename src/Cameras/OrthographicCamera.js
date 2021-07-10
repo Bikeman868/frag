@@ -51,6 +51,22 @@ window.frag.OrthographicCamera = function () {
         return public;
     }
 
+    public.moveToX = function (x) {
+        private.x = x;
+
+        computeTransformMatrix();
+
+        return public;
+    }
+
+    public.moveToY = function (y) {
+        private.y = y;
+
+        computeTransformMatrix();
+
+        return public;
+    }
+
     public.moveToZ = function (z) {
         private.z = z;
 

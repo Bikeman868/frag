@@ -52,12 +52,9 @@
         // asset catalog that the models were loaded into is passed as a parameter
         const modelsLoaded = function(assetCatalog) {
 
-            // Get the "excavator" model that was loaded
+            // Get the "excavator" model that was loaded and override the shading algorithm
             const excavatorModel = assetCatalog.getModel('excavator_nla')
-                //.drawNormals(0.5, [255, 0, 0], 1)
-                //.shadeFlat()
-                .shadeSmooth()
-                ;
+                .shadeSmooth();
 
             // Create an excavator from the model and add it to the scene
             const excavator = frag.SceneObject(excavatorModel);
@@ -65,14 +62,17 @@
             scene.addObject(excavator);
 
             // Next we are going to define an animation sequence for
-            // the excavator that has five steps as follows:
+            // the excavator that has four steps that repeat in a loop
+            // 1. Move the excavator to the left side of the scene
+            // 2. Do some excavating
+            // 3. Move the excavator to the right side of the scene
+            // 4. Tip out the contents of the excavator
 
             const invLinearVelocity = 3;
             const position = excavator.getPosition();
 
             // Step 1 in the animation sequence
-            // Move the excavator from 0 to -80 on the x-axis
-            // whilst running the "moving" animation
+            // Move the excavator from to position -80 on the x-axis whilst running the "moving" animation
             const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveTo([-80, -30, 0])
                 .onStart(excavator.animations.moving.start)
@@ -83,8 +83,7 @@
             const step2 = frag.RepeatAnimationAction(excavator.animations.excavating, 4)
 
             // Step 3 in the animation sequence
-            // Move the excavator from -80 to +20 on the x-axis
-            // whilst running the "moving" animation
+            // Move the excavator by +100 units on the x-axis whilst running the "moving" animation
             const step3 = frag.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([100, 0, 0])
                 .onStart(excavator.animations.moving.start)
@@ -94,22 +93,22 @@
             // Run the "tipping" animation exactly once
             const step4 = excavator.animations.tipping;
 
-            // Step 5 in the animation sequence
-            // Move the excavator from +20 back to 0 on the x-axis so that the animation can loop
-            // whilst running the "moving" animation
-            const step5 = frag.PositionAnimationAction(position, invLinearVelocity)
-                .moveBy([-20, 0, 0])
-                .onStart(excavator.animations.moving.start)
-                .onStop(excavator.animations.moving.stop);
-
-            // Add the animation sequence and start it running
-            const animation = frag.Animation().sequence([step1, step2, step3, step4, step5], true);
+            // Add the steps to an animation sequence and start it running
+            const animation = frag.Animation().sequence([step1, step2, step3, step4], true);
             animation.start();
 
-            // Define a custom wireframe display on/off state
+            // Next we are going to define some player inputs that control
+            // various things in the scene. The model we use here is that an
+            // "input" changes a "state" which triggers an "action". These
+            // things exist in both digital and analog versions.
+
+            // Define a custom wireframe display "digital state". When this state
+            // is "on" the selected model will be drawn in wireframe. The state
+            // change handler assumes that state changes are trigged by a mouse event
+            // and uses the mouse location to select the model to wireframe
             let wireframeModel = null;
-            const wireframeStateChange = function(state, evt) {
-                if (state.isOn) {
+            const wireframeStateChange = function(digitalState, evt) {
+                if (digitalState.isOn) {
                     const hit = frag.hitTest(evt.clientX, evt.clientY);
                     if (hit) {
                         wireframeModel = hit.model;
@@ -124,10 +123,11 @@
             };
             const wireframeState = frag.DigitalState(wireframeStateChange, { isOn: false }, "wireframe");
 
-            // Define a custom normals display on/off state
+            // This is very similar to the wireframe example above, but turns on the
+            // drawing of normal vectors on the model
             let normalsModel = null;
-            const normalsStateChange = function(state, evt) {
-                if (state.isOn) {
+            const normalsStateChange = function(digitalState, evt) {
+                if (digitalState.isOn) {
                     const hit = frag.hitTest(evt.clientX, evt.clientY);
                     if (hit) {
                         normalsModel = hit.model;
@@ -142,13 +142,16 @@
             }
             const normalsState = frag.DigitalState(normalsStateChange, { isOn: false }, "normals");
 
-            // Use DigitalAction to define some other on/off states that the player can control with inputs
-
+            // Define a DigitalState for the excavator visibility with an aassociated
+            // DigitalAction that hides and shows the excavator in the scene
             const excavatorVisibilityState = frag.DigitalState(
                 frag.DigitalAction("sceneobject", { sceneObject: excavator }), 
                 { isOn: true }, 
                 "excavator visibility");
 
+            // Define a DigitalState for the excavator bucket visibility with an aassociated
+            // DigitalAction that hides and shows the bucket in the excavator model. This would
+            // affect all excavators in the scene
             const excavatorModelChildren = [];
             excavatorModel.addFlattenedChildren(excavatorModelChildren, (child) => child.getName() === "bucket");
             const bucketVisibilityState = frag.DigitalState(
@@ -156,20 +159,22 @@
                 { isOn: true }, 
                 "bucket visibility");
 
+            // Define a DigitalState where the state change action is a custom function that writes to the console
             const customState = frag.DigitalState(
                 (digitalState) => { console.log("Custom digital state is " + (digitalState.isOn ? "on" : "off")) },
                 { isOn: false },
                 "custom flag");
 
+            // Define a DigitalState for the animation with an aassociated DigitalAction that starts and stops
+            // the animation
             const animationState = frag.DigitalState(
                 frag.DigitalAction("animation", { animation }),
                 { isOn: true },
                 "animation running");
 
-            // Use AnalogState to define some continuously variable states that the player can control with inputs
-
+            // Use AnalogState and AnalogAction to allow the player to move the camera on the z-axis
             const cameraZoomState = frag.AnalogState(
-                (analogState) => { camera.moveToZ(analogState.value); },
+                frag.AnalogAction("move-camera-z"),
                 {   value: -120,
                     minValue: -500,
                     maxValue: 0,
@@ -179,36 +184,40 @@
                 },
                 "camera zoom");
 
+            // Use AnalogState and AnalogAction to allow the player to move the camera on the x-axis
             const cameraPanXState = frag.AnalogState(
-                (analogState) => { camera.moveToX(analogState.value); },
-                {   value: 0,
-                    minValue: -100,
+                frag.AnalogAction("move-camera-x"),
+                {   minValue: -100,
                     maxValue: 100,
                 },
                 "camera pan X");
 
+            // Use AnalogState and AnalogAction to allow the player to move the camera on the y-axis
             const cameraPanYState = frag.AnalogState(
-                (analogState) => { camera.moveToY(analogState.value); },
-                {   value: 0,
-                    minValue: -100,
+                frag.AnalogAction("move-camera-y"),
+                {   minValue: -100,
                     maxValue: 100,
                 },
                 "camera pan Y");
 
-            // Group inputs together so that they can be turned on and off as a set
+            // Create some input bindings and associate them with the "satte" that they control.
+            // Group inputs into an InputMethod so that they can be turned on and off as a set.
+            // Note that you can create as many InputMethod instances as you need and turn them
+            // on and off to control which inputs do what at various times thoughout the game
             const inputs = frag.InputMethod()
                 .add(frag.DigitalInput("middle-mouse", wireframeState))
                 .add(frag.DigitalInput("right-mouse", normalsState))
-                .add(frag.DigitalInput("key-ctrl-a", customState))
-                .add(frag.DigitalInput("key-q-toggle", excavatorVisibilityState))
-                .add(frag.DigitalInput("key-e-toggle", bucketVisibilityState))
-                .add(frag.DigitalInput("key-r-toggle", animationState))
-                .add(frag.DigitalInput("key-t-inverted", animationState))
-                .add(frag.DigitalInput("key-y-off", animationState))
-                .add(frag.DigitalInput("key-u-on", animationState))
+                .add(frag.DigitalInput("ctrl-a-key", customState))
+                .add(frag.DigitalInput("q-key-toggle", excavatorVisibilityState))
+                .add(frag.DigitalInput("e-key-toggle", bucketVisibilityState))
+                .add(frag.DigitalInput("r-key-toggle", animationState))
+                .add(frag.DigitalInput("t-key-inverted", animationState))
+                .add(frag.DigitalInput("y-key-off", animationState))
+                .add(frag.DigitalInput("u-key-on", animationState));
+            inputs
                 .add(frag.AnalogInput("mouse-wheel", cameraZoomState))
-                .add(frag.AnalogInput("mouse-left-horizontal-inverted", cameraPanXState))
-                .add(frag.AnalogInput("mouse-left-vertical", cameraPanYState))
+                .add(frag.AnalogInput("left-mouse-horizontal-inverted", cameraPanXState))
+                .add(frag.AnalogInput("left-mouse-vertical", cameraPanYState))
                 .add(frag.AnalogInput("keys-d-a", cameraPanXState))
                 .add(frag.AnalogInput("keys-w-s", cameraPanYState));
 
@@ -226,7 +235,7 @@
             .compile();
 
         // An asset catalog contains named materials and models. We will load models
-        // into the catalog but define the materials manualls
+        // into the catalog but define the materials manually
         const assetCatalog = frag.AssetCatalog(shader);
 
         // Helper function to set a named material to a 1x1 pixel diffuse texture.
