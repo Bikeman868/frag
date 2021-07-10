@@ -38,7 +38,7 @@ window.frag.DigitalInput = function (inputName, onChange, isOn) {
         } else {
             if (isOn !== public.isOn) {
                 public.isOn = isOn;
-                if (frag.debugInputs) console.log("Digital input", inputName, public.isOn ? "is on" : "is off");
+                if (frag.debugInputs) console.log("Digital input", inputName, "turned", public.isOn ? "on" : "off");
                 change(evt);
             }
         }

@@ -106,7 +106,8 @@
             animation.start();
 
             // Define some user inputs
-            let selectedModel = null;
+            let wireframeModel = null;
+            let normalsModel = null;
             const inputs = frag.InputMethod()
                 // Show wireframe when middle mouse button is down
                 .add(frag.DigitalInput(
@@ -115,13 +116,31 @@
                         if (input.isOn) {
                             const hit = frag.hitTest(evt.clientX, evt.clientY);
                             if (hit) {
-                                selectedModel = hit.model;
-                                selectedModel.getMesh().wireframe(true);
+                                wireframeModel = hit.model;
+                                wireframeModel.wireframe(true);
                             }
                         } else {
-                            if (selectedModel) {
-                                selectedModel.getMesh().wireframe(false);
-                                selectedModel = null;
+                            if (wireframeModel) {
+                                wireframeModel.wireframe(false);
+                                wireframeModel = null;
+                            }
+                        }
+                    }
+                ))
+                // Show normal vectors when right mouse button is down
+                .add(frag.DigitalInput(
+                    "right-mouse", 
+                    (input, evt) => {
+                        if (input.isOn) {
+                            const hit = frag.hitTest(evt.clientX, evt.clientY);
+                            if (hit) {
+                                normalsModel = hit.model;
+                                normalsModel.drawNormals(1);
+                            }
+                        } else {
+                            if (normalsModel) {
+                                normalsModel.drawNormals(0);
+                                normalsModel = null;
                             }
                         }
                     }

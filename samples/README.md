@@ -79,9 +79,9 @@ This [sample](model-loader.html) illustrates the following features and techniqu
 Note that this sample must be hosted by a web server - see above.
 Once you have a Python http server running you can see this sample running at this url http://localhost:8000/model-loader.html
 * Loads a package of models that were exported from Blender
-* Defines the materials to use to paint the models as 1x1 pixel textures
+* Defines the materials to use to paint the models as hard-coded 1x1 pixel textures
 * Creates an animation sequence that combines model movements within the scene with animations imported from Blender
-* Adds a mouse down event listener and logs the name of the object that was clicked by the mouse
+* Demonstrates some of the things that you can wire up to user input
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator
