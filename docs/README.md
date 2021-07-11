@@ -11,35 +11,44 @@ If you prefer reading reference material instead then read on...
 ## Subjects
 The following documents are general discussions around a specific topic
 
-* [Materials and shaders](materials.md)
-* [Material and model loaders](loaders.md)
+* ~[Materials and shaders](materials.md)~
+* ~[Material and model loaders](loaders.md)~
 * [Animation](animation.md)
-* [Configuration options](configuration.md)
+* ~[Configuration options](configuration.md)~
 * [Packaging models](packaging.md)
+* [Player input](inputs.md)
 
 ## Reference
-The following classes are documented at detailed technical level
+The following classes are documented at detailed technical level. Note that the ones
+with strikeout formatting are planned but not written yet. Please reach out if you
+need help, or take a look at the source code.
 
-* [Animation](./reference/animation.md)
-* [KeyframeAnimationAction](./reference/keyframe-animation-action.md)
-* [Material](./reference/material.md)
-~* [MaterialLoader](./reference/material-loader.md)~
-* [Vector](./reference/vector.md)
-* [Matrix](./reference/matrix.md)
-* [Model](./reference/model.md)
-* [ModelAnimation](./reference/model-animation.md)
-~* [ModelLoader](./reference/model-loader.md)~
-* [OrthographicCamera](./reference/orthographic-camera.md)
+* [AnalogAction](reference/analog-action.md) applies analog state changes to something in the game.
+* [AnalogInput](reference/analog-input.md) updates an analog state from an input device.
+* [AnalogState](reference/analog-state.md) stores a floating point value that can be controlled by the player.
+* [Animation](./reference/animation.md) is the core animation engine
+* [DigitalAction](reference/digital-action.md) applies digital state changes to something in the game.
+* [DigitalInput](reference/digital-action.md) updates a digital state from an input device.
+* [DigitalState](reference/digital-action.md) stores an on/off value that can be controlled by the player
+* [InputMethod](reference/input-method.md) a collection of analog and digital inputs that can be enabled/disabled together.
+* [KeyframeAnimationAction](./reference/keyframe-animation-action.md) adds keyframe action to an animation
+* [Material](./reference/material.md) defines the surface appearence of part of a model
+* ~[MaterialLoader](./reference/material-loader.md)~ loads material packages from the server
+* [Matrix](./reference/matrix.md) performs matrix math
+* [Model](./reference/model.md) is a template for instancing scene objects
+* [ModelAnimation](./reference/model-animation.md) adds animation effects to a model
+* ~[ModelLoader](./reference/model-loader.md)~ loads model packages from the server
+* [OrthographicCamera](./reference/orthographic-camera.md) draws objects in the scene at their actual size
 * [ParallelAnimationAction](./reference/parallel-animation-action.md)
-* [PerspectiveCamera](./reference/perspective-camera.md)
-* [Scene](./reference/scene.md)
-* [SceneObject](./reference/scene-object.md)
-* [ScenePosition](./reference/scene-position.md)
-~* [Shader](./reference/shader.md)~
-* [Texture](./reference/texture.md)
-~* [Transform](./reference/transform.md)~
-~* [Transform2D](./reference/transform-2d.md)~
-* [UiCamera](./reference/ui-camera.md)
-~* [UiShader](./reference/ui-shader.md)~
-* [ValueAnimationAction](./reference/value-animation-action.md)
-* [Vector](./reference/vector.md)
+* [PerspectiveCamera](./reference/perspective-camera.md) objects further from the camera appear smaller
+* [Scene](./reference/scene.md) a collection of objects and a camera to draw them
+* [SceneObject](./reference/scene-object.md) an instance of a model that can be positioned within a scene
+* [ScenePosition](./reference/scene-position.md) location, orientation and scale
+* ~[Shader](./reference/shader.md)~ builds programs that run on the GPU to render the scene
+* [Texture](./reference/texture.md) defines one aspect of a material, for example how shiny it is
+* ~[Transform](./reference/transform.md)~ builds a 3x3 matrix that defines a sequence of 2D transformations
+* ~[Transform2D](./reference/transform-2d.md)~ builds a 4x4 matrix that defines a sequence of 3D transformations
+* [UiCamera](./reference/ui-camera.md) projects a 2D scene onto the front of the viewport
+* ~[UiShader](./reference/ui-shader.md)~ is used in combination with the UI camera to render a UI
+* [ValueAnimationAction](./reference/value-animation-action.md) smoothly animate a value over time
+* [Vector](./reference/vector.md) performs vector math

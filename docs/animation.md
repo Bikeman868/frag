@@ -20,6 +20,9 @@ Starting with the lowest level and moving up, the options available are
 * [`KeyframeAnimationAction`](reference/keyframe-animation-action.md) - can
   be included in an animation sequence and lets you execute specific functions
   at specific keyframes within the animation.
+* [`PositionAnimationAction](reference/position-animation-action.md) - can be
+  included in an animation sequence and lets you move and rotate scene objects
+  and cameras with defined linear speed or angular speed.
 * [`ModelAnimation`](reference/model-animation.md) - allows you to add names
   animations to models. Any scene objects that are based in this model will
   have these animations available. This is the type of animation that is

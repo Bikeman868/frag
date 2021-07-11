@@ -10,6 +10,7 @@ No known bugs at this time.
 * Armatures and character animation
 * Bitmap font textures and text rendering
 * Vector fonts as 2D mesh per ASCII character
+* Parenting a scene object to another scene object
 
 ## Optional nice to have features
 * Play sounds synced with animations.

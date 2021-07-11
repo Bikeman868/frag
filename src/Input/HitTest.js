@@ -71,8 +71,15 @@
             models: [],
         };
 
-        scene.adjustToViewport(gl);
-        scene.draw(drawContext);
+        if (Array.isArray(scene)) {
+            for (let i = 0; i < scene.length; i++) {
+                scene[i].adjustToViewport(gl);
+                scene[i].draw(drawContext);
+            }
+        } else {
+            scene.adjustToViewport(gl);
+            scene.draw(drawContext);
+        }
 
         const pixel = new Uint8Array(4);
         gl.readPixels(x, height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
