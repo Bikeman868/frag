@@ -38,6 +38,9 @@ const cameraZoomState = frag.AnalogState(
 // into changes in the analog state value
 const wheelInput = frag.AnalogInput("mouse-wheel", cameraZoomState);
 
+// Allow the player to also control camera zoom with touch screen pinch
+const wheelInput = frag.AnalogInput("pinch-touch", cameraZoomState);
+
 // Bind the input to the mouse wheel
 wheelInput.enable();
 ```
@@ -82,7 +85,34 @@ that you can use. If you simply pass `keys` as the `inputName` parameter then th
 keys are `ArrowLeft` and `ArrowRight`.
 
 ## Touch screen input
-This is not implemented yet.
+Touch screens support multiple concurrent touch points. It's sort of like having 
+multiple mice but each mouse only has one button and it must be pressed for the mouse
+to work.
+
+For touch screen input the `inputName` parameter is a hyphen separated list of keywords.
+The keywords and not case sensitive and can be put in any order, so order them in a way 
+that is most readable for you.
+
+To indicate that you want to capture touch input, the keyword list must include
+`touch`. If you do not add any other keywords the default is to capture horizontal
+movement if a single finger touching the screen. You can add the following keywords 
+to change this default:
+* `horizontal` redundent since this is the default, add it to improve readability
+* `vertical` captures vertical movement of the finger touching the screen
+* `1` captures movement when there is exactly 1 finger touching the screen
+* `2` captures movement of the second finger when there are exactly 2 fingers touching the screen
+* `3` captures movement of the third finger when there are exactly 3 fingers touching the screen
+* `plus` allows additional fingers to be touching the screen. For example if I pass `1-plus-touch`
+  as my `inputName` then this input will respond if there is 1 or more fingers touching the screen,
+  but finger 1 will still control the analog value even when additional fingers are touching.
+* `inverted` inverts the touch direction, so for example moving your finger to the 
+  right will decrease the value of the analog state instead of increasing it.
+* `pinch` the analog state will be set to the distance distance between two fingers when
+  exactly 2 fingers are touching the screen. The `inverted` option works with `pinch` but is not 
+  recommended.
+* `rotate` the analog state is controlled by the angle between the first finger position
+  to the second finger position when exactly 2 fingers are touching the screen. The `inverted` 
+  option works with `rotate` but is not recommended.
 
 ## Game pad input
 This is not implemented yet.
@@ -93,7 +123,25 @@ need to specifically configure individual input devices. For example if the play
 with no mouse the "pointer" input will surface touch events, but if the player is on a laptop
 with no touch screen then it will surface track pad input.
 
-This is not implemented yet.
+For pointer input the `inputName` parameter is a hyphen separated list of keywords.
+The keywords and not case sensitive and can be put in any order, so order 
+them in a way that is most readable for you.
+
+To indicate that you want to capture pointer input, the keyword list must include
+`pointer`. If you do not add any other keywords the default is to capture horizontal
+movement of the pointer regardless of the state of the pointer buttons. You can add
+the following keywords to change this default:
+* `horizontal` redundent since this is the default, add it to improve readability
+* `vertical` captures vertical movement of the pointer
+* `inverted` inverts the pointer direction, so for example moving the pointer to the 
+  right will decrease the value of the analog state instead of increasing it.
+* `left` the left button must be pressed for pointer movements to be recorded
+* `right` the right button must be pressed for pointer movements to be recorded
+* `middle` the middle button must be pressed for pointer movements to be recorded
+* `back` the back button must be pressed for pointer movements to be recorded
+* `forward` the forward button must be pressed for pointer movements to be recorded
+* `eraser` the eraser button must be pressed for pointer movements to be recorded
+* `any` any button must be pressed for pointer movements to be recorded
 
 ## Device orientation input
 This is not implemented yet.

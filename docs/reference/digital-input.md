@@ -53,6 +53,8 @@ You can only use one of the following keywords. Which one you pick determines
 the other keywords that are available:
 * `mouse` indicates that you want to capture input from the mouse buttons
 * `key` indicates that you want to capture input from a keyboard key
+* `pointer` indicates that you want to capture input from the primary pointing 
+  device. This can be the mouse, a pen or a touch screen.
 
 Regardless of which input device you are binding to, the following keywords are
 always available:
@@ -65,12 +67,13 @@ always available:
 * `off` turns the digital state "off" on key down (or key up if inverted). Never turns the state "on.
 
 When the `mouse` keyword is included, the following keywords become available:
-* `left` to capture pressing the left mouse button
-* `right` to capture pressing the right mouse button
-* `middle` to capture pressing the middle mouse button
-* `back` to capture pressing the back mouse button
-* `forward` to capture pressing the forward mouse button
-* `any` to capture pressing the any of the mouse buttons
+* `left` to capture pressing the left button
+* `right` to capture pressing the right button
+* `middle` to capture pressing the middle button
+* `back` to capture pressing the back button
+* `forward` to capture pressing the forward button
+* `eraser` to capture the eraser button if this is a pen
+* `any` to capture pressing the any of the  buttons
 
 Note that some mice only have a left button, others have left and right etc.
 Gaming mice usually have left, right, middle, back and forwards plus some other

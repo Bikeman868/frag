@@ -50,7 +50,8 @@ window.frag.DigitalInput = function (inputName, digitalState) {
             if ((/^middle$/i).test(splits[i])) buttons = 4;
             if ((/^back$/i).test(splits[i])) buttons = 8;
             if ((/^forward$/i).test(splits[i])) buttons = 16;
-            if ((/^any$/i).test(splits[i])) buttons = 31;
+            if ((/^eraser$/i).test(splits[i])) buttons = 32;
+            if ((/^any$/i).test(splits[i])) buttons = 255;
         }
 
         const handler = function (evt) {
@@ -66,6 +67,41 @@ window.frag.DigitalInput = function (inputName, digitalState) {
         public.disable = function () {
             frag.canvas.removeEventListener("mousedown", handler, false);
             frag.canvas.removeEventListener("mouseup", handler, false);
+        }
+
+        return public;
+    }
+
+    if ((/pointer/i).test(inputName)) {
+        let buttons = 1;
+
+        for (let i = 0; i < splits.length; i++) {
+            if ((/^toggle$/i).test(splits[i])) private.toggle = true;
+            if ((/^inverted$/i).test(splits[i])) private.inverted = true;
+            if ((/^on$/i).test(splits[i])) private.setOn = true;
+            if ((/^off$/i).test(splits[i])) private.setOff = true;
+            if ((/^left$/i).test(splits[i])) buttons = 1;
+            if ((/^right$/i).test(splits[i])) buttons = 2;
+            if ((/^middle$/i).test(splits[i])) buttons = 4;
+            if ((/^back$/i).test(splits[i])) buttons = 8;
+            if ((/^forward$/i).test(splits[i])) buttons = 16;
+            if ((/^eraser$/i).test(splits[i])) buttons = 32;
+            if ((/^any$/i).test(splits[i])) buttons = 255;
+        }
+
+        const handler = function (evt) {
+            setIsOn(evt, (evt.buttons & buttons) !== 0);
+            return true;
+        }
+
+        public.enable = function () {
+            frag.canvas.addEventListener("pointerdown", handler, false);
+            frag.canvas.addEventListener("pointerup", handler, false);
+        }
+
+        public.disable = function () {
+            frag.canvas.removeEventListener("pointerdown", handler, false);
+            frag.canvas.removeEventListener("pointerup", handler, false);
         }
 
         return public;
