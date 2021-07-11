@@ -124,18 +124,23 @@ window.frag.AnalogInput = function(inputName, analogState) {
 
     if ((/touch/i.test(inputName))) {
         // https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
+        return public;
     }
 
     if ((/gamepad/i.test(inputName))) {
         // https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API
+        return public;
     }
 
     if ((/pointer/i.test(inputName))) {
         // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events
+        return public;
     }
 
     if ((/orientation/i.test(inputName))) {
         // https://developer.mozilla.org/en-US/docs/Web/Events/Detecting_device_orientation
+        return public;
     }
+
     return public;
 }

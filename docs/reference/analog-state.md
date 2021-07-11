@@ -18,13 +18,13 @@ can manually mutate the state in your code by calling one of these methods:
 
 ## Example
 
-The following example moves the camera in and out if the scene when the mouse wheel is scrolled:
+The following example moves the camera in and out of the scene when the mouse wheel 
+is scrolled:
 
 ```javascript
 const frag = window.frag;
 
-// Define an action that sets the Z-axis position of the camera to
-// the value in an analog state
+// Define an action that sets the Z-axis position of the camera
 const cameraActionZ = frag.AnalogAction("move-camera-z");
 
 // Define an analog state to hold the current value of the camera
