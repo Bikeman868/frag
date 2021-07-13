@@ -14,6 +14,7 @@ window.frag.AnalogState = function(analogAction, config, name) {
         analogAction,
         config,
         name,
+        inverted: false,
     }
 
     const public = {
@@ -21,7 +22,14 @@ window.frag.AnalogState = function(analogAction, config, name) {
         value: config.value,
         minValue: config.minValue,
         maxValue: config.maxValue,
+        maxVelocity: Math.abs(config.maxVelocity),
         velocity: 0,
+    }
+
+    if (config.maxValue < config.minValue) {
+        private.inverted = true;
+        public.minValue = config.maxValue;
+        public.maxValue = config.minValue;
     }
 
     private.change = function(evt) {
@@ -35,14 +43,13 @@ window.frag.AnalogState = function(analogAction, config, name) {
         }
     }
 
-    public.setValue = function(evt, value, calcVelocity) {
-        if (calcVelocity) public.velocity = value - public.value;
-        if (value < private.config.minValue) {
-            value = private.config.minValue;
+    private.setValue = function(evt, value) {
+        if (value < public.minValue) {
+            value = public.minValue;
             public.velocity = 0;
         }
-        if (value > private.config.maxValue) {
-            value = private.config.maxValue;
+        if (value > public.maxValue) {
+            value = public.maxValue;
             public.velocity = 0;
         }
         if (Math.abs(public.value - value) > 1e-5) {
@@ -52,16 +59,43 @@ window.frag.AnalogState = function(analogAction, config, name) {
         }
     }
 
-    public.increment = function(evt) {
+    private.increment = function(evt) {
         public.velocity += public.velocity >= 0 ? private.config.acceleration : private.config.deceleration;
         if (public.velocity > private.config.maxVelocity) public.velocity = private.config.maxVelocity;
-        public.setValue(evt, public.value + public.velocity, false);
+        private.setValue(evt, public.value + public.velocity, false);
+    }
+
+    private.decrement = function(evt) {
+        public.velocity -= public.velocity <= 0 ? private.config.acceleration : private.config.deceleration;
+        if (public.velocity < -private.config.maxVelocity) public.velocity = -private.config.maxVelocity;
+        private.setValue(evt, public.value + public.velocity, false);
+    }
+
+    public.setValue = function(evt, value, calcVelocity) {
+        if (private.inverted)
+            value = public.minValue + public.maxValue - value;
+
+        if (calcVelocity) public.velocity = value - public.value;
+
+        private.setValue(evt, value);
+    }
+
+    public.increment = function(evt) {
+        if (private.inverted) private.decrement(evt);
+        else private.increment(evt);
     }
 
     public.decrement = function(evt) {
-        public.velocity -= public.velocity <= 0 ? private.config.acceleration : private.config.deceleration;
+        if (private.inverted) private.increment(evt);
+        else private.decrement(evt);
+    }
+
+    public.setVelocity = function(evt, velocity) {
+        if (inverted) public.velocity = -velocity;
+        else public.velocity = velocity;
+        if (public.velocity > private.config.maxVelocity) public.velocity = private.config.maxVelocity;
         if (public.velocity < -private.config.maxVelocity) public.velocity = -private.config.maxVelocity;
-        public.setValue(evt, public.value + public.velocity, false);
+        private.setValue(evt, public.value + public.velocity);
     }
 
     return public;

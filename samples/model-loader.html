@@ -214,16 +214,16 @@
             // Use AnalogState and AnalogAction to allow the player to move the camera on the x-axis
             const cameraPanXState = frag.AnalogState(
                 frag.AnalogAction("move-camera-x"),
-                {   minValue: -100,
-                    maxValue: 100,
+                {   minValue: 100,
+                    maxValue: -100,
                 },
                 "camera pan X");
 
             // Use AnalogState and AnalogAction to allow the player to move the camera on the y-axis
             const cameraPanYState = frag.AnalogState(
                 frag.AnalogAction("move-camera-y"),
-                {   minValue: -100,
-                    maxValue: 100,
+                {   minValue: 100,
+                    maxValue: -100,
                 },
                 "camera pan Y");
 
@@ -256,14 +256,16 @@
                 .add(frag.DigitalInput("u-key-on", animationState));
             inputs
                 .add(frag.AnalogInput("mouse-wheel", cameraZoomState))
-                .add(frag.AnalogInput("left-mouse-horizontal-inverted", cameraPanXState))
-                .add(frag.AnalogInput("left-mouse-vertical-inverted", cameraPanYState))
+                .add(frag.AnalogInput("left-mouse-horizontal", cameraPanXState))
+                .add(frag.AnalogInput("left-mouse-vertical", cameraPanYState))
                 .add(frag.AnalogInput("touch-pinch", cameraZoomState))
                 .add(frag.AnalogInput("touch-rotate", cameraRotateState))
-                .add(frag.AnalogInput("1-plus-touch-horizontal-inverted", cameraPanXState))
-                .add(frag.AnalogInput("1-plus-touch-vertical-inverted", cameraPanYState))
-                .add(frag.AnalogInput("keys-d-a", cameraPanXState))
-                .add(frag.AnalogInput("keys-w-s", cameraPanYState));
+                .add(frag.AnalogInput("1-plus-touch-horizontal", cameraPanXState))
+                .add(frag.AnalogInput("1-plus-touch-vertical", cameraPanYState))
+                .add(frag.AnalogInput("keys-a-d", cameraPanXState))
+                .add(frag.AnalogInput("keys-s-w", cameraPanYState))
+                .add(frag.AnalogInput("gamepad-horizontal", cameraPanXState))
+                .add(frag.AnalogInput("gamepad-vertical", cameraPanYState));
 
             // Bind all inputs to event listeners
             inputs.enable();

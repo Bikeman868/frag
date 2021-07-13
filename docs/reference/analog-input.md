@@ -52,7 +52,7 @@ devices controlling that input state.
 ## Mouse input
 
 For mouse input the `inputName` parameter is a hyphen separated list of keywords.
-The keywords and not case sensitive and can be put in any order, so order 
+The keywords are not case sensitive and can be put in any order, so order 
 them in a way that is most readable for you.
 
 To indicate that you want to capture mouse input, the keyword list must include
@@ -90,7 +90,7 @@ multiple mice but each mouse only has one button and it must be pressed for the 
 to work.
 
 For touch screen input the `inputName` parameter is a hyphen separated list of keywords.
-The keywords and not case sensitive and can be put in any order, so order them in a way 
+The keywords are not case sensitive and can be put in any order, so order them in a way 
 that is most readable for you.
 
 To indicate that you want to capture touch input, the keyword list must include
@@ -115,7 +115,27 @@ to change this default:
   option works with `rotate` but is not recommended.
 
 ## Game pad input
-This is not implemented yet.
+In terms of analog inputs, game controllers have zero or more joystick axes. Frag supports
+up to four controllers each having four 2-axis joysticks.
+
+For game pad input the `inputName` parameter is a hyphen separated list of keywords.
+The keywords are not case sensitive and can be put in any order, so order them in a way 
+that is most readable for you.
+
+To indicate that you want to capture gamepad input, the keyword list must include
+`gamepad`. If you do not add any other keywords the default is to capture horizontal
+movement of the first joystick on the player 1 game pad:
+* `horizontal` redundent since this is the default, add it to improve readability
+* `vertical` captures the vertical joystick axis
+* `inverted` inverts the joystick axis so that moving the joystick up will reduce the analog state value
+* `player1` captures the first gamepad to connect to the device
+* `player2` captures the second gamepad to connect to the device
+* `player3` captures the third gamepad to connect to the device
+* `player4` captures the fourth gamepad to connect to the device
+* `stick1` captures the 1st joystick on the gamepad
+* `stick2` captures the 2nd joystick on the gamepad
+* `stick3` captures the 3rd joystick on the gamepad
+* `stick4` captures the 4th joystick on the gamepad
 
 ## Pointer input
 Browsers define a "pointer" input device that unifies the various input methods avoiding the
@@ -148,3 +168,16 @@ This is not implemented yet.
 
 # Device accelorometer input
 This is not implemented yet.
+
+### Input name examples
+These are just a few examples of input names and how they would affect the `AnalogState` that the input is connected to:
+* `left-mouse` dragging the mouse from left to right with the left mouse button pressed will change the state value up and down.
+* `mouse-vertical` any forward and backwards movement of the mouse will change the state value up and down even with no buttons pressed.
+* `keys-ArrowLeft-ArrowRight` the right and left arrow keys on the keyboard will change the state value up and down.
+* `1-plus-touch-horizontal-inverted` touching the screen with one or more fingers and moving horizontally will change the state value up and down in the opposite direction to the movement. The state value will track the first finger to touch the screen.
+* `2-touch-vertical` when exactly two fingers are touching the screen, vertical movement of the second finger to touch will change the state value up and down.
+* `2-plus-rotate` when two or more fingers are touching the screen, the angle between the first two fingers will change the state value up and down.
+* `left-pointer-horizontal` captures horizontal movement of the primary pointing device (which could be a mouse, stylus or touch screen) when it's primary button is held down. In the case of touch the number of fingers can can/should be touching the screen is device dependant. On my touch device it does not matter how many fingers you touch the screen with, so this is equivalent to `1-plus-touch-horizontal`. In general the pointer device is easier to work with but harder to predict.
+* `right-pointer-vertical` if your primary input device is a mouse then this will capture movement of the mouse with the right mouse button depressed. For touch devices (which don't have a right button concept) the behaviour is not well defined and could vary between devices.
+* `player1-gamepad` captures the horizontal axis of the first joystick on the first gamepad to connect.
+* `player2-gamepad-stick2-vertical-inverted` captures vertical movement of the 2nd joystick on the 2nd game pad to connect such that moving the joystick up reduces the analog state value and moving the joystick down increases the analog state value.

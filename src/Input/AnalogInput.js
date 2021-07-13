@@ -327,7 +327,63 @@ window.frag.AnalogInput = function(inputName, analogState) {
     }
 
     if ((/gamepad/i.test(inputName))) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API
+        let controllerIndex = 0;
+        let stickIndex = 0;
+        let axisIndex = 0;
+        let gamepad = null;
+        let inverted = false;
+        let interval;
+
+        for (let i = 0; i < splits.length; i++) {
+            if ((/^horizontal$/).test(splits[i])) axisIndex = 0;
+            if ((/^vertical$/).test(splits[i])) axisIndex = 1;
+            if ((/^inverted$/).test(splits[i])) inverted = true;
+            if ((/^player1$/).test(splits[i])) controllerIndex = 0;
+            if ((/^player2$/).test(splits[i])) controllerIndex = 1;
+            if ((/^player3$/).test(splits[i])) controllerIndex = 2;
+            if ((/^player4$/).test(splits[i])) controllerIndex = 3;
+            if ((/^stick1$/).test(splits[i])) stickIndex = 0;
+            if ((/^stick2$/).test(splits[i])) stickIndex = 1;
+            if ((/^stick3$/).test(splits[i])) stickIndex = 2;
+            if ((/^stick4$/).test(splits[i])) stickIndex = 3;
+        }
+
+        const index = stickIndex * 2 + axisIndex;
+
+        const poll = function (evt) {
+            if (gamepad) {
+                const value = gamepad.axes[index];
+                if (inverted) value = -value;
+                private.analogState.setVelocity(evt, value * private.analogState.maxVelocity);
+            }
+        }
+
+        const connectedHandler = function(evt) {
+            if (frag.debugInputs) console.log("Gamepad", evt.gamepad.index, "connected", "id:" + evt.gamepad.id, "with", e.gamepad.axes.length, "axes");
+            if (evt.gamepad.index === controllerIndex && gamepad.axes.length > index) {
+                gamepad = evt.gamepad;
+                interval = setInterval(poll, 50);
+            }
+        }
+
+        const disconnectedHandler = function(evt) {
+            if (frag.debugInputs) console.log("Gamepad", evt.gamepad.index, "disconnected", "id:" + evt.gamepad.id);
+            if (evt.gamepad.id === gamepad.id) {
+                clearInterval(interval);
+                gamepad = null;
+            }
+        }
+
+        public.enable = function () {
+            window.addEventListener("gamepadconnected", connectedHandler, false);
+            window.addEventListener("gamepaddisconnected", disconnectedHandler, false);
+        }
+
+        public.disable = function () {
+            window.removeEventListener("gamepadconnected", connectedHandler, false);
+            window.removeEventListener("gamepaddisconnected", disconnectedHandler, false);
+        }
+
         return public;
     }
 

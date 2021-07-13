@@ -87,6 +87,14 @@ When the `key` keyword is included, the following keywords become available:
 * `shift` this key is only actioned if the Shift key is pressed at the same time
 * `meta` this key is only actioned if the Meta key is pressed at the same time
 
-For the `key` keywords anything that is not a keyword is assumed to be the key value to capture.
-See https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values for a list
-of the supported key values.
+For the `key` keywords anything that is not a keyword is assumed to be the 
+[key value](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values) to capture.
+
+### Input name examples
+These are just a few examples of input names and how they would affect the `DititalState` the input is connected to:
+* `left-mouse` turn the state on when the left mouse button is pressed and turn it off again when the left mouse button is released.
+* `right-mouse-toggle` toggle the state when the right mouse button is pressed and do nothing when it is released.
+* `middle-mouse-toggle-inverted` do nothing when the middle mouse button is pressed and toggle the state when it is released.
+* `ctrl-a-key-on` turn the state on when the Ctrl+A keys are pressed. State change happens on key down.
+* `alt-F12-key-off-inverted` turn the state off when the Alt+F12 keys are pressed. State change happens on key up.
+* `PageDown-key-inverted` the state is on when the Page Down key is not pressed and off when the key is pressed.
