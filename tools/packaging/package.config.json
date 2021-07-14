@@ -12,22 +12,24 @@
             "version": 1
         }],
         "models": [{
-            "modelName": "{type}",
-            "include": "{type}.frag_model"
+            "modelName": "{type}_nla",
+            "include": "{type}_nla.frag_model"
+        },{
+            "modelName": "{type}_dope",
+            "include": "{type}_dope.frag_model"
         }],
         "fonts": [{
             "fontName": "{name}",
-            "include": "{name}_font.png"
+            "include": "Fonts\\{name}.png"
         }],
         "materials": [{
             "materialName": "{name}",
-            "include": "{name}_{texture}.png",
+            "folder": "materials\\",
             "textures": {
-                "ambient": "{name}_Ambient_Occlusion.jpg",
+                "ambient": "{name}_Ambient_Occlusion",
                 "diffuse": "{name}_Base_Color.jpg",
                 "glossiness": "{name}_Glossiness.jpg",
                 "height": "{name}_Height.jpg",
-                "metal": "{name}_Metalic.jpg",
                 "normal": "{name}_NormalOgl.jpg",
                 "roughness": "{name}_Roughness.jpg"
             }

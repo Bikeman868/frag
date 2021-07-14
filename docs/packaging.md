@@ -139,7 +139,7 @@ script.
 The checked in code contains a `package.config.json` file that builds the packages in the [samples folder](../samples)
 
 This is an example of a very simple packager configuration. It creates one package file with
-little-endian byte ordering that contains some models, fonts and materials:
+little-endian byte ordering that contains some models, fonts and materials using default naming:
 ```json
 {
     "packages":[{
@@ -157,17 +157,11 @@ little-endian byte ordering that contains some models, fonts and materials:
             "fontName": "{name}"
         }],
         "materials":[{
-            "include": "materials\\{name}_{texture}.jpg",
-            "textures": {
-                "ambient": "{name}_Ambient_Occlusion.jpg",
-                "diffuse": "{name}_Base_Color.jpg",
-                "glossiness": "{name}_Glossiness.jpg",
-                "height": "{name}_Height.jpg",
-                "metal": "{name}_Metalic.jpg",
-                "normal": "{name}_NormalOgl.jpg",
-                "roughness": "{name}_Roughness.jpg"
-            },
+            "folder": "materials\\",
             "materialName": "{name}",
+            "textures": {
+                "diffuse": "{name}_Base_Color.jpg"
+            }
         }]
     }]
 }
