@@ -1,11 +1,26 @@
 # Packaging
 
-To create models and load them into your game
+To create models and load them into your game:
 1. Draw models and define animation effects in Blender
 2. Install the Frag exporter addon for Blender
 3. Export your models to `.frag_model` files using the Blender addon
 4. Create a configuration for the model packager script
 5. Run the packager Python script to combine all the `.frag_model` files into one or more package
+6. Host your package files on the Internet so that the game can download them
+
+To create fonts and load them into your game:
+1. Go to https://evanw.github.io/font-texture-generator/ and download the fonts you need
+2. Copy/paste the generated json into a file stored alongside the font image
+3. Create a configuration for the model packager script
+4. Run the packager Python script to combine all the font files into one or more packages
+5. Host your package files on the Internet so that the game can download them
+
+To create materials and load them into your game:
+1. Download and install Adobe Substance Player
+2. Find or purchase some substances
+3. Load substance into Substance Player, tweak the settings then export the texture files
+4. Create a configuration for the model packager script
+5. Run the packager Python script to combine all the texture bitmaps into one or more packages
 6. Host your package files on the Internet so that the game can download them
 
 These steps are explained in more detail below. The examples given relate to rebuilding
@@ -78,17 +93,43 @@ feature in Blender - which will just unzip the Python code into the `addons` fol
 * Go to the "File|Export|Frag model" option in the Blender menu
 * Save the export. This will produce a `.frag_model` file and also a `.log` file that you can check for errors
 
-## 4. Create a configuration for the model packager script
-The model packager is a Python application that combines multiple `.frag_model` files into one or mode
-package files. The package files use a very efficient and compact binary format that can be compressed
-and delivered to the browser to get your game running as quickly as possible.
+## 4. Generate the fonts you need
+If you want to draw text in your OpenGL scene then you will need to generate some font textures. Note that
+you can also create the game UI in the web page using Vue.js, Angular.js, React.js etc and jut have
+the game scene rendered onto a canvas in the page. In this case you may not need any fonts.
+* Nativate to https://evanw.github.io/font-texture-generator/
+* Choose a bitmap size that is a power of 2
+* Choose your font family and other settings
+* Download the font bitmap file onto your computer
+* Copy the generated json and save it into a `.json` file alongside the font bitmap file. 
+  It must be in the same folder and have the same filename but have a `.json` file extension.
+
+## 5. Create the materials that you need
+You don't have to package materials. If you want to use solid colors in your game that you can easily
+create materials programmatically. Most of the [samples](../samples) do this just to keep the samples
+easy to understand.
+
+Materials are defined using a collection of bitmaps. Each bitmap represents one aspect of how the
+model surface is rendered. For example one bitmap can define how rough or smooth the surface is and
+another defines how dull or shiny it is etc. These bitmaps can be generated from a substance file
+using a substance player. This is the approach that Frag supports.
+* Download and install the Adobe Substance Player application.
+* Purchase or download free substances, or use Adobe Substance Designer to build your own substances.
+* Open your substance in Substace Player and play with the settings to get the look that you want
+* Export the substance into a set of bitmap files. The files will all have the same prefix and various 
+  suffixes to let you knoe which ones are the glossiness etc.
+
+## 6. Create a configuration for the packager script
+The packager is a Python application that combines multiple `.frag_model` files, font files and textures
+into one or more package files. The package files use a very efficient and compact binary format that 
+can be compressed and delivered to the browser to get your game running as quickly as possible.
 
 The packager is in the `./tools/packaging/` folder within this repository.
 
-The packager uses a configuration file to locate all of the `.frag_model` files, and define which models
-are packaged into which packages. If you only have a few models it migh make sense to build one package.
-If different models come into play at different stages of your game, then you can build a small package
-that contains only the models needed to get the game started, and one or more packages that download
+The packager uses a configuration file to locate all of the files to package, and define which models, fonts
+and materials are packaged into which packages. If you only have a few assets it migh make sense to build one package.
+If different assets come into play at different stages of your game, then you can build a small package
+that contains only the assets needed to get the game started, and one or more packages that are download
 in the background for later in the game.
 
 When you run the packager you can pass the location of the configuration file on the command line. If you
@@ -97,28 +138,46 @@ script.
 
 The checked in code contains a `package.config.json` file that builds the packages in the [samples folder](../samples)
 
-The minimal form of the configurartion file is:
+This is an example of a very simple packager configuration. It creates one package file with
+little-endian byte ordering that contains some models, fonts and materials:
 ```json
 {
-    "model-packages":[{
+    "packages":[{
         "variants":[{
             "output": "models_little.pkg",
             "littleEndian": true,
             "version": 1
         }],
-        "groups":[{
+        "models":[{
             "include": "Models\\{type}\\{size}.frag_model",
             "modelName": "model_{type}{size}"
+        }],
+        "fonts":[{
+            "include": "Fonts\\{name}.png",
+            "fontName": "{name}"
+        }],
+        "materials":[{
+            "include": "materials\\{name}_{texture}.jpg",
+            "textures": {
+                "ambient": "{name}_Ambient_Occlusion.jpg",
+                "diffuse": "{name}_Base_Color.jpg",
+                "glossiness": "{name}_Glossiness.jpg",
+                "height": "{name}_Height.jpg",
+                "metal": "{name}_Metalic.jpg",
+                "normal": "{name}_NormalOgl.jpg",
+                "roughness": "{name}_Roughness.jpg"
+            },
+            "materialName": "{name}",
         }]
-    }],
+    }]
 }
 ```
 
 In this file:
 * `variants` is a collection of package files to output. All of these files will contain the
-  same set of models. The variations are in the schema version and the endiness of the binary
+  same set of assets. The variations are in the schema version and the endiness of the binary
   data. To output the latest version omit the `version` property.
-* `groups` are sets of models that have a common naming convention. The `include` property
+* `models` are sets of models that have a common naming convention. The `include` property
   is a file name pattern of the models to package. These must be exported from Blender using
   the Frag exporter. The `modelName` property defines how the name of the model (in your game)
   will be derrived from the file name. The placeholders in curly braces must match the ones in the
@@ -126,8 +185,13 @@ In this file:
 * For the `include` property, each path segment can only contain one placeholder in curly braces.
   These placeholders will match any text in the filename, and define the part of the filename
   that will be extracted and used to form the names of the models.
+* `fonts` are sets of fonts that have a common naming convention. The rules are similar to the
+  rules for models.
+* `materials` are sets of texture files that define materials and have a common naming convention. 
+  The rules are similar to the rules for models except that you need to specify how the various
+  texture file names are formed. The example above matches the default configuration of Substance Player.
 
-## 5. Run the packager Python script to combine all the `.frag_model` files into one or more package
+## 7. Run the packager Python script to combine all the asset files into one or more package
 In the `./tools/packaging/` folder there are examples of how to run the Python program and
 supply command line parameters. These examples are `pack.cmd` for Windows users and `pack.sh` for
 Linux and Mac users.
@@ -138,13 +202,13 @@ Since you will likely run these packaging programs many times during the develop
 I recommend making a shell script that is specific to your folder structure so that you can run
 it easily.
 
-## 6. Host your package files on the Internet so that the game can download them
+## 8. Host your package files on the Internet so that the game can download them
 In the Frag framework you will load your models by providing a URL to the package file.
 You can host this file the same way you would host your html, css etc.
 
 I recommend building both little-endian and big-endian versions of your packages, detecting
 the endiness of the players device, and downloading the one that matches, because this will
-be unpacked much more efficiently on the device and the gaem will start up faster.
+be unpacked much more efficiently on the device and the game will start up faster.
 
 # Examples
 
@@ -162,7 +226,7 @@ This sample script will:
 {
     "input": "..\\assets\\",
     "output": "..\\assets\\",
-    "model-packages":[{
+    "packages":[{
         "variants":[{
             "output": "models_little.pkg",
             "littleEndian": true,
@@ -172,7 +236,7 @@ This sample script will:
             "littleEndian": false,
             "version": 1
         }],
-        "groups":[{
+        "models":[{
             "modelName": "connector_{type}{size}",
             "include": "Connector\\{type}\\{size}.frag_model",
         },{
@@ -183,7 +247,6 @@ This sample script will:
             "include": "Robot\\{type}.frag_model",
         }]
     }],
-    "material-packages":[]
 }
 ```
 

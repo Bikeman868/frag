@@ -1,7 +1,7 @@
 import json
 from package_writer import PackageWriter
 from logger import Logger
-from model import Model
+from asset_file import AssetFile
 
 class ModelWriter:
     _writer: PackageWriter
@@ -9,7 +9,7 @@ class ModelWriter:
     def __init__(self, writer: PackageWriter):
         self._writer = writer
 
-    def write(self, model: Model, logIndent: int):
+    def write(self, model: AssetFile, logIndent: int):
         with open(model.filename, 'rt') as file:
             modelJson = json.loads(file.read())
 

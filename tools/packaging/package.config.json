@@ -1,8 +1,8 @@
 {
     "input": "..\\..\\samples\\assets\\",
     "output": "..\\..\\samples\\assets\\",
-    "model-packages":[{
-        "variants":[{
+    "packages": [{
+        "variants": [{
             "output": "models_little.pkg",
             "littleEndian": true,
             "version": 1
@@ -11,13 +11,26 @@
             "littleEndian": false,
             "version": 1
         }],
-        "groups":[{
-            "modelName": "{type}_nla",
-            "include": "{type}_nla.frag_model"
-        },{
-            "modelName": "{type}_dope",
-            "include": "{type}_dope.frag_model"
+        "models": [{
+            "modelName": "{type}",
+            "include": "{type}.frag_model"
+        }],
+        "fonts": [{
+            "fontName": "{name}",
+            "include": "{name}_font.png"
+        }],
+        "materials": [{
+            "materialName": "{name}",
+            "include": "{name}_{texture}.png",
+            "textures": {
+                "ambient": "{name}_Ambient_Occlusion.jpg",
+                "diffuse": "{name}_Base_Color.jpg",
+                "glossiness": "{name}_Glossiness.jpg",
+                "height": "{name}_Height.jpg",
+                "metal": "{name}_Metalic.jpg",
+                "normal": "{name}_NormalOgl.jpg",
+                "roughness": "{name}_Roughness.jpg"
+            }
         }]
-    }],
-    "material-packages":[]
+    }]
 }

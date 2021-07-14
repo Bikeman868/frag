@@ -11,7 +11,7 @@ class NameField:
 
     def __repr__(self): return 'NameField(' + self.identifier + '=>[' + str(self.segment) + '][' + str(self.start) + ',' + str(self.end) + '])'
 
-class Model:
+class AssetFile:
     @property
     def name(self): return self.__name
 
@@ -23,7 +23,7 @@ class Model:
         self.__filename = filename
 
     @staticmethod
-    def enumerateModels(rootPath, modelNamePattern, include, exclude):
+    def enumerateAssets(rootPath, assetNamePattern, include, exclude):
         rootSegments = rootPath.split(os.path.sep)
 
         fields = []
@@ -43,12 +43,12 @@ class Model:
                 segmentIndex = i + len(rootSegments) - 1
                 fields.append(NameField(identifier, segmentIndex, fieldStart, replEnd))
 
-        models = []
+        assets = []
         pattern = rootPath + re.sub(r'{[^}]*}', '*', include)
         for filename in glob.iglob(pattern):
             pathSegments = filename.split(os.path.sep)
-            modelName = modelNamePattern
+            assetName = assetNamePattern
             for field in fields:
-                modelName = modelName.replace(field.identifier, pathSegments[field.segment][field.start:field.end])
-            models.append(Model(modelName, filename))
-        return models
+                assetName = assetName.replace(field.identifier, pathSegments[field.segment][field.start:field.end])
+            assets.append(AssetFile(assetName, filename))
+        return assets
