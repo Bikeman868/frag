@@ -1,6 +1,7 @@
 from struct import Struct, pack
 from byte_array import ByteArray
 from config import config
+from PIL import Image
 
 class PackageWriter:
     _filename: str
@@ -56,12 +57,12 @@ class PackageWriter:
 
     # Materials
 
-    def getOrAddMaterial(self, materialName: str):
+    def getOrAddMaterial(self, materialName: str, headerOnly: bool):
         materialIndex = self._materials.get(materialName, None)
         if materialIndex == None:
             materialIndex = self.startHeader(1)
             self.writeIndexStr(materialName)
-            self.endHeader()
+            if headerOnly: self.endHeader()
             self._materials[materialName] = materialIndex
         return materialIndex
 
@@ -113,6 +114,9 @@ class PackageWriter:
         for strByte in strBytes: self.writeIndexByte(strByte)
 
     def writeDataOffset(self):
+        extraBytes = self._dataOffset % 4
+        if extraBytes > 0:
+            for i in range(4 - extraBytes): self.writeDataByte(0) # word alignment
         self.writeIndexUInt(self._dataOffset)
 
     # writing to the data area
@@ -140,3 +144,33 @@ class PackageWriter:
         self.writeIndexByte(len(strBytes))
         for strByte in strBytes: self.writeDataByte(strByte)
 
+    def writeDataImage(self, filename: str):
+        with Image.open(filename) as image:
+            width, height = image.size
+            self.writeIndexStr(image.mode)
+            self.writeIndexUShort(width)
+            self.writeIndexUShort(height)
+            self.writeDataOffset()
+            pixels = image.load()
+            if image.mode == 'RGB':
+                for y in range(height):
+                    for x in range(width):
+                        r, g, b = pixels[x,y]
+                        self.writeDataByte(r)
+                        self.writeDataByte(g)
+                        self.writeDataByte(b)
+            elif image.mode == 'RGBA':
+                for y in range(height):
+                    for x in range(width):
+                        r, g, b, a = pixels[x,y]
+                        self.writeDataByte(r)
+                        self.writeDataByte(g)
+                        self.writeDataByte(b)
+                        self.writeDataByte(a)
+            elif image.mode == 'L':
+                for y in range(height):
+                    for x in range(width):
+                        l = pixels[x,y]
+                        self.writeDataByte(l)
+            else:
+                raise NotImplementedError('Unknown image format ' + image.mode)

@@ -37,7 +37,7 @@ need help, or take a look at the source code.
 * [Matrix](./reference/matrix.md) performs matrix math
 * [Model](./reference/model.md) is a template for instancing scene objects
 * [ModelAnimation](./reference/model-animation.md) adds animation effects to a model
-* ~[ModelLoader](./reference/model-loader.md)~ loads model packages from the server
+* ~[PackageLoader](./reference/package-loader.md)~ loads asset packages from the server
 * [OrthographicCamera](./reference/orthographic-camera.md) draws objects in the scene at their actual size
 * [ParallelAnimationAction](./reference/parallel-animation-action.md)
 * [PerspectiveCamera](./reference/perspective-camera.md) objects further from the camera appear smaller

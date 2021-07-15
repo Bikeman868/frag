@@ -40,8 +40,7 @@ window.frag.init = function () {
     frag.renderInterval = 15;
     frag.gameTickMs = 10;
 
-    frag.debugMaterialLoader = false;
-    frag.debugModelLoader = false;
+    frag.debugPackageLoader = false;
     frag.debugShaderBuilder = false;
     frag.debugAnimations = false;
     frag.debugMeshes = false;

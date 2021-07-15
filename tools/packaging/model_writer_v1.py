@@ -85,7 +85,7 @@ class ModelWriter:
                 model['mesh'] = mesh
                 materials = mesh['materials']
                 if len(materials) > 0:
-                    model['materialIndex'] = self._writer.getOrAddMaterial(materials[0])
+                    model['materialIndex'] = self._writer.getOrAddMaterial(materials[0], True)
 
             if not animationName in (None, ''):
                 animation = animationsByName[animationName]

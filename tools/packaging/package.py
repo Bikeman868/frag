@@ -72,14 +72,17 @@ def writePackageFile(output: str, littleEndian: bool, version: int, package: dic
             materialWriter = MaterialWriterV1(writer)
         else: raise NotImplementedError()
 
-        packageModels(inputPath, package, modelWriter)
         packageFonts(inputPath, package, fontWriter)
         packageMaterials(inputPath, package, materialWriter)
+        packageModels(inputPath, package, modelWriter)
+
+        writer.startHeader(0)
+        writer.endHeader()
 
 try:
     inputPath = config['input']
     outputPath = config['output']
-    logger.log('Packaging Blender models from ' + inputPath + ' to ' + outputPath, 0)
+    logger.log('Packaging assets from ' + inputPath + ' to ' + outputPath, 0)
     logger.logStart()
 
     for package in config['packages']:

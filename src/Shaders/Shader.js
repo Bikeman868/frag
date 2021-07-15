@@ -234,7 +234,7 @@ window.frag.Shader = function () {
         else if (private.verticies !== none) shader.vSource += "  vec2 position = a_position;\n";
 
         if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) {
-            shader.vSource += "  vec4 surface = texture2D(u_surface, a_texcoord);\n";
+            shader.vSource += "  vec4 surface = texture2D(u_surface, vec2(a_texcoord.x, 1.0 - a_texcoord.y));\n";
         }
 
         if (private.displacementTexture !== none) {
@@ -266,7 +266,7 @@ window.frag.Shader = function () {
                 shader.vSource += "  vec3 N = normalize(vec3(u_modelMatrix * vec4(a_normal, 0.0)));\n";
                 shader.vSource += "  mat3 TBN = transpose(mat3(T, B, N));\n";
                 shader.vSource += "  v_lightDirection = TBN * u_lightDirection;\n";
-                shader.fSource += "  vec3 normal = texture2D(u_normalMap, v_texcoord).rgb * 2.0 - 1.0;\n";
+                shader.fSource += "  vec3 normal = texture2D(u_normalMap, vec2(v_texcoord.x, 1.0 - v_texcoord.y)).rgb * 2.0 - 1.0;\n";
             } else {
                 shader.vSource += "  v_normal = (u_modelMatrix * vec4(a_normal, 0)).xyz;\n";
                 shader.vSource += "  v_lightDirection = u_lightDirection;\n";
@@ -295,7 +295,7 @@ window.frag.Shader = function () {
 
         if (private.textureCoords === "vec2") {
             if (private.diffuseTexture === "RGB")
-                shader.fSource += "  gl_FragColor += texture2D(u_diffuse, v_texcoord);\n";
+                shader.fSource += "  gl_FragColor += texture2D(u_diffuse, vec2(v_texcoord.x, 1.0 - v_texcoord.y));\n";
         }
 
         if (private.ambientLight !== none || private.directionalLight !== none)
@@ -303,7 +303,7 @@ window.frag.Shader = function () {
 
         if (private.textureCoords === "vec2") {
             if (private.emmissiveTexture === "RGB")
-                shader.fSource += "  gl_FragColor.rgb += texture2D(u_emmissive, v_texcoord).rgb;\n";
+                shader.fSource += "  gl_FragColor.rgb += texture2D(u_emmissive, vec2(v_texcoord.x, 1.0 - v_texcoord.y)).rgb;\n";
         }
     }
 

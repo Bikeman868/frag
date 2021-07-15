@@ -11,8 +11,10 @@ require("./Framework/Framework");
 
 require("./Shaders/Shader");
 require("./Shaders/UiShader");
+require("./Shaders/FontShader");
 
 require("./Materials/Texture");
+require("./Materials/Font");
 require("./Materials/Material");
 
 require("./SceneGraph/VertexData");
@@ -44,7 +46,7 @@ require("./Shapes/Plane");
 
 require("./Loaders/AssetCatalog");
 require("./Loaders/MaterialLoader");
-require("./Loaders/ModelLoader");
+require("./Loaders/PackageLoader");
 
 require("./Input/HitTest");
 require("./Input/InputMethod");

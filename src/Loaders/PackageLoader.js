@@ -1,4 +1,4 @@
-window.frag.ModelLoader = (function () {
+window.frag.PackageLoader = (function () {
     const frag = window.frag;
 
     const uInt32 = new Uint32Array([0x11223344]);
@@ -15,6 +15,78 @@ window.frag.ModelLoader = (function () {
         littleEndian
     };
 
+    private.loadFontV1 = function (context, objectIndex, headerOffset) {
+        const nameLength = context.header.getUint8(headerOffset++);
+        var name = "";
+        for (let i = 0; i < nameLength; i++) {
+            name += String.fromCharCode(context.header.getUint8(headerOffset++));
+        }
+
+        const font = context.assetCatalog.getFont(name);
+        if (frag.debugPackageLoader)
+            console.log("Object[" + objectIndex + "] is font " + name);
+
+        const faceLength = context.header.getUint8(headerOffset++);
+        var fontFace = "";
+        for (let i = 0; i < faceLength; i++) {
+            fontFace += String.fromCharCode(context.header.getUint8(headerOffset++));
+        }
+
+        const lineHeight = context.header.getUint16(headerOffset, littleEndian);
+        const width = context.header.getUint16(headerOffset + 2, littleEndian);
+        const height = context.header.getUint16(headerOffset + 4, littleEndian);
+        const charCount = context.header.getUint16(headerOffset + 6, littleEndian);
+        headerOffset += 8;
+
+        if (frag.debugPackageLoader)
+            console.log("  " + width + "x" + height + " pixel texture contains " + charCount + " characters from " + lineHeight + "px " + fontFace);
+
+        font.lineHeight(lineHeight);
+
+        for (let charIndex = 0; charIndex < charCount; charIndex++) {
+            const charLength = context.header.getUint8(headerOffset++);
+            var char = "";
+            for (let i = 0; i < charLength; i++) {
+                char += String.fromCharCode(context.header.getUint8(headerOffset++));
+            }
+            const x = context.header.getUint16(headerOffset + 0, littleEndian);
+            const y = context.header.getUint16(headerOffset + 2, littleEndian);
+            const width = context.header.getUint16(headerOffset + 4, littleEndian);
+            const height = context.header.getUint16(headerOffset + 6, littleEndian);
+            const originX = context.header.getInt16(headerOffset + 8, littleEndian);
+            const originY = context.header.getInt16(headerOffset + 10, littleEndian);
+            const advance = context.header.getInt16(headerOffset + 12, littleEndian);
+            headerOffset += 14;
+
+            font.addChar(char, x, y, width, height, originX, originY, advance);
+        }
+
+        const modeLength = context.header.getUint8(headerOffset++);
+        var mode = "";
+        for (let i = 0; i < modeLength; i++) {
+            mode += String.fromCharCode(context.header.getUint8(headerOffset++));
+        }
+
+        if (mode === "RGB") font.dataFormat(frag.gl.RGB);
+        else if (mode === "RGBA") font.dataFormat(frag.gl.RGBA);
+        else if (mode === "L") font.dataFormat(frag.gl.LUMINANCE);
+        else console.error("Font " + name + " unsupported mode " + mode);
+
+        const imageWidth = context.header.getUint16(headerOffset + 0, littleEndian);
+        const imageHeight = context.header.getUint16(headerOffset + 2, littleEndian);
+        let dataOffset = context.header.getUint32(headerOffset + 4, littleEndian) + context.dataOffset;
+        headerOffset += 8;
+
+        if (imageWidth !== width)             
+            console.error("Font " + name + " width does not match image width");
+        if (imageHeight !== height)             
+            console.error("Font " + name + " height does not match image height");
+
+        const dataArray = new Uint8Array(context.data, dataOffset);
+        font.fromArrayBuffer(dataArray, 0, width, height);
+        return font;
+    }
+
     private.loadMaterialV1 = function (context, objectIndex, headerOffset) {
         const nameLength = context.header.getUint8(headerOffset++);
         var name = "";
@@ -22,7 +94,7 @@ window.frag.ModelLoader = (function () {
             name += String.fromCharCode(context.header.getUint8(headerOffset++));
         }
         const material = context.assetCatalog.getMaterial(name);
-        if (frag.debugModelLoader)
+        if (frag.debugPackageLoader)
             console.log("Object[" + objectIndex + "] is material " + name);
         return material;
     }
@@ -31,7 +103,7 @@ window.frag.ModelLoader = (function () {
         const mesh = frag.MeshData();
         const fragmentCount = context.header.getUint16(headerOffset, littleEndian);
         headerOffset += 2;
-        if (frag.debugModelLoader)
+        if (frag.debugPackageLoader)
             console.log("Object[" + objectIndex + "] is a mesh with " + fragmentCount + " fragments");
 
         for (let fragmentIndex = 0; fragmentIndex < fragmentCount; fragmentIndex++) {
@@ -64,7 +136,7 @@ window.frag.ModelLoader = (function () {
                 triangleCount = meshVertexCount - 2;
             };
 
-            if (frag.debugModelLoader) {
+            if (frag.debugPackageLoader) {
                 let msg = "  fragment[" + fragmentIndex + "] has " + meshVertexCount + " verticies forming ";
                 if (vertexFormat === 1) {
                     msg += triangleCount + " triangles"
@@ -229,7 +301,7 @@ window.frag.ModelLoader = (function () {
                 //}
             }
 
-            if (frag.debugModelLoader && frag.debugMeshes) {
+            if (frag.debugPackageLoader && frag.debugMeshes) {
                 let msg = "  vertices[";
                 for (var i = 0; i < verticies.length; i++) {
                     if (i > 0) msg += ', ';
@@ -271,7 +343,7 @@ window.frag.ModelLoader = (function () {
         const loop = (flags & 0x1) === 0x1;
         const reverse = (flags & 0x2) === 0x2;
 
-        if (frag.debugModelLoader) {
+        if (frag.debugPackageLoader) {
             let msg = "Object[" + objectIndex + "] is '" + name + "' animation which runs for " + frames + "x" + interval + " ms";
             if (loop) msg += ". Repeats until stopped";
             if (reverse) msg += ". Plays in reverse after playing forwards";
@@ -297,7 +369,7 @@ window.frag.ModelLoader = (function () {
                 channelName += String.fromCharCode(context.header.getUint8(headerOffset++));
             }
 
-            if (frag.debugModelLoader && frag.debugAnimations) {
+            if (frag.debugPackageLoader && frag.debugAnimations) {
                 msg = "  Channel " + channelName + " applies to " + pattern + " children"
                 console.log(msg);
             }
@@ -317,7 +389,7 @@ window.frag.ModelLoader = (function () {
                 else if (transitionEnum === 2) transition = "spline";
                 keyframes[frame] = { value, transition };
 
-                if (frag.debugModelLoader && frag.debugAnimations) {
+                if (frag.debugPackageLoader && frag.debugAnimations) {
                     msg = "    Keyframe[" + frame + "] = " + round4(value) + " " + transition;
                     console.log(msg);
                 }
@@ -366,7 +438,7 @@ window.frag.ModelLoader = (function () {
         const hasMaterial = (modelFlags & 2) === 2;
         const hasMesh = (modelFlags & 4) === 4;
 
-        if (frag.debugModelLoader) {
+        if (frag.debugPackageLoader) {
             console.log("Object[" + objectIndex + "] is " + 
                 (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + 
                 (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
@@ -412,7 +484,7 @@ window.frag.ModelLoader = (function () {
         return model;
     };
 
-    public.loadModelsFromBuffer = function(buffer, assetCatalog){
+    public.loadFromBuffer = function(buffer, assetCatalog){
         if (!assetCatalog) assetCatalog = frag.AssetCatalog();
 
         const bytes = new Uint8Array(buffer);
@@ -423,8 +495,8 @@ window.frag.ModelLoader = (function () {
         var headerOffset = 8;
         const dataOffset = headerOffset + headerLength;
 
-        if (frag.debugModelLoader)
-            console.log("Model pack V" + version + " is " + bytes.length + " bytes with " + headerLength + " header bytes");
+        if (frag.debugPackageLoader)
+            console.log("Asset pack V" + version + " is " + bytes.length + " bytes with " + headerLength + " header bytes");
 
         const context = {
             assetCatalog,
@@ -434,7 +506,8 @@ window.frag.ModelLoader = (function () {
             materials: {},
             meshes: {},
             animations: {},
-            models: {}
+            models: {},
+            fonts: {}
         };
 
         if (version === 1) {
@@ -464,30 +537,32 @@ window.frag.ModelLoader = (function () {
                 else if (objectType === 4) {
                     context.models[objectIndex] = private.loadModelV1(context, objectIndex, objectOffset);
                 }
+                else if (objectType === 5) {
+                    context.fonts[objectIndex] = private.loadFontV1(context, objectIndex, objectOffset);
+                }
                 else console.error("Unknown object type " + objectType);
 
                 headerOffset += objectSize;
                 objectSize = header.getUint16(headerOffset, littleEndian);
             }
         } else {
-            console.error("Version " + version + " model packs are not supported");
+            console.error("Version " + version + " asset packs are not supported");
         }
         return assetCatalog
     };
 
-    public.loadModelsFromUrl = function (url, assetCatalog, onload) {
+    public.loadFromUrl = function (url, assetCatalog, onload) {
         var xhttp = new XMLHttpRequest();
         xhttp.responseType = "arraybuffer";
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                assetCatalog = public.loadModelsFromBuffer(this.response, assetCatalog);
+                assetCatalog = public.loadFromBuffer(this.response, assetCatalog);
                 if (onload) onload(assetCatalog)
             }
         };
         xhttp.open("GET", url, true);
         xhttp.send();
     };
-
 
     return public;
 })();

@@ -37,6 +37,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
 
     const private = {
         defaultTextures,
+        fonts: {},
         materials: {},
         models: {},
     };
@@ -45,6 +46,16 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
         __private: private,
         shader
     };
+
+    public.getFont = function(name) {
+        var font = private.fonts[name];
+        if (!font) {
+            font = frag.Font()
+                .name(name)
+            private.fonts[name] = font;
+        }
+        return font;
+    }
 
     public.getMaterial = function(name) {
         var material = private.materials[name];
