@@ -145,8 +145,9 @@ window.frag.Texture = function () {
     }
 
     public.apply = function (textureType, gl, shader) {
-        if (!shader.uniforms[textureType]) return public;
-        if (!private.glTexture) return public;
+        const uniform = shader.uniforms[textureType];
+        if (!uniform || !private.glTexture)
+            return public;
         
         gl.activeTexture(gl.TEXTURE0 + public.textureUnit);
         gl.bindTexture(gl.TEXTURE_2D, private.glTexture);
@@ -158,7 +159,7 @@ window.frag.Texture = function () {
             private.generated = true;
         }
 
-        gl.uniform1i(shader.uniforms[textureType], public.textureUnit);
+        gl.uniform1i(uniform, public.textureUnit);
         return public;
     }
 

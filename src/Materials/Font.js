@@ -10,7 +10,8 @@ window.frag.Font = function () {
         dataType: gl.UNSIGNED_BYTE,
         valuesPerPixel: 4,
         chars: {},
-        lineHeight: 24
+        lineHeight: 24,
+        color: [0, 0, 0, 1]
     }
 
     const public = {
@@ -29,6 +30,10 @@ window.frag.Font = function () {
     public.name = function (value) {
         private.name = value;
         return public;
+    }
+
+    public.color = function(color) {
+        private.color = color;
     }
 
     public.dataFormat = function (format) {
@@ -104,9 +109,13 @@ window.frag.Font = function () {
     }
 
     public.apply = function (gl, shader) {
-        const textureType = 'diffuse';
-        if (!shader.uniforms[textureType]) return public;
-        if (!private.glTexture) return public;
+        if (shader.uniforms["color"] !== undefined) {
+            gl["uniform" + private.color.length + "fv"](shader.uniforms["color"], private.color);
+        }
+
+        const uniform = shader.uniforms["diffuse"];
+        if (!uniform || !private.glTexture)
+            return public;
         
         gl.activeTexture(gl.TEXTURE0 + public.textureUnit);
         gl.bindTexture(gl.TEXTURE_2D, private.glTexture);
@@ -118,17 +127,13 @@ window.frag.Font = function () {
             private.generated = true;
         }
 
-        gl.uniform1i(shader.uniforms[textureType], public.textureUnit);
+        gl.uniform1i(uniform, public.textureUnit);
         return public;
     }
-    public.buildTextMesh = function (text, color, scale) {
-        color = color || [0, 0, 0];
-        scale = scale || 1;
-
+    public.buildTextMesh = function (text) {
         const verticies = [];
         const uvs = [];
         const normals = [];
-        const colors = [];
 
         const pushVerticies = function (left, right, top, bottom) {
             verticies.push(left);
@@ -156,10 +161,6 @@ window.frag.Font = function () {
             verticies.push(0);
 
             for (let i = 0; i < 6; i++) {
-                colors.push(color[0]);
-                colors.push(color[1]);
-                colors.push(color[2]);
-
                 normals.push(0);
                 normals.push(0);
                 normals.push(-1);
@@ -218,13 +219,13 @@ window.frag.Font = function () {
         }
 
         return frag.MeshData()
-            .addTriangles(verticies, colors, uvs, normals)
+            .addTriangles(verticies, undefined, uvs, normals)
             .shadeFlat()
             .textureFlat();
     }
 
-    public.buildTextModel = function(text, color, scale) {
-        const mesh = public.buildTextMesh(text, color, scale);
+    public.buildTextModel = function(text) {
+        const mesh = public.buildTextMesh(text);
 
         const model = frag.Model(true)
             .shader(frag.fontShader)
@@ -233,9 +234,9 @@ window.frag.Font = function () {
         return model;
     }
 
-    public.updateTextModel = function(model, text, color, scale) {
+    public.updateTextModel = function(model, text) {
         const oldMesh = model.getMesh();
-        model.mesh(public.buildTextMesh(text, color, scale));
+        model.mesh(public.buildTextMesh(text));
         oldMesh.dispose();
         return public;
     }
