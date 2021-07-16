@@ -2,6 +2,9 @@ window.frag.createShader = function (name, type, source) {
     const frag = window.frag;
     const gl = frag.gl;
 
+    //if (frag.debugShaderBuilder) {
+        console.log("\n// " + name + " " + (type === gl.VERTEX_SHADER ? "vertex" : "fragment") + " shader\n" + source);
+
     var shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
@@ -116,6 +119,7 @@ window.frag.CustomShader = function (is3d) {
             }
             private.bindList.push(function (gl) {
                 if (private[name] !== undefined) {
+                    //console.log("gl.uniform" + glType + "(" + name + "," + private[name] + ")")
                     gl["uniform" + glType](uniform, private[name]);
                 }
             });
