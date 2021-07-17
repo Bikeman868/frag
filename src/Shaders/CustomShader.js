@@ -53,12 +53,11 @@ window.frag.CustomShader = function (is3d) {
         return public;
     }
 
-    public.source = function (vertexShaderSource, fragmentShaderSource) {
-        //if (frag.debugShaderBuilder) {
-            console.log("\n// " + private.name + " vertext shader\n" + vertexShaderSource);
-            console.log("\n// " + private.name + " fragment shader\n" + fragmentShaderSource);
-        //}
+    public.getName = function () {
+        return private.name;
+    }
 
+    public.source = function (vertexShaderSource, fragmentShaderSource) {
         private.vSource = vertexShaderSource;
         private.fSource = fragmentShaderSource;
 

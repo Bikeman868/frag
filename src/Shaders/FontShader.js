@@ -38,6 +38,12 @@ window.frag.startFunctions.push(function(frag) {
     frag.fontShader = frag.CustomShader()
         .name("Font")
         .source(vertexShader, fragmentShader)
+        .attribute("position")
+        .attribute("texcoord")
+        .attribute("normal")
+        .uniform("modelMatrix")
         .uniform("clipMatrix")
+        .uniform("lightDirection", "3fv", [-1, -1, 1])
+        .uniform("ambientLight", "1f", 0.5)
         .uniform("diffuse");
 });
