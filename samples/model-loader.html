@@ -115,7 +115,7 @@
             // Move the excavator from to position -80 on the x-axis whilst running the "moving" animation
             // The "moving" animation was defined in Blender, you can open the `.blend` file to see it.
             const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
-                .moveTo([-80, -30, 0])
+                .moveTo([-60, -30, -25])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
@@ -127,7 +127,7 @@
             // Step 3 in the animation sequence
             // Move the excavator by +100 units on the x-axis whilst running the "moving" animation
             const step3 = frag.PositionAnimationAction(position, invLinearVelocity)
-                .moveBy([100, 0, 0])
+                .moveBy([100, 20, 100])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
@@ -311,7 +311,7 @@
             // We can manipulate this scene object just like any other model
             fpsObject.getPosition()
                 .scale(0.5)
-                .moveByXYZ(-70, 40, -70);
+                .moveByXYZ(-70, 30, -85);
             scene.addObject(fpsObject);
 
             // The text in font models can be updated

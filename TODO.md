@@ -1,14 +1,13 @@
 # Things that need to be added or improved
 
 ## Bug fixes
-No known bugs at this time.
+* In the excatator sample the very first movement is based on the wrong initial position
 
 ## Core features that are missing
 * Creating material packages.
 * Particle system
 * Shader support for full PBR model
 * Armatures and character animation
-* Bitmap font textures and text rendering
 * Vector fonts as 2D mesh per ASCII character
 * Parenting a scene object to another scene object
 

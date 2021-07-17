@@ -46,7 +46,6 @@ require("./Shapes/Disc");
 require("./Shapes/Plane");
 
 require("./Loaders/AssetCatalog");
-require("./Loaders/MaterialLoader");
 require("./Loaders/PackageLoader");
 
 require("./Input/HitTest");
