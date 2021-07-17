@@ -308,12 +308,12 @@ window.frag.MeshData = function () {
     }
 
     private.drawFragmentTexture = function(shader, fragment) {
-        if (shader.attributes.texture >= 0) {
+        if (shader.attributes.texcoord >= 0) {
             if (fragment.uvDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.texture);
-                gl.vertexAttribPointer(shader.attributes.texture, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
+                gl.enableVertexAttribArray(shader.attributes.texcoord);
+                gl.vertexAttribPointer(shader.attributes.texcoord, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
             } else {
-                gl.disableVertexAttribArray(shader.attributes.texture)
+                gl.disableVertexAttribArray(shader.attributes.texcoord)
             }
         }
     }

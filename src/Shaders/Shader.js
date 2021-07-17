@@ -330,46 +330,26 @@ window.frag.Shader = function () {
 
         const bindList = shader.__private.bindList;
 
-        if (private.verticies !== none) {
-            shader.attributes.position = frag.gl.getAttribLocation(shader.program, "a_position");
-        }
+        if (private.verticies !== none) shader.attribute("position");
+        if (private.colors !== none) shader.attribute("color");
+        if (private.textureCoords !== none) shader.attribute("texcoord");
+        if (private.normals !== none) shader.attribute("normal");
+        if (private.tangents !== none) shader.attribute("tangent");
+        if (private.bitangents !== none) shader.attribute("bitangent");
 
-        if (private.colors !== none) {
-            shader.attributes.color = frag.gl.getAttribLocation(shader.program, "a_color");
-        }
+        if (private.diffuseTexture !== none) shader.uniform("diffuse");
+        if (private.emmissiveTexture !== none) shader.uniform("emmissive");
+        if (private.normalMap !== none) shader.uniform("normalMap");
 
-        if (private.textureCoords !== none) {
-            shader.attributes.texture = frag.gl.getAttribLocation(shader.program, "a_texcoord");
-        }
-
-        if (private.normals !== none) {
-            shader.attributes.normal = frag.gl.getAttribLocation(shader.program, "a_normal");
-        }
-
-        if (private.tangents !== none) {
-            shader.attributes.tangent = frag.gl.getAttribLocation(shader.program, "a_tangent");
-        }
-
-        if (private.bitangents !== none) {
-            shader.attributes.bitangent = frag.gl.getAttribLocation(shader.program, "a_bitangent");
-        }
+        if (private.displacementTexture !== none || 
+            private.roughnessTexture !== none || 
+            private.shininessTexture != none) 
+            shader.uniform("surface");
 
         if (private.matrix !== none) {
             if (private.directionalLight !== none)
-                shader.uniforms.modelMatrix = frag.gl.getUniformLocation(shader.program, "u_modelMatrix");
-            shader.uniforms.clipMatrix = frag.gl.getUniformLocation(shader.program, "u_clipMatrix");
-        }
-
-        if (private.diffuseTexture !== none) {
-            shader.uniforms.diffuse = frag.gl.getUniformLocation(shader.program, "u_diffuse");
-        }
-
-        if (private.emmissiveTexture !== none) {
-            shader.uniforms.emmissive = frag.gl.getUniformLocation(shader.program, "u_emmissive");
-        }
-
-        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) {
-            shader.uniforms.surface = frag.gl.getUniformLocation(shader.program, "u_surface");
+                shader.uniform("modelMatrix");
+            shader.uniform("clipMatrix");
         }
 
         if (private.displacementTexture !== none) {
@@ -380,10 +360,6 @@ window.frag.Shader = function () {
                 shader._displacementScale = scale;
                 return shader;
             };
-        }
-
-        if (private.normalMap !== none) {
-            shader.uniforms.normalMap = frag.gl.getUniformLocation(shader.program, "u_normalMap");
         }
 
         if (private.ambientLight !== none) {

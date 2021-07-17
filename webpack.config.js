@@ -1,13 +1,15 @@
 const path = require('path');
 
+var env = process.env.NODE_ENV || "development";
+
 module.exports = {
-  mode: 'production',
+  mode: env,
   entry: './src/index.js',
   output: {
     filename: 'frag.min.js',
     path: path.resolve(__dirname, 'dist')
   },
-  devtool: 'source-map',
+  devtool: env === 'development' ? false : 'source-map', 
   watchOptions: {
     ignored: '**/node_modules'
   }

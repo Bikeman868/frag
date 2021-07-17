@@ -20,7 +20,7 @@ Windows Subsystem for Linux so that you can run bash scripts.
 To build this package, run this command:
 
 ```bash
-npx webpack
+NODE_ENV=production npx webpack
 ```
 
 This will update `frag.min.js` in the `dist` folder with a minified version of the Javascript.
@@ -29,7 +29,7 @@ This will update `frag.min.js` in the `dist` folder with a minified version of t
 To build the package in watch mode, run this command:
 
 ```bash
-npx webpack --watch
+NODE_ENV=development npx webpack --watch
 ```
 
 This will build the production package and source maps into the `dist` folder,

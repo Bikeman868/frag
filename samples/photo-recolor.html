@@ -26,7 +26,7 @@
     <canvas id='scene'></canvas>
     <script src='frag.min.js'></script>
     <script>
-        window.frag.config = function() {
+        window.frag.config = function(frag) {
             // By default Frag clears the background to white. For our
             // mask we want this to be black instead. WebGL will still
             // render the web page with a white background.
@@ -35,19 +35,9 @@
         window.frag.init();
 
         window.app = {};
-        window.app.photoShader = (function () {
-            const frag = window.frag;
-            const gl = frag.gl;
-
-            const shader = {
-                name: "Photo",
-                attributes: {},
-                uniforms: {},
-                is3d: false,
-                _color: [0.5, 0.5, 0.5],
-            };
-
-            shader.vSource =
+        window.app.photoShader = window.frag.CustomShader(false)
+            .name("Photo")
+            .source(
                 'attribute vec2 a_position;\n' +
                 'attribute vec2 a_texcoord;\n' +
                 'uniform mat3 u_clipMatrix\n;' +
@@ -72,9 +62,8 @@
                 '  gl_Position = vec4(position, 0, 1);\n' +
                 '  v_texcoord = a_texcoord;\n' +
                 '  v_color = rgb2hsv(u_color);\n' +
-                '}';
+                '}',
 
-            shader.fSource =
                 'precision mediump float;\n' +
                 'uniform sampler2D u_photo;\n' +
                 'uniform sampler2D u_mask;\n' +
@@ -106,103 +95,34 @@
                 '  vec3 recoloredPixelHsv = vec3(v_color.x, v_color.y, photoPixelHsv.z);\n' +
                 '  vec3 recoloredPixel = hsv2rgb(recoloredPixelHsv);\n' +
                 '  gl_FragColor = vec4(mix(photoPixel, recoloredPixel, maskPixel.r), 1);\n' +
-                '}\n';
-
-            const vertexShader = frag.createShader(shader.name, gl.VERTEX_SHADER, shader.vSource);
-            const fragmentShader = frag.createShader(shader.name, gl.FRAGMENT_SHADER, shader.fSource);
-            shader.program = frag.createProgram(shader.name, vertexShader, fragmentShader);
-
-            if (!shader.program) return null;
-
-            const bindList = [];
-            const unbindList = [];
-
-            shader.attributes.position = gl.getAttribLocation(shader.program, "a_position");
-            shader.attributes.texture = gl.getAttribLocation(shader.program, "a_texcoord");
-            shader.uniforms.photo = gl.getUniformLocation(shader.program, "u_photo");
-            shader.uniforms.mask = gl.getUniformLocation(shader.program, "u_mask");
-            shader.uniforms.clipMatrix = gl.getUniformLocation(shader.program, "u_clipMatrix");
-
-            shader.uniforms.color = frag.gl.getUniformLocation(shader.program, "u_color");
-            if (shader.uniforms.color)
-                bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.color, shader._color); });
-
-            shader.color = function (color) {
-                shader._color = color;
-                return shader;
-            };
-
-            shader.bind = function (gl) {
-                gl.useProgram(shader.program);
-                bindList.forEach(f => f(gl));
-            }
-
-            shader.unbind = function (gl) {
-                unbindList.forEach(f => f(gl));
-            }
-
-            return shader;
-        })();
-
-        window.app.maskShader = (function () {
-            let frag = window.frag;
-            let gl = frag.gl;
-
-            const shader = {
-                name: "Mask",
-                attributes: {},
-                uniforms: {},
-                is3d: false,
-                _color: [1, 0, 0],
-            };
-
-            shader.vSource =
+                '}\n'
+            )
+            .attribute("position")
+            .attribute("texcoord")
+            .uniform("photo")
+            .uniform("mask")
+            .uniform("clipMatrix")
+            .uniform("color", "3fv", [0.5, 0.5, 0.5]);
+        
+        window.app.maskShader = window.frag.CustomShader(false)
+            .name("Mask")
+            .source(
                 'attribute vec2 a_position;\n' +
                 'uniform mat3 u_clipMatrix\n;' +
                 'void main() {\n' +
                 '  vec2 position = (u_clipMatrix * vec3(a_position, 1)).xy;\n' +
                 '  gl_Position = vec4(position, -0.1, 1);\n' +
-                '}';
+                '}',
 
-            shader.fSource =
                 'precision mediump float;\n' +
                 'uniform vec3 u_color;\n' +
                 'void main() {\n' +
                 '  gl_FragColor = vec4(u_color, 1);\n' +
-                '}\n';
-
-            const vertexShader = frag.createShader(shader.name, gl.VERTEX_SHADER, shader.vSource);
-            const fragmentShader = frag.createShader(shader.name, gl.FRAGMENT_SHADER, shader.fSource);
-            shader.program = frag.createProgram(shader.name, vertexShader, fragmentShader);
-
-            if (!shader.program) return null;
-
-            const bindList = [];
-            const unbindList = [];
-
-            shader.attributes.position = gl.getAttribLocation(shader.program, "a_position");
-            shader.uniforms.clipMatrix = gl.getUniformLocation(shader.program, "u_clipMatrix");
-
-            shader.uniforms.color = frag.gl.getUniformLocation(shader.program, "u_color");
-            if (shader.uniforms.color)
-                bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.color, shader._color); });
-
-            shader.color = function (color) {
-                shader._color = color;
-                return shader;
-            };
-
-            shader.bind = function (gl) {
-                gl.useProgram(shader.program);
-                bindList.forEach(f => f(gl));
-            }
-
-            shader.unbind = function (gl) {
-                unbindList.forEach(f => f(gl));
-            }
-
-            return shader;
-        })();
+                '}\n'
+            )
+            .attribute("position")
+            .uniform("clipMatrix")
+            .uniform("color", "3fv", [1, 0, 0]);
 
         window.app.image = new Image();
         window.app.image.onload = function () {
