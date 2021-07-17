@@ -329,7 +329,6 @@ window.frag.Shader = function () {
         shader.source(source.vectorShader, source.fragmentShader);
 
         const bindList = shader.__private.bindList;
-        const unbindList = shader.__private.unbindList;
 
         if (private.verticies !== none) {
             shader.attributes.position = frag.gl.getAttribLocation(shader.program, "a_position");
@@ -423,15 +422,6 @@ window.frag.Shader = function () {
                 shader.lightDirection([0.8, -0.2, 0.8]);
             else if (private.directionalLight === "Grey")
                 shader.lightDirection([0.5, -0.1, 0.5]);
-        }
-
-        shader.bind = function (gl) {
-            gl.useProgram(shader.program);
-            bindList.forEach(f => f(gl));
-        }
-
-        shader.unbind = function (gl) {
-            unbindList.forEach(f => f(gl));
         }
 
         return shader;
