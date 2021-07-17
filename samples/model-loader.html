@@ -32,14 +32,27 @@
         const frag = window.frag;
 
         frag.config = function(frag) {
+            // There are a number of debug console outputs that you can enable
             frag.debugPackageLoader = true;
             frag.debugAnimations = false;
             frag.debugShaderBuilder = false;
-            frag.debugInputs = true;
+            frag.debugInputs = false;
 
-            frag.gl.clearColor(0, 0, 0, 0);
-            frag.gl.enable(frag.gl.BLEND);
-            frag.gl.blendFunc(frag.gl.SRC_ALPHA, frag.gl.ONE_MINUS_SRC_ALPHA);
+            // higher renderInterval will give you lower power consumption
+            // and higher framr rate. The default value is 15ms which will cap
+            // the frame rate at about 60 frames per second.
+            frag.renderInterval = 20;
+
+            // Animation sequences, keyframe animations and speeds are based on
+            // game ticks. This number must match the server and all other
+            // players in a multi-player game. The default is 10ms.
+            frag.gameTickMs = 10;
+
+            // When drawing text you probably want to enable transparency unless
+            // your text is always drawn against its background color. Transparency
+            // has a big performance impact.
+            // See http://learnwebgl.brown37.net/11_advanced_rendering/alpha_blending.html
+            frag.transparency = true;
         }
         frag.init();
 
@@ -276,25 +289,59 @@
 
             // **********************************************************************
             // The package we loaded also contains a font called "Arial". Lets use it
-            // to draw the frame rate.
+            // to draw the frame rate and some help text
             // **********************************************************************
 
-            const font = assetCatalog.getFont("Arial")
+            // This font was downloaded from the server in a package and
+            // added to the asset catalog
+            const arialFont = assetCatalog.getFont("Arial");
+
+            // Create a version of this font for the FPS drawing that is blue and
+            // uses kerning
+            const fpsFont = arialFont.clone()
                 .backgroundColor([0, 0, 1, 0])
                 .textColor([0, 0, 1, 1])
                 .kerning(true)
                 .letterSpacing(2);
-            const fpsModel = font.buildTextModel("Hello, world");
-            const fpsText = frag.SceneObject(fpsModel);
-            fpsText.getPosition()
+
+            // The font object can construct models whose mesh is a text string
+            const fpsModel = fpsFont.buildTextModel("Unknown fps");
+            const fpsObject = frag.SceneObject(fpsModel);
+
+            // We can manipulate this scene object just like any other model
+            fpsObject.getPosition()
                 .scale(0.5)
                 .moveByXYZ(-70, 40, -70);
-            scene.addObject(fpsText);
+            scene.addObject(fpsObject);
+
+            // The text in font models can be updated
             frag.Animation()
                 .repeatTicks(() => {
-                    font.updateTextModel(fpsModel, Math.floor(frag.fps) + 'fps');
+                    fpsFont.updateTextModel(fpsModel, Math.floor(frag.fps) + 'fps');
                 }, 50)
                 .start();
+
+            // If we create other versions of the arial font they will use the
+            // same texture bitmap, so this won't impact performance
+            const helpFont = arialFont.clone()
+                .backgroundColor([1, 0, 0, 0])
+                .textColor([1, 0, 0, 1])
+                .kerning(false)
+                .letterSpacing(-1);
+            const helpLine1Model = helpFont.buildTextModel(
+                "Q=show/hide model E=show/hide bucket R=pause/play T=freeze Y=stop U=play ASDW=pan camera");
+            const helpLine2Model = helpFont.buildTextModel(
+                "Drag mouse to pan. Right click for normals. Middle click for wireframe. Scroll to zoom.");
+            const helpLine1Object = frag.SceneObject(helpLine1Model);
+            helpLine1Object.getPosition()
+                .scale(0.1)
+                .moveByXYZ(-70, -40, -70);
+            scene.addObject(helpLine1Object);
+            const helpLine2Object = frag.SceneObject(helpLine2Model);
+            helpLine2Object.getPosition()
+                .scale(0.1)
+                .moveByXYZ(-70, -45, -70);
+            scene.addObject(helpLine2Object);
         }
 
         // **********************************************************************
@@ -312,8 +359,8 @@
             .colorsRGB()
             .compile();
 
-        // An asset catalog contains named materials and models. We will load models
-        // into the catalog but define the materials manually
+        // An asset catalog contains named materials, fonts and models. We will load models
+        // into the catalog but define the materials manually for this example
         const assetCatalog = frag.AssetCatalog(shader);
 
         // Helper function to set a named material to a 1x1 pixel diffuse texture.
@@ -328,16 +375,17 @@
 
         // These material names are the ones defined in Blender for the models we are importing
         // we can set up these materials before or after loading the model packages. We can
-        // also load material packages instead of hard coding the materials like this
+        // also load material packages instead of hard coding the materials like this, or package
+        // the materials into the same package as the models.
         singleColorMaterial("Plastic", [210, 210, 255]);
         singleColorMaterial("Metal", [220, 175, 175]);
         singleColorMaterial("Rubber", [120, 90, 90]);
 
-        // We need to load the package with the correct endiness
+        // We need to load the version of the package with the correct endiness
         const packageUrl = frag.PackageLoader.littleEndian ? 'assets/models_little.pkg' : 'assets/models_big.pkg';
 
         // Download the model package and add the models in it to the asset catalog
-        // When loading completes, the modelsLoaded() function will be called
+        // When loading completes, the assetsLoaded() function will be called
         frag.PackageLoader.loadFromUrl(packageUrl, assetCatalog, assetsLoaded)
 
     </script>

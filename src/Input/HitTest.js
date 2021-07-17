@@ -71,6 +71,8 @@
             models: [],
         };
 
+        gl.disable(gl.BLEND);
+
         if (Array.isArray(scene)) {
             for (let i = 0; i < scene.length; i++) {
                 scene[i].adjustToViewport(gl);
@@ -84,6 +86,8 @@
         const pixel = new Uint8Array(4);
         gl.readPixels(x, height - y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        if (frag.transparency) gl.enable(gl.BLEND);
 
         const red = pixel[0];
         const green = pixel[1];

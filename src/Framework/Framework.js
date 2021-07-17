@@ -8,8 +8,10 @@
     let frameTick = 0;
     let mainScene = null;
     let nextAnimationId = 0;
-    let frameTimes = [];
-    let frameTimesSum = 0;
+    let currentFrameCount = 0;
+    let frameCounts = [];
+    let frameCountsSum = 0;
+    let nextFpsPush = 0;
 
     frag.correctClock = function(serverTick) {
         let difference = serverTick - gameTick;
@@ -108,11 +110,17 @@
                 scenes[i].draw(drawContext);
             }
 
-            const elapsed = performance.now() - t0;
-            frameTimes.push(elapsed);
-            frameTimesSum += elapsed;
-            if (frameTimes.length > 20) frameTimesSum -= frameTimes.shift();
-            frag.fps = 1000 * frameTimes.length / frameTimesSum;
+            const t1 = performance.now();
+            currentFrameCount++;
+            if (t1 > nextFpsPush)
+            {
+                nextFpsPush = t1 + 100;
+                frameCountsSum += currentFrameCount;
+                frameCounts.push(currentFrameCount);
+                currentFrameCount = 0;
+                if (frameCounts.length > 20) frameCountsSum -= frameCounts.shift();
+                frag.fps = 10 * frameCountsSum / frameCounts.length;
+            }
         }
         setTimeout(render, frag.renderInterval);
     }

@@ -17,23 +17,31 @@ If you are doing development on Windows then I strongly recommend installing
 Windows Subsystem for Linux so that you can run bash scripts.
 
 # Production build
-To build this package, run this command:
+To build this package for production release, run this command:
 
 ```bash
 NODE_ENV=production npx webpack
 ```
 
-This will update `frag.min.js` in the `dist` folder with a minified version of the Javascript.
+This will update `frag.min.js` and `frag.min.js.map` in the `dist` folder with a minified 
+version of the Javascript.
 
 # Development
-To build the package in watch mode, run this command:
+To build the development package in watch mode, run this command:
 
 ```bash
-NODE_ENV=development npx webpack --watch
+npx webpack --watch
 ```
 
-This will build the production package and source maps into the `dist` folder,
-and update them if any source files change.
+This will build the development package and source maps into the `samples` folder,
+and update them if any source files change subsequently.
 
-You can open one of the pages in the `./samples` folder to test specific features
-in the framework.
+You can use the html pages in the `./samples` folder to test specific features
+in the framework to make sure everything is working.
+
+Note that there are no automated tests because its very hard to automatically test
+a 3D animated scene for correctness. Make sure you know what all of the samples are
+supposed to look like, and test each of the samples before each release.
+
+If you add any new features to the framework, make sure that at least one of the
+samples exercises this feature.

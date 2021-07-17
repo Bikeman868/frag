@@ -45,6 +45,7 @@ window.frag.init = function () {
     frag.debugAnimations = false;
     frag.debugMeshes = false;
     frag.debugInputs = false;
+    frag.transparency = false;
 
     frag.maxTextureUnits = frag.gl.getParameter(frag.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     frag.nextTextureUnit = 0;
@@ -55,6 +56,11 @@ window.frag.init = function () {
     };
 
     if (frag.config) frag.config(frag);
+
+    if (frag.transparency) {
+        frag.gl.enable(frag.gl.BLEND);
+        frag.gl.blendFunc(frag.gl.SRC_ALPHA, frag.gl.ONE_MINUS_SRC_ALPHA);
+    }
 
     for (var i = 0; i < frag.startFunctions.length; i++)
         frag.startFunctions[i](frag);
