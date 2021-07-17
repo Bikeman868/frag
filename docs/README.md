@@ -12,12 +12,12 @@ If you prefer reading reference material instead then read on...
 The following documents are general discussions around a specific topic
 
 * ~[Materials and shaders](materials.md)~
-* ~[Material and model loaders](loaders.md)~
+* ~[Asset loaders](loaders.md)~
 * [Animation](animation.md)
 * ~[Configuration options](configuration.md)~
 * [Packaging models](packaging.md)
 * [Player input](inputs.md)
-
+* [Text rendering](text.md)
 ## Reference
 The following classes are documented at detailed technical level. Note that the ones
 with strikeout formatting are planned but not written yet. Please reach out if you
@@ -30,6 +30,7 @@ need help, or take a look at the source code.
 * [DigitalAction](reference/digital-action.md) applies digital state changes to something in the game.
 * [DigitalInput](reference/digital-action.md) updates a digital state from an input device.
 * [DigitalState](reference/digital-action.md) stores an on/off value that can be controlled by the player
+* [Font](reference/font.md) used to construct models that render text in the scene
 * [InputMethod](reference/input-method.md) a collection of analog and digital inputs that can be enabled/disabled together.
 * [KeyframeAnimationAction](./reference/keyframe-animation-action.md) adds keyframe action to an animation
 * [Material](./reference/material.md) defines the surface appearence of part of a model
