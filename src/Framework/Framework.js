@@ -108,10 +108,10 @@
                 scenes[i].draw(drawContext);
             }
 
-            const elapsed = performance.now() - startTime;
+            const elapsed = performance.now() - t0;
             frameTimes.push(elapsed);
             frameTimesSum += elapsed;
-            if (frameTimes.length > 100) frameTimesSum -= frameTimes.shift();
+            if (frameTimes.length > 20) frameTimesSum -= frameTimes.shift();
             frag.fps = 1000 * frameTimes.length / frameTimesSum;
         }
         setTimeout(render, frag.renderInterval);

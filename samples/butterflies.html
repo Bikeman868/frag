@@ -26,7 +26,7 @@
     <script src='frag.min.js'></script>
     <script>
         const frag = window.frag;
-        frag.config = function() {
+        frag.config = function(frag) {
             frag.gl.disable(frag.gl.CULL_FACE); // We want to be able to see the back of the wings
         }
         frag.init();

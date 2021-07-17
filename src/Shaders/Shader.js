@@ -328,8 +328,6 @@ window.frag.Shader = function () {
 
         shader.source(source.vectorShader, source.fragmentShader);
 
-        const bindList = shader.__private.bindList;
-
         if (private.verticies !== none) shader.attribute("position");
         if (private.colors !== none) shader.attribute("color");
         if (private.textureCoords !== none) shader.attribute("texcoord");
@@ -340,6 +338,8 @@ window.frag.Shader = function () {
         if (private.diffuseTexture !== none) shader.uniform("diffuse");
         if (private.emmissiveTexture !== none) shader.uniform("emmissive");
         if (private.normalMap !== none) shader.uniform("normalMap");
+        if (private.displacementTexture !== none) shader.uniform("displacementScale", "1f", 0.2);
+        if (private.ambientLight !== none) shader.uniform("ambientLight", "1f", 0.5);
 
         if (private.displacementTexture !== none || 
             private.roughnessTexture !== none || 
@@ -352,48 +352,27 @@ window.frag.Shader = function () {
             shader.uniform("clipMatrix");
         }
 
-        if (private.displacementTexture !== none) {
-            shader.uniforms.displacementScale = frag.gl.getUniformLocation(shader.program, "u_displacementScale");
-            bindList.push(function (gl) { gl.uniform1f(shader.uniforms.displacementScale, shader._displacementScale); });
-            shader._displacementScale = 0.2;
-            shader.displacementScale = function (scale) {
-                shader._displacementScale = scale;
-                return shader;
-            };
-        }
-
-        if (private.ambientLight !== none) {
-            shader.uniforms.ambientLight = frag.gl.getUniformLocation(shader.program, "u_ambientLight");
-            bindList.push(function (gl) { gl.uniform1f(shader.uniforms.ambientLight, shader._ambientLight); });
-            shader._ambientLight = 0.5;
-        }
-
         if (private.directionalLight !== none) {
-            shader.uniforms.lightDirection = frag.gl.getUniformLocation(shader.program, "u_lightDirection");
-            bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.lightDirection, shader._lightDirection); });
+            shader.uniform("lightDirection", "3fv");
 
-            if (private.directionalLight === "Color"){
-                shader.uniforms.lightColor = frag.gl.getUniformLocation(shader.program, "u_lightColor");
-                bindList.push(function (gl) { gl.uniform3fv(shader.uniforms.lightColor, shader._lightColor); });
+            if (private.directionalLight === "Color")
+                shader.uniform("lightColor", "3fv");
 
-                shader.lightColor = function(color) {
-                    shader._lightColor = color;
-                    return shader;
-                }
-            }
+            const balanceAmbient = private.ambientLight === "Balanced" && shader.ambientLight;
+            const innerLightDirection = shader.lightDirection;
 
-            const balanceAmbient = private.ambientLight === "Balanced";
             shader.lightDirection = function (direction) {
                 const length = window.frag.Vector.length(direction);
                 if (length > 1) {
-                    shader._lightDirection = [-direction[0] / length, -direction[1] / length, -direction[2] / length];
-                    if (balanceAmbient) shader._ambientLight = 0;
+                    innerLightDirection([-direction[0] / length, -direction[1] / length, -direction[2] / length]);
+                    if (balanceAmbient) shader.ambientLight(0);
                 } else {
-                    shader._lightDirection = [-direction[0], -direction[1], -direction[2]];
-                    if (balanceAmbient) shader._ambientLight = 1 - length;
+                    innerLightDirection([-direction[0], -direction[1], -direction[2]]);
+                    if (balanceAmbient) shader.ambientLight(1 - length);
                 }
                 return shader;
             };
+
             if (private.directionalLight === "White")
                 shader.lightDirection([0.8, -0.2, 0.8]);
             else if (private.directionalLight === "Grey")

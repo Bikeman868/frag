@@ -31,11 +31,15 @@
 
         const frag = window.frag;
 
-        frag.config = function() {
+        frag.config = function(frag) {
             frag.debugPackageLoader = true;
             frag.debugAnimations = false;
             frag.debugShaderBuilder = false;
             frag.debugInputs = true;
+
+            frag.gl.clearColor(0, 0, 0, 0);
+            frag.gl.enable(frag.gl.BLEND);
+            frag.gl.blendFunc(frag.gl.SRC_ALPHA, frag.gl.ONE_MINUS_SRC_ALPHA);
         }
         frag.init();
 
@@ -275,7 +279,11 @@
             // to draw the frame rate.
             // **********************************************************************
 
-            const font = assetCatalog.getFont("Arial");
+            const font = assetCatalog.getFont("Arial")
+                .backgroundColor([0, 0, 1, 0])
+                .textColor([0, 0, 1, 1])
+                .kerning(true)
+                .letterSpacing(2);
             const fpsModel = font.buildTextModel("Hello, world");
             const fpsText = frag.SceneObject(fpsModel);
             fpsText.getPosition()

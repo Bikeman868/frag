@@ -82,12 +82,14 @@ Once you have a Python http server running you can see this sample running at th
 * Defines the materials to use to paint the models as hard-coded 1x1 pixel textures
 * Creates an animation sequence that combines model movements within the scene with animations imported from Blender
 * Demonstrates some of the things that you can wire up to user input
+* Draws the frames per second using a packaged font
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator
 * Create a material package that paints the model in PBR materials exported from Substance Player
 * Add some terrain for the excavator to move on
 * Update the model in Blender. Export a Frag model from Blender and rebuild the model package
+* Generate some other fonts, package them and draw some text in different styles and colors
 
 ## Truck on a Track
 This [sample](truck-on-track.html) illustrates the following features and techniques:

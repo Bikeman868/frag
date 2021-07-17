@@ -7,7 +7,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'frag.min.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, env === 'development' ? 'samples' : 'dist')
   },
   devtool: env === 'development' ? false : 'source-map', 
   watchOptions: {

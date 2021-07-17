@@ -11,7 +11,10 @@ window.frag.Font = function () {
         valuesPerPixel: 4,
         chars: {},
         lineHeight: 24,
-        color: [0, 0, 0, 1]
+        textColor: [0, 0, 0, 1],
+        backgroundColor: [0, 0, 0, 1],
+        kerning: false,
+        letterSpacing: 0,
     }
 
     const public = {
@@ -32,8 +35,24 @@ window.frag.Font = function () {
         return public;
     }
 
-    public.color = function(color) {
-        private.color = color;
+    public.kerning = function (kerning) {
+        private.kerning = kerning;
+        return public;
+    }
+
+    public.letterSpacing = function (pixels) {
+        private.letterSpacing = pixels;
+        return public;
+    }
+
+    public.textColor = function(textColor) {
+        private.textColor = textColor;
+        return public;
+    }
+
+    public.backgroundColor = function(backgroundColor) {
+        private.backgroundColor = backgroundColor;
+        return public;
     }
 
     public.dataFormat = function (format) {
@@ -79,10 +98,12 @@ window.frag.Font = function () {
 
     public.lineHeight = function (height) {
         private.lineHeight = height;
+        return public;
     }
 
     public.addChar = function(char, x, y, width, height, originX, originY, advance) {
         private.chars[char] = { x, y, width, height, originX, originY, advance };
+        return public;
     }
 
     public.fromArrayBuffer = function (buffer, offset, width, height) {
@@ -109,8 +130,11 @@ window.frag.Font = function () {
     }
 
     public.apply = function (gl, shader) {
-        if (shader.uniforms["color"] !== undefined) {
-            gl["uniform" + private.color.length + "fv"](shader.uniforms["color"], private.color);
+        if (shader.uniforms["fgcolor"] !== undefined) {
+            gl["uniform" + private.textColor.length + "fv"](shader.uniforms["fgcolor"], private.textColor);
+        }
+        if (shader.uniforms["bgcolor"] !== undefined) {
+            gl["uniform" + private.backgroundColor.length + "fv"](shader.uniforms["bgcolor"], private.backgroundColor);
         }
 
         const uniform = shader.uniforms["diffuse"];
@@ -130,6 +154,7 @@ window.frag.Font = function () {
         gl.uniform1i(uniform, public.textureUnit);
         return public;
     }
+
     public.buildTextMesh = function (text) {
         const verticies = [];
         const uvs = [];
@@ -210,7 +235,13 @@ window.frag.Font = function () {
 
             pushTexture(texLeft, texRight, texTop, texBottom);
 
-            return x + dimensions.advance;
+            let advance = dimensions.advance;
+            if (!private.kerning)
+                advance = dimensions.width > dimensions.advance 
+                    ? dimensions.width 
+                    : dimensions.advance;
+
+            return x + advance + private.letterSpacing;
         }
 
         let x = 0;
