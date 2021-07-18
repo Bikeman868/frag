@@ -1,16 +1,27 @@
 # Analog Action
 
-The `AnalogAction(actionName: string, context: Object)` function constructs
-a function that can ba passed to an `AnalogState` object to perform some 
-specific action in the game when the analog state changes.
+This class can change your game scene by responding to changes in an `AnalogState`
 
-The `actionName` parameter is a hyphen separated list of keywords that define
-what action is taken. In some cases additional context is needed and this is
-supplied by the `context` parameter. For `actionName` values that need no
-additional context, the context parameter can be omitted.
+## Constructor
+```javascript
+window.frag.AnalogAction(engine: Engine, actionName: string, context: Object)
+```
 
-The order of the keywords does not matter, you can use whatever seems most
-readable to you.
+* `engine` is the game engine for your game. It is an instance of the `Egnine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `actionName` a hyphen separated list of keywords that defines what action is taken. 
+  In some cases additional context is needed and this is supplied by the `context` parameter.
+  The order of the keywords does not matter, you can use whatever seems most readable to you.
+* `context` an object that provides additional context to the `actionName`. Only required
+  for certain actions as described below.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.AnalogAction(actionName: string, context: Object)
+```
 
 ## Example
 

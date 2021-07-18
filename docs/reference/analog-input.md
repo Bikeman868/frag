@@ -9,6 +9,26 @@ capturing and player inputs. There is also a `disable()` method you can call to
 stop responding to this player action. You can also add inputs to an `InputMethod`
 to enable or disable a set of inputs all at once.
 
+## Constructor
+```javascript
+window.frag.AnalogInput(engine: Engine, inputName: string, analogState: AnalogState)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Egnine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `inputName` a hyphen separated list of keywords that defines which input device to capture
+  input from. See below.
+* `analogState` is an instance of the `AnalogState` class. This analog state will be updated
+  by player actions on the input device defined by the `inputName` parameter
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.AnalogInput(inputName: string, analogState: AnalogState)
+```
+
 ## Example
 
 The following example moves the camera in and out of the scene when the mouse 
@@ -166,10 +186,10 @@ the following keywords to change this default:
 ## Device orientation input
 This is not implemented yet.
 
-# Device accelorometer input
+## Device accelorometer input
 This is not implemented yet.
 
-### Input name examples
+## Input name examples
 These are just a few examples of input names and how they would affect the `AnalogState` that the input is connected to:
 * `left-mouse` dragging the mouse from left to right with the left mouse button pressed will change the state value up and down.
 * `mouse-vertical` any forward and backwards movement of the mouse will change the state value up and down even with no buttons pressed.
