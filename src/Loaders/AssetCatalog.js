@@ -1,5 +1,6 @@
-window.frag.AssetCatalog = function (shader, defaultTextures) {
+window.frag.AssetCatalog = function (engine, shader, defaultTextures) {
     const frag = window.frag;
+    const gl = engine.gl;
 
     const defaultTexturePixels = new Uint8Array([
         0x7F, 0x7F, 0x7F, 0xFF, // Opaque medium grey
@@ -8,25 +9,25 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
         0x7F, 0x7F, 0xFF]);     // Normal (0, 0, 1)
     
     if (!defaultTextures) defaultTextures = {};
-    if (!defaultTextures.diffuse) defaultTextures.diffuse = frag.Texture()
+    if (!defaultTextures.diffuse) defaultTextures.diffuse = frag.Texture(engine)
         .name("default-diffuse-texture")
-        .dataFormat(frag.gl.RGBA)
+        .dataFormat(gl.RGBA)
         .fromArrayBuffer(0, defaultTexturePixels.buffer, 0, 1, 1);
-    if (!defaultTextures.surface) defaultTextures.surface = frag.Texture()
+    if (!defaultTextures.surface) defaultTextures.surface = frag.Texture(engine)
         .name("default-surface-texture")
-        .dataFormat(frag.gl.RGBA)
+        .dataFormat(gl.RGBA)
         .fromArrayBuffer(0, defaultTexturePixels.buffer, 4, 1, 1);
-    if (!defaultTextures.emmissive) defaultTextures.emmissive = frag.Texture()
+    if (!defaultTextures.emmissive) defaultTextures.emmissive = frag.Texture(engine)
         .name("default-emmissive-texture")
-        .dataFormat(frag.gl.RGB)
+        .dataFormat(gl.RGB)
         .fromArrayBuffer(0, defaultTexturePixels.buffer, 8, 1, 1);
-    if (!defaultTextures.normal) defaultTextures.normal = frag.Texture()
+    if (!defaultTextures.normal) defaultTextures.normal = frag.Texture(engine)
         .name("default-normal-map-texture")
-        .dataFormat(frag.gl.RGB)
+        .dataFormat(gl.RGB)
         .fromArrayBuffer(0, defaultTexturePixels.buffer, 11, 1, 1);
 
     if (!shader) {
-        shader = frag.Shader()
+        shader = frag.Shader(engine)
             .name("Model")
             .verticiesXYZ()
             .matrix3D()
@@ -50,7 +51,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
     public.getFont = function(name) {
         var font = private.fonts[name];
         if (!font) {
-            font = frag.Font()
+            font = frag.Font(engine)
                 .name(name)
             private.fonts[name] = font;
         }
@@ -60,7 +61,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
     public.getMaterial = function(name) {
         var material = private.materials[name];
         if (!material) {
-            material = frag.Material()
+            material = frag.Material(engine)
                 .name(name)
                 .disposeTextures(false)
                 .setTexture("diffuse", private.defaultTextures.diffuse)
@@ -75,7 +76,7 @@ window.frag.AssetCatalog = function (shader, defaultTextures) {
     public.getModel = function (name, isChild) {
         var model = isChild ? undefined : private.models[name];
         if (!model) {
-            model = frag.Model(public.shader.is3d)
+            model = frag.Model(engine, public.shader.is3d)
                 .name(name)
                 .shader(public.shader);
             if (!isChild) private.models[name] = model;

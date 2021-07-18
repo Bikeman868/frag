@@ -17,46 +17,46 @@ window.frag.MaterialLoader = (function () {
         const flags = header.getUint8(headerOffset++);
 
         const colorDataOffset = header.getUint32(headerOffset, littleEndian);
-        if (frag.debugMaterialLoader)
+        if (engine.debugMaterialLoader)
             console.log("Color data at " + colorDataOffset);
         headerOffset += 4;
 
-        const colorTexture = frag.Texture()
-            .dataFormat((flags & 1) === 1 ? frag.gl.RGBA : frag.gl.RGB)
+        const colorTexture = frag.Texture(engine)
+            .dataFormat((flags & 1) === 1 ? engine.gl.RGBA : engine.gl.RGB)
             .fromArrayBuffer(mipLevel, data, dataOffset + colorDataOffset, width, height);
         material.setTexture("diffuse", colorTexture);
 
         if ((flags & 2) === 2) {
             const surfaceDataOffset = header.getUint32(headerOffset, littleEndian);
-            if (frag.debugMaterialLoader)
+            if (engine.debugMaterialLoader)
                 console.log("Surface data at " + surfaceDataOffset);
             headerOffset += 4;
 
-            const surfaceTexture = frag.Texture()
-                .dataFormat(frag.gl.RGBA)
+            const surfaceTexture = frag.Texture(engine)
+                .dataFormat(engine.gl.RGBA)
                 .fromArrayBuffer(mipLevel, data, dataOffset + surfaceDataOffset, width, height);
             material.setTexture("surface", surfaceTexture);
         }
 
         if ((flags & 4) === 4) {
             const normalMapDataOffset = header.getUint32(headerOffset, littleEndian);
-            if (frag.debugMaterialLoader)
+            if (engine.debugMaterialLoader)
                 console.log("Normal map at " + normalMapDataOffset);
             headerOffset += 4;
 
-            const normalMap = frag.Texture()
-                .dataFormat(frag.gl.RGB)
+            const normalMap = frag.Texture(engine)
+                .dataFormat(engine.gl.RGB)
                 .fromArrayBuffer(mipLevel, data, dataOffset + normalMapDataOffset, width, height);
             material.setTexture("normalMap", normalMap);
         }
 
         if ((flags & 8) === 8) {
             const pbrDataOffset = header.getUint32(headerOffset, littleEndian);
-            if (frag.debugMaterialLoader)
+            if (engine.debugMaterialLoader)
                 console.log("PBR data at " + pbrDataOffset);
             headerOffset += 4;
-            const pbrTexture = frag.Texture()
-                .dataFormat(frag.gl.RGBA)
+            const pbrTexture = frag.Texture(engine)
+                .dataFormat(engine.gl.RGBA)
                 .fromArrayBuffer(mipLevel, data, dataOffset + pbrDataOffset, width, height);
             material.setTexture("pbr", pbrTexture);
         }
@@ -71,7 +71,7 @@ window.frag.MaterialLoader = (function () {
             name += String.fromCharCode(header.getUint8(headerOffset++));
         }
         const material = assetCatalog.getMaterial(name);
-        if (frag.debugMaterialLoader) {
+        if (engine.debugMaterialLoader) {
             console.log("");
             console.log("Loading " + name + " material textures");
         }
@@ -85,7 +85,7 @@ window.frag.MaterialLoader = (function () {
 
         do {
             mip = header.getUint8(headerOffset++);
-            if (frag.debugMaterialLoader)
+            if (engine.debugMaterialLoader)
                 console.log("Loading MIP level " + mip + " at " + width + " x " + height + " pixels");
 
             if (mip !== nextMip)
@@ -102,7 +102,7 @@ window.frag.MaterialLoader = (function () {
 
 
     public.loadMaterialsFromBuffer = function(buffer, assetCatalog){
-        if (!assetCatalog) assetCatalog = frag.AssetCatalog();
+        if (!assetCatalog) assetCatalog = frag.AssetCatalog(engine);
 
         const bytes = new Uint8Array(buffer);
         const header = new DataView(buffer, 0, bytes.length);
@@ -112,7 +112,7 @@ window.frag.MaterialLoader = (function () {
         var headerOffset = 4;
         const dataOffset = headerOffset + headerLength;
 
-        if (frag.debugMaterialLoader)
+        if (engine.debugMaterialLoader)
             console.log("Material pack V" + version + " is " + bytes.length + " bytes with " + headerLength + " header bytes");
 
         if (version === 1) {

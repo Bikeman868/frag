@@ -29,24 +29,28 @@
         const Vector = frag.Vector;
         const degToRad = Math.PI / 180;
 
-        frag.config = function() {
-            frag.gl.disable(frag.gl.CULL_FACE); // We want to be able to see the underside of the track
-        }
-        frag.init();
+        const engine = frag.Engine()
+        const gl = engine.gl;
+
+        engine.onStart((engine) =>
+        {
+            engine.gl.disable(engine.gl.CULL_FACE); // We want to be able to see the underside of the track
+        });
+        engine.start();
 
         // The perspective camera makes objects further from the camera look smaller
-        const camera = frag.PerspectiveCamera()
+        const camera = frag.PerspectiveCamera(engine)
             .frustrum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 
         // We always need at least one scene
-        const scene = frag.Scene()
+        const scene = frag.Scene(engine)
             .camera(camera);
-        frag.mainScene(scene);
+        engine.mainScene(scene);
 
         // We need a shader to draw something onto the screen
-        const shader = frag.Shader()
+        const shader = frag.Shader(engine)
             .name("Model shader")
             .diffuseTexture()
             .directionalLightGrey()
@@ -56,9 +60,9 @@
         // but a real game would likely load texture bitmaps. I did it like
         // this so that this demo will run as a stand-alone single html file.
         const singleColorMaterial = function(name, rgb) {
-            texture = frag.Texture()
+            texture = frag.Texture(engine)
                 .name(name)
-                .dataFormat(frag.gl.RGB)
+                .dataFormat(engine.gl.RGB)
                 .fromArrayBuffer(0, new Uint8Array(rgb), 0, 1, 1);
             return frag.Material()
                 .name(name)
@@ -70,14 +74,14 @@
         const wheelMaterial = singleColorMaterial("wheel", [120, 90, 90]);
 
         // Make a simple truck shape using scaled geometric shapes
-        const cubeMesh = frag.Cube(12)
+        const cubeMesh = frag.Cube(engine, 12)
             .name("cube")
             .shadeSmooth();
         
-        const wheelMesh = frag.Cylinder(6)
+        const wheelMesh = frag.Cylinder(engine, 6)
             .name("wheel");
 
-        const truckModel = frag.Model()
+        const truckModel = frag.Model(engine)
             .name('Truck')
             .shader(shader);
 
@@ -125,7 +129,7 @@
         // Add a "moving" animation to the truck that rotates all of the wheels.
         // Gradually rotating by 60 degrees then flipping back to zero looks like
         // continuous rotation because the wheels are hexagonal.
-        const wheelTurningAnimation = frag.ModelAnimation()
+        const wheelTurningAnimation = frag.ModelAnimation(engine)
             .name("moving")
             .loop(true)
             .frames(15)
@@ -141,7 +145,7 @@
         truckModel.addAnimation(wheelTurningAnimation);
 
         // Create an instance of the truck model and add it to the scene
-        const truck = frag.SceneObject(truckModel);
+        const truck = frag.SceneObject(engine, truckModel);
         truck.getPosition().scale(6).location([-10, -50, 0]);
         scene.addObject(truck);
 
@@ -206,16 +210,16 @@
             }
         }
         const trackMaterial = singleColorMaterial("track", [120, 220, 90]);
-        const trackMesh = frag.MeshData()
+        const trackMesh = frag.MeshData(engine)
             .name("Track")
             .shadeFlat()
             .addTriangleStrip(trackVertices);
-        const trackModel = frag.Model()
+        const trackModel = frag.Model(engine)
             .name("Track")
             .mesh(trackMesh)
             .material(trackMaterial)
             .shader(shader);
-        scene.addObject(frag.SceneObject(trackModel));
+        scene.addObject(frag.SceneObject(engine, trackModel));
 
         // Start a looping animation that will move the truck around the track
         const actions = [];
@@ -227,7 +231,7 @@
             const thisTrackLocation = Vector.extract3D(track, iThis);
             
             if (iThis === 0){
-                actions.push(frag.PositionAnimationAction(position).moveTo(Vector.add(thisTrackLocation, truckPosition), invLinearVelocity));
+                actions.push(frag.PositionAnimationAction(engine, position).moveTo(Vector.add(thisTrackLocation, truckPosition), invLinearVelocity));
             }
 
             const iNext = iThis + 3 >= track.length ? 0 : iThis + 3;
@@ -235,10 +239,10 @@
             const angle = Vector.eulerAngles(Vector.sub(nextTracklocation, thisTrackLocation));
             angle[1] -= Math.PI * 0.5;
 
-            actions.push(frag.PositionAnimationAction(position).rotateTo(angle, invAngularVelocity));
-            actions.push(frag.PositionAnimationAction(position).moveTo(Vector.add(nextTracklocation, truckPosition), invLinearVelocity));
+            actions.push(frag.PositionAnimationAction(engine, position).rotateTo(angle, invAngularVelocity));
+            actions.push(frag.PositionAnimationAction(engine, position).moveTo(Vector.add(nextTracklocation, truckPosition), invLinearVelocity));
         }
-        frag.Animation().sequence(actions, true).start();
+        frag.Animation(engine).sequence(actions, true).start();
 
         // Start the wheels turning on the truck
         truck.animations.moving.start();

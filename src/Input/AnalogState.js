@@ -1,5 +1,5 @@
 // Represents an analog value that can be changed by the player using analog inputs
-window.frag.AnalogState = function(analogAction, config, name) {
+window.frag.AnalogState = function(engine, analogAction, config, name) {
     const frag = window.frag;
 
     if (!config) config = {};
@@ -54,7 +54,7 @@ window.frag.AnalogState = function(analogAction, config, name) {
         }
         if (Math.abs(public.value - value) > 1e-5) {
             public.value = value;
-            if (frag.debugInputs) console.log("Analog state", private.name, "set to", value);
+            if (engine.debugInputs) console.log("Analog state", private.name, "set to", value);
             private.change(evt);
         }
     }

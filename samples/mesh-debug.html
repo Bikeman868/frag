@@ -26,48 +26,47 @@
     <script src='frag.min.js'></script>
     <script>
         const frag = window.frag;
-
-        frag,config = function(frag) {
-            frag.debugShaderBuilder = true;
-        }
-        frag.init();
+        const engine = frag.Engine({
+            debugShaderBuilder: true
+        });
+        engine.start();
 
         const degToRad = Math.PI / 180;
 
-        const camera = frag.PerspectiveCamera()
+        const camera = frag.PerspectiveCamera(engine)
             .frustrum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 
-        const scene = frag.Scene()
+        const scene = frag.Scene(engine)
             .camera(camera);
 
-        frag.mainScene(scene);
+        engine.mainScene(scene);
 
-        const shader = frag.Shader()
+        const shader = frag.Shader(engine)
             .name("My shader")
             .colorsRGB()
             .directionalLightGrey()
             .compile();
 
-        const mesh = frag.Cube(5, { color: [0.8, 0.1, 0.4] })
+        const mesh = frag.Cube(engine, 5, { color: [0.8, 0.1, 0.4] })
             .name('My cube')
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
 
-        const model = frag.Model()
+        const model = frag.Model(engine)
             .name('My model')
             .mesh(mesh)
             .shader(shader);
 
-        const cube = frag.SceneObject(model);
+        const cube = frag.SceneObject(engine, model);
         cube.getPosition().scale(40);
         scene.addObject(cube);
 
-        const spinningAnimation = frag.Animation()
+        const spinningAnimation = frag.Animation(engine)
             .perform(
-                frag.ValueAnimationAction()
+                frag.ValueAnimationAction(engine)
                     .setDuration(2000)
                     .onStep((a, r) => {
                         const angle = Math.PI * 2 * r;

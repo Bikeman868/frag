@@ -1,4 +1,6 @@
-window.frag.PackageLoader = (function () {
+window.frag.PackageLoader = function (engine) {
+    if (engine.packageLoader) return engine.packageLoader;
+
     const frag = window.frag;
 
     const uInt32 = new Uint32Array([0x11223344]);
@@ -12,8 +14,9 @@ window.frag.PackageLoader = (function () {
 
     const public = {
         __private: private,
-        littleEndian
+        littleEndian,
     };
+    engine.packageLoader = public;
 
     private.loadFontV1 = function (context, objectIndex, headerOffset) {
         const nameLength = context.header.getUint8(headerOffset++);
@@ -23,7 +26,7 @@ window.frag.PackageLoader = (function () {
         }
 
         const font = context.assetCatalog.getFont(name);
-        if (frag.debugPackageLoader)
+        if (engine.debugPackageLoader)
             console.log("Object[" + objectIndex + "] is font " + name);
 
         const faceLength = context.header.getUint8(headerOffset++);
@@ -38,7 +41,7 @@ window.frag.PackageLoader = (function () {
         const charCount = context.header.getUint16(headerOffset + 6, littleEndian);
         headerOffset += 8;
 
-        if (frag.debugPackageLoader)
+        if (engine.debugPackageLoader)
             console.log("  " + width + "x" + height + " pixel texture contains " + charCount + " characters from " + lineHeight + "px " + fontFace);
 
         font.lineHeight(lineHeight);
@@ -67,9 +70,9 @@ window.frag.PackageLoader = (function () {
             mode += String.fromCharCode(context.header.getUint8(headerOffset++));
         }
 
-        if (mode === "RGB") font.dataFormat(frag.gl.RGB);
-        else if (mode === "RGBA") font.dataFormat(frag.gl.RGBA);
-        else if (mode === "L") font.dataFormat(frag.gl.LUMINANCE);
+        if (mode === "RGB") font.dataFormat(engine.gl.RGB);
+        else if (mode === "RGBA") font.dataFormat(engine.gl.RGBA);
+        else if (mode === "L") font.dataFormat(engine.gl.LUMINANCE);
         else console.error("Font " + name + " unsupported mode " + mode);
 
         const imageWidth = context.header.getUint16(headerOffset + 0, littleEndian);
@@ -94,16 +97,16 @@ window.frag.PackageLoader = (function () {
             name += String.fromCharCode(context.header.getUint8(headerOffset++));
         }
         const material = context.assetCatalog.getMaterial(name);
-        if (frag.debugPackageLoader)
+        if (engine.debugPackageLoader)
             console.log("Object[" + objectIndex + "] is material " + name);
         return material;
     }
 
     private.loadMeshV1 = function (context, objectIndex, headerOffset) {
-        const mesh = frag.MeshData();
+        const mesh = frag.MeshData(engine);
         const fragmentCount = context.header.getUint16(headerOffset, littleEndian);
         headerOffset += 2;
-        if (frag.debugPackageLoader)
+        if (engine.debugPackageLoader)
             console.log("Object[" + objectIndex + "] is a mesh with " + fragmentCount + " fragments");
 
         for (let fragmentIndex = 0; fragmentIndex < fragmentCount; fragmentIndex++) {
@@ -136,7 +139,7 @@ window.frag.PackageLoader = (function () {
                 triangleCount = meshVertexCount - 2;
             };
 
-            if (frag.debugPackageLoader) {
+            if (engine.debugPackageLoader) {
                 let msg = "  fragment[" + fragmentIndex + "] has " + meshVertexCount + " verticies forming ";
                 if (vertexFormat === 1) {
                     msg += triangleCount + " triangles"
@@ -301,7 +304,7 @@ window.frag.PackageLoader = (function () {
                 //}
             }
 
-            if (frag.debugPackageLoader && frag.debugMeshes) {
+            if (engine.debugPackageLoader && engine.debugMeshes) {
                 let msg = "  vertices[";
                 for (var i = 0; i < verticies.length; i++) {
                     if (i > 0) msg += ', ';
@@ -311,7 +314,7 @@ window.frag.PackageLoader = (function () {
                 console.log(msg);
             }
 
-            const vertexData = frag.VertexData();
+            const vertexData = frag.VertexData(engine);
             if (vertexFormat === 1 || vertexFormat === 2) {
                 if (is3D)
                     vertexData.setTriangles(verticies, colors, uvs, normals, tangents, bitangents)
@@ -343,18 +346,18 @@ window.frag.PackageLoader = (function () {
         const loop = (flags & 0x1) === 0x1;
         const reverse = (flags & 0x2) === 0x2;
 
-        if (frag.debugPackageLoader) {
+        if (engine.debugPackageLoader) {
             let msg = "Object[" + objectIndex + "] is '" + name + "' animation which runs for " + frames + "x" + interval + " ms";
             if (loop) msg += ". Repeats until stopped";
             if (reverse) msg += ". Plays in reverse after playing forwards";
             console.log(msg);
         }
 
-        const modelAnimation = frag.ModelAnimation()
+        const modelAnimation = frag.ModelAnimation(engine)
             .name(name)
             .loop(loop)
             .frames(frames)
-            .interval(interval / window.frag.gameTickMs);
+            .interval(interval / engine.gameTickMs);
 
         for (let i = 0; i < channelCount; i++) {
             const patternLength = context.header.getUint8(headerOffset++);
@@ -369,7 +372,7 @@ window.frag.PackageLoader = (function () {
                 channelName += String.fromCharCode(context.header.getUint8(headerOffset++));
             }
 
-            if (frag.debugPackageLoader && frag.debugAnimations) {
+            if (engine.debugPackageLoader && engine.debugAnimations) {
                 msg = "  Channel " + channelName + " applies to " + pattern + " children"
                 console.log(msg);
             }
@@ -389,7 +392,7 @@ window.frag.PackageLoader = (function () {
                 else if (transitionEnum === 2) transition = "spline";
                 keyframes[frame] = { value, transition };
 
-                if (frag.debugPackageLoader && frag.debugAnimations) {
+                if (engine.debugPackageLoader && engine.debugAnimations) {
                     msg = "    Keyframe[" + frame + "] = " + round4(value) + " " + transition;
                     console.log(msg);
                 }
@@ -417,7 +420,7 @@ window.frag.PackageLoader = (function () {
         const meshIndex = context.header.getUint16(headerOffset + 3, littleEndian);
         headerOffset += 5;
 
-        const location = frag.Location(true); // Loaded models are always 3D
+        const location = frag.Location(engine, true); // Loaded models are always 3D
         location.translateX = context.header.getFloat32(headerOffset + 0, littleEndian);
         location.translateY = context.header.getFloat32(headerOffset + 4, littleEndian);
         location.translateZ = context.header.getFloat32(headerOffset + 8, littleEndian);
@@ -438,7 +441,7 @@ window.frag.PackageLoader = (function () {
         const hasMaterial = (modelFlags & 2) === 2;
         const hasMesh = (modelFlags & 4) === 4;
 
-        if (frag.debugPackageLoader) {
+        if (engine.debugPackageLoader) {
             console.log("Object[" + objectIndex + "] is " + 
                 (isRoot ? "root " : "") + "model " + name + " with " + childCount + " children and " + animationCount + " animations." + 
                 (hasMesh ? " Paint mesh " + meshIndex : " No mesh") + (hasMaterial ? " with material " + materialIndex : ". No material"));
@@ -461,14 +464,14 @@ window.frag.PackageLoader = (function () {
         }
 
         if (isRoot) {
-            if (frag.debugAnimations && animationCount > 0)
+            if (engine.debugAnimations && animationCount > 0)
                 console.log("Model #" + objectIndex + " '" + name + "' has " + animationCount + " animations");
             for (let i = 0; i < animationCount; i++) {
                 const animationIndex = context.header.getUint16(headerOffset, littleEndian);
                 headerOffset += 2;
 
                 const animation = context.animations[animationIndex];
-                if (frag.debugAnimations) {
+                if (engine.debugAnimations) {
                     const channels = animation.getChannelGraphs();
                     console.log("  Animation '" + animation.getName() + "' has " + channels.length + " channels." + (animation.__private.loop ? " Loop " : "") + animation.__private.frames + "x" + animation.__private.interval + " frames");
                     for (let channelIndex = 0; channelIndex < channels.length; channelIndex++) {
@@ -485,7 +488,7 @@ window.frag.PackageLoader = (function () {
     };
 
     public.loadFromBuffer = function(buffer, assetCatalog){
-        if (!assetCatalog) assetCatalog = frag.AssetCatalog();
+        if (!assetCatalog) assetCatalog = frag.AssetCatalog(engine);
 
         const bytes = new Uint8Array(buffer);
         const header = new DataView(buffer, 0, bytes.length);
@@ -495,7 +498,7 @@ window.frag.PackageLoader = (function () {
         var headerOffset = 8;
         const dataOffset = headerOffset + headerLength;
 
-        if (frag.debugPackageLoader)
+        if (engine.debugPackageLoader)
             console.log("Asset pack V" + version + " is " + bytes.length + " bytes with " + headerLength + " header bytes");
 
         const context = {
@@ -565,4 +568,4 @@ window.frag.PackageLoader = (function () {
     };
 
     return public;
-})();
+};

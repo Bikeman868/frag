@@ -1,5 +1,5 @@
 // Represents the current state of an object being animated
-window.frag.ObjectAnimationState = function () {
+window.frag.ObjectAnimationState = function (engine) {
     const private = {
     };
 

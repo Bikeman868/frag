@@ -1,7 +1,7 @@
 // Constructs a model animation in the context of a scene object
 // For example this could be the "moving" animation for a model. Constructing this
 // object enables you to start and stop this animation on a specific scene object
-window.frag.SceneObjectAnimation = function (animation, animationMap) {
+window.frag.SceneObjectAnimation = function (engine, animation, animationMap) {
     const modelAnimation = animation.modelAnimation;
     const childAnimations = animation.childAnimations;
 
@@ -26,13 +26,13 @@ window.frag.SceneObjectAnimation = function (animation, animationMap) {
         }
     }
 
-    const action = window.frag.KeyframeAnimationAction()
+    const action = window.frag.KeyframeAnimationAction(engine)
         .setFrames(modelAnimation.getInterval(), modelAnimation.getFrames());
 
     for (let frame = 0; frame < modelAnimation.getFrames(); frame++) {
         action.add(frame, frameAction);
     }
 
-    return window.frag.Animation()
+    return window.frag.Animation(engine)
         .perform(action, modelAnimation.getLoop());
 }

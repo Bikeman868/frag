@@ -1,6 +1,6 @@
 // This class provides a set of helper methods for
 // manipulating a Location object
-window.frag.ScenePosition = function (location) {
+window.frag.ScenePosition = function (engine, location) {
     const private = {
         location: null,
     };
@@ -10,7 +10,7 @@ window.frag.ScenePosition = function (location) {
     };
 
     public.setLocation = function (value) {
-        private.location = value || window.frag.Location();
+        private.location = value || window.frag.Location(engine);
         return public;
     }
     public.setLocation(location);

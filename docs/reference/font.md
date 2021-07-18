@@ -13,12 +13,12 @@ The following example downloads a font image, defines the characters that can be
 rendered from this font, then uses it to darw some text in the scene.
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 
 const fontImage = new Image();
 fontImage.src = "http://somewhere/something.jpg";
 
-const font = frag.Font()
+const font = engine.Font()
     .name("MyFont")
     .fromImage(fontImage)
     .textColor([1, 0, 0, 1])
@@ -29,9 +29,9 @@ const font = frag.Font()
     .addChar("C", 50, 0, 24, 24, 0, 23, 26);
 
 const textModel = font.buildTextModel("ABBCAA");
-const textObject = frag.SceneObject(textModel);
+const textObject = engine.SceneObject(textModel);
 
-const scene = frag.Scene();
+const scene = engine.Scene();
 scene.addObject(textObject);
 ```
 

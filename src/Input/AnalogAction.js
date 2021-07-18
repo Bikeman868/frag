@@ -1,5 +1,5 @@
 // Returne functions that can be bound to analog inputs
-window.frag.AnalogAction = function(actionName, context) {
+window.frag.AnalogAction = function(engine, actionName, context) {
 
     const splits = actionName.split("-");
 
@@ -21,11 +21,11 @@ window.frag.AnalogAction = function(actionName, context) {
     if (/camera/i.test(actionName)) {
         if (mode === "move") {
             if (axis === "x") 
-                return function(analogState) { frag.getMainScene().getCamera().moveToX(analogState.value); }
+                return function(analogState) { engine.getMainScene().getCamera().moveToX(analogState.value); }
             if (axis === "y") 
-                return function(analogState) { frag.getMainScene().getCamera().moveToY(analogState.value); }
+                return function(analogState) { engine.getMainScene().getCamera().moveToY(analogState.value); }
             if (axis === "z") 
-                return function(analogState) { frag.getMainScene().getCamera().moveToZ(analogState.value); }
+                return function(analogState) { engine.getMainScene().getCamera().moveToZ(analogState.value); }
         }        
     }
 

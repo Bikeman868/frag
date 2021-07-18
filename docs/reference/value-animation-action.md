@@ -18,23 +18,22 @@ Note that this example does not configure the model or the scene object, but
 focuses on the `ValueAnimationAction` class.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const sceneObject = frag.SceneObject(model);
+const model = engine.Model();
+const sceneObject = engine.SceneObject(model);
 
-const animation = frag.Animation({ 
+const animation = engine.Animation({ 
     obj: sceneObject, 
     pos: sceneObject.getPosition() 
   })
   .sequence([
-    frag.ValueAnimationAction()
+    engine.ValueAnimationAction()
       .setDuration(500)
       .setInterval(20)
       .onStart((animation) => { animation.obj.enable(); } )
       .onStep((animation, ratio) => { animation.pos.rotateZ(ratio * Math.PI); }),
-    frag.ValueAnimationAction()
+    engine.ValueAnimationAction()
       .setDuration(1000)
       .setInterval(50)
       .onStep((animation, ratio) => { animation.pos.rotateX(ratio * Math.PI); })

@@ -2,7 +2,7 @@
 // one color into another or smoothly move an object within the scene.
 // ValueAnimationAction objects can be passed to an Animation object as the action
 // to take in one of the steps in an animation sequence
-window.frag.ValueAnimationAction = function () {
+window.frag.ValueAnimationAction = function (engine) {
     const private = {};
 
     const public = {

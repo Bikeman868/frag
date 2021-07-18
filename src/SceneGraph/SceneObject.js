@@ -1,4 +1,4 @@
-window.frag.SceneObject = function (model) {
+window.frag.SceneObject = function (engine, model) {
     const frag = window.frag;
 
     const private = {
@@ -19,29 +19,29 @@ window.frag.SceneObject = function (model) {
         for (let j = 0; j < animation.childAnimations.length; j++) {
             const childModelName = animation.childAnimations[j].model.getName();
             if (!private.animationMap[childModelName]) {
-                const animationState = window.frag.ObjectAnimationState();
-                if (window.frag.debugAnimations) {
+                const animationState = window.frag.ObjectAnimationState(engine);
+                if (engine.debugAnimations) {
                     animationState.__private.modelName = model.getName();
                     animationState.__private.childModelName = childModelName;
                 }
                 private.animationMap[childModelName] = animationState;
             }
         }
-        const objectAnimation = window.frag.SceneObjectAnimation(animation, private.animationMap);
+        const objectAnimation = window.frag.SceneObjectAnimation(engine, animation, private.animationMap);
         public.animations[animation.modelAnimation.getName()] = objectAnimation;
     };
 
     private.getLocation = function () {
         if (private.location) return private.location;
         if (!private.model.location) return null;
-        private.location = frag.Location(private.model.location.is3d);
+        private.location = frag.Location(engine, private.model.location.is3d);
         return private.location;
     };
 
     private.getAnimationLocation = function () {
         if (private.animationLocation) return private.animationLocation;
         if (!private.model.location) return null;
-        private.animationLocation = frag.Location(private.model.location.is3d);
+        private.animationLocation = frag.Location(engine, private.model.location.is3d);
         return private.animationLocation;
     };
 
@@ -52,7 +52,7 @@ window.frag.SceneObject = function (model) {
     public.getPosition = function () {
         const location = private.getLocation();
         if (!location) return null;
-        return frag.ScenePosition(location);
+        return frag.ScenePosition(engine, location);
     };
 
     /**
@@ -63,7 +63,7 @@ window.frag.SceneObject = function (model) {
     public.getAnimationPosition = function () {
         const location = private.getAnimationLocation();
         if (!location) return null;
-        return frag.ScenePosition(location);
+        return frag.ScenePosition(engine, location);
     };
 
     /**

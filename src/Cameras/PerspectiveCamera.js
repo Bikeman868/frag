@@ -1,13 +1,11 @@
 // This public makes objects closer to the public appear larger. The frustrum
 // defines clipping and scaling of the scene
 
-window.frag.PerspectiveCamera = function () {
-    const frag = window.frag;
-
+window.frag.PerspectiveCamera = function (engine) {
     const private = {
-        locationTransform: window.frag.Transform(),
-        worldTransform: window.frag.Transform(),
-        perspectiveTransform: window.frag.Transform(),
+        locationTransform: window.frag.Transform(engine),
+        worldTransform: window.frag.Transform(engine),
+        perspectiveTransform: window.frag.Transform(engine),
         x: 0,
         y: 0,
         z: -200,
@@ -24,7 +22,7 @@ window.frag.PerspectiveCamera = function () {
 
     const public = {
         __private: private,
-        worldToClipTransform: window.frag.Transform()
+        worldToClipTransform: window.frag.Transform(engine)
     };
 
     private.computeCameraTransforms = function () {

@@ -24,12 +24,11 @@ to it. The UI camera is designed to project a 2D scene onto the screen
 in front of other content.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const uiCamera = frag.UiCamera();
+const uiCamera = engine.UiCamera();
 
-const scene = frag.Scene()
+const scene = engine.Scene()
   .name('My scene')
   .camera(uiCamera);
 ```

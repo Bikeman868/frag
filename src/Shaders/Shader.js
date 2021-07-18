@@ -1,5 +1,8 @@
 // This builds a custom shader based on a set of options
-window.frag.Shader = function () {
+window.frag.Shader = function (engine) {
+    const frag = window.frag;
+    const gl = engine.gl;
+
     const none = "None";
     const private = {
         name: "Custom",
@@ -277,7 +280,7 @@ window.frag.Shader = function () {
     }
 
     public.compile = function () {
-        const shader = window.frag.CustomShader(private.matrix === "mat4")
+        const shader = frag.CustomShader(engine, private.matrix === "mat4")
             .name(private.name);
 
         const source = {
@@ -362,7 +365,7 @@ window.frag.Shader = function () {
             const innerLightDirection = shader.lightDirection;
 
             shader.lightDirection = function (direction) {
-                const length = window.frag.Vector.length(direction);
+                const length = frag.Vector.length(direction);
                 if (length > 1) {
                     innerLightDirection([-direction[0] / length, -direction[1] / length, -direction[2] / length]);
                     if (balanceAmbient) shader.ambientLight(0);

@@ -1,6 +1,5 @@
-window.frag.Texture = function () {
-    const frag = window.frag;
-    const gl = frag.gl;
+window.frag.Texture = function (engine) {
+    const gl = engine.gl;
 
     const private = {
         glTexture: null,
@@ -13,7 +12,7 @@ window.frag.Texture = function () {
 
     const public = {
         __private: private,
-        textureUnit: window.frag.allocateTextureUnit()
+        textureUnit: engine.allocateTextureUnit()
     };
 
     public.dispose = function () {
@@ -103,9 +102,6 @@ window.frag.Texture = function () {
     }
 
     public.update = function (width, height) {
-        const frag = window.frag;
-        const gl = frag.gl;
-
         if (private.scene) {
             if (width !== undefined && height !== undefined) {
                 if (width !== private.width || height !== private.height) {
@@ -124,8 +120,6 @@ window.frag.Texture = function () {
     }
 
     public.fromScene = function (scene, width, height) {
-        const frag = window.frag;
-        const gl = frag.gl;
         const level = 0;
 
         private.setup(width, height);

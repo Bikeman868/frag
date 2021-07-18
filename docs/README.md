@@ -8,6 +8,26 @@ complicated and are designed to be studied and experimented with.
 For people who like to learn by doing this is the best place to start.
 If you prefer reading reference material instead then read on...
 
+## The basics
+* You need an html web page with at least one `<canvas />` element on it.
+* You need to load the `frag.min.js` file before running your javascript.
+* You need to call `window.frag.Engine()` to construct a game engine. If your canvas `id` is "scene" then you don't need to pass anything to the engine constructor.
+* You can call the `start()` method of engine to render your game scene continuously, or you can call the `render()` method each time you want to redraw the screen.
+
+To define what's in your game scene you will contruct objects by calling methods of `window.frag` 
+just like we did to construct the game engine. These constructors all start with a capital letter
+and they all take the game engine as the first parameter. For example `window.frag.Scene(engine)`.
+
+The game engine provides a more convenient syntax for constructing objects. Calling `engine.Scene()` produces the exact same result as calling `window.frag.Scene(engine)` it's just a little less typing
+and one extra level of function call.
+
+Things can mostly be done in any order. For example you can start using a font from an asset
+catalog then download the font into the catalog and this will work just fine, but the text
+will not be rendered until the font has finished downloading of course.
+
+The best place to go from here is to take a look at the [spinning cube sample](../samples/hello-cube.html)
+followed by the other samples in the order presented in the [samples readme file](../samples/README.md).
+
 ## Subjects
 The following documents are general discussions around a specific topic
 
@@ -18,6 +38,7 @@ The following documents are general discussions around a specific topic
 * [Packaging models](packaging.md)
 * [Player input](inputs.md)
 * [Text rendering](text.md)
+
 ## Reference
 The following classes are documented at detailed technical level. Note that the ones
 with strikeout formatting are planned but not written yet. Please reach out if you

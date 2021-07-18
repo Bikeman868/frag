@@ -64,12 +64,7 @@ If you are having problems with your inputs not doing what you expect, you can t
 input debugging by setting the Frag config at startup like this:
 
 ```javascript
-const frag = window.frag;
-
-frag.config = function() {
-  frag.debugInputs = true;
-}
-frag.init();
+const engine = window.frag.Engine({ debugInputs: true }).start();
 ```
 
 This will print detailed information in the browser console window.

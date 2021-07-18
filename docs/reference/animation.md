@@ -17,7 +17,7 @@ The animation engine keeps time in two ways. Game ticks occur at regular
 time intervals and frame ticks increment every time the screen is redrawn.
 
 Frag measures the approximate frame refresh rate. You can read this from
-`window.frag.fps`.
+`engine.fps`.
 
 Game ticks provide smooth animation and precise timing. If the device
 CPU/GPU can't keep up with the demands of the game then Frag will skip
@@ -25,13 +25,13 @@ some game ticks, this may result in less smooth animation, but animations
 will still run for the correct amount of time from start to finish.
 
 You can change the ratio of game ticks to milliseconds in the
-Frag framework by assigning a new value to `window.frag.gameTickMs`. 
+Frag framework by assigning a new value to `engine.gameTickMs`. 
 By default 1 game tick is 10ms. This should not be changed during the game, 
 should match the tick speed of the game engine on the back-end server, 
 and must be the same for all players in a multi-player scenario.
 
 If you have a back-end server that is counting game ticks then you will want 
-to keep them in sync. To do this call `window.frag.correctClock(serverTick)`
+to keep them in sync. To do this call `engine.correctClock(serverTick)`
 passing the game tick from the server. This will slowly speed up or slow down
 the game to keep it in sync with the server game time.
 
@@ -40,12 +40,11 @@ This is an example of creating and configuring an animation. This
 animation will repeat every 5 game ticks for 200 ticks then stop.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
 const interval = 5;
 const limit = 200;
-const myAnimation = frag.Animation({ someCounter: 0 })
+const myAnimation = engine.Animation({ someCounter: 0 })
   .repeatTicks(function(animation, gameTick, frameTick){
     animation.someCounter++;
   }, interval)

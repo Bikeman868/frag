@@ -30,31 +30,30 @@
         // **********************************************************************
 
         const frag = window.frag;
-
-        frag.config = function(frag) {
+        const engine = frag.Engine({
             // There are a number of debug console outputs that you can enable
-            frag.debugPackageLoader = true;
-            frag.debugAnimations = false;
-            frag.debugShaderBuilder = false;
-            frag.debugInputs = false;
+            debugPackageLoader: true,
+            debugAnimations: false,
+            debugShaderBuilder: false,
+            debugInputs: false,
 
             // higher renderInterval will give you lower power consumption
             // and higher framr rate. The default value is 15ms which will cap
             // the frame rate at about 60 frames per second.
-            frag.renderInterval = 20;
+            renderInterval: 20,
 
             // Animation sequences, keyframe animations and speeds are based on
             // game ticks. This number must match the server and all other
             // players in a multi-player game. The default is 10ms.
-            frag.gameTickMs = 10;
+            gameTickMs: 10,
 
             // When drawing text you probably want to enable transparency unless
             // your text is always drawn against its background color. Transparency
             // has a big performance impact.
             // See http://learnwebgl.brown37.net/11_advanced_rendering/alpha_blending.html
-            frag.transparency = true;
-        }
-        frag.init();
+            transparency: true
+        });
+        engine.start();
 
         // **********************************************************************
         // Next we need to define a scene and a camera that projects 
@@ -63,15 +62,15 @@
 
         const degToRad = Math.PI / 180;
 
-        const camera = frag.PerspectiveCamera()
+        const camera = engine.PerspectiveCamera()
             .frustrum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 
-        const scene = frag.Scene()
+        const scene = engine.Scene()
             .camera(camera);
 
-        frag.mainScene(scene);
+        engine.mainScene(scene);
 
         // **********************************************************************
         // Define a function that will get called after the models have finished 
@@ -90,10 +89,10 @@
                 .shadeSmooth();
 
             // Create an excavator from the model and add it to the scene
-            const excavator = frag.SceneObject(excavatorModel);
+            const excavator = engine.SceneObject(excavatorModel);
             excavator.getPosition()
                 .scale(10)
-                .rotateY(-15 * degToRad)
+                .rotateY(-30 * degToRad)
                 .rotateX(-15 * degToRad)
                 .moveByXYZ(0, -30, 0);
             scene.addObject(excavator);
@@ -114,7 +113,7 @@
             // Step 1 in the animation sequence
             // Move the excavator from to position -80 on the x-axis whilst running the "moving" animation
             // The "moving" animation was defined in Blender, you can open the `.blend` file to see it.
-            const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
+            const step1 = engine.PositionAnimationAction(position, invLinearVelocity)
                 .moveTo([-60, -30, -25])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
@@ -122,11 +121,11 @@
             // Step 2 in the animation sequence
             // Run the "excavating" animation 4 times. The "moving" animation was defined in Blender, 
             // you can open the `.blend` file to see how it is defined.
-            const step2 = frag.RepeatAnimationAction(excavator.animations.excavating, 4)
+            const step2 = engine.RepeatAnimationAction(excavator.animations.excavating, 4)
 
             // Step 3 in the animation sequence
             // Move the excavator by +100 units on the x-axis whilst running the "moving" animation
-            const step3 = frag.PositionAnimationAction(position, invLinearVelocity)
+            const step3 = engine.PositionAnimationAction(position, invLinearVelocity)
                 .moveBy([100, 20, 100])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
@@ -136,7 +135,7 @@
             const step4 = excavator.animations.tipping;
 
             // Add the steps to an animation sequence and start it running
-            const animation = frag.Animation().sequence([step1, step2, step3, step4], true);
+            const animation = engine.Animation().sequence([step1, step2, step3, step4], true);
             animation.start();
 
             // **********************************************************************
@@ -153,7 +152,7 @@
             let wireframeModel = null;
             const wireframeStateChange = function(digitalState, evt) {
                 if (digitalState.isOn) {
-                    const hit = frag.hitTest(evt.clientX, evt.clientY);
+                    const hit = engine.hitTest(evt.clientX, evt.clientY);
                     if (hit) {
                         wireframeModel = hit.model;
                         wireframeModel.wireframe(true);
@@ -165,14 +164,17 @@
                     }
                 }
             };
-            const wireframeState = frag.DigitalState(wireframeStateChange, { isOn: false }, "wireframe");
+            const wireframeState = engine.DigitalState(
+                wireframeStateChange, 
+                { isOn: false }, 
+                "wireframe");
 
             // This is very similar to the wireframe example above, but turns on the
             // drawing of normal vectors on the model
             let normalsModel = null;
             const normalsStateChange = function(digitalState, evt) {
                 if (digitalState.isOn) {
-                    const hit = frag.hitTest(evt.clientX, evt.clientY);
+                    const hit = engine.hitTest(evt.clientX, evt.clientY);
                     if (hit) {
                         normalsModel = hit.model;
                         normalsModel.drawNormals(1);
@@ -184,12 +186,15 @@
                     }
                 }
             }
-            const normalsState = frag.DigitalState(normalsStateChange, { isOn: false }, "normals");
+            const normalsState = engine.DigitalState(
+                normalsStateChange, 
+                { isOn: false }, 
+                "normals");
 
             // Define a DigitalState for the excavator visibility with an aassociated
             // DigitalAction that hides and shows the excavator in the scene
-            const excavatorVisibilityState = frag.DigitalState(
-                frag.DigitalAction("sceneobject", { sceneObject: excavator }), 
+            const excavatorVisibilityState = engine.DigitalState(
+                engine.DigitalAction("sceneobject", { sceneObject: excavator }), 
                 { isOn: true }, 
                 "excavator visibility");
 
@@ -198,55 +203,56 @@
             // affect all excavators in the scene if there were more than one.
             const excavatorModelChildren = [];
             excavatorModel.addFlattenedChildren(excavatorModelChildren, (child) => child.getName() === "bucket");
-            const bucketVisibilityState = frag.DigitalState(
-                frag.DigitalAction("model", { model: excavatorModelChildren[0] }), 
+            const bucketVisibilityState = engine.DigitalState(
+                engine.DigitalAction("model", { model: excavatorModelChildren[0] }), 
                 { isOn: true }, 
                 "bucket visibility");
 
             // Define a DigitalState where the state change action is a custom function that writes to the console
-            const customState = frag.DigitalState(
+            const customState = engine.DigitalState(
                 (state) => { console.log("Custom digital state is " + (state.isOn ? "on" : "off")) },
                 { isOn: false },
                 "custom flag");
 
             // Define a DigitalState for the animation with an associated DigitalAction that starts and stops
             // the animation
-            const animationState = frag.DigitalState(
-                frag.DigitalAction("animation", { animation }),
+            const animationState = engine.DigitalState(
+                engine.DigitalAction("animation", { animation }),
                 { isOn: true },
                 "animation running");
 
             // Use AnalogState and AnalogAction to allow the player to move the camera on the z-axis
-            const cameraZoomState = frag.AnalogState(
-                frag.AnalogAction("move-camera-z"),
-                {   value: -120,
-                    minValue: -500,
-                    maxValue: 0,
-                    maxVelocity: 20,
-                    acceleration: 0.5,
-                    deceleration: 2,
-                },
-                "camera zoom");
+            const cameraZoomState = engine.AnalogState(
+                engine.AnalogAction(
+                    "move-camera-z"),
+                    {   value: -120,
+                        minValue: -500,
+                        maxValue: 0,
+                        maxVelocity: 20,
+                        acceleration: 0.5,
+                        deceleration: 2,
+                    },
+                    "camera zoom");
 
             // Use AnalogState and AnalogAction to allow the player to move the camera on the x-axis
-            const cameraPanXState = frag.AnalogState(
-                frag.AnalogAction("move-camera-x"),
+            const cameraPanXState = engine.AnalogState(
+                engine.AnalogAction("move-camera-x"),
                 {   minValue: 100,
                     maxValue: -100,
                 },
                 "camera pan X");
 
             // Use AnalogState and AnalogAction to allow the player to move the camera on the y-axis
-            const cameraPanYState = frag.AnalogState(
-                frag.AnalogAction("move-camera-y"),
+            const cameraPanYState = engine.AnalogState(
+                engine.AnalogAction("move-camera-y"),
                 {   minValue: 100,
                     maxValue: -100,
                 },
                 "camera pan Y");
 
             // Use AnalogState and AnalogAction to allow the player to rotate the camera around the z-axis
-            const cameraRotateState = frag.AnalogState(
-                frag.AnalogAction("rotate-camera-z"),
+            const cameraRotateState = engine.AnalogState(
+                engine.AnalogAction("rotate-camera-z"),
                 {   minValue: -Math.PI / 2,
                     maxValue: Math.PI / 2,
                 },
@@ -261,28 +267,28 @@
             // You should consider providing a UI that allows the player to customize the input
             // bindings to match their device hardware and playing style.
 
-            const inputs = frag.InputMethod()
-                .add(frag.DigitalInput("middle-mouse", wireframeState))
-                .add(frag.DigitalInput("right-mouse", normalsState))
-                .add(frag.DigitalInput("ctrl-a-key", customState))
-                .add(frag.DigitalInput("q-key-toggle", excavatorVisibilityState))
-                .add(frag.DigitalInput("e-key-toggle", bucketVisibilityState))
-                .add(frag.DigitalInput("r-key-toggle", animationState))
-                .add(frag.DigitalInput("t-key-inverted", animationState))
-                .add(frag.DigitalInput("y-key-off", animationState))
-                .add(frag.DigitalInput("u-key-on", animationState));
+            const inputs = engine.InputMethod()
+                .add(engine.DigitalInput("middle-mouse", wireframeState))
+                .add(engine.DigitalInput("right-mouse", normalsState))
+                .add(engine.DigitalInput("ctrl-a-key", customState))
+                .add(engine.DigitalInput("q-key-toggle", excavatorVisibilityState))
+                .add(engine.DigitalInput("e-key-toggle", bucketVisibilityState))
+                .add(engine.DigitalInput("r-key-toggle", animationState))
+                .add(engine.DigitalInput("t-key-inverted", animationState))
+                .add(engine.DigitalInput("y-key-off", animationState))
+                .add(engine.DigitalInput("u-key-on", animationState));
             inputs
-                .add(frag.AnalogInput("mouse-wheel", cameraZoomState))
-                .add(frag.AnalogInput("left-mouse-horizontal", cameraPanXState))
-                .add(frag.AnalogInput("left-mouse-vertical", cameraPanYState))
-                .add(frag.AnalogInput("touch-pinch", cameraZoomState))
-                .add(frag.AnalogInput("touch-rotate", cameraRotateState))
-                .add(frag.AnalogInput("1-plus-touch-horizontal", cameraPanXState))
-                .add(frag.AnalogInput("1-plus-touch-vertical", cameraPanYState))
-                .add(frag.AnalogInput("keys-a-d", cameraPanXState))
-                .add(frag.AnalogInput("keys-s-w", cameraPanYState))
-                .add(frag.AnalogInput("gamepad-horizontal", cameraPanXState))
-                .add(frag.AnalogInput("gamepad-vertical", cameraPanYState));
+                .add(engine.AnalogInput("mouse-wheel", cameraZoomState))
+                .add(engine.AnalogInput("left-mouse-horizontal", cameraPanXState))
+                .add(engine.AnalogInput("left-mouse-vertical", cameraPanYState))
+                .add(engine.AnalogInput("touch-pinch", cameraZoomState))
+                .add(engine.AnalogInput("touch-rotate", cameraRotateState))
+                .add(engine.AnalogInput("1-plus-touch-horizontal", cameraPanXState))
+                .add(engine.AnalogInput("1-plus-touch-vertical", cameraPanYState))
+                .add(engine.AnalogInput("keys-a-d", cameraPanXState))
+                .add(engine.AnalogInput("keys-s-w", cameraPanYState))
+                .add(engine.AnalogInput("gamepad-horizontal", cameraPanXState))
+                .add(engine.AnalogInput("gamepad-vertical", cameraPanYState));
 
             // Bind all inputs to event listeners
             inputs.enable();
@@ -306,7 +312,7 @@
 
             // The font object can construct models whose mesh is a text string
             const fpsModel = fpsFont.buildTextModel("Unknown fps");
-            const fpsObject = frag.SceneObject(fpsModel);
+            const fpsObject = engine.SceneObject(fpsModel);
 
             // We can manipulate this scene object just like any other model
             fpsObject.getPosition()
@@ -315,9 +321,9 @@
             scene.addObject(fpsObject);
 
             // The text in font models can be updated
-            frag.Animation()
+            engine.Animation()
                 .repeatTicks(() => {
-                    fpsFont.updateTextModel(fpsModel, Math.floor(frag.fps) + 'fps');
+                    fpsFont.updateTextModel(fpsModel, Math.floor(engine.fps) + 'fps');
                 }, 50)
                 .start();
 
@@ -332,12 +338,12 @@
                 "Q=show/hide model E=show/hide bucket R=pause/play T=freeze Y=stop U=play ASDW=pan camera");
             const helpLine2Model = helpFont.buildTextModel(
                 "Drag mouse to pan. Right click for normals. Middle click for wireframe. Scroll to zoom.");
-            const helpLine1Object = frag.SceneObject(helpLine1Model);
+            const helpLine1Object = engine.SceneObject(helpLine1Model);
             helpLine1Object.getPosition()
                 .scale(0.1)
                 .moveByXYZ(-70, -40, -70);
             scene.addObject(helpLine1Object);
-            const helpLine2Object = frag.SceneObject(helpLine2Model);
+            const helpLine2Object = engine.SceneObject(helpLine2Model);
             helpLine2Object.getPosition()
                 .scale(0.1)
                 .moveByXYZ(-70, -45, -70);
@@ -352,7 +358,7 @@
 
         // This shader will be used to draw models imported from the package. If you
         // don't pass a shader to the asset catalog then it will use a default shader
-        shader = frag.Shader()
+        shader = engine.Shader()
             .name("Model")
             .diffuseTexture()
             .directionalLightGrey()
@@ -361,13 +367,13 @@
 
         // An asset catalog contains named materials, fonts and models. We will load models
         // into the catalog but define the materials manually for this example
-        const assetCatalog = frag.AssetCatalog(shader);
+        const assetCatalog = engine.AssetCatalog(shader);
 
         // Helper function to set a named material to a 1x1 pixel diffuse texture.
         // Note that texture bitmaps use values 0..255 for the pixels
         const singleColorMaterial = function(name, rgb) {
-            texture = frag.Texture()
-                .dataFormat(frag.gl.RGB)
+            texture = engine.Texture()
+                .dataFormat(engine.gl.RGB)
                 .fromArrayBuffer(0, new Uint8Array(rgb), 0, 1, 1);
             assetCatalog.getMaterial(name)
                 .setTexture('diffuse', texture);
@@ -382,11 +388,12 @@
         singleColorMaterial("Rubber", [120, 90, 90]);
 
         // We need to load the version of the package with the correct endiness
-        const packageUrl = frag.PackageLoader.littleEndian ? 'assets/models_little.pkg' : 'assets/models_big.pkg';
+        const packageLoader = engine.PackageLoader();
+        const packageUrl = packageLoader.littleEndian ? 'assets/models_little.pkg' : 'assets/models_big.pkg';
 
         // Download the model package and add the models in it to the asset catalog
         // When loading completes, the assetsLoaded() function will be called
-        frag.PackageLoader.loadFromUrl(packageUrl, assetCatalog, assetsLoaded)
+        packageLoader.loadFromUrl(packageUrl, assetCatalog, assetsLoaded)
 
     </script>
 </body>

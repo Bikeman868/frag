@@ -15,20 +15,19 @@ This is an example of moving an object along the Y axis and rotating it around
 the Z axis at the same time, then rotating it about the X axis.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const obj = frag.SceneObject(model);
+const model = engine.Model();
+const obj = engine.SceneObject(model);
 const pos = obj.getPosition();
 
-const animation = frag.Animation()
+const animation = engine.Animation()
   .sequence([
-    frag.ParallelAnimationAction([
-      frag.ValueAnimationAction().onStep((a, r) => { pos.rotateZ(r * Math.PI); }),
-      frag.ValueAnimationAction().onStep((a, r) => { pos.locationY(r * 100); })
+    engine.ParallelAnimationAction([
+      engine.ValueAnimationAction().onStep((a, r) => { pos.rotateZ(r * Math.PI); }),
+      engine.ValueAnimationAction().onStep((a, r) => { pos.locationY(r * 100); })
     ]),
-    frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
+    engine.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
   ]);
 ```
 
@@ -36,19 +35,19 @@ Note that you should not need the `ParallelAnimationAction` very often. The
 example above can be rewritten more efficiently as:
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const obj = frag.SceneObject(model);
+const model = engine.Model();
+const obj = engine.SceneObject(model);
 const pos = obj.getPosition();
 
-const animation = frag.Animation()
+const animation = engine.Animation()
   .sequence([
-    frag.ValueAnimationAction().onStep((a, r) => { 
+    engine.ValueAnimationAction().onStep((a, r) => { 
       pos.rotateZ(r * Math.PI);
       pos.locationY(r * 100);
     }),
-    frag.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
+    engine.ValueAnimationAction().onStep((a, r) => { pos.rotateX(r * Math.PI); })
   ]);
 ```
 

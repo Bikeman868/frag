@@ -37,15 +37,13 @@ This is an example of creating a new scene and attaching a UI Camera
 to it.
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
-frag.init();
-
-const camera = frag.UiCamera()
+const camera = engine.UiCamera()
   .scaleX(100);
 
-const scene = frag.Scene()
+const scene = engine.Scene()
   .name('My scene')
   .camera(camera);
 ```

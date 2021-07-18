@@ -1,4 +1,4 @@
-window.frag.Observable = function (notify) {
+window.frag.Observable = function (engine, notify) {
     const private = {
         notify,
         observers: []
@@ -35,7 +35,7 @@ window.frag.Observable = function (notify) {
 
 window.frag.ObservableValue = function () {
     let value = null;
-    const observable = frag.Observable((fn) => { fn(value); });
+    const observable = frag.Observable(engine, (fn) => { fn(value); });
 
     const public = {};
 
@@ -60,7 +60,7 @@ window.frag.ObservableValue = function () {
 };
 
 /*
-const observedValue = window.frag.ObservableValue();
+const observedValue = window.frag.ObservableValue(engine);
 observedValue.set(42);
 
 let observer1 = function (v) { console.log("Observer 1 received " + v); }

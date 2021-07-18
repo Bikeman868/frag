@@ -21,17 +21,15 @@ This is an example of creating a new scene and attaching a Perspective
 Camera to it.
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
-frag.init();
-
-const camera = frag.PerspectiveCamera()
+const camera = engine.PerspectiveCamera()
   .frustrum(35 * degToRad, -100, 100)
   .scaleX(100)
   .moveToZ(-120);
 
-const scene = frag.Scene()
+const scene = engine.Scene()
   .camera(camera);
 ```
 

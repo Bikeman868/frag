@@ -1,8 +1,7 @@
-window.frag.createShader = function (name, type, source) {
-    const frag = window.frag;
-    const gl = frag.gl;
+window.frag.createShader = function (engine, name, type, source) {
+    const gl = engine.gl;
 
-    //if (frag.debugShaderBuilder) {
+    if (engine.debugShaderBuilder)
         console.log("\n// " + name + " " + (type === gl.VERTEX_SHADER ? "vertex" : "fragment") + " shader\n" + source);
 
     var shader = gl.createShader(type);
@@ -16,9 +15,8 @@ window.frag.createShader = function (name, type, source) {
     gl.deleteShader(shader);
 };
 
-window.frag.createProgram = function (name, vertexShader, fragmentShader) {
-    const frag = window.frag;
-    const gl = frag.gl;
+window.frag.createProgram = function (engine, name, vertexShader, fragmentShader) {
+    const gl = engine.gl;
 
     var program = gl.createProgram();
     gl.attachShader(program, vertexShader);
@@ -28,15 +26,18 @@ window.frag.createProgram = function (name, vertexShader, fragmentShader) {
     if (success) return program;
 
     console.error('Failed to link shaders into program ' + name);
-    console.log(frag.gl.getProgramInfoLog(program));
+    console.log(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
 };
 
-window.frag.CustomShader = function (is3d) {
+window.frag.CustomShader = function (engine, is3d) {
+    const frag = window.frag;
+    const gl = engine.gl;
+
     const private = {
         name: "Custom",
-        vSource: null,
-        fSource: null,
+        vertexShaderSource: null,
+        fragmentShaderSource: null,
         bindList: [],
         unbindList: [],
     };
@@ -58,12 +59,12 @@ window.frag.CustomShader = function (is3d) {
     }
 
     public.source = function (vertexShaderSource, fragmentShaderSource) {
-        private.vSource = vertexShaderSource;
-        private.fSource = fragmentShaderSource;
+        private.vertexShaderSource = vertexShaderSource;
+        private.fragmentShaderSource = fragmentShaderSource;
 
-        const vertexShader = frag.createShader(private.name, frag.gl.VERTEX_SHADER, vertexShaderSource);
-        const fragmentShader = frag.createShader(private.name, frag.gl.FRAGMENT_SHADER, fragmentShaderSource);
-        public.program = frag.createProgram(private.name, vertexShader, fragmentShader);
+        const vertexShader = frag.createShader(engine, private.name, gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = frag.createShader(engine, private.name, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        public.program = frag.createProgram(engine, private.name, vertexShader, fragmentShader);
 
         return public;
     }
@@ -84,7 +85,7 @@ window.frag.CustomShader = function (is3d) {
             return public;
         }
 
-        const attribute = frag.gl.getAttribLocation(public.program, "a_" + name);
+        const attribute = gl.getAttribLocation(public.program, "a_" + name);
 
         if (attribute === undefined) {
             console.error("Shader program " + private.name + " does not have attribute a_" + name);
@@ -101,7 +102,7 @@ window.frag.CustomShader = function (is3d) {
             return public;
         }
 
-        const uniform = frag.gl.getUniformLocation(public.program, "u_" + name);
+        const uniform = gl.getUniformLocation(public.program, "u_" + name);
 
         if (!uniform) {
             console.error("Shader program " + private.name + " does not have uniform u_" + name);

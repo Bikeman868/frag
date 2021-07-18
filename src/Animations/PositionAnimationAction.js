@@ -1,5 +1,5 @@
 // Provides a mechanism to move an object in the scene at a specific speed
-window.frag.PositionAnimationAction = function (scenePosition, invLinearVelocity, invAngularVelocity) {
+window.frag.PositionAnimationAction = function (engine, scenePosition, invLinearVelocity, invAngularVelocity) {
     const frag = window.frag;
     const Vector = frag.Vector;
 

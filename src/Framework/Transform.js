@@ -1,7 +1,7 @@
 // This is a wrapper around a 4x4 matrix. It provides methods to operate on the matrix
 // and can appply the matrix to a shader for rendering. It also provides an observable
 // that you can subscribe to changes in the matrix
-window.frag.Transform = function (matrix) {
+window.frag.Transform = function (engine, matrix) {
     const frag = window.frag;
     const _ = 0;
 
@@ -11,12 +11,12 @@ window.frag.Transform = function (matrix) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable((o) => { o(private.matrix) }),
+        observableMatrix: window.frag.Observable(engine, (o) => { o(private.matrix) }),
         is3d: true,
     };
 
     public.clone = function (matrix) {
-        return window.frag.Transform(matrix || private.matrix);
+        return window.frag.Transform(engine, matrix || private.matrix);
     }
 
     public.getMatrix = function () {
@@ -202,9 +202,9 @@ window.tests.transform = {
         const result = window.frag.Matrix.m4Xv4(transform.getMatrix(), vector);
         window.tests.expectArray(name, expected, result);
     },
-    t1: window.frag.Transform().identity(),
-    t2: window.frag.Transform().scaleXYZ(2, 3, 4).translateXYZ(1, 2, 3),
-    t3: window.frag.Transform().translateXYZ(1, 2, 3).scaleXYZ(2, 3, 4),
+    t1: window.frag.Transform(engine).identity(),
+    t2: window.frag.Transform(engine).scaleXYZ(2, 3, 4).translateXYZ(1, 2, 3),
+    t3: window.frag.Transform(engine).translateXYZ(1, 2, 3).scaleXYZ(2, 3, 4),
 
     run: function (test) {
         test.check("Identity matrix", test.t1, [9, 13, 56, 1], [9, 13, 56, 1]);

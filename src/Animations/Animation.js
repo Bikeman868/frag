@@ -4,7 +4,7 @@
 // and it will be embelished with proprties and methods to make it into an animation.
 // This allows you to store custom fields relating to your animation and access them
 // within the animation steps.
-window.frag.Animation = function (obj, isChild) {
+window.frag.Animation = function (engine, obj, isChild) {
     const private = {
         stopAfter: 0,
         isRunning: false
@@ -49,7 +49,7 @@ window.frag.Animation = function (obj, isChild) {
                 let step = private.sequence[private.sequenceIndex];
                 if (step.stop) step.stop(public, gameTick);
             }
-            window.frag.deactivateAnimation(public);
+            engine.deactivateAnimation(public);
             if (private.disposeOnStop) public.dispose();
             private.isRunning = false;
             return;
@@ -128,7 +128,7 @@ window.frag.Animation = function (obj, isChild) {
         delete private.nextStepTick;
         delete private.stopAfter;
         delete private.stopAt;
-        window.frag.activateAnimation(public);
+        engine.activateAnimation(public);
         private.isRunning = true;
         return public;
     }
@@ -174,10 +174,10 @@ window.frag.Animation = function (obj, isChild) {
         private.disposeOnStop = dispose;
     }
 
-    if (!isChild) window.frag.addAnimation(public);
+    if (!isChild) engine.addAnimation(public);
 
     public.dispose = function () {
-        window.frag.removeAnimation(public);
+        engine.removeAnimation(public);
     }
 
     return public;

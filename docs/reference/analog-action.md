@@ -18,10 +18,10 @@ The following example moves the active camera in the main scene along
 the z-axis using the scroll wheel on the mouse:
 
 ```javascript
-const frag = window.frag;
-const cameraActionZ = frag.AnalogAction("move-camera-z");
-const cameraZoomState = frag.AnalogState(cameraActionZ);
-const wheelInput = frag.AnalogInput("mouse-wheel", cameraZoomState);
+const engine = window.frag.Engine().start();
+const cameraActionZ = engine.AnalogAction("move-camera-z");
+const cameraZoomState = engine.AnalogState(cameraActionZ);
+const wheelInput = engine.AnalogInput("mouse-wheel", cameraZoomState);
 wheelInput.enable();
 ```
 

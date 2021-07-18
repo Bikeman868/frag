@@ -10,12 +10,11 @@ This is an example of creating a new texture and assigning it to
 a material as the 'emmissive' characteristic of the model surface.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const texture = frag.Texture()
+const texture = engine.Texture()
   .name('My emmissive texture')
-  .dataFormat(frag.gl.RGB)
+  .dataFormat(engine.gl.RGB)
   fromUrl(0, 'emmissive_64x64.jpg')
   fromUrl(1, 'emmissive_32x32.jpg')
   fromUrl(2, 'emmissive_16x16.jpg')
@@ -24,7 +23,7 @@ const texture = frag.Texture()
   fromUrl(5, 'emmissive_2x2.jpg')
   fromUrl(6, 'emmissive_1x1.jpg');
 
-const material = frag.Material()
+const material = engine.Material()
   .setTexture("emmissive", texture);
 ```
 
@@ -64,11 +63,11 @@ but consumes more memory on the graphics card.
 The values of the format parameter are defined by WebGL. The supported
 options are:
 
-* `frag.gl.RGBA` this is the default. Uses 4 bytes per pixel.
-* `frag.gl.RGB` uses 3 bytes per pixel. The alpha component will always be fully opaque.
-* `frag.gl.LUMINANCE_ALPHA` uses 2 bytes per pixel for brightness and transparency.
-* `frag.gl.LUMINANCE` uses 1 bytes per pixel for brightness only.
-* `frag.gl.ALPHA` uses 1 bytes per pixel for transparency only.
+* `engine.gl.RGBA` this is the default. Uses 4 bytes per pixel.
+* `engine.gl.RGB` uses 3 bytes per pixel. The alpha component will always be fully opaque.
+* `engine.gl.LUMINANCE_ALPHA` uses 2 bytes per pixel for brightness and transparency.
+* `engine.gl.LUMINANCE` uses 1 bytes per pixel for brightness only.
+* `engine.gl.ALPHA` uses 1 bytes per pixel for transparency only.
 
 ## fromArrayBuffer(level: int, buffer: ArrayBuffer, offset: int, width: int, height: int)
 Allows you to supply bitmap data in an array. You can construct the array
@@ -93,8 +92,8 @@ const green = 89;
 const blue = 54;
 const pixelData = new Uint8Array([red, green, blue]);
 
-const texture = window.frag.Texture()
-  .dataFormat(window.frag.gl.RGB)
+const texture = engine.Texture()
+  .dataFormat(engine.gl.RGB)
   .fromArrayBuffer(level, pixelData, 0, width, height);
 ```
 

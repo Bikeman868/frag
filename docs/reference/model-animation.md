@@ -35,24 +35,23 @@ can define ans test them in Blender NLA Strips and they will be imported when
 you import the model from Blender.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
 // Set these up any way you want
-const scene = frag.Scene();
-const carMaterial = frag.Material();
-const wheelMaterial = frag.Material();
-const shader = frag.Shader().compile();
+const scene = engine.Scene();
+const carMaterial = engine.Material();
+const wheelMaterial = engine.Material();
+const shader = engine.Shader().compile();
 
 // Use a simple cube mesh for the car body
-const carBodyMesh = frag.Cube(1).name("car body");
+const carBodyMesh = engine.Cube(1).name("car body");
 
 // Use a simple cylinder mesh for a wheel
-const carWheelMesh = frag.Cylinder(6).name("car wheel");
+const carWheelMesh = engine.Cylinder(6).name("car wheel");
 
 // The car model is just a placeholder for the position of the
 // car in the scene. It has no mesh and draws nothing to the viewport
-const carModel = frag.Model()
+const carModel = engine.Model()
     .name('car')
     .shader(shader);
 
@@ -96,7 +95,7 @@ carModel.addChild()
         .scaleXYZ(4, 4, 1));
 
 // Define a "moving" animation that turns all of the wheels and add this to the car model
-const wheelTurning = frag.ModelAnimation()
+const wheelTurning = engine.ModelAnimation()
     .name("moving")
     .loop(true)
     .frames(50)
@@ -113,7 +112,7 @@ carModel.addAnimation(wheelTurning);
 
 // Define a "bump" animation that makes the car go over a bump in the road
 // Note that the front and back wheels go over the bump at different times
-const wheelBumping = frag.ModelAnimation()
+const wheelBumping = engine.ModelAnimation()
     .name("bump")
     .loop(false)
     .frames(20)
@@ -139,7 +138,7 @@ wheelBumping.addChannel({
 carModel.addAnimation(wheelBumping);
 
 // Create a car based on the car model and add it to the scene
-const car = frag.SceneObject(carModel);
+const car = engine.SceneObject(carModel);
 car.getPosition().moveBy(-25, 25, 0).rotateY(40 * degToRad);
 scene.addObject(car);
 

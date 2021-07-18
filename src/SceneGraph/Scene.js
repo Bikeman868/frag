@@ -3,7 +3,7 @@
 // the same viewport, but only one of these scenes should set the viewport and the rest
 // should adjust to the viewport.
 
-window.frag.Scene = function() {
+window.frag.Scene = function(engine) {
     const private = {
         sceneObjects: [],
         activeCamera: null

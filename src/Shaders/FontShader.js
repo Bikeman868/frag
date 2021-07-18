@@ -1,4 +1,6 @@
-window.frag.startFunctions.push(function(frag) {
+window.frag.FontShader = function(engine) {
+    if (engine.fontShader) return engine.fontShader;
+    
     const vertexShader = 
         "attribute vec4 a_position;\n" +
         "attribute vec2 a_texcoord;\n" +
@@ -19,8 +21,7 @@ window.frag.startFunctions.push(function(frag) {
         "  vec4 texture = texture2D(u_diffuse, vec2(v_texcoord.x, 1.0 - v_texcoord.y));\n" +
         "  gl_FragColor = mix(u_bgcolor, u_fgcolor, length(texture.rgb));\n" +
         "}\n";
-    
-    frag.fontShader = frag.CustomShader()
+    engine.fontShader = frag.CustomShader(engine)
         .name("Font")
         .source(vertexShader, fragmentShader)
         .attribute("position")
@@ -29,4 +30,5 @@ window.frag.startFunctions.push(function(frag) {
         .uniform("bgcolor", "4fv", [1, 1, 1, 1])
         .uniform("fgcolor", "4fv", [0, 0, 0, 1])
         .uniform("diffuse");
-});
+    return engine.fontShader;
+}

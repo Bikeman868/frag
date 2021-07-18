@@ -1,5 +1,5 @@
 // Applies mesh smoothing and calculates normals and binormals where required
-window.frag.MeshOptimizer = function () {
+window.frag.MeshOptimizer = function (engine) {
     const frag = window.frag;
 
     const private = {
@@ -46,19 +46,20 @@ window.frag.MeshOptimizer = function () {
                         const uvB = vertexData.getUvVector(b);
                         const uvC = vertexData.getUvVector(c);
 
-                        const deltaPos1 = frag.Vector.sub(vectorB, vectorA);
-                        const deltaPos2 = frag.Vector.sub(vectorC, vectorA);
-                        const deltaUv1 = frag.Vector.sub(uvB, uvA);
-                        const deltaUv2 = frag.Vector.sub(uvC, uvA);
+                        const Vector = frag.Vector;
+                        const deltaPos1 = Vector.sub(vectorB, vectorA);
+                        const deltaPos2 = Vector.sub(vectorC, vectorA);
+                        const deltaUv1 = Vector.sub(uvB, uvA);
+                        const deltaUv2 = Vector.sub(uvC, uvA);
 
                         const r = deltaUv1[0] * deltaUv2[1] - deltaUv1[1] * deltaUv2[0];
                         if (r === 0) {
-                            fragmentTriangle.tangent = frag.Vector.zero(vertexData.normalDimensions);
-                            fragmentTriangle.bitangent = frag.Vector.zero(vertexData.normalDimensions);
+                            fragmentTriangle.tangent = Vector.zero(vertexData.normalDimensions);
+                            fragmentTriangle.bitangent = Vector.zero(vertexData.normalDimensions);
                         } else {
                             const ri = 1 / r;
-                            fragmentTriangle.tangent = frag.Vector.normalize(frag.Vector.mult(frag.Vector.sub(frag.Vector.mult(deltaPos1, deltaUv2[1]), frag.Vector.mult(deltaPos2, deltaUv1[1])), ri));
-                            fragmentTriangle.bitangent = frag.Vector.normalize(frag.Vector.mult(frag.Vector.sub(frag.Vector.mult(deltaPos2, deltaUv1[0]), frag.Vector.mult(deltaPos1, deltaUv2[0])), ri));
+                            fragmentTriangle.tangent = Vector.normalize(Vector.mult(Vector.sub(Vector.mult(deltaPos1, deltaUv2[1]), Vector.mult(deltaPos2, deltaUv1[1])), ri));
+                            fragmentTriangle.bitangent = Vector.normalize(Vector.mult(Vector.sub(Vector.mult(deltaPos2, deltaUv1[0]), Vector.mult(deltaPos1, deltaUv2[0])), ri));
                         }
                     }
 

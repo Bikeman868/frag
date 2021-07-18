@@ -1,5 +1,5 @@
 // Defines an animation that can be applied to scene objects based on a particular model
-window.frag.ModelAnimation = function () {
+window.frag.ModelAnimation = function (engine) {
     const private = {
         loop: false,
         interval: 10,

@@ -26,24 +26,25 @@
     <script src='frag.min.js'></script>
     <script>
         const frag = window.frag;
-        frag.config = function(frag) {
-            frag.gl.disable(frag.gl.CULL_FACE); // We want to be able to see the back of the wings
-        }
-        frag.init();
+        const engine = frag.Engine();
+        engine.onStart((engine) => {
+            engine.gl.disable(engine.gl.CULL_FACE); // We want to be able to see the back of the wings
+        });
+        engine.start();
 
         const degToRad = Math.PI / 180;
 
-        const camera = frag.PerspectiveCamera()
+        const camera = frag.PerspectiveCamera(engine)
             .frustrum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 
-        const scene = frag.Scene()
+        const scene = frag.Scene(engine)
             .camera(camera);
 
-        frag.mainScene(scene);
+        engine.mainScene(scene);
 
-        const shader = frag.Shader()
+        const shader = frag.Shader(engine)
             .name("My shader")
             .diffuseTexture()
             .directionalLightGrey()
@@ -74,14 +75,14 @@
             1,   0.35,
             0.3,    0
         ];
-        const wingMesh = frag.MeshData()
+        const wingMesh = frag.MeshData(engine)
             .name('Wing')
             .shadeSmooth()
             .addTriangleFan(wingVerticies, wingColors, wingUVs);
 
         // Create animations that flaps the wings
 
-        const fastFlyingAnimation = frag.ModelAnimation()
+        const fastFlyingAnimation = frag.ModelAnimation(engine)
             .name("flying")
             .loop(true)
             .frames(30)
@@ -105,7 +106,7 @@
             }
         });
 
-        const slowFlyingAnimation = frag.ModelAnimation()
+        const slowFlyingAnimation = frag.ModelAnimation(engine)
             .name("flying")
             .loop(true)
             .frames(30)
@@ -144,14 +145,14 @@
 
             // Create a 1x1 pixel texture using this color
 
-            const diffuseTexture = frag.Texture()
+            const diffuseTexture = frag.Texture(engine)
                 .name("Texture " + id)
-                .dataFormat(window.frag.gl.RGB)
+                .dataFormat(engine.gl.RGB)
                 .fromArrayBuffer(0, new Uint8Array([red, green, blue]), 0, 1, 1);
 
             // Create a material that has this diffuse texture
 
-            const butterflyMaterial = frag.Material()
+            const butterflyMaterial = frag.Material(engine)
                 .name("Material " + id)
                 .setTexture("diffuse", diffuseTexture)
                 .disposeTextures(true);
@@ -160,7 +161,7 @@
 
             const wingLength = randomFloat(0.5, 0.7);
 
-            const butterflyModel = frag.Model()
+            const butterflyModel = frag.Model(engine)
                 .name('Butterfly ' + id)
                 .material(butterflyMaterial)
                 .shader(shader);
@@ -204,7 +205,7 @@
             const butterflyModel = butterflyModels[randomInt(butterflyModels.length)];
 
             // Create an instance of the model
-            const butterfly = frag.SceneObject(butterflyModel);
+            const butterfly = frag.SceneObject(engine, butterflyModel);
 
             // Place the butterfly in a random size, position and orientation
             butterfly.getPosition()
@@ -280,7 +281,7 @@
 
         // Move all of the butterflies that are flying
 
-        const movingAnimation = frag.Animation()
+        const movingAnimation = frag.Animation(engine)
             .repeatTicks(function () {
                 for (const id in butterflies) {
                     butterflies[id].moveForwards();

@@ -15,28 +15,28 @@ The following example starts a weapon firing animation when the 'A' key is
 pressed down and stops the animation when the key is released:
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 
 // This is just to illustrate the types of object you need. In an actual game
 // you would need to construct a model and an animation that did something.
-const firingAnimation = frag.ModelAnimation().name("firing");
-const weaponModel = frag.Model().addAnimation(firingAnimation);
-const weapon = frag.SceneObject(weaponModel);
+const firingAnimation = engine.ModelAnimation().name("firing");
+const weaponModel = engine.Model().addAnimation(firingAnimation);
+const weapon = engine.SceneObject(weaponModel);
 
 // Define an input action that turns the animation on and off. When the
 // digital state is "on" the animation will be running and when the digital
 // state os "off" the animation will be stopped
-const weaponFiringAction = frag.DigitalAction("animation", { animation: weapon.animations.firing });
+const weaponFiringAction = engine.DigitalAction("animation", { animation: weapon.animations.firing });
 
 // Define an on/off state that triggers the weapon firing action on changes.
 // Note that you can also pass an array of actions to have mutliple things
 // happen when the state changes.
-const weaponFiringState = frag.DigitalState(weaponFiringAction);
+const weaponFiringState = engine.DigitalState(weaponFiringAction);
 
 // Bind the 'A' key to the weapon firing state. When the key is pressed down 
 // the digital state will be set to "on" and when the key is released the digital 
 // state will be set to "off".
-frag.DigitalInput("a-key", weaponFiringState).enable();
+engine.DigitalInput("a-key", weaponFiringState).enable();
 ```
 
 The reason that the code is broken up into these 3 pieces is so that

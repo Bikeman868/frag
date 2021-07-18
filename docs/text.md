@@ -22,7 +22,7 @@ These are the steps you need to code to achieve this:
   character in your bitmap.
 * Add one or more fonts to your asset packages and download the packages into your
   game. See [packaging](packaging.md) for more details on how to do this.
-* Create a font with the `window.frag.Font()` function and use fliud syntax to configure 
+* Create a font with the `window.frag.Font(engine)` function and use fliud syntax to configure 
   it, or retrieve a font that was downloaded into an asset catalog.
 * The font is basically a mesh factory and a material. It can produce models that
   render a line of text in the specified font.
@@ -52,14 +52,14 @@ const font = assetCatalog.getFont("Arial")
     .kerning(true)
     .letterSpacing(2);
 const fpsModel = font.buildTextModel("Hello, world");
-const fpsText = frag.SceneObject(fpsModel);
+const fpsText = engine.SceneObject(fpsModel);
 fpsText.getPosition()
     .scale(0.5)
     .moveByXYZ(-70, 40, -70);
 scene.addObject(fpsText);
-frag.Animation()
+engine.Animation()
     .repeatTicks(() => {
-        font.updateTextModel(fpsModel, Math.floor(frag.fps) + 'fps');
+        font.updateTextModel(fpsModel, Math.floor(engine.fps) + 'fps');
     }, 50)
     .start();
 ```

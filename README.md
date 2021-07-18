@@ -125,8 +125,12 @@ Here are some scenes that illustrate how to use Frag.
 
 ## Hello cube
 This is a very simple scene that displays a spining cube with a texture painted on it.
+This might look like quite a big of code but half of it is comments. They are there
+for your benefit.
 
 There are other samples for you to explore in the [samples folder](./samples)
+
+More detailed documentation can be found in the [docs folder](./docs)
 
 ```html
 <!DOCTYPE html>
@@ -156,35 +160,47 @@ There are other samples for you to explore in the [samples folder](./samples)
     <canvas id='scene'></canvas>
     <script src='frag.min.js'></script>
     <script>
-        const frag = window.frag;
-
-        // The default behavior is to look for an element with am id of "scene" so this
-        // code is redundent, but shows how you would do it if your canvas is identified
+        // In every game we must first create a game engine and attach it to a canvas
+        // in our html. The default behavior is to look for an element with an id of 
+        // "scene" so we could have called the Engine() function with no parameters, 
+        // but this sample shows how you would do it if your canvas is identified
         // some other way
-        frag.canvas = document.getElementById("scene");
+        const frag = window.frag;
+        const engine = frag.Engine({
+            canvas: document.getElementById("scene")
+        })
+        .onStart((engine) =>
+        {
+            engine.gl.clearColor(1, 1, 1, 1);
+        });
 
-        // After configuring frag you need to call the `init()` function to get things going.
-        frag.init();
+        // You can start your engine running right away, or you can set up your scene
+        // first then start the engine. In this example we are going to start it up now
+        engine.start();
 
         const degToRad = Math.PI / 180;
 
         // The perspective camera makes objects further from the camera look smaller
-        const camera = frag.PerspectiveCamera()
+        const camera = frag.PerspectiveCamera(engine)
             .frustrum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 
         // We always need at least one scene
-        const scene = frag.Scene()
+        const scene = frag.Scene(engine)
             .camera(camera);
 
         // The camera attached to the main scene defines the size of the
         // viewport. Other scenes will adapt their size to size of the viewport
-        frag.mainScene(scene);
+        engine.mainScene(scene);
 
-        // We need a shader to draw onto the screen. The more features you
-        // enable the lower the frame rate will be for your game
-        const shader = frag.Shader()
+        // The shader is responsible for turning meshes and textures into pixels
+        // on the screen. This example uses the shader builder, but you can also
+        // create custom shaders that implement special effects. The shader
+        // builder lets you choose the features you want then builds a shader
+        // with those features. The more features you enable the lower the frame
+        // rate will be for your game. Shaders run on the gpaphics card GPU.
+        const shader = frag.Shader(engine)
             .name("My shader")
             .diffuseTexture()
             .directionalLightGrey()
@@ -194,15 +210,15 @@ There are other samples for you to explore in the [samples folder](./samples)
         // using larger textures will have dramatic impact on the performance of 
         // your game, so you will have to compromise on visuals to target lower 
         // performance devices
-        const texture = frag.Texture()
+        const texture = frag.Texture(engine)
             .name('My texture')
-            .dataFormat(frag.gl.RGB)
+            .dataFormat(engine.gl.RGB)
             .fromUrl(0, 'https://images.pexels.com/photos/122458/pexels-photo-122458.jpeg?auto=compress&cs=tinysrgb&h=512&w=512', '');
 
         // For this simple example the material only has a diffuse texture. You
         // can add more realism by adding other types of texture but these will
         // consume memory on the graphics card and reduce the frame rate
-        const material = frag.Material()
+        const material = frag.Material(engine)
             .name('My material')
             .setTexture('diffuse', texture);
 
@@ -210,6 +226,7 @@ There are other samples for you to explore in the [samples folder](./samples)
         // for demo and getting started, but you probably wont use them
         // much in your game. The recommended tool for drawing meshes is Blender.
         const mesh = frag.Cube(
+            engine,
             8, { 
                 duplicateTexture: true 
             })
@@ -221,7 +238,7 @@ There are other samples for you to explore in the [samples folder](./samples)
         // - A mesh defines the shape of the model
         // - A material defines how to paint the surface of the model
         // - A shader defines how to turn the other things into pixels
-        const model = frag.Model()
+        const model = frag.Model(engine)
             .name('My model')
             .mesh(mesh)
             .material(material)
@@ -231,7 +248,7 @@ There are other samples for you to explore in the [samples folder](./samples)
         // that you need. Each instance can be independently moved,
         // rotated, scaled and animated but they all share the same
         // mesh, material and shader defined bu the model.
-        const cube = frag.SceneObject(model);
+        const cube = frag.SceneObject(engine, model);
         cube.getPosition().scale(40);
         scene.addObject(cube);
 
@@ -239,7 +256,7 @@ There are other samples for you to explore in the [samples folder](./samples)
         // keyframes and smooth transitions over time. Here we are
         // using the simplest animation technique of executing a
         // function at regular intervals
-        const spinningAnimation = frag.Animation()
+        const spinningAnimation = frag.Animation(engine)
             .repeatTicks(function () {
                 const position = cube.getPosition();
 

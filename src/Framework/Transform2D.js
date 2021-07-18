@@ -1,7 +1,7 @@
 // This is a wrapper around a 3x3 matrix. It provides methods to operate on the matrix
 // and can appply the matrix to a shader for rendering. It also provides an observable
 // that you can subscribe to changes in the matrix
-window.frag.Transform2D = function (matrix) {
+window.frag.Transform2D = function (engine, matrix) {
     const frag = window.frag;
     const _ = 0;
 
@@ -11,12 +11,12 @@ window.frag.Transform2D = function (matrix) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable((o) => { o(private.matrix) }),
+        observableMatrix: window.frag.Observable(engine, (o) => { o(private.matrix) }),
         is3d: false,
     };
 
     public.clone = function (matrix) {
-        return window.frag.Transform2D(matrix || private.matrix);
+        return window.frag.Transform2D(engine, matrix || private.matrix);
     }
 
     public.getMatrix = function () {

@@ -1,8 +1,8 @@
 // Represents a collection of mesh fragments where each
 // fragment is a collection of triangles
-window.frag.MeshData = function () {
+window.frag.MeshData = function (engine) {
     const frag = window.frag;
-    const gl = frag.gl;
+    const gl = engine.gl;
 
     const private = {
         glBuffer: gl.createBuffer(),
@@ -103,28 +103,28 @@ window.frag.MeshData = function () {
     }
 
     public.addTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
+        const vertexData = frag.VertexData(engine).setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
     public.addTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangles(verticies, colors, uvs, normals, tangents, bitangents);
+        const vertexData = frag.VertexData(engine).setTriangles(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
     public.addTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
+        const vertexData = frag.VertexData(engine).setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
     public.addTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData().setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
+        const vertexData = frag.VertexData(engine).setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
         return private.addFragment(vertexData);
     }
 
     public.fromBuffer = function (buffer, size, count, primitiveType, vertexDataOffset, colorDataOffset, uvDataOffset, normalDataOffset, tangentDataOffset, bitangentDataOffset)
     {
-        const vertexData = frag.VertexData();
+        const vertexData = frag.VertexData(engine);
         vertexData.vertexDimensions = size;
         vertexData.vertexCount = count;
         vertexData.primitiveType = primitiveType;
@@ -218,15 +218,15 @@ window.frag.MeshData = function () {
         });
 
         if (fragment.vertexData.vertexDimensions == 2)
-            newFragment.renderData = frag.VertexData().setLines2D(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines2D(verticies, colors, uvs, normals);
         else
-            newFragment.renderData = frag.VertexData().setLines(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines(verticies, colors, uvs, normals);
     }
 
     private.finalize = function () {
         private.finalized = true;
 
-        const optimizer = frag.MeshOptimizer()
+        const optimizer = frag.MeshOptimizer(engine)
             .setFragments(private.meshFragments)
             .initialize(private.smoothShading, private.smoothTexture);
 

@@ -39,7 +39,8 @@ a slower rate. If you have a complex scene running on a small device (like an
 older phone) then you should consider trading off some smoothness for some
 CPU/GPU cycles and turn down the frequency of the animation updates.
 
-The number of ms per game tick is in `window.frag.gameTickMs`.
+The number of ms per game tick is in `engine.gameTickMs` assuming you created
+your game engine with `const engine = window.frag.Engine();`.
 
 Don't use `setInterval` and `setTimeout` if you want the timing to be accurate and
 syncrhronized accross the whole game. The `Animation` class will ensure that

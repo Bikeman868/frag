@@ -1,4 +1,4 @@
-window.frag.Disc = function (facets, options) {
+window.frag.Disc = function (engine, facets, options) {
     facets = facets || 32;
     options = options || {};
 
@@ -25,5 +25,5 @@ window.frag.Disc = function (facets, options) {
         uvs.push((y + 1) * 0.5);
     }
 
-    return window.frag.MeshData().addTriangleFan(verticies, uvs, normals);
+    return window.frag.MeshData(engine).addTriangleFan(verticies, uvs, normals);
 };

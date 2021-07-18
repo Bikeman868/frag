@@ -52,7 +52,7 @@ move both butterfly wings together.
 ```javascript
 const wingLength = randomFloat(0.5, 0.7);
 
-const butterflyModel = frag.Model()
+const butterflyModel = engine.Model()
     .name('Butterfly ' + id)
     .material(butterflyMaterial)
     .shader(shader);
@@ -201,11 +201,11 @@ Here is an incomplete example that illustrates the relationship between the anim
 name and the `animations` property of `SceneObject`:
 
 ```javascript
-const modelAnimation = frag.ModelAnimation().name("running");
+const modelAnimation = engine.ModelAnimation().name("running");
 
-const model = frag.Model().addAnimation(modelAnimation);
+const model = engine.Model().addAnimation(modelAnimation);
 
-const sceneObject = frag.SceneObject(model);
+const sceneObject = engine.SceneObject(model);
 sceneObject.animations.running.start();
 
 ```

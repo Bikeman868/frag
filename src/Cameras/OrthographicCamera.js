@@ -1,7 +1,7 @@
 // This camera draws objects in their actual size regardless of how far from the camera they are.
 // The frustrum affects z clip space and XY scaling to the viewport but does not scale objects in the scene
 
-window.frag.OrthographicCamera = function () {
+window.frag.OrthographicCamera = function (engine) {
     const private = {
         x: 0,
         y: 0,
@@ -15,7 +15,7 @@ window.frag.OrthographicCamera = function () {
 
     const public = {
         __private: private,
-        worldToClipTransform: window.frag.Transform()
+        worldToClipTransform: window.frag.Transform(engine)
     };
 
     const computeTransformMatrix = function () {

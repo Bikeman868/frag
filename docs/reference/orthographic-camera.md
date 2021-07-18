@@ -20,17 +20,15 @@ This is an example of creating a new scene and attaching a Orthogrphic
 Camera to it.
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
-frag.init();
-
-const camera = frag.OrthographicCamera()
+const camera = engine.OrthographicCamera()
   .frustrum(35 * degToRad, -100, 100)
   .scaleX(100)
   .moveToZ(-200);
 
-const scene = frag.Scene()
+const scene = engine.Scene()
   .name('My scene')
   .camera(camera);
 ```

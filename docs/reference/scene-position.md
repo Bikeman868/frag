@@ -26,13 +26,12 @@ This is an example of getting a scene object's position and using that to scale 
 object to 40x its original size.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const scene = grag.Scene();
+const model = engine.Model();
+const scene = engine.Scene();
 
-const sceneObject = frag.SceneObject(model);
+const sceneObject = engine.SceneObject(model);
 sceneObject.getPosition().scale(40);
 scene.addObject(sceneObject);
 ```

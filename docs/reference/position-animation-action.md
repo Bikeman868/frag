@@ -27,26 +27,26 @@ the context in which this code runs.
 const invLinearVelocity = 1.5;
 const position = excavator.getPosition();
 
-const step1 = frag.PositionAnimationAction(position, invLinearVelocity)
+const step1 = engine.PositionAnimationAction(position, invLinearVelocity)
     .moveBy([-80, 0, 0])
     .onStart(excavator.animations.moving.start)
     .onStop(excavator.animations.moving.stop);
 
-const step2 = frag.RepeatAnimationAction(excavator.animations.excavating, 4)
+const step2 = engine.RepeatAnimationAction(excavator.animations.excavating, 4)
 
-const step3 = frag.PositionAnimationAction(position, invLinearVelocity)
+const step3 = engine.PositionAnimationAction(position, invLinearVelocity)
     .moveBy([100, 0, 0])
     .onStart(excavator.animations.moving.start)
     .onStop(excavator.animations.moving.stop);
 
 const step4 = excavator.animations.tipping;
 
-const step5 = frag.PositionAnimationAction(position, invLinearVelocity)
+const step5 = engine.PositionAnimationAction(position, invLinearVelocity)
     .moveBy([-20, 0, 0])
     .onStart(excavator.animations.moving.start)
     .onStop(excavator.animations.moving.stop);
 
-frag.Animation().sequence([step1, step2, step3, step4, step5], true)
+engine.Animation().sequence([step1, step2, step3, step4, step5], true)
     .start();
 ```
 

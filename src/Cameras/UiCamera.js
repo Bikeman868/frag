@@ -1,13 +1,13 @@
 // This public draws 2D shapes scaled to the width of the viewport.
 // It is designed to be used in conjunction with the UiShader which will project onto the front of the viewport.
 
-window.frag.UiCamera = function () {
+window.frag.UiCamera = function (engine) {
 
     const private = {
         aspectRatio: 1};
 
     const public = {
-        worldToClipTransform: window.frag.Transform2D().identity()
+        worldToClipTransform: window.frag.Transform2D(engine).identity()
     };
 
     public.scaleX = function (horizontalScale) {

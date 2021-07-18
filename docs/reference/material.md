@@ -11,10 +11,9 @@ this case you should take care to ensure that marerials are configures
 to not dispose of the textures.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const material = frag.Material()
+const material = engine.Material()
   .name('My material')
   .setTexture("diffuse", Texture().fromUrl(0, 'diffuse.jpg'))
   .setTexture("emmissive", Texture().fromUrl(0, 'emmissive.jpg')

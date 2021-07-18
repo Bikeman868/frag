@@ -14,15 +14,14 @@ and not the color, lighting or texture detail.
 This is an example of creating a new mesh and adding a triangle to it.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
 const vertices = [
   0, 0, 0, 
   1, 0, 0,
   1, 1, 0];
 
-const mesh = frag.MeshData()
+const mesh = engine.MeshData()
   .name('My mesh')
   .addTriangles(vertices);
 ```

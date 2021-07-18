@@ -1,6 +1,6 @@
-window.frag.VertexData = function() {
+window.frag.VertexData = function(engine) {
     const frag = window.frag;
-    const gl = frag.gl;
+    const gl = engine.gl;
 
     const private = {
     };
@@ -22,7 +22,7 @@ window.frag.VertexData = function() {
     };
 
     public.clone = function () {
-        const clone = frag.VertexData();
+        const clone = frag.VertexData(engine);
 
         clone.primitiveType = public.primitiveType;
         clone.vertexCount = public.vertexCount;

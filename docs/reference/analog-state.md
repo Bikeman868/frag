@@ -22,15 +22,15 @@ The following example moves the camera in and out of the scene when the mouse wh
 is scrolled:
 
 ```javascript
-const frag = window.frag;
+const engine = window.frag.Engine().start();
 
 // Define an action that sets the Z-axis position of the camera
-const cameraActionZ = frag.AnalogAction("move-camera-z");
+const cameraActionZ = engine.AnalogAction("move-camera-z");
 
 // Define an analog state to hold the current value of the camera
 // Z-axis position. Define the range of allowed values and how
 // quickly the value can change.
-const cameraZoomState = frag.AnalogState(
+const cameraZoomState = engine.AnalogState(
     cameraActionZ, 
     {   value: -200,
         minValue: -500,
@@ -43,7 +43,7 @@ const cameraZoomState = frag.AnalogState(
 
 // Define an analog input that converts movements of the mouse wheel
 // into changes in the analog state value
-const wheelInput = frag.AnalogInput("mouse-wheel", cameraZoomState);
+const wheelInput = engine.AnalogInput("mouse-wheel", cameraZoomState);
 
 // Bind the input to the mouse wheel
 wheelInput.enable();
@@ -92,5 +92,5 @@ any of the following optional properties:
 
 ## Name
 the `name` parameter is optional, and only useful during debugging. In particular if
-you assign `window.frag.debugInputs = true;` then the this name will be included in
+you assign `engine.debugInputs = true;` then the this name will be included in
 the console log to help you figure out issues with your input handling.

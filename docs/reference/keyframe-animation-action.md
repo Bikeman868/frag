@@ -24,12 +24,11 @@ Note that this example does not configure the model or the scene object, but
 focuses on the `KeyframeAnimationAction` class.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const objectA = frag.SceneObject(model);
-const objectB = frag.SceneObject(model);
+const model = engine.Model();
+const objectA = engine.SceneObject(model);
+const objectB = engine.SceneObject(model);
 
 const moveUp = function(frame, obj, tick){
   obj.getPosition().moveBy(0, 10, 0);
@@ -39,9 +38,9 @@ const moveDown = function(frame, obj, tick){
   obj.getPosition().moveBy(0, -10, 0);
 }
 
-const animation = frag.Animation()
+const animation = engine.Animation()
   .perform(
-    frag.KeyframeAnimationAction()
+    engine.KeyframeAnimationAction()
       .setFrames(5, 300)
       .add(0, moveUp, objectA)
       .add(50, moveUp, objectB)

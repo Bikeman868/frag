@@ -2,12 +2,11 @@ require("./Math/Vector");
 require("./Math/Triangle");
 require("./Math/Matrix");
 
-require("./Framework/Init");
 require("./Framework/Observable");
 require("./Framework/Transform");
 require("./Framework/Transform2D");
 require("./Framework/Location");
-require("./Framework/Framework");
+require("./Framework/Engine");
 
 require("./Shaders/CustomShader");
 require("./Shaders/Shader");
@@ -48,7 +47,6 @@ require("./Shapes/Plane");
 require("./Loaders/AssetCatalog");
 require("./Loaders/PackageLoader");
 
-require("./Input/HitTest");
 require("./Input/InputMethod");
 require("./Input/DigitalState");
 require("./Input/AnalogState");

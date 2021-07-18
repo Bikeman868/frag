@@ -1,5 +1,5 @@
 // This cube consists of a single sub-mesh so that smooth shading works correctly
-window.frag.Cube = function (facets, options) {
+window.frag.Cube = function (engine, facets, options) {
     options = options || {};
     if (options.drawFront === undefined) options.drawFront = true;
     if (options.drawBack === undefined) options.drawBack = true;
@@ -113,5 +113,5 @@ window.frag.Cube = function (facets, options) {
         if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.MeshData().addTriangles(verticies, colors, uvs);
+    return window.frag.MeshData(engine).addTriangles(verticies, colors, uvs);
 };

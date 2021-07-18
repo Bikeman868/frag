@@ -1,6 +1,6 @@
-window.frag.Font = function (_private, _instance) {
+window.frag.Font = function (engine, _private, _instance) {
     const frag = window.frag;
-    const gl = frag.gl;
+    const gl = engine.gl;
 
     const private = _private || {
         glTexture: null,
@@ -29,7 +29,7 @@ window.frag.Font = function (_private, _instance) {
 
     const public = {
         __private: private,
-        textureUnit: window.frag.allocateTextureUnit()
+        textureUnit: engine.allocateTextureUnit()
     };
 
     public.dispose = function () {
@@ -41,7 +41,7 @@ window.frag.Font = function (_private, _instance) {
     }
 
     public.clone = function () {
-        return window.frag.Font(private, instance);
+        return window.frag.Font(engine, private, instance);
     }
 
     public.name = function (value) {
@@ -263,7 +263,7 @@ window.frag.Font = function (_private, _instance) {
             x = drawChar(text[i], x);
         }
 
-        return frag.MeshData()
+        return frag.MeshData(engine)
             .addTriangles(verticies, undefined, uvs, normals)
             .shadeFlat()
             .textureFlat();
@@ -272,8 +272,8 @@ window.frag.Font = function (_private, _instance) {
     public.buildTextModel = function(text) {
         const mesh = public.buildTextMesh(text);
 
-        const model = frag.Model(true)
-            .shader(frag.fontShader)
+        const model = frag.Model(engine, true)
+            .shader(frag.FontShader(engine))
             .mesh(mesh)
             .material(public);
         return model;

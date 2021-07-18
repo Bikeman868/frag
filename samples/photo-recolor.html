@@ -26,16 +26,18 @@
     <canvas id='scene'></canvas>
     <script src='frag.min.js'></script>
     <script>
-        window.frag.config = function(frag) {
+        const frag = window.frag;
+        const engine = frag.Engine();
+        engine.onStart(function(engine) {
             // By default Frag clears the background to white. For our
             // mask we want this to be black instead. WebGL will still
             // render the web page with a white background.
-            frag.gl.clearColor(0, 0, 0, 1);
-        }
-        window.frag.init();
+            engine.gl.clearColor(0, 0, 0, 1);
+        });
+        engine.start();
 
         window.app = {};
-        window.app.photoShader = window.frag.CustomShader(false)
+        window.app.photoShader = window.frag.CustomShader(engine, false)
             .name("Photo")
             .source(
                 'attribute vec2 a_position;\n' +
@@ -104,7 +106,7 @@
             .uniform("clipMatrix")
             .uniform("color", "3fv", [0.5, 0.5, 0.5]);
         
-        window.app.maskShader = window.frag.CustomShader(false)
+        window.app.maskShader = window.frag.CustomShader(engine, false)
             .name("Mask")
             .source(
                 'attribute vec2 a_position;\n' +
@@ -129,59 +131,59 @@
             const frag = window.frag;
             const app = window.app;
             const image = app.image;
-            const gl = frag.gl;
+            const gl = engine.gl;
             const degToRad = Math.PI / 180;
 
             // Cameras and scenes
 
-            const camera = frag.UiCamera()
+            const camera = frag.UiCamera(engine)
                 .scaleX(100);
 
-            const mainScene = frag.Scene()
+            const mainScene = frag.Scene(engine)
                 .camera(camera);
 
-            frag.mainScene(mainScene);
+                engine.mainScene(mainScene);
 
             // Create a masking texture by rendering a scene onto the texture buffer
 
-            const maskScene = frag.Scene()
+            const maskScene = frag.Scene(engine)
                 .camera(camera);
 
-            const maskModel = frag.Model(false)
+            const maskModel = frag.Model(engine, false)
                 .name('mask')
-                .mesh(frag.Plane(1).name('mask'))
+                .mesh(frag.Plane(engine, 1).name('mask'))
                 .shader(app.maskShader);
 
-            const maskObject = frag.SceneObject(maskModel)
+            const maskObject = frag.SceneObject(engine, maskModel)
             maskScene.addObject(maskObject);
             maskObject.getPosition()
                 .scale(30);
 
-            const maskTexture = frag.Texture()
+            const maskTexture = frag.Texture(engine)
                 .name('mask')
                 .fromScene(maskScene, image.width, image.height);
             maskTexture.update();
 
             // Draw a photo recolored in the masked area
 
-            const photoTexture = frag.Texture()
+            const photoTexture = frag.Texture(engine)
                 .name('photo')
                 .dataFormat(gl.RGB)
                 .fromImage(0, image);
 
-            const photoMaterial = frag.Material()
+            const photoMaterial = frag.Material(engine)
                 .name('photo')
                 .setTexture('photo', photoTexture)
                 .setTexture('mask', maskTexture)
                 .disposeTextures(false);
 
-            const photoModel = frag.Model(false)
+            const photoModel = frag.Model(engine, false)
                 .name('photo')
-                .mesh(frag.Plane(1).name('photo'))
+                .mesh(frag.Plane(engine, 1).name('photo'))
                 .material(photoMaterial)
                 .shader(app.photoShader);
 
-            const photoObject = frag.SceneObject(photoModel)
+            const photoObject = frag.SceneObject(engine, photoModel)
             mainScene.addObject(photoObject);
 
             photoObject.getPosition()
@@ -204,7 +206,7 @@
                 position.rotateZ(rotation);
             }
 
-            frag.Animation()
+            frag.Animation(engine)
                 .repeatTicks(function () {
                     spinMask();
                     maskTexture.update();

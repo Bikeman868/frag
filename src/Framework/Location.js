@@ -1,5 +1,5 @@
 // Represents a location, scale and orientation
-window.frag.Location = function (is3d) {
+window.frag.Location = function (engine, is3d) {
     const public = {
         is3d,
         isModified: false,
@@ -16,7 +16,7 @@ window.frag.Location = function (is3d) {
     };
 
     public.clone = function() {
-        const clone = window.frag.Location(public.is3d);
+        const clone = window.frag.Location(engine, public.is3d);
         clone.isModified = public.isModified;
         clone.matrix = public.matrix;
         clone.translateX = public.translateX;
@@ -51,12 +51,12 @@ window.frag.Location = function (is3d) {
 
         let transform;
         if (public.is3d) {
-            transform = window.frag.Transform()
+            transform = window.frag.Transform(engine)
                 .translateXYZ(public.translateX, public.translateY, public.translateZ)
                 .rotateXYZ(public.rotateX, public.rotateY, public.rotateZ)
                 .scaleXYZ(public.scaleX, public.scaleY, public.scaleZ);
         } else {
-            transform = window.frag.Transform2D()
+            transform = window.frag.Transform2D(engine)
                 .translateXY(public.translateX, public.translateY)
                 .rotate(public.rotateZ)
                 .scaleXY(public.scaleX, public.scaleY);

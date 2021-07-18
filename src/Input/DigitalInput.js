@@ -1,5 +1,5 @@
 // Represents an input that can only be on or off. For example keyboard keys or mouse buttons
-window.frag.DigitalInput = function (inputName, digitalState) {
+window.frag.DigitalInput = function (engine, inputName, digitalState) {
     const frag = window.frag;
 
     const private = {
@@ -19,7 +19,7 @@ window.frag.DigitalInput = function (inputName, digitalState) {
 
     const setIsOn = function (evt, isOn) {
         if (private.inverted) isOn = !isOn;
-        if (frag.debugInputs) console.log("Digital input", private.inputName, "is", isOn ? "on" : "off");
+        if (engine.debugInputs) console.log("Digital input", private.inputName, "is", isOn ? "on" : "off");
         if (private.toggle) {
             if (isOn) private.digitalState.toggle(evt);
         } else {
@@ -60,13 +60,13 @@ window.frag.DigitalInput = function (inputName, digitalState) {
         }
 
         public.enable = function () {
-            frag.canvas.addEventListener("mousedown", handler, false);
-            frag.canvas.addEventListener("mouseup", handler, false);
+            engine.canvas.addEventListener("mousedown", handler, false);
+            engine.canvas.addEventListener("mouseup", handler, false);
         }
 
         public.disable = function () {
-            frag.canvas.removeEventListener("mousedown", handler, false);
-            frag.canvas.removeEventListener("mouseup", handler, false);
+            engine.canvas.removeEventListener("mousedown", handler, false);
+            engine.canvas.removeEventListener("mouseup", handler, false);
         }
 
         return public;
@@ -95,13 +95,13 @@ window.frag.DigitalInput = function (inputName, digitalState) {
         }
 
         public.enable = function () {
-            frag.canvas.addEventListener("pointerdown", handler, false);
-            frag.canvas.addEventListener("pointerup", handler, false);
+            engine.canvas.addEventListener("pointerdown", handler, false);
+            engine.canvas.addEventListener("pointerup", handler, false);
         }
 
         public.disable = function () {
-            frag.canvas.removeEventListener("pointerdown", handler, false);
-            frag.canvas.removeEventListener("pointerup", handler, false);
+            engine.canvas.removeEventListener("pointerdown", handler, false);
+            engine.canvas.removeEventListener("pointerup", handler, false);
         }
 
         return public;

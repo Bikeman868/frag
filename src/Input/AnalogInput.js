@@ -1,6 +1,6 @@
 // Represents an input that can be moved up and down in value. For example
 // the scroll wheel on the mouse or a joystick axis
-window.frag.AnalogInput = function(inputName, analogState) {
+window.frag.AnalogInput = function(engine, inputName, analogState) {
     const frag = window.frag;
 
     const private = {
@@ -37,17 +37,17 @@ window.frag.AnalogInput = function(inputName, analogState) {
 
         const moveHandler = function (evt) {
             if (buttons === 0) {
-                let fraction = vertical ? (frag.canvas.clientHeight - evt.clientY) / frag.canvas.clientHeight : evt.clientX / frag.canvas.clientWidth;
+                let fraction = vertical ? (engine.canvas.clientHeight - evt.clientY) / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
             } else if ((evt.buttons & buttons) !== 0) {
                 let fraction = vertical 
-                    ? (inverted ? (evt.clientY - downPosition) : (downPosition - evt.clientY)) / frag.canvas.clientHeight
-                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / frag.canvas.clientWidth;
+                    ? (inverted ? (evt.clientY - downPosition) : (downPosition - evt.clientY)) / engine.canvas.clientHeight
+                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
             }
             return true;
@@ -61,7 +61,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
         }
 
         const wheelHandler = function(evt) {
-            if (frag.debugInputs) console.log("Analog input", private.inputName, "delta", evt.deltaY);
+            if (engine.debugInputs) console.log("Analog input", private.inputName, "delta", evt.deltaY);
             if (inverted) {
                 if (evt.deltaY > 0) private.analogState.decrement(evt); else private.analogState.increment(evt);
             } else {
@@ -73,19 +73,19 @@ window.frag.AnalogInput = function(inputName, analogState) {
 
         public.enable = function () {
             if (wheel) {
-                frag.canvas.addEventListener("wheel", wheelHandler, false);
+                engine.canvas.addEventListener("wheel", wheelHandler, false);
             } else {
-                frag.canvas.addEventListener("mousemove", moveHandler, false);
-                if (buttons !== 0) frag.canvas.addEventListener("mousedown", downHandler, false);
+                engine.canvas.addEventListener("mousemove", moveHandler, false);
+                if (buttons !== 0) engine.canvas.addEventListener("mousedown", downHandler, false);
             }
         }
 
         public.disable = function () {
             if (wheel) {
-                frag.canvas.removeEventListener("wheel", wheelHandler, false);
+                engine.canvas.removeEventListener("wheel", wheelHandler, false);
             } else {
-                frag.canvas.removeEventListener("mousemove", moveHandler, false);
-                if (buttons !== 0) frag.canvas.removeEventListener("mousedown", downHandler, false);
+                engine.canvas.removeEventListener("mousemove", moveHandler, false);
+                if (buttons !== 0) engine.canvas.removeEventListener("mousedown", downHandler, false);
             }
         }
 
@@ -100,11 +100,11 @@ window.frag.AnalogInput = function(inputName, analogState) {
 
         const handler = function (evt) {
             if (evt.key === leftKey) {
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "decrement");
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "decrement");
                 private.analogState.decrement(evt);
                 evt.preventDefault();
             } else if (evt.key === rightKey) {
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "increment");
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "increment");
                 private.analogState.increment(evt);
                 evt.preventDefault();
             }
@@ -153,7 +153,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     const touch = evt.touches.item(index);
                     let fraction = (inverted ? (downPosition - touch.clientX) : (touch.clientX - downPosition)) / clientLength;
                     const value = downValue + (span * fraction);
-                    if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                    if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
                 }
                 return true;
@@ -164,7 +164,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     downPosition = touch.clientX;
                     downValue = private.analogState.value;
                     span = private.analogState.maxValue - private.analogState.minValue;
-                    clientLength = frag.canvas.clientWidth;
+                    clientLength = engine.canvas.clientWidth;
                 }
                 return true;
             }
@@ -176,7 +176,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     const touch = evt.touches.item(index);
                     let fraction =  (inverted ? (touch.clientY - downPosition) : (downPosition - touch.clientY)) / clientLength;
                     const value = downValue + (span * fraction);
-                    if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                    if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
                 }
                 return true;
@@ -187,7 +187,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     downPosition = touch.clientY;
                     downValue = private.analogState.value;
                     span = private.analogState.maxValue - private.analogState.minValue;
-                    clientLength = frag.canvas.clientHeight;
+                    clientLength = engine.canvas.clientHeight;
                 }
                 return true;
             }
@@ -208,7 +208,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     let fraction = (position - downPosition) / clientLength;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
-                    if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                    if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
                 }
                 return true;
@@ -218,7 +218,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     downPosition = distance(evt);
                     downValue = private.analogState.value;
                     span = private.analogState.maxValue - private.analogState.minValue;
-                    clientLength = Math.sqrt(frag.canvas.clientHeight * frag.canvas.clientHeight + frag.canvas.clientWidth * frag.canvas.clientWidth) * 0.5;
+                    clientLength = Math.sqrt(engine.canvas.clientHeight * engine.canvas.clientHeight + engine.canvas.clientWidth * engine.canvas.clientWidth) * 0.5;
                 }
                 return true;
             }
@@ -239,7 +239,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
                     let fraction = (position - downPosition) / clientLength;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
-                    if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                    if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
                 }
                 return true;
@@ -256,13 +256,13 @@ window.frag.AnalogInput = function(inputName, analogState) {
         }
 
         public.enable = function () {
-            if (moveHandler) frag.canvas.addEventListener("touchmove", moveHandler, false);
-            if (touchStartHandler) frag.canvas.addEventListener("touchstart", touchStartHandler, false);
+            if (moveHandler) engine.canvas.addEventListener("touchmove", moveHandler, false);
+            if (touchStartHandler) engine.canvas.addEventListener("touchstart", touchStartHandler, false);
         }
 
         public.disable = function () {
-            if (moveHandler) frag.canvas.removeEventListener("touchmove", moveHandler, false);
-            if (touchStartHandler) frag.canvas.removeEventListener("touchstart", touchStartHandler, false);
+            if (moveHandler) engine.canvas.removeEventListener("touchmove", moveHandler, false);
+            if (touchStartHandler) engine.canvas.removeEventListener("touchstart", touchStartHandler, false);
         }
 
         return public;
@@ -290,17 +290,17 @@ window.frag.AnalogInput = function(inputName, analogState) {
 
         const moveHandler = function (evt) {
             if (buttons === 0) {
-                let fraction = vertical ? evt.clientY / frag.canvas.clientHeight : evt.clientX / frag.canvas.clientWidth;
+                let fraction = vertical ? evt.clientY / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
             } else if ((evt.buttons & buttons) !== 0) {
                 let fraction = vertical 
-                    ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / frag.canvas.clientHeight
-                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / frag.canvas.clientWidth;
+                    ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / engine.canvas.clientHeight
+                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
-                if (frag.debugInputs) console.log("Analog input", private.inputName, "=", value);
+                if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
             }
             return true;
@@ -314,13 +314,13 @@ window.frag.AnalogInput = function(inputName, analogState) {
         }
 
         public.enable = function () {
-            frag.canvas.addEventListener("pointermove", moveHandler, false);
-            if (buttons !== 0) frag.canvas.addEventListener("pointerdown", downHandler, false);
+            engine.canvas.addEventListener("pointermove", moveHandler, false);
+            if (buttons !== 0) engine.canvas.addEventListener("pointerdown", downHandler, false);
         }
 
         public.disable = function () {
-            frag.canvas.removeEventListener("pointermove", moveHandler, false);
-            if (buttons !== 0) frag.canvas.removeEventListener("pointerdown", downHandler, false);
+            engine.canvas.removeEventListener("pointermove", moveHandler, false);
+            if (buttons !== 0) engine.canvas.removeEventListener("pointerdown", downHandler, false);
         }
 
         return public;
@@ -359,7 +359,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
         }
 
         const connectedHandler = function(evt) {
-            if (frag.debugInputs) console.log("Gamepad", evt.gamepad.index, "connected", "id:" + evt.gamepad.id, "with", e.gamepad.axes.length, "axes");
+            if (engine.debugInputs) console.log("Gamepad", evt.gamepad.index, "connected", "id:" + evt.gamepad.id, "with", e.gamepad.axes.length, "axes");
             if (evt.gamepad.index === controllerIndex && gamepad.axes.length > index) {
                 gamepad = evt.gamepad;
                 interval = setInterval(poll, 50);
@@ -367,7 +367,7 @@ window.frag.AnalogInput = function(inputName, analogState) {
         }
 
         const disconnectedHandler = function(evt) {
-            if (frag.debugInputs) console.log("Gamepad", evt.gamepad.index, "disconnected", "id:" + evt.gamepad.id);
+            if (engine.debugInputs) console.log("Gamepad", evt.gamepad.index, "disconnected", "id:" + evt.gamepad.id);
             if (evt.gamepad.id === gamepad.id) {
                 clearInterval(interval);
                 gamepad = null;

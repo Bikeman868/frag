@@ -1,4 +1,4 @@
-window.frag.Cylinder = function (facets, options) {
+window.frag.Cylinder = function (engine, facets, options) {
     facets = facets || 32;
     options = options || {};
 
@@ -97,7 +97,7 @@ window.frag.Cylinder = function (facets, options) {
     sideNormals.push(1);
     sideNormals.push(0);
 
-    return window.frag.MeshData()
+    return window.frag.MeshData(engine)
         .addTriangleFan(top, topColors, topUvs, topNormals)
         .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
         .addTriangleStrip(side, sideColors, sideUvs, sideNormals);

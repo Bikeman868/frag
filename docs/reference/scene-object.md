@@ -18,13 +18,12 @@ This is an example of creating a scene object from a model and adding that scene
 object to a scene.
 
 ```javascript
-const frag = window.frag;
-frag.init();
+const engine = window.frag.Engine().start();
 
-const model = frag.Model();
-const scene = frag.Scene();
+const model = engine.Model();
+const scene = engine.Scene();
 
-const sceneObject = frag.SceneObject(model);
+const sceneObject = engine.SceneObject(model);
 sceneObject.getPosition().scale(40);
 scene.addObject(sceneObject);
 ```

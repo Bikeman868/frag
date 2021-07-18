@@ -1,4 +1,4 @@
-window.frag.Model = function (is3d, parent) {
+window.frag.Model = function (engine, is3d, parent) {
     const frag = window.frag;
 
     if (is3d === undefined) {
@@ -20,7 +20,7 @@ window.frag.Model = function (is3d, parent) {
 
     const public = {
         __private: private,
-        location: frag.Location(is3d),
+        location: frag.Location(engine, is3d),
         animations: []
     };
 
@@ -36,7 +36,7 @@ window.frag.Model = function (is3d, parent) {
     }
 
     public.getPosition = function() {
-        return frag.ScenePosition(public.location);
+        return frag.ScenePosition(engine, public.location);
     }
 
     public.name = function (value) {
@@ -95,7 +95,7 @@ window.frag.Model = function (is3d, parent) {
         if (child) {
             child.__private.parent = public;
         } else {
-            child = window.frag.Model(undefined, public);
+            child = window.frag.Model(engine, undefined, public);
         }
         private.children.push(child);
         return child;
@@ -190,12 +190,13 @@ window.frag.Model = function (is3d, parent) {
             : public.location;
         const localMatrix = location.getMatrix();
 
+        const Matrix = frag.Matrix;
         if (location.is3d) {
-            modelToWorldMatrix = frag.Matrix.m4Xm4(modelToWorldMatrix, localMatrix);
-            modelToClipMatrix = frag.Matrix.m4Xm4(modelToClipMatrix, localMatrix);
+            modelToWorldMatrix = Matrix.m4Xm4(modelToWorldMatrix, localMatrix);
+            modelToClipMatrix = Matrix.m4Xm4(modelToClipMatrix, localMatrix);
         } else {
-            modelToWorldMatrix = frag.Matrix.m3Xm3(modelToWorldMatrix, localMatrix);
-            modelToClipMatrix = frag.Matrix.m3Xm3(modelToClipMatrix, localMatrix);
+            modelToWorldMatrix = Matrix.m3Xm3(modelToWorldMatrix, localMatrix);
+            modelToClipMatrix = Matrix.m3Xm3(modelToClipMatrix, localMatrix);
         }
 
         const shader = drawContext.shader || public.getShader();
@@ -219,12 +220,12 @@ window.frag.Model = function (is3d, parent) {
             if (material) material.apply(drawContext.gl, shader);
 
             if (shader.uniforms.clipMatrix !== undefined) {
-                const modelToClipTransform = location.is3d ? frag.Transform(modelToClipMatrix) : frag.Transform2D(modelToClipMatrix);
+                const modelToClipTransform = location.is3d ? frag.Transform(engine, modelToClipMatrix) : frag.Transform2D(engine, modelToClipMatrix);
                 modelToClipTransform.apply(drawContext.gl, shader.uniforms.clipMatrix);
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
-                const modelToWorldTransform = location.is3d ? frag.Transform(modelToWorldMatrix) : frag.Transform2D(modelToWorldMatrix);
+                const modelToWorldTransform = location.is3d ? frag.Transform(engine, modelToWorldMatrix) : frag.Transform2D(engine, modelToWorldMatrix);
                 modelToWorldTransform.apply(drawContext.gl, shader.uniforms.modelMatrix);
             }
 
