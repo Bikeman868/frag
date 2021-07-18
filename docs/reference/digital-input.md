@@ -1,13 +1,32 @@
 # Digital Input
 
-The `DigitalInput(inputName: string, digitalState: DigitalState)` function constructs 
-a digital input object that can capture player actions on input devices and mutate
+The digital input object captures player actions on input devices and mutates
 a `DigitalState` object.
 
 Note that you must call the `enable()` method of the digital input for it to start
-capturing and player inputs. There is also a `disable()` method you can call to
-stop responding to this player action. You can also add inputs to an `InputMethod`
+capturing player inputs. There is also a `disable()` method you can call to
+stop responding to this player input. You can also add inputs to an `InputMethod`
 to enable or disable a set of inputs all at once.
+
+## Constructor
+```javascript
+window.frag.DigitalInput(engine: Engine, inputName: string, digitalState: DigitalState)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `inputName` a hyphen separated list of keywords that defines which input device to capture
+  input from. See below.
+* `digitalState` must be an instance of the `DigitalState` class. This digital state will be updated
+  by player actions on the input device defined by the `inputName` parameter
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.DigitalInput(inputName: string, digitalState: DigitalState)
+```
 
 ## Example
 

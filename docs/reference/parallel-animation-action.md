@@ -1,14 +1,27 @@
 # Parallel Animation Action
-To construct a new parallel animation action call the `ParallelAnimationAction` 
-method passing an array of actions to execute in parallel, then use fluent syntax 
-to configure the attributes of the action.
 
-This object provides a mechanism for executing multiple actions in parallel
+This class provides a mechanism for executing multiple actions in parallel
 as part of an animation sequence.
 
 This object is an animation action, which means that you must pass it
 to the `sequence()` function of an `Animation` object. The `Animation` 
 object that you pass it to will invoke this action as part of the sequence.
+
+## Constructor
+```javascript
+window.frag.ParallelAnimationAction(engine: Engine, actions: Action[])
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.ParallelAnimationAction(actions: Action[])
+```
 
 ## Examples
 This is an example of moving an object along the Y axis and rotating it around

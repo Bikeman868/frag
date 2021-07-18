@@ -18,6 +18,7 @@ window.frag.Engine = function(config) {
         frameCountsSum: 0,
         nextFpsPush: 0,
         hitTestShader: null,
+        nextTextureUnit: 0,
     }
 
     const public = {
@@ -32,7 +33,6 @@ window.frag.Engine = function(config) {
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
-        nextTextureUnit: 0,
     }
     public.gl = public.canvas.getContext("webgl");
 
@@ -46,8 +46,8 @@ window.frag.Engine = function(config) {
     }
 
     public.allocateTextureUnit = function () {
-        const result = public.nextTextureUnit;
-        public.nextTextureUnit = (public.nextTextureUnit + 1) % public.maxTextureUnits;
+        const result = private.nextTextureUnit;
+        private.nextTextureUnit = (private.nextTextureUnit + 1) % public.maxTextureUnits;
         return result;
     };
 
@@ -258,9 +258,13 @@ window.frag.Engine = function(config) {
         return public;
     }
 
-    public.start = function() {
+    public.initialize = function () {
         for (var i = 0; i < private.startFunctions.length; i++)
             private.startFunctions[i](public);
+    }
+
+    public.start = function() {
+        public.initialize();
         private.running = true;
         private.renderLoop();
         return public;
@@ -302,7 +306,6 @@ window.frag.Engine = function(config) {
     addProxy("Transform");
     addProxy("Transform2D");
     addProxy("Location");
-    addProxy("Engine");
     
     addProxy("CustomShader");
     addProxy("Shader");

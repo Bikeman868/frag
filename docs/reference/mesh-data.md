@@ -1,7 +1,4 @@
 # MeshData
-To construct a new mesh call the `MeshData` method, then use
-fluent syntax to configure the attributes of the mesh.
-
 Meshes are collections of drawing primitives such as triangles,
 triangle strips, triangle fans, lines, line strips and line fans.
 
@@ -9,6 +6,22 @@ After you construct and configure a mesh you can reuse it on many
 models with different scaling, positioning and surface appearence.
 The mesh itself only defines the shaps of an object in the scene,
 and not the color, lighting or texture detail.
+
+## Constructor
+```javascript
+window.frag.MeshData(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.MeshData()
+```
 
 ## Examples
 This is an example of creating a new mesh and adding a triangle to it.

@@ -1,11 +1,10 @@
 # Analog Input
 
-The `AnalogInput(inputName: string, analogState: AnalogState)` function constructs 
-a analog input object that can capture player actions on input devices and mutate
+The analog input object captures player actions on input devices and mutates
 an `AnalogState` object.
 
 Note that you must call the `enable()` method of the analog input for it to start
-capturing and player inputs. There is also a `disable()` method you can call to
+capturing player inputs. There is also a `disable()` method you can call to
 stop responding to this player action. You can also add inputs to an `InputMethod`
 to enable or disable a set of inputs all at once.
 
@@ -14,12 +13,12 @@ to enable or disable a set of inputs all at once.
 window.frag.AnalogInput(engine: Engine, inputName: string, analogState: AnalogState)
 ```
 
-* `engine` is the game engine for your game. It is an instance of the `Egnine` class. You can 
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
   have more than one on a page but more often there is just one that is constructed at the 
   very beginning.
 * `inputName` a hyphen separated list of keywords that defines which input device to capture
   input from. See below.
-* `analogState` is an instance of the `AnalogState` class. This analog state will be updated
+* `analogState` must be an instance of the `AnalogState` class. This analog state will be updated
   by player actions on the input device defined by the `inputName` parameter
 
 Note that for any constructor, you can call this function on the `engine` rather than passing

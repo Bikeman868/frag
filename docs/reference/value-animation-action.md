@@ -1,13 +1,26 @@
 # Value Animation Action
-To construct a new value animation action call the `ValueAnimationAction` 
-method, then use fluent syntax to configure the attributes of the action.
-
-This object provides a mechanism for changing a value smoothly over time.
+This class provides a mechanism for changing a value smoothly over time.
 For example you might want to transition gradually from one color to another
 or smoothly rotate an object in the scene.
 
 This object is an animation action, which means that you must pass it
 to the `sequence()` function of an `Animation` object.
+
+## Constructor
+```javascript
+window.frag.ValueAnimationAction(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.ValueAnimationAction()
+```
 
 ## Examples
 This is an example of enabling a scene object, then slowly rotating it on

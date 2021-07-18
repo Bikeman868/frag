@@ -1,16 +1,24 @@
 # Digital Action
 
-The `DigitalAction(actionName: string, context: Object)` function constructs
-a function that can ba passed to an `DigitalState` object to perform some 
-specific action in the game when the digital state changes.
+This class can change your game scene by responding to changes in an `DigitalState`
 
-The `actionName` parameter is a hyphen separated list of keywords that define
-what action is taken. In some cases additional context is needed and this is
-supplied by the `context` parameter. For `actionName` values that need no
-additional context, the context parameter can be omitted.
+## Constructor
+```javascript
+window.frag.DigitalAction(engine: Engine, actionName: string, context: Object | undefined)
+```
 
-The order of the keywords does not matter, you can use whatever seems most
-readable to you.
+* `actionName` is a hyphen separated list of keywords that define what action is taken.
+  In some cases additional context is needed depending on the `actionName`. See below.
+  The order of the keywords does not matter, you can use whatever seems most readable to you.
+* `context` ror `actionName` values that need no additional context, the context parameter 
+  can be omitted. For input actions that require context see below for details.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.DigitalAction(actionName: string, context: Object | undefined)
+```
 
 ## Example
 

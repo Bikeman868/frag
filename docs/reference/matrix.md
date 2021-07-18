@@ -3,6 +3,8 @@ The `Matrix` class provides static methods for manipulating matricies. You
 cannot construct an instance of the `Matrix` class, matricies in Frag are just
 Javascript arrays.
 
+There is no `Matrix` constructor, you cannot create an instance of a matrix.
+
 ## m3Identity(): Matrix
 Constructs a 3x3 identity matrix
 

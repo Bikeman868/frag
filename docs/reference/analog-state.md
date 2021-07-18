@@ -1,20 +1,44 @@
 # Analog State
 
-The `AnalogState(action: undefined | AnalogAction | Array<AnalogAction>, config: Object, name: string)` 
-function constructs an analog state object that holds a floating point value that can be bound to 
-input devices and actions. The input devices operated by the player mutate the floating point value, and 
-these changes trigger actions that alter the game.
+This class maintains a floating point value that can be changed by analog 
+inputs or program code. The analog state also has a velocity and acceleration
+to limit the rate of change in the value.
 
-Note that you do not have to pass any actions, instead you can just query the 
-current state whenever you need it. The advantage being that later on you might
-decide that you also want to play a sound of run an animation when the state changes
-and these can easily be added later.
+The analog state can be hooked up to analog actions that are updated on
+significant changes in state.
 
-You also don't have to configure an input bindings to this state. In this case you
-can manually mutate the state in your code by calling one of these methods:
+## Constructor
+```javascript
+window.frag.AnalogState(engine: Engine, action: undefined | AnalogAction | AnalogAction[], config: Object | undefined, name: string | undefined)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `action` zero or more instances of the `AnalogAction` class. This defines what changes
+  in your game scene as a result of this analog state changing. Note that you do not have 
+  to pass any actions, instead you can just query the current state whenever you need it. 
+  The advantage being that later on you might decide that you also want to play a sound of
+  run an animation when the state changes and these can easily be added later.
+* `config` is an optional configuration for the state. Allows you to define the initial
+  value, min and max values as well as acceleration and max velocity. See below for details.
+* `name` optional, and only useful during debugging. In particular if you assign 
+  `engine.debugInputs = true;` then the this name will be included in the console log to 
+  help you figure out issues with your input handling.
+
+Note that it is usual to wire up some `AnalogInput` instances to drive state changes, but
+you don't have to do this. In this case you can manually mutate the state in your code 
+by calling one of these methods:
 * `setValue(evt: Event, value: float, calcVelocity: bool)`
 * `increment(evt: Event)`
 * `decrement(evt: Event)`
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.AnalogState(action: undefined | AnalogAction | AnalogAction[], config: Object | undefined, name: string | undefined)
+```
 
 ## Example
 
@@ -90,7 +114,3 @@ any of the following optional properties:
 * `acceleration` the amount that the velocity changes by on each event pushing it in the same direction. Defaults to 0.25
 * `deceleration` the amount that the velocity changes by on each event pushing it in the opposite direction. Defaults to 1
 
-## Name
-the `name` parameter is optional, and only useful during debugging. In particular if
-you assign `engine.debugInputs = true;` then the this name will be included in
-the console log to help you figure out issues with your input handling.

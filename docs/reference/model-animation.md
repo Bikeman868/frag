@@ -1,6 +1,4 @@
 # Model Animation
-To construct a new model animation call the `ModelAnimation` function,
-then use fluent syntax to configure the attributes of the model animation.
 
 This object provides a mechanism for defining an animation effect that
 can be applied to models. The same model animation can be applied to
@@ -19,6 +17,22 @@ defined for the channel. For example you can add a channel to the model animatio
 that continuously rotates all contained models called `/wheel/`. You could then
 attach this animation to a car model that contains 4 wheel models and all of the
 wheels will rotate whilst the animation is running.
+
+## Constructor
+```javascript
+window.frag.ModelAnimation(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.ModelAnimation()
+```
 
 ## Examples
 This example defines a car that has 4 wheels. The car has two animations, one

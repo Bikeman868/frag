@@ -4,10 +4,10 @@ This class can change your game scene by responding to changes in an `AnalogStat
 
 ## Constructor
 ```javascript
-window.frag.AnalogAction(engine: Engine, actionName: string, context: Object)
+window.frag.AnalogAction(engine: Engine, actionName: string, context: Object | undefined)
 ```
 
-* `engine` is the game engine for your game. It is an instance of the `Egnine` class. You can 
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
   have more than one on a page but more often there is just one that is constructed at the 
   very beginning.
 * `actionName` a hyphen separated list of keywords that defines what action is taken. 
@@ -20,7 +20,7 @@ Note that for any constructor, you can call this function on the `engine` rather
 `engine` as a parameter. In this case the call looks like:
 
 ```javascript
-engine.AnalogAction(actionName: string, context: Object)
+engine.AnalogAction(actionName: string, context: Object | undefined)
 ```
 
 ## Example

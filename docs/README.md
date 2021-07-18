@@ -72,15 +72,15 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`AnalogInput`](reference/analog-input.md) updates an analog state from an input device.
 * [`AnalogState`](reference/analog-state.md) stores a floating point value that can be controlled by the player.
 * [`Animation`](./reference/animation.md) is the core animation engine.
-* [`CustomShader`])(./reference/custom-shader.md) the base class for all code that runs on the GPU.
+* [`CustomShader`](./reference/custom-shader.md) the base class for all code that runs on the GPU.
 * [`DigitalAction`](reference/digital-action.md) applies digital state changes to something in the game.
 * [`DigitalInput`](reference/digital-action.md) updates a digital state from an input device.
 * [`DigitalState`](reference/digital-action.md) stores an on/off value that can be controlled by the player.
+* [`Engine`](reference/engine.md) renders a WebGL scene onto a canvas element on the page.
 * [`Font`](reference/font.md) used to construct models that render text in the scene.
 * [`InputMethod`](reference/input-method.md) a collection of analog and digital inputs that can be enabled/disabled together.
 * [`KeyframeAnimationAction`](./reference/keyframe-animation-action.md) adds keyframe action to an animation.
 * [`Material`](./reference/material.md) defines the surface appearence of part of a model.
-* ~[`MaterialLoader`](./reference/material-loader.md)~ loads material packages from the server.
 * [`Matrix`](./reference/matrix.md) performs matrix math.
 * [`Model`](./reference/model.md) is a template for instancing scene objects.
 * [`ModelAnimation`](./reference/model-animation.md) adds animation effects to a model.

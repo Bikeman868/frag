@@ -3,6 +3,8 @@ The `Vector` class provides static methods for manipulating vectors. You
 cannot construct an instance of the Vector class, vectors in Frag are just
 Javascript arrays.
 
+There is no `Vector` constructor, you cannot create an instance of a vector.
+
 ## extract2D(a: Array, offset: int): Vector
 Constructs a 2D vector by copying values from a larger array starting at the 
 specified offset. This allows you to pack many vectors into a single array.

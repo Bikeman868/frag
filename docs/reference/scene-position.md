@@ -1,18 +1,35 @@
 # ScenePosition
-To construct a new scene position object call the `ScenePosition` method, passing
-a `Location` object as a paremeter, then use fluent syntax to configure the attributes 
-of the scene position object.
 
 `ScenePosition` objects are wrappers that provide convenient methods for manipulating
 a `Location` object. The Scene Position lets you modify the translation, scale and
 orientation easily, and flags the `Location` as modified to that the next time the
-`getMatrix()` funtion is called hte matrix will be rebuilt.
+`getMatrix()` funtion is called hte matrix will be recalculated.
 
 The `Location` always constructs the transformation matrix by applying scaling first,
 then rotation, then translation last. This means that for example you cannot rotate about
 an arbitary point in space (which requires translating, rotating and translating back again).
 The scale and rotate will always occur around the origin of the model and the translation 
-will place it within the scene. This is the behaviour you want for scene positioning.
+will place it within the scene. This is the behaviour you typically want for scene positioning
+in games. For more advanced use cases use the `Transform` class instead, it can combine 
+any number of transformations performed in a specific sequence and it can calculate the 
+resulting transformation matrix.
+
+## Constructor
+```javascript
+window.frag.ScenePosition(engine: Engine, location: Location)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `location` a `Location` object that you want to manipulate usign this `ScenePosition` instance.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.ScenePosition(location: Location)
+```
 
 ## Examples
 You would not normally construct scene positions in your code, but you can if you want

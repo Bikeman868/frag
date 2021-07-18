@@ -1,9 +1,8 @@
 # Keyframe Animation Action
-To construct a new keyframe animation action call the `KeyframeAnimationAction` 
-method, then use fluent syntax to configure the attributes of the action.
 
 This object provides a mechanism for defining a set of frames like the
-frames in a movie, then defining key frames where something changes.
+frames in a movie, then defining key frames (important or significant frames)
+where something happens.
 
 Lets say you create a keyframe animation that has 240 frames and runs at 
 24 frames per second. This means that the animation will play for 10 seconds.
@@ -15,6 +14,22 @@ This object is an animation action, which means that you must pass it
 to the `sequence()` function of an `Animation` object. If you don't
 have a sequence, then you can also call the `perform()` function of the
 `Animation` to just perform one action.
+
+## Constructor
+```javascript
+window.frag.KeyframeAnimationAction(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.KeyframeAnimationAction()
+```
 
 ## Examples
 This is an example of describing a keyframe animation in which two objects

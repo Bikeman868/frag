@@ -1,16 +1,29 @@
 # Animation
-To construct a new animation object call the `Animation` method, then use
-fluent syntax to configure the attributes of the animation.
-
-You can optionally pass an object to the `Animation` method to hold
-animation state. The `Animation` function will add methods and properties
-to the state that you pass to make it into an animation object. When the
-animation object is passed to animation actions you can access these
-properties to maintain animation state and call your own functions.
 
 This object provides the lowest level access to the animation engine.
 This is great if you want to do something very custom, but is harder
 to use than the layers that exist on top of it.
+
+## Constructor
+```javascript
+window.frag.Animation(engine: Engine, state: Object | undefined)
+
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `state` is an optional object that you can use to maintain state associated with the
+  animation. The constructor will add methods and properties to the state that you pass 
+  to make it into an animation object. When the animation object is passed to animation 
+  actions you can use its properties and methods to maintain animation state.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Animation(state: Object | undefined)
+```
 
 ## Time
 The animation engine keeps time in two ways. Game ticks occur at regular

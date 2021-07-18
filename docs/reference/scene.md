@@ -1,7 +1,4 @@
 # Scene
-To construct a new scene object call the `Scene` method, then use
-fluent syntax to configure the attributes of the scene.
-
 Scenes have a camera that projects the scene onto a viewport and a
 collection of scene objects that defines what to draw.
 
@@ -17,6 +14,22 @@ The other reason for creating multiple scenes is that you can render
 a scene onto a texture then use this texture to paint a model. This
 is useful for windows and mirrors that give the player a view onto
 some other part of the environment.
+
+## Constructor
+```javascript
+window.frag.Scene(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Scene()
+```
 
 ## Examples
 This is an example of creating a new scene and attaching a UI Camera

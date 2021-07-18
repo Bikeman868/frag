@@ -1,11 +1,27 @@
 # Font
 
-The `Font()` function constructs a font object. The font object can be used to build 
-meshes that render characters from that font.
+Encapsulates a font bitmap, behaves as a material, and is a factory for meshes and 
+models that draw as lines of text.
 
-Note that you do not usually need to construct a font object like this, the more
+Note that you do not usually need to construct a font object, the more
 usual approach is to add a font to an asset package and download it into an
 asset catalog.
+
+## Constructor
+```javascript
+window.frag.Font(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Font()
+```
 
 ## Example
 

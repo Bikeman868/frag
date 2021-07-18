@@ -1,7 +1,4 @@
 # UI Camera
-To construct a new UI camera object call the `UiCamera` 
-method, then use fluent syntax to configure the attributes of the camera.
-
 Scenes must have a camera. The job of the camera is to define a 
 transformation matrix that will map coordinates in the scene onto 
 pixel coordinates on the viewport (screen).
@@ -26,11 +23,26 @@ then apply that testure to a 3D object in the main scene. This is a good
 way of placing a UI onto an object within the scene - for example on an
 instrument panel within the game.
 
-Note that to allow the user to interact with the UI you will need a physics
-engine that tracks the position of everything in the scene, and can tell
-you which object will be drawn to specific pixel. You need this so that
-when the user taps on the screen you can determine which object within the
-scene the user wants to interact with.
+Note that to allow the user to interact with the UI you will need to use the
+`hitTest` method of the `Engine`. When you call this method the engine will
+draw the scene off-screen and figure out which model was closest to the 
+camera at a specific pixel location on the screen.
+
+## Constructor
+```javascript
+window.frag.UiCamera(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.UiCamera()
+```
 
 ## Examples
 This is an example of creating a new scene and attaching a UI Camera

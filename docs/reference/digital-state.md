@@ -1,19 +1,41 @@
 # Digital State
 
-The `DigitalState(action: undefined | DigitalAction | Array<DigitalAction>, config: Object, name: string)` 
-function constructs a digital state object that holds an on/off state and can be bound to 
-input devices and actions. The input devices operated by the player mutate the state, and 
-these changes trigger actions that alter the game.
+This class maintains a boolean value that can be changed by digital 
+inputs or program code. The digital state can be configured to invert the
+boolean value.
 
-Note that you do not have to pass any actions, instead you can just query the 
-current state whenever you need it. The advantage being that later on you might
-decide that you also want to play a sound of run an animation when the state changes
-and these can easily be added later.
+The digital state can be hooked up to digital actions that are updated on
+changes in state.
+
+## Constructor
+```javascript
+window.frag.DigitalState(engine: Engine, action: undefined | DigitalAction | DigitalAction[], config: Object | undefined, name: string | undefined)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `action` zero or more instances of the `DigitalAction` class. This defines what changes
+  in your game scene as a result of this digital state changing. Note that you do not have 
+  to pass any actions, instead you can just query the current state whenever you need it. 
+  The advantage being that later on you might decide that you also want to play a sound of
+  run an animation when the state changes and these can easily be added later.
+* `config` is an optional configuration for the state. See below for details.
+* `name` optional, and only useful during debugging. In particular if you assign 
+  `engine.debugInputs = true;` then the this name will be included in the console log to 
+  help you figure out issues with your input handling.
 
 You also don't have to configure an input bindings to this state. In this case you
 can manually mutate the state in your code by calling one of these methods:
 * `setIsOn(evt: Event, value: isOn: bool)`
 * `toggle(evt: Event)`
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.DigitalState(action: undefined | DigitalAction | DigitalAction[], config: Object | undefined, name: string | undefined)
+```
 
 ## Example
 

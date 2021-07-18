@@ -41,9 +41,29 @@ whenever the vehicle is moving and a 'firing' animation that runs each time the
 vehicle fires its gun and stops after one iteration. This vehicle can be moving,
 firing or moving and firing at the same time.
 
+## Constructor
+```javascript
+window.frag.Model(engine: Engine, is3d: bool | undefined)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+* `is3d` pass `false` here if you are constructing a 2-dimentional model. Note that
+  2-dimensional models will only work with 2-dimensional shaders. For 3-dimensional
+  models you can omit this parameter or pass `true`.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Model(is3d: bool | undefined)
+```
+
 ## Examples
 This is an example of creating a new model with child models. This example was taken
-from the 'butterflies' sample if you want to see this code in context.
+from the ['butterflies' sample](../../samples/butterflies.html) if you want to see
+this code in context.
 
 Note that in this example the parent model has no mesh and therefore does not draw 
 anything, it just provides an anchor point that can be moved around the scene to

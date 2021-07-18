@@ -1,9 +1,22 @@
 # Texture
-To construct a new texture object call the `Texture` method, then use
-fluent syntax to configure the attributes of the texture.
-
 Textures are just bitmaps that can be assigned to one or more materials.
-How the bitmap will be used is defined by the shader.
+How the bitmap will be used to render the scene is defined by the shader.
+
+## Constructor
+```javascript
+window.frag.Texture(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Texture()
+```
 
 ## Examples
 This is an example of creating a new texture and assigning it to

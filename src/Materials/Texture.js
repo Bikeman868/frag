@@ -102,19 +102,19 @@ window.frag.Texture = function (engine) {
     }
 
     public.update = function (width, height) {
-        if (private.scene) {
-            if (width !== undefined && height !== undefined) {
-                if (width !== private.width || height !== private.height) {
-                    public.fromScene(private.scene, width, height);
-                }
+        if (!private.scene) return public;
+        
+        if (width !== undefined && height !== undefined) {
+            if (width !== private.width || height !== private.height) {
+                public.fromScene(private.scene, width, height);
             }
-
-            gl.bindFramebuffer(gl.FRAMEBUFFER, private.frameBuffer);
-            gl.viewport(0, 0, private.width, private.height);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            private.scene.adjustToViewport(gl);
-            private.scene.draw({ gl });
         }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, private.frameBuffer);
+        gl.viewport(0, 0, private.width, private.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        private.scene.adjustToViewport(gl);
+        private.scene.draw({ gl });
 
         return public;
     }

@@ -1,8 +1,24 @@
 # Material
-To construct a new material object call the `Material` method, then use
-fluent syntax to configure the attributes of the material.
 
-Materials are a collection of textures
+Materials are a collection of textures. Each model in the scene is painted with a 
+specific material that defines the surface appearence of the model. Note that a model
+is comprised of child models and each child can be painted with a different material.
+
+## Constructor
+```javascript
+window.frag.Material(engine: Engine)
+```
+
+* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
+  have more than one on a page but more often there is just one that is constructed at the 
+  very beginning.
+
+Note that for any constructor, you can call this function on the `engine` rather than passing
+`engine` as a parameter. In this case the call looks like:
+
+```javascript
+engine.Material()
+```
 
 ## Examples
 This is an example of creating a new material and assigning some new
