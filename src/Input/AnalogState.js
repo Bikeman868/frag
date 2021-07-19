@@ -80,6 +80,12 @@ window.frag.AnalogState = function(engine, analogAction, config, name) {
         private.setValue(evt, value);
     }
 
+    public.getValue = function() {
+        if (private.inverted)
+            return public.minValue + public.maxValue - public.value;
+        return public.value;
+    }
+
     public.increment = function(evt) {
         if (private.inverted) private.decrement(evt);
         else private.increment(evt);

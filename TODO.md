@@ -2,7 +2,6 @@
 
 ## Bug fixes
 * In the excatator sample the very first movement is based on the wrong initial position
-* Analog input based on mouse drag actions sometimes jump on pressing the mouse button down
 
 ## Core features that are missing
 * Packaging and loading materials.

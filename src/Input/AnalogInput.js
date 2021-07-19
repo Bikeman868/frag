@@ -56,7 +56,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const downHandler = function(evt) {
             if ((evt.buttons & buttons) !== 0) {
                 downPosition = vertical ? evt.clientY : evt.clientX;
-                downValue = private.analogState.value;
+                downValue = private.analogState.getValue();
             }
         }
 
@@ -162,7 +162,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if (evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     downPosition = touch.clientX;
-                    downValue = private.analogState.value;
+                    downValue = private.analogState.getValue();
                     span = private.analogState.maxValue - private.analogState.minValue;
                     clientLength = engine.canvas.clientWidth;
                 }
@@ -185,7 +185,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if (evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     downPosition = touch.clientY;
-                    downValue = private.analogState.value;
+                    downValue = private.analogState.getValue();
                     span = private.analogState.maxValue - private.analogState.minValue;
                     clientLength = engine.canvas.clientHeight;
                 }
@@ -216,7 +216,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
             touchStartHandler = function(evt) {
                 if (evt.touches.length === 2) {
                     downPosition = distance(evt);
-                    downValue = private.analogState.value;
+                    downValue = private.analogState.getValue();
                     span = private.analogState.maxValue - private.analogState.minValue;
                     clientLength = Math.sqrt(engine.canvas.clientHeight * engine.canvas.clientHeight + engine.canvas.clientWidth * engine.canvas.clientWidth) * 0.5;
                 }
@@ -247,7 +247,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
             touchStartHandler = function(evt) {
                 if (evt.touches.length === 2) {
                     downPosition = angle(evt);
-                    downValue = private.analogState.value;
+                    downValue = private.analogState.getValue();
                     span = private.analogState.maxValue - private.analogState.minValue;
                     clientLength = Math.PI * 0.5;
                 }
@@ -309,7 +309,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const downHandler = function(evt) {
             if ((evt.buttons & buttons) !== 0) {
                 downPosition = vertical ? evt.clientY : evt.clientX;
-                downValue = private.analogState.value;
+                downValue = private.analogState.getValue();
             }
         }
 
