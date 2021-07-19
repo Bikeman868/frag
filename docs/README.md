@@ -91,7 +91,7 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`Scene`](./reference/scene.md) a collection of objects and a camera to draw them.
 * [`SceneObject`](./reference/scene-object.md) an instance of a model that can be positioned within a scene.
 * [`ScenePosition`](./reference/scene-position.md) location, orientation and scale.
-* ~[`Shader`](./reference/shader.md)~ builds programs that run on the GPU to render the scene.
+* [`Shader`](./reference/shader.md) builds programs that run on the GPU to render the scene.
 * [`Texture`](./reference/texture.md) defines one aspect of a material, for example how shiny it is.
 * ~[`Transform`](./reference/transform.md)~ builds a 3x3 matrix that defines a sequence of 2D transformations.
 * ~[`Transform2D`](./reference/transform-2d.md)~ builds a 4x4 matrix that defines a sequence of 3D transformations.
