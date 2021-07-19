@@ -103,3 +103,12 @@ Things to mess around with on this sample:
 * Improve the appearence of the truck
 * Make the truck and trailor pivot when it goes around corners
 * Make the front wheels of the truck turn when it is turning
+
+## Multiple engines
+This [sample](multiple-engines.html) illustrates the following features and techniques:
+* Adding multiple canvases on one html page and rendering them independantly.
+* Arrangine code in a modular fashion to reuse code across scenes.
+
+Things to mess around with on this sample:
+* Make the WebGL scenes more complex
+* Add some html based UI around the two canvases using Vue.js, React.js, Angular.js, or your favorite front-end framework.

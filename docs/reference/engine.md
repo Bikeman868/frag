@@ -64,6 +64,7 @@ The `Engine` instance has the following properties that you can access
 * `transparency` set to `true` to enable transparency in the scene. Mostly only needed for `Font` drawing.
 * `fps` the average number of frame redraws per second over the last few seconds.
 * `maxTextureUnits` the maximum number of textures that can be simultaneously loaded into the graphics card. Do not modify this property.
+* `gl` contains a reference to the WebGL context that for this engine/canvas.
 
 ## Methods
 

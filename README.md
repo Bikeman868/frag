@@ -24,7 +24,7 @@ you need that functionality.
 The functioanllity that is provided:
 * Drawing stuff to the screen with high refresh rate and minimum load on the hardware
 * Support for old devices that only support OpenGL 1.1
-* Bulk loading of models and materials designed in tools like Blender and Substance Player
+* Bulk loading of models, fonts and materials designed in tools like Blender and Substance Player
 * Separation of models from materials so that the same models can be used with different
   skins in different parts of the game.
 * Powerful animation engine that can run many parallel animations on the same model
@@ -52,13 +52,15 @@ These are the main elements that you will be working with
 ## Canvas
 You need to add an HTML5 canvas to your web page. If you call your canvas "scene"
 then Frag will pick it up automatically. If you want to call it something else
-then there is a small code snippet you need to define that.
+then there is a small code snippet you need to define that. You must create an
+instance of the Frag `Engine` class for each canvas that you want to render to.
 
 ## Scene
-You need to create at least 1 scene. You can display multiple scenes on top of each
-other, this is often the best way of combining the 3D game elements with a 2D UI
-that sits at the front of the viewport. You can also render a scene onto a texture
-and paint this texture onto part of a model - for example a window or a mirror.
+You need to create at least 1 scene in each engine. You can display multiple 
+scenes on top of each other, this is often the best way of combining the 3D 
+game elements with a 2D UI that sits at the front of the viewport. You can 
+also render a scene onto a texture and paint this texture onto part of a 
+model - for example a window or a mirror.
 
 ## Camera
 You need to create at least one camera. You need to associate a camera with each
@@ -78,7 +80,7 @@ wheel models within your car model to rotate until the animation is stopped.
 Each model is defined by: 
 * A mesh that describes the shape of the model in 2D or 3D
 * A material that is painted onto the mesh
-* A transform that defines the position and orientation of the model
+* A transform that defines the position, scale and orientation of the model in the scene
 * A shader that combines the mesh, material and transform into pixels
 
 ## Mesh
@@ -86,9 +88,16 @@ A collection of 2D or 3D points that define a surface. A mesh can be comprised
 of several pieces, where each piece can be a set of triangles, rectangles, a
 triangle strip or a triangle fan.
 
-A mesh can also have normal vectors to define how light is reflected off the
+A mesh can define a color for each vertex that is mixed with the material
+to create the final color of the model.
+
+A mesh can also define normal vectors to define how light is reflected off the
 surface of the mesh and tangent vectors to define how to apply normal maps
-to the surface. Normal maps are also used for displacement textures.
+to the surface.
+
+As well as using normal maps to give the impression of greater detail than
+actually exists in the mesh, you can also use displacement textures to 
+distort the mesh and create detail that way.
 
 ## Shader
 You need to specify which shader to use to draw each model in your scene. Frag
@@ -119,18 +128,22 @@ The same texture can be reused on multiple materials. If you want to dyanmically
 create and dispose materials, you can define whether the material will dispose
 of textures or not.
 
+## Font
+A font is a special kind of material that can generate meshes that represent
+a line of text in a particular font. This is done internally by building a mesh
+comprising one rectangle per character, where the texture coordinates for the
+rectangle map to the pixels in the material that are a drawing of a specific
+character.
+
 # Example scenes
 
-Here are some scenes that illustrate how to use Frag.
+Here are some scenes that illustrate how to use Frag. There are a lot more
+examples in the  [samples folder](./samples).
 
 ## Hello cube
 This is a very simple scene that displays a spining cube with a texture painted on it.
 This might look like quite a big of code but half of it is comments. They are there
 for your benefit.
-
-There are other samples for you to explore in the [samples folder](./samples)
-
-More detailed documentation can be found in the [docs folder](./docs)
 
 ```html
 <!DOCTYPE html>
