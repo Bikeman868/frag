@@ -49,6 +49,10 @@ window.frag.CustomShader = function (engine, is3d) {
         is3d: is3d === undefined ? true : is3d,
     }
 
+    public.dispose = function () {
+        gl.deleteProgram(public.program);
+    }
+
     public.name = function (name) {
         private.name = name;
         return public;

@@ -56,5 +56,9 @@ window.frag.ValueAnimationAction = function (engine) {
         return public;
     }
 
+    public.dispose = function () {
+        public.stop();
+    }
+
     return public;
 }

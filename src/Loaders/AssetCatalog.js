@@ -48,6 +48,9 @@ window.frag.AssetCatalog = function (engine, shader, defaultTextures) {
         shader
     };
 
+    public.dispose = function () {
+    }
+
     public.getFont = function(name) {
         var font = private.fonts[name];
         if (!font) {

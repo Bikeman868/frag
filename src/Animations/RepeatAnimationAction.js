@@ -6,6 +6,7 @@ window.frag.RepeatAnimationAction = function (engine, action, count) {
         interval: action.interval,
         start: action.start,
         stop: action.stop,
-        action: action.action
+        action: action.action,
+        dispose: function () {}    
     };
 }

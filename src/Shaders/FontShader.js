@@ -21,6 +21,7 @@ window.frag.FontShader = function(engine) {
         "  vec4 texture = texture2D(u_diffuse, vec2(v_texcoord.x, 1.0 - v_texcoord.y));\n" +
         "  gl_FragColor = mix(u_bgcolor, u_fgcolor, length(texture.rgb));\n" +
         "}\n";
+
     engine.fontShader = frag.CustomShader(engine)
         .name("Font")
         .source(vertexShader, fragmentShader)
@@ -30,5 +31,6 @@ window.frag.FontShader = function(engine) {
         .uniform("bgcolor", "4fv", [1, 1, 1, 1])
         .uniform("fgcolor", "4fv", [0, 0, 0, 1])
         .uniform("diffuse");
+        
     return engine.fontShader;
 }

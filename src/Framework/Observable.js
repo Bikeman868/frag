@@ -8,6 +8,9 @@ window.frag.Observable = function (engine, notify) {
         __private: private
     };
 
+    public.dispose = function () {
+    }
+
     public.subscribe = function (observer) {
         private.observers.push(observer);
         private.notify(observer);

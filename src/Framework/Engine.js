@@ -275,6 +275,10 @@ window.frag.Engine = function(config) {
         return public;
     }
 
+    public.dispose = function () {
+        public.stop();
+    }
+
     public.onStart(function (engine) {
         engine.canvas.addEventListener('contextmenu', event => event.preventDefault());
 

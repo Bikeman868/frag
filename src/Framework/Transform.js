@@ -15,6 +15,10 @@ window.frag.Transform = function (engine, matrix) {
         is3d: true,
     };
 
+    public.dispose = function () {
+        public.observableMatrix.dispose();
+    }
+
     public.clone = function (matrix) {
         return window.frag.Transform(engine, matrix || private.matrix);
     }

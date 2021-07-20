@@ -87,5 +87,8 @@ window.frag.ModelAnimation = function (engine) {
         });
     };
 
+    public.dispose = function () {
+    }
+
     return public;
 };

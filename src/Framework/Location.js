@@ -15,6 +15,9 @@ window.frag.Location = function (engine, is3d) {
         rotateZ: 0
     };
 
+    public.dispose = function () {
+    }
+
     public.clone = function() {
         const clone = window.frag.Location(engine, public.is3d);
         clone.isModified = public.isModified;

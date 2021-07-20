@@ -15,6 +15,9 @@ window.frag.MeshOptimizer = function (engine) {
         __private: private,
     };
 
+    public.dispose = function () {
+    }
+
     private.ensureTriangles = function () {
         if (private.fragmentTriangles) return;
 

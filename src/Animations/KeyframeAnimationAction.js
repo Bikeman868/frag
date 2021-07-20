@@ -54,5 +54,8 @@ window.frag.KeyframeAnimationAction = function (engine) {
         return public;
     }
 
+    public.dispose = function () {
+    }
+
     return public;
 }

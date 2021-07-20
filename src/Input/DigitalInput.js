@@ -15,6 +15,10 @@ window.frag.DigitalInput = function (engine, inputName, digitalState) {
         __private: private,
     }
 
+    public.dispose = function () {
+        public.disable();
+    }
+
     const splits = inputName.split("-");
 
     const setIsOn = function (evt, isOn) {

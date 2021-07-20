@@ -12,6 +12,10 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         __private: private,
     }
 
+    public.dispose = function () {
+        public.disable();
+    }
+
     const splits = inputName.split("-");
 
     if ((/mouse/i).test(inputName)) {
@@ -78,6 +82,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 engine.canvas.addEventListener("mousemove", moveHandler, false);
                 if (buttons !== 0) engine.canvas.addEventListener("mousedown", downHandler, false);
             }
+            return public;
         }
 
         public.disable = function () {
@@ -87,6 +92,7 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 engine.canvas.removeEventListener("mousemove", moveHandler, false);
                 if (buttons !== 0) engine.canvas.removeEventListener("mousedown", downHandler, false);
             }
+            return public;
         }
 
         return public;
@@ -113,10 +119,12 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
 
         public.enable = function () {
             document.addEventListener("keydown", handler, false);
+            return public;
         }
 
         public.disable = function () {
             document.removeEventListener("keydown", handler, false);
+            return public;
         }
 
         return public;
@@ -258,11 +266,13 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         public.enable = function () {
             if (moveHandler) engine.canvas.addEventListener("touchmove", moveHandler, false);
             if (touchStartHandler) engine.canvas.addEventListener("touchstart", touchStartHandler, false);
+            return public;
         }
 
         public.disable = function () {
             if (moveHandler) engine.canvas.removeEventListener("touchmove", moveHandler, false);
             if (touchStartHandler) engine.canvas.removeEventListener("touchstart", touchStartHandler, false);
+            return public;
         }
 
         return public;
@@ -316,11 +326,13 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         public.enable = function () {
             engine.canvas.addEventListener("pointermove", moveHandler, false);
             if (buttons !== 0) engine.canvas.addEventListener("pointerdown", downHandler, false);
+            return public;
         }
 
         public.disable = function () {
             engine.canvas.removeEventListener("pointermove", moveHandler, false);
             if (buttons !== 0) engine.canvas.removeEventListener("pointerdown", downHandler, false);
+            return public;
         }
 
         return public;
@@ -377,11 +389,13 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         public.enable = function () {
             window.addEventListener("gamepadconnected", connectedHandler, false);
             window.addEventListener("gamepaddisconnected", disconnectedHandler, false);
+            return public;
         }
 
         public.disable = function () {
             window.removeEventListener("gamepadconnected", connectedHandler, false);
             window.removeEventListener("gamepaddisconnected", disconnectedHandler, false);
+            return public;
         }
 
         return public;

@@ -21,6 +21,9 @@ window.frag.VertexData = function(engine) {
         bitangents: undefined,
     };
 
+    public.dispose = function () {
+    }
+
     public.clone = function () {
         const clone = frag.VertexData(engine);
 

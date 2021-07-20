@@ -40,5 +40,8 @@ window.frag.UiCamera = function (engine) {
         return public;
     }
 
+    public.dispose = function () {
+    }
+
     return public;
 };

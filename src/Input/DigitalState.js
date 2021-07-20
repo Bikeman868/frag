@@ -16,6 +16,9 @@ window.frag.DigitalState = function (engine, digitalAction, config, name) {
         isOn: config.isOn,
     }
 
+    public.dispose = function () {
+    }
+
     private.change = function(evt) {
         if (private.digitalAction) {
             if (Array.isArray(private.digitalAction)) {

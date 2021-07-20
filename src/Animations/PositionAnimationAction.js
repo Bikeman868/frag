@@ -160,5 +160,9 @@ window.frag.PositionAnimationAction = function (engine, scenePosition, invLinear
         return public;
     }
 
+    public.dispose = function () {
+        public.stop();
+    }
+
     return public;
 }

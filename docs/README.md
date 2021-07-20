@@ -40,6 +40,11 @@ Things can mostly be done in any order. For example you can start using a font f
 catalog then download the font into the catalog and this will work just fine, but the text
 will not be rendered until the font has finished downloading of course.
 
+Every object has a `dispose()` method that will clean up any resources it is using.
+In many cases these `dispose()` methods do nothing, but calling it will ensure compatibility
+with future versions of the framework. You should dispose objects in the oposite order to
+how you constructed them.
+
 The best place to go from here is to take a look at the [spinning cube sample](../samples/hello-cube.html)
 followed by the other samples in the order presented in the [samples readme file](../samples/README.md).
 

@@ -39,5 +39,8 @@ window.frag.ParallelAnimationAction = function (engine, [actions]) {
         });
     }
 
+    public.dispose = function () {
+    }
+
     return public;
 }

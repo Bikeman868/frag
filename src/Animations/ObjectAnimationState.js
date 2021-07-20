@@ -66,5 +66,8 @@ window.frag.ObjectAnimationState = function (engine) {
         return function () { };
     };
 
+    public.dispose = function () {
+    }
+
     return public;
 }

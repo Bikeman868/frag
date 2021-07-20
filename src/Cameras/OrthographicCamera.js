@@ -114,5 +114,8 @@ window.frag.OrthographicCamera = function (engine) {
         return public;
     }
 
+    public.dispose = function () {
+    }
+
     return public;
 };

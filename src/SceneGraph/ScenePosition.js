@@ -9,6 +9,9 @@ window.frag.ScenePosition = function (engine, location) {
         __private: private,
     };
 
+    public.dispose = function () {
+    }
+
     public.setLocation = function (value) {
         private.location = value || window.frag.Location(engine);
         return public;

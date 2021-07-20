@@ -9,6 +9,10 @@ window.frag.InputMethod = function(engine) {
         __private: private
     }
 
+    public.dispose = function () {
+        public.disable();
+    }
+
     // Enables all of the inputs for this input method
     public.enable = function() {
         if (!private.enabled) {

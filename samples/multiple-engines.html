@@ -7,7 +7,8 @@
     <style>
         html,
         body {
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             width: 100%;
             height: 100%;
             margin: 20px;
@@ -45,9 +46,12 @@
     <div id='app'>
         <h1>Each cube is a separate instance of the Frag game engine</h1>
         <div class='scene-container'>
-            <div v-for='game in games' class='scene'>
-                <h2>{{ game.title }}</h3>
-                    <game :color='game.color' :spin-time='game.spinTime' />
+            <div class=scene>
+                <button v-on:click="addGame">Add Game</button>
+            </div>
+            <div v-for='game in games' :key="game.id" class='scene'>
+                <h3>{{ game.title }}&nbsp;&nbsp;<button @click="removeGame(game)">X</button></h3>
+                <game :color='game.color' :spin-time='game.spinTime'/>
             </div>
         </div>
         <p>You can drag the cubes around with your pointer</p>
@@ -70,24 +74,29 @@
             }
 
             dispose() {
-                this.engine.stop();
+                this.shader.dispose();
+                this.scene.dispose();
+                this.camera.dispose();
+                this.engine.dispose();
             }
         }
 
         class SpinningCube {
             constructor(gameCanvas, color, duration) {
-                this.model = gameCanvas.engine.Model()
-                    .mesh(gameCanvas.engine.Cube(1, { color }))
+                this.gameCanvas = gameCanvas;
+                const engine = gameCanvas.engine;
+
+                this.model = engine.Model()
+                    .mesh(engine.Cube(1, { color }))
                     .shader(gameCanvas.shader)
                     .shadeFlat();
 
-                this.cube = gameCanvas.engine.SceneObject(this.model);
+                this.cube = engine.SceneObject(this.model);
                 const cubePosition = this.cube.getPosition();
                 cubePosition.scale(40);
 
                 gameCanvas.scene.addObject(this.cube);
 
-                const engine = gameCanvas.engine;
                 this.animation = engine.Animation()
                     .perform(
                         engine.ValueAnimationAction()
@@ -102,6 +111,14 @@
 
             dispose() {
                 this.animation.dispose();
+                this.cube.dispose();
+                this.model.getMesh().dispose();
+                this.model.dispose();
+            }
+
+            setColor(color) {
+                this.model.getMesh().dispose();
+                this.model.mesh(this.gameCanvas.engine.Cube(1, { color }))
             }
         }
 
@@ -121,8 +138,8 @@
             }
 
             dispose() {
-                for (let i = i; i < this.inputs.length; i++)
-                    this.inputs[i].disable();
+                for (let i = 0; i < this.inputs.length; i++)
+                    this.inputs[i].dispose();
                 this.cube.dispose();
                 this.gameCanvas.dispose();
             }
@@ -142,19 +159,35 @@
         new Vue({
             el: "#app",
             data: {
-                games: [{
-                    title: "Burgandy Cube",
-                    color: [0.8, 0.1, 0.4],
-                    spinTime: 400
-                }, {
-                    title: "Green Cube",
-                    color: [0.1, 0.8, 0.4],
-                    spinTime: 1500
-                }, {
-                    title: "Yellow Cube",
-                    color: [1, 1, 0.1],
-                    spinTime: 600
-                }]
+                nextId: 1,
+                games: []
+            },
+            mounted() {
+                this.addGame();
+                this.addGame();
+                this.addGame();
+            },
+            methods: {
+                addGame: function() {
+                    const red = Math.random();
+                    const green = Math.random();
+                    const blue = Math.random();
+                    
+                    let scale = 1 / red;
+                    if (green > red) scale = 1 / green;
+                    if (blue > red && blue > green) scale = 1 / blue;
+                    const color = [red * scale, green * scale, blue * scale];
+
+                    const spinTime = 500 + Math.random() * 2000;
+                    const id = this.nextId++;
+                    const title = "Game #" + id;
+
+                    this.games.push({ id, title, color, spinTime });
+                },
+                removeGame: function(game) {
+                    const index = this.games.indexOf(game);
+                    this.games.splice(index, 1);
+                }
             }
         });
 

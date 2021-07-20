@@ -16,6 +16,10 @@ window.frag.PackageLoader = function (engine) {
         __private: private,
         littleEndian,
     };
+
+    public.dispose = function () {
+    }
+
     engine.packageLoader = public;
 
     private.loadFontV1 = function (context, objectIndex, headerOffset) {

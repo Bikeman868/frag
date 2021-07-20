@@ -177,5 +177,8 @@ window.frag.PerspectiveCamera = function (engine) {
         return public;
     }
 
+    public.dispose = function () {
+    }
+
     return public;
 };
