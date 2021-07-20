@@ -62,7 +62,9 @@ class PackageWriter:
         if materialIndex == None:
             materialIndex = self.startHeader(1)
             self.writeIndexStr(materialName)
-            if headerOnly: self.endHeader()
+            if headerOnly: 
+                self.writeIndexByte(0) # no textures
+                self.endHeader()
             self._materials[materialName] = materialIndex
         return materialIndex
 

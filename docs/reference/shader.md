@@ -92,12 +92,15 @@ Disables the matricies so that the identity matrix will be used for all
 vertex transformations. Useful only for debugging.
 
 ## normals(): ShaderBuilder
-Adds support for passing vertex normals to the shader and using them in
-lighting calculations.
+Adds a `normal` uniform that will accept a normal map texture. Vectors are sampled from
+the normap map texture and used instead of the normal vectors defined by the mesh allowing
+for more detail in the lighting than exists in the mesh. The UV coordinates of the vertex 
+define which pixel is sampled from the texture.
 
 ## colorsRGB(): ShaderBuilder
-Adds support for each vertex having a red, green and blue value. If no material
-is defined for the model then it will be drawn in these colors.
+Adds support for each vertex in the mesh having a red, green and blue value. If no material
+is defined for the model then it will be drawn in these colors, otherwise these colors
+will be added to the diffuse texture as the basis for the vertex color.
 
 ## colorsRGBA(): ShaderBuilder
 Adds support for each vertex having a red, green, blue and alpha value. If no material
@@ -116,26 +119,26 @@ how much light emmitted from each vertex. The UV coordinates of the vertex defin
 pixel is samples from the texture.
 
 ## normalMapStandard(): ShaderBuilder
-Adds an `normalMap` uniform that will accept a normal map texture in "standard" format.
+Adds an `normal` uniform that will accept a normal map texture in "standard" format.
 This texture defines overrides the normal vector for each vertex taking vectors from
 the normal map instead. The UV coordinates of the vertex define which pixel is samples
 from the texture.
 
-## normalMapStandard(): ShaderBuilder
-Adds an `normalMap` uniform that will accept a normal map texture in "OpenGL" format.
+## normalMapOpenGL(): ShaderBuilder
+Adds an `normal` uniform that will accept a normal map texture in "OpenGL" format.
 This texture defines overrides the normal vector for each vertex taking vectors from
 the normal map instead. The UV coordinates of the vertex define which pixel is samples
 from the texture.
 
 ## displacementTextureRaised(): ShaderBuilder
-Adds a `displacement` uniform that will accept a displacement texture. This texture
+Adds a `height` uniform that will accept a displacement texture. This texture
 will deform the mesh by moving verticies in the direction of the normal vector.
 
 Also adds a `displacementScale` function to the shader so that you can control the
 amount of deformation of the mesh.
 
 ## displacementTextureSunken(): ShaderBuilder
-Adds a `displacement` uniform that will accept a displacement texture. This texture
+Adds a `height` uniform that will accept a displacement texture. This texture
 will deform the mesh by moving verticies in a direction opposite to the direction of
 the normal vector.
 
@@ -143,7 +146,7 @@ Also adds a `displacementScale` function to the shader so that you can control t
 amount of deformation of the mesh.
 
 ## displacementTextureSigned(): ShaderBuilder
-Adds a `displacement` uniform that will accept a displacement texture. This texture
+Adds a `height` uniform that will accept a displacement texture. This texture
 will deform the mesh by moving verticies along the direction of the normal vector.
 Pixel values in the texture are treated as signed values that can either raise up
 or push down the verticies.

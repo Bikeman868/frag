@@ -15,11 +15,6 @@
             padding: 0;
         }
 
-        #app {
-            width: 100vw;
-            height: 100vh;
-        }
-
         .scene-container {
             display: flex;
             flex-direction: row;
@@ -29,8 +24,8 @@
 
         .scene {
             border: 2px solid darkgrey;
-            margin: 15px;
-            padding: 10px;
+            margin: 5px;
+            padding: 5px;
         }
 
         canvas {
@@ -45,9 +40,10 @@
 <body>
     <div id='app'>
         <h1>Each cube is a separate instance of the Frag game engine</h1>
+        <p>Note that WebGL has a maximum number of WebGL contexts that can be active at a time.</p>
         <div class='scene-container'>
             <div class=scene>
-                <button v-on:click="addGame">Add Game</button>
+                <button @click="addGame">Add Game</button>
             </div>
             <div v-for='game in games' :key="game.id" class='scene'>
                 <h3>{{ game.title }}&nbsp;&nbsp;<button @click="removeGame(game)">X</button></h3>

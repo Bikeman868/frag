@@ -101,8 +101,42 @@ window.frag.PackageLoader = function (engine) {
             name += String.fromCharCode(context.header.getUint8(headerOffset++));
         }
         const material = context.assetCatalog.getMaterial(name);
+        const textureCount = context.header.getUint8(headerOffset++)
+
         if (engine.debugPackageLoader)
-            console.log("Object[" + objectIndex + "] is material " + name);
+            console.log("Object[" + objectIndex + "] is " + name + " material with " + textureCount + " textures");
+            
+        for (let i = 0; i < textureCount; i++) {
+            const textureTypeLength = context.header.getUint8(headerOffset++);
+            var textureType = "";
+            for (let i = 0; i < textureTypeLength; i++) {
+                textureType += String.fromCharCode(context.header.getUint8(headerOffset++));
+            }
+
+            const modeLength = context.header.getUint8(headerOffset++);
+            var mode = "";
+            for (let i = 0; i < modeLength; i++) {
+                mode += String.fromCharCode(context.header.getUint8(headerOffset++));
+            }
+    
+            const texture = frag.Texture(engine);
+            if (mode === "RGB") texture.dataFormat(engine.gl.RGB);
+            else if (mode === "RGBA") texture.dataFormat(engine.gl.RGBA);
+            else if (mode === "L") texture.dataFormat(engine.gl.LUMINANCE);
+            else console.error("Texture " + name + " unsupported mode " + mode);
+    
+            const imageWidth = context.header.getUint16(headerOffset + 0, littleEndian);
+            const imageHeight = context.header.getUint16(headerOffset + 2, littleEndian);
+            const dataOffset = context.header.getUint32(headerOffset + 4, littleEndian) + context.dataOffset;
+            headerOffset += 8;
+    
+            if (engine.debugPackageLoader)
+                console.log("  Texture " + textureType + " is " + imageWidth + "x"  + imageHeight + "px in " + mode + " format");
+
+            const dataArray = new Uint8Array(context.data, dataOffset);
+            texture.fromArrayBuffer(0, dataArray, dataOffset, imageWidth, imageHeight);
+            material.setTexture(textureType, texture);
+        }
         return material;
     }
 

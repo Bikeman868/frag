@@ -90,8 +90,10 @@ Once you have a Python http server running you can see this sample running at th
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator
-* Create a material package that paints the model in PBR materials exported from Substance Player
-* Add some terrain for the excavator to move on
+* Add materials to the asset package that paints the model in PBR materials exported from Substance Player
+* Change the features that are enabled on the `groundShader` to see the effect that they have
+* Change the number of facets on the ground `Plane` mesh and observe the impact on the ground appearence, game start-up time and rendering frame rate
+* Instead of one big ground tile, break the ground into multiple tiles
 * Update the model in Blender. Export a Frag model from Blender and rebuild the model package
 * Generate some other fonts, package them and draw some text in different styles and colors
 
@@ -111,8 +113,9 @@ Things to mess around with on this sample:
 ## Multiple engines
 This [sample](multiple-engines.html) illustrates the following features and techniques:
 * Adding multiple canvases on one html page and rendering them independantly using separate engine instances
-* Creating a class to encapsulate your game, and instantiating one game instance for each canvas
+* Creating a class structure for your game, and instantiating one game instance for each canvas
 * Integrating a front-end framework. In this case [Vue.js](https://vuejs.org/)
+* Proper clean up by calling `dispose()` methods
 
 Things to mess around with on this sample:
 * Make the WebGL scenes more interesting

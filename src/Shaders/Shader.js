@@ -155,6 +155,11 @@ window.frag.Shader = function (engine) {
         return public;
     }
 
+    public.ambientTexture = function () {
+        private.ambientLight = "Texture";
+        return public;
+    }
+
     private.addAttributeDeclarations = function(shader) {
         if (private.verticies === "XYZ") shader.vectorShader += "attribute vec4 a_position;\n";
         else if (private.verticies !== none) shader.vectorShader += "attribute vec2 a_position;\n";
@@ -174,10 +179,15 @@ window.frag.Shader = function (engine) {
         }
         if (private.directionalLight !== none) shader.vectorShader += "uniform vec3 u_lightDirection;\n";
         if (private.directionalLight === "Color") shader.vectorShader += "uniform vec3 u_lightColor;\n";
-        if (private.displacementTexture !== none) shader.vectorShader += "uniform float u_displacementScale;\n";
-        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) shader.vectorShader += "uniform sampler2D u_surface;\n";
+        if (private.displacementTexture !== none) {
+            shader.vectorShader += "uniform sampler2D u_height;\n";
+            shader.vectorShader += "uniform float u_displacementScale;\n";
+        }
+        if (private.roughnessTexture !== none) shader.vectorShader += "uniform sampler2D u_roughness;\n";
+        if (private.shininessTexture !== none) shader.vectorShader += "uniform sampler2D u_glossiness;\n";
+        if (private.ambientLight === "Texture") shader.vectorShader += "uniform sampler2D u_ambient;\n";
 
-        if (private.normalMap !== none) shader.fragmentShader += "uniform sampler2D u_normalMap;\n";
+        if (private.normalMap !== none) shader.fragmentShader += "uniform sampler2D u_normal;\n";
         if (private.textureCoords !== none) {
             if (private.diffuseTexture !== none) shader.fragmentShader += "uniform sampler2D u_diffuse;\n";
             if (private.emmissiveTexture !== none) shader.fragmentShader += "uniform sampler2D u_emmissive;\n";
@@ -205,15 +215,17 @@ window.frag.Shader = function (engine) {
         if (private.verticies === "XYZ") shader.vectorShader += "  vec4 position = a_position;\n";
         else if (private.verticies !== none) shader.vectorShader += "  vec2 position = a_position;\n";
 
-        if (private.displacementTexture !== none || private.roughnessTexture !== none || private.shininessTexture != none) {
-            shader.vectorShader += "  vec4 surface = texture2D(u_surface, vec2(a_texcoord.x, 1.0 - a_texcoord.y));\n";
-        }
+        if (private.roughnessTexture !== none)
+            shader.vectorShader += "  vec4 roughness = texture2D(u_roughness, vec2(a_texcoord.x, 1.0 - a_texcoord.y));\n";
+        if (private.shininessTexture != none)
+            shader.vectorShader += "  vec4 glossiness = texture2D(u_glossiness, vec2(a_texcoord.x, 1.0 - a_texcoord.y));\n";
 
         if (private.displacementTexture !== none) {
+            shader.vectorShader += "  vec4 height = texture2D(u_height, vec2(a_texcoord.x, 1.0 - a_texcoord.y));\n";
             if (private.verticies === "XYZ" && private.normals === "vec3") {
-                if (private.displacementTexture === "Sunken") shader.vectorShader += "  float displacement = -surface.r;\n";
-                else if (private.displacementTexture === "Signed") shader.vectorShader += "  float displacement = surface.r * 2.0 - 1.0;\n";
-                else if (private.displacementTexture === "Raised") shader.vectorShader += "  float displacement = surface.r;\n";
+                if (private.displacementTexture === "Sunken") shader.vectorShader += "  float displacement = -height.r;\n";
+                else if (private.displacementTexture === "Signed") shader.vectorShader += "  float displacement = height.r * 2.0 - 1.0;\n";
+                else if (private.displacementTexture === "Raised") shader.vectorShader += "  float displacement = height.r;\n";
                 shader.vectorShader += "  position = vec4(position.xyz + (a_normal * displacement * u_displacementScale), position.w);\n";
             }
         }
@@ -238,7 +250,7 @@ window.frag.Shader = function (engine) {
                 shader.vectorShader += "  vec3 N = normalize(vec3(u_modelMatrix * vec4(a_normal, 0.0)));\n";
                 shader.vectorShader += "  mat3 TBN = transpose(mat3(T, B, N));\n";
                 shader.vectorShader += "  v_lightDirection = TBN * u_lightDirection;\n";
-                shader.fragmentShader += "  vec3 normal = texture2D(u_normalMap, vec2(v_texcoord.x, 1.0 - v_texcoord.y)).rgb * 2.0 - 1.0;\n";
+                shader.fragmentShader += "  vec3 normal = texture2D(u_normal, vec2(v_texcoord.x, 1.0 - v_texcoord.y)).rgb * 2.0 - 1.0;\n";
             } else {
                 shader.vectorShader += "  v_normal = (u_modelMatrix * vec4(a_normal, 0)).xyz;\n";
                 shader.vectorShader += "  v_lightDirection = u_lightDirection;\n";
@@ -340,15 +352,20 @@ window.frag.Shader = function (engine) {
 
         if (private.diffuseTexture !== none) shader.uniform("diffuse");
         if (private.emmissiveTexture !== none) shader.uniform("emmissive");
-        if (private.normalMap !== none) shader.uniform("normalMap");
-        if (private.displacementTexture !== none) shader.uniform("displacementScale", "1f", 0.2);
-        if (private.ambientLight !== none) shader.uniform("ambientLight", "1f", 0.5);
+        if (private.normalMap !== none) shader.uniform("normal");
+        if (private.roughnessTexture !== none) shader.uniform("roughness");
+        if (private.shininessTexture != none) shader.uniform("glossiness");
 
-        if (private.displacementTexture !== none || 
-            private.roughnessTexture !== none || 
-            private.shininessTexture != none) 
-            shader.uniform("surface");
+        if (private.ambientLight !== none) {
+            if (private.ambientLight === "Texture") shader.uniform("ambient");
+            else shader.uniform("ambientLight", "1f", 0.5);
+        }
 
+        if (private.displacementTexture !== none) {
+            shader.uniform("height");
+            shader.uniform("displacementScale", "1f", 0.2);
+        }
+    
         if (private.matrix !== none) {
             if (private.directionalLight !== none)
                 shader.uniform("modelMatrix");

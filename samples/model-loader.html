@@ -34,7 +34,7 @@
             // There are a number of debug console outputs that you can enable
             debugPackageLoader: true,
             debugAnimations: false,
-            debugShaderBuilder: false,
+            debugShaderBuilder: true,
             debugInputs: false,
 
             // higher renderInterval will give you lower power consumption
@@ -49,7 +49,7 @@
 
             // When drawing text you probably want to enable transparency unless
             // your text is always drawn against its background color. Transparency
-            // has a big performance impact.
+            // hovever has a big performance impact.
             // See http://learnwebgl.brown37.net/11_advanced_rendering/alpha_blending.html
             transparency: true
         });
@@ -84,7 +84,29 @@
             // we can add one of these model to the scene.
             // **********************************************************************
 
-            // Get the "excavator" model that was loaded and override the shading algorithm
+            // Create a flat plane as the "ground" and paint it with the "rocks"
+            // material that is in the package we just downloaded
+
+            const groundShader = engine.Shader()
+                .name("Ground")
+                .diffuseTexture()
+                .normalMapOpenGL()
+                .displacementTextureRaised()
+                .directionalLightGrey()
+                .compile();
+            groundShader.displacementScale(0.1);
+
+            const ground = engine.SceneObject(
+                engine.Model()
+                    .mesh(engine.Plane(20))
+                    .material(assetCatalog.getMaterial('rocks'))
+                    .shader(groundShader)
+            );
+            ground.getPosition().locationXYZ(0, -30, 200).scale(200).rotateX(80 * degToRad);
+            scene.addObject(ground);
+
+            // Get the "excavator_nla" or "excavator_dope" model that was loaded 
+            // and override the shading algorithm
             const excavatorModel = assetCatalog.getModel('excavator_nla')
                 .shadeSmooth();
 
@@ -94,7 +116,7 @@
                 .scale(10)
                 .rotateY(-30 * degToRad)
                 .rotateX(-15 * degToRad)
-                .moveByXYZ(0, -30, 0);
+                .moveByXYZ(0, -29, 0);
             scene.addObject(excavator);
 
             // **********************************************************************
@@ -114,7 +136,7 @@
             // Move the excavator from to position -80 on the x-axis whilst running the "moving" animation
             // The "moving" animation was defined in Blender, you can open the `.blend` file to see it.
             const step1 = engine.PositionAnimationAction(position, invLinearVelocity)
-                .moveTo([-60, -30, -25])
+                .moveTo([-60, -29, -25])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
@@ -126,7 +148,7 @@
             // Step 3 in the animation sequence
             // Move the excavator by +100 units on the x-axis whilst running the "moving" animation
             const step3 = engine.PositionAnimationAction(position, invLinearVelocity)
-                .moveBy([100, 20, 100])
+                .moveBy([100, 0, 100])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
