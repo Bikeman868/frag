@@ -45,9 +45,9 @@
     <div id='app'>
         <h1>Each cube is a separate instance of the Frag game engine</h1>
         <div class='scene-container'>
-            <div v-for='scene in scenes' class='scene'>
-                <h2>{{ scene.title }}</h3>
-                    <scene :id='scene.id' :color='scene.color' :spin-time='scene.spinTime' />
+            <div v-for='game in games' class='scene'>
+                <h2>{{ game.title }}</h3>
+                    <game :color='game.color' :spin-time='game.spinTime' />
             </div>
         </div>
         <p>You can drag the cubes around with your pointer</p>
@@ -59,36 +59,38 @@
     <script>
         const degToRad = Math.PI / 180;
 
-        class MyGame {
+        class GameCanvas {
             constructor(canvas) {
-                this.canvas = canvas;
                 this.engine = window.frag.Engine({ canvas }).start();
                 this.camera = this.engine.PerspectiveCamera().frustrum(35 * degToRad, -100, 100).scaleX(100).moveToZ(-120);
                 this.scene = this.engine.Scene().camera(this.camera);
-                this.engine.mainScene(this.scene);
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
+
+                this.engine.mainScene(this.scene);
             }
 
-            setupInputs() {
-                const panXState = this.engine.AnalogState(this.engine.AnalogAction("move-camera-x"), { minValue: 100, maxValue: -100 });
-                const panYState = this.engine.AnalogState(this.engine.AnalogAction("move-camera-y"), { minValue: -100, maxValue: 100 });
-
-                this.engine.AnalogInput("left-pointer-horizontal", panXState).enable();
-                this.engine.AnalogInput("left-pointer-vertical", panYState).enable();
+            dispose() {
+                this.engine.stop();
             }
+        }
 
-            spinningCube(color, duration) {
-                const mesh = this.engine.Cube(1, { color })
-                const model = this.engine.Model().mesh(mesh).shader(this.shader).shadeFlat();
+        class SpinningCube {
+            constructor(gameCanvas, color, duration) {
+                this.model = gameCanvas.engine.Model()
+                    .mesh(gameCanvas.engine.Cube(1, { color }))
+                    .shader(gameCanvas.shader)
+                    .shadeFlat();
 
-                const cube = this.engine.SceneObject(model);
-                const cubePosition = cube.getPosition();
+                this.cube = gameCanvas.engine.SceneObject(this.model);
+                const cubePosition = this.cube.getPosition();
                 cubePosition.scale(40);
-                this.scene.addObject(cube);
 
-                const spinningAnimation = this.engine.Animation()
+                gameCanvas.scene.addObject(this.cube);
+
+                const engine = gameCanvas.engine;
+                this.animation = engine.Animation()
                     .perform(
-                        this.engine.ValueAnimationAction()
+                        engine.ValueAnimationAction()
                             .setDuration(duration)
                             .onStep((a, r) => {
                                 const angle = Math.PI * 2 * r;
@@ -96,20 +98,43 @@
                             }),
                         true)
                     .start();
+            }
 
-                return cube;
+            dispose() {
+                this.animation.dispose();
             }
         }
 
-        Vue.component('scene', {
+        class MyGame {
+            constructor(canvas, color, duration) {
+                this.gameCanvas = new GameCanvas(canvas);
+                this.cube = new SpinningCube(this.gameCanvas, color, duration);
+
+                const engine = this.gameCanvas.engine;
+                const panXState = engine.AnalogState(engine.AnalogAction("move-camera-x"), { minValue: 100, maxValue: -100 });
+                const panYState = engine.AnalogState(engine.AnalogAction("move-camera-y"), { minValue: -100, maxValue: 100 });
+                
+                this.inputs = [
+                    engine.AnalogInput("left-pointer-horizontal", panXState).enable(),
+                    engine.AnalogInput("left-pointer-vertical", panYState).enable()
+                ];
+            }
+
+            dispose() {
+                for (let i = i; i < this.inputs.length; i++)
+                    this.inputs[i].disable();
+                this.cube.dispose();
+                this.gameCanvas.dispose();
+            }
+        }
+
+        Vue.component('game', {
             props: ['color', 'spinTime'],
             mounted() {
-                this.game = new MyGame(this.$el);
-                this.game.spinningCube(this.color, this.spinTime);
-                this.game.setupInputs();
+                this.game = new MyGame(this.$el, this.color, this.spinTime);
             },
             beforeDestroy() {
-                this.game.engine.stop();
+                this.game.dispose();
             },
             template: '<canvas />'
         });
@@ -117,7 +142,7 @@
         new Vue({
             el: "#app",
             data: {
-                scenes: [{
+                games: [{
                     title: "Burgandy Cube",
                     color: [0.8, 0.1, 0.4],
                     spinTime: 400
