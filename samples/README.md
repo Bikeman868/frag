@@ -2,23 +2,27 @@
 These pages can be used to learn how to achieve particular effects and are 
 also used to test and debug the framework itself before each release.
 
-If you are new to this framework I recommend studying the samples in the order
-presented here.
+If you are new to this framework I strongly recommend studying the samples
+ in the order presented here. Each sample contains comments that supplement
+ the documentation. Sometimes it is easier to explain something within the
+ context of a code sample.
 
-To try most of these samples, clone this repository onto your computer and open the
-html file in your browser. I highly recommend playing around with these samples
+To try these samples, clone this repository onto your computer, navigate to
+the `./samples` folder and open the html files in your browser (try double 
+clicking on the file). I highly recommend playing around with these samples 
 to get a much better understanding of how the framework works.
 
-For the samples that load assets, you cannot simply open the html file in your browser
+## Model loader sample
+For the model loader sample, you cannot simply open the html file in your browser
 because the asset loading will be blocked by CORS. There is no way around this, you
 have to run a web server locally.
 
-To run a web server and try the samples that load assets:
+To run a web server and try this sample:
 1. Open a command line, shell or VS Code terminal window
-2. Navigate to the `./samples/` folder
+2. Navigate to the `./samples` folder
 3. Install Python 3 if you don't already have it
 4. Execute the command `python -m http.server` and leave the command running
-5. Open the samples in your browser at `http://localhost:8000/`
+5. Open `http://localhost:8000/model-loader.html` in your browser
 
 ## Hello Cube
 This [sample](hello-cube.html) is the nearest thing to a "Hello, World" 
@@ -106,9 +110,12 @@ Things to mess around with on this sample:
 
 ## Multiple engines
 This [sample](multiple-engines.html) illustrates the following features and techniques:
-* Adding multiple canvases on one html page and rendering them independantly.
-* Arrangine code in a modular fashion to reuse code across scenes.
+* Adding multiple canvases on one html page and rendering them independantly using separate engine instances
+* Creating a class to encapsulate your game, and instantiating one game instance for each canvas
+* Integrating a front-end framework. In this case [Vue.js](https://vuejs.org/)
 
 Things to mess around with on this sample:
-* Make the WebGL scenes more complex
-* Add some html based UI around the two canvases using Vue.js, React.js, Angular.js, or your favorite front-end framework.
+* Make the WebGL scenes more interesting
+* Add a check box that toggles the cubes between flat and smooth shading
+* Add some game UI features using Vue.js
+* Add a color picker and re-build the cube mesh with the color chosen

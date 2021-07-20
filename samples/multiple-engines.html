@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+
 <head>
     <title>Multiple engines</title>
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
@@ -9,89 +10,128 @@
             overflow: hidden;
             width: 100%;
             height: 100%;
-            margin: 0;
+            margin: 20px;
             padding: 0;
         }
 
+        #app {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .scene-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+
         .scene {
-            width: 40vw;
-            height: 90vh;
-            touch-action: none;
-            display: inline-block;
             border: 2px solid darkgrey;
             margin: 15px;
+            padding: 10px;
+        }
+
+        canvas {
+            display: block;
+            touch-action: none;
+            width: 280px;
+            height: 280px;
         }
     </style>
 </head>
+
 <body>
-    <canvas id='scene1' class='scene'></canvas>
-    <canvas id='scene2' class='scene'></canvas>
+    <div id='app'>
+        <h1>Each cube is a separate instance of the Frag game engine</h1>
+        <div class='scene-container'>
+            <div v-for='scene in scenes' class='scene'>
+                <h2>{{ scene.title }}</h3>
+                    <scene :id='scene.id' :color='scene.color' :spin-time='scene.spinTime' />
+            </div>
+        </div>
+        <p>You can drag the cubes around with your pointer</p>
+    </div>
+
+    <script src="https://unpkg.com/vue"></script>
     <script src='frag.min.js'></script>
+    
     <script>
         const degToRad = Math.PI / 180;
 
-        /*************************************
-         * Shared code
-        **************************************/
+        class MyGame {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.engine = window.frag.Engine({ canvas }).start();
+                this.camera = this.engine.PerspectiveCamera().frustrum(35 * degToRad, -100, 100).scaleX(100).moveToZ(-120);
+                this.scene = this.engine.Scene().camera(this.camera);
+                this.engine.mainScene(this.scene);
+                this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
+            }
 
-        const setupEnvironment = function (elementId) {
-            const engine = window.frag.Engine({ canvas: document.getElementById(elementId) }).start();
-            const camera = engine.PerspectiveCamera().frustrum(35 * degToRad, -100, 100).scaleX(100).moveToZ(-120);
-            const scene = engine.Scene().camera(camera);
-            engine.mainScene(scene);
-            const shader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile();
-            return { engine, scene, shader };
+            setupInputs() {
+                const panXState = this.engine.AnalogState(this.engine.AnalogAction("move-camera-x"), { minValue: 100, maxValue: -100 });
+                const panYState = this.engine.AnalogState(this.engine.AnalogAction("move-camera-y"), { minValue: -100, maxValue: 100 });
+
+                this.engine.AnalogInput("left-pointer-horizontal", panXState).enable();
+                this.engine.AnalogInput("left-pointer-vertical", panYState).enable();
+            }
+
+            spinningCube(color, duration) {
+                const mesh = this.engine.Cube(1, { color })
+                const model = this.engine.Model().mesh(mesh).shader(this.shader).shadeFlat();
+
+                const cube = this.engine.SceneObject(model);
+                const cubePosition = cube.getPosition();
+                cubePosition.scale(40);
+                this.scene.addObject(cube);
+
+                const spinningAnimation = this.engine.Animation()
+                    .perform(
+                        this.engine.ValueAnimationAction()
+                            .setDuration(duration)
+                            .onStep((a, r) => {
+                                const angle = Math.PI * 2 * r;
+                                cubePosition.rotateXYZ(angle, -angle, 0)
+                            }),
+                        true)
+                    .start();
+
+                return cube;
+            }
         }
 
-        const setupInputs = function (env) {
-            const panXState = env.engine.AnalogState(
-                env.engine.AnalogAction("move-camera-x"), { minValue: 100, maxValue: -100 });
+        Vue.component('scene', {
+            props: ['color', 'spinTime'],
+            mounted() {
+                this.game = new MyGame(this.$el);
+                this.game.spinningCube(this.color, this.spinTime);
+                this.game.setupInputs();
+            },
+            beforeDestroy() {
+                this.game.engine.stop();
+            },
+            template: '<canvas />'
+        });
 
-            const panYState = env.engine.AnalogState(
-                env.engine.AnalogAction("move-camera-y"), { minValue: -100, maxValue: 100 });
-
-            env.engine.AnalogInput("left-pointer-horizontal", panXState).enable();
-            env.engine.AnalogInput("left-pointer-vertical", panYState).enable();
-        }
-
-        const spinningCube = function (env, color, duration) {
-            const engine = env.engine;
-            const scene = env.scene;
-            const shader = env.shader;
-
-            const mesh = engine.Cube(1, { color })
-            const model = engine.Model().mesh(mesh).shader(shader).shadeFlat();
-
-            const cube = engine.SceneObject(model);
-            cube.getPosition().scale(40);
-            scene.addObject(cube);
-
-            const spinningAnimation = frag.Animation(engine)
-                .perform(
-                    frag.ValueAnimationAction(engine)
-                        .setDuration(duration)
-                        .onStep((a, r) => {
-                            const angle = Math.PI * 2 * r;
-                            cube.getPosition().rotateXYZ(angle, -angle, 0)
-                        }),
-                    true)
-                .start();
-            return cube;
-        }
-
-        /*************************************
-         * Scene 1 
-        **************************************/
-        const env1 = setupEnvironment("scene1");
-        spinningCube(env1, [0.8, 0.1, 0.4], 2000);
-        setupInputs(env1);
-
-        /*************************************
-         * Scene 2
-        **************************************/
-        const env2 = setupEnvironment("scene2");
-        spinningCube(env2, [0.1, 0.8, 0.4], 1500);
-        setupInputs(env2);
+        new Vue({
+            el: "#app",
+            data: {
+                scenes: [{
+                    title: "Burgandy Cube",
+                    color: [0.8, 0.1, 0.4],
+                    spinTime: 400
+                }, {
+                    title: "Green Cube",
+                    color: [0.1, 0.8, 0.4],
+                    spinTime: 1500
+                }, {
+                    title: "Yellow Cube",
+                    color: [1, 1, 0.1],
+                    spinTime: 600
+                }]
+            }
+        });
 
     </script>
 </body>
