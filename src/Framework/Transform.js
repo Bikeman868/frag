@@ -33,7 +33,7 @@ window.frag.Transform = function (engine, matrix) {
         return public;
     }
 
-    private.transform = function (matrix) {
+    public.transform = function (matrix) {
         if (private.matrix)
             return public.setMatrix(frag.Matrix.m4Xm4(private.matrix, matrix));
         return public.setMatrix(matrix);
@@ -49,7 +49,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scale = function (s) {
-        return private.transform([
+        return public.transform([
             s, _, _, _,
             _, s, _, _,
             _, _, s, _,
@@ -58,7 +58,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scaleX = function (s) {
-        return private.transform([
+        return public.transform([
             s, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -67,7 +67,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scaleY = function (s) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, s, _, _,
             _, _, s, _,
@@ -76,7 +76,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scaleZ = function (s) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, s, _,
@@ -85,7 +85,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scaleXY = function (x, y) {
-        return private.transform([
+        return public.transform([
             x, _, _, _,
             _, y, _, _,
             _, _, 1, _,
@@ -94,7 +94,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.scaleXYZ = function (x, y, z) {
-        return private.transform([
+        return public.transform([
             x, _, _, _,
             _, y, _, _,
             _, _, z, _,
@@ -103,7 +103,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.translateX = function (d) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -112,7 +112,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.translateY = function (d) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -121,7 +121,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.translateZ = function (d) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -130,7 +130,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.translateXY = function (x, y) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -139,7 +139,7 @@ window.frag.Transform = function (engine, matrix) {
     }
 
     public.translateXYZ = function (x, y, z) {
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, 1, _, _,
             _, _, 1, _,
@@ -150,7 +150,7 @@ window.frag.Transform = function (engine, matrix) {
     public.rotateX = function (rad) {
         var c = Math.cos(rad);
         var s = Math.sin(rad);
-        return private.transform([
+        return public.transform([
             1, _, _, _,
             _, c, s, _,
             _,-s, c, _,
@@ -161,7 +161,7 @@ window.frag.Transform = function (engine, matrix) {
     public.rotateY = function (rad) {
         var c = Math.cos(rad);
         var s = Math.sin(rad);
-        return private.transform([
+        return public.transform([
             c, _,-s, _,
             _, 1, _, _,
             s, _, c, _,
@@ -172,7 +172,7 @@ window.frag.Transform = function (engine, matrix) {
     public.rotateZ = function (rad) {
         var c = Math.cos(rad);
         var s = Math.sin(rad);
-        return private.transform([
+        return public.transform([
             c, s, _, _,
            -s, c, _, _,
             _, _, 1, _,

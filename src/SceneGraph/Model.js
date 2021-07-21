@@ -181,7 +181,7 @@ window.frag.Model = function (engine, is3d, parent) {
         return public;
     }
 
-    public.draw = function (drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap) {
+    public.draw = function (drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap, childMap) {
         if (!public.location) return public;
 
         const animationState = animationMap && private.name ? animationMap[private.name] : null;
@@ -235,7 +235,23 @@ window.frag.Model = function (engine, is3d, parent) {
         }
 
         for (let i = 0; i < private.children.length; i++)
-            private.children[i].draw(drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap);
+            private.children[i].draw(drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap, childMap);
+
+        const sceneObjects = parent 
+            ? (childMap && private.name ? childMap[private.name] : undefined)
+            : (childMap ? childMap['.'] : undefined);
+
+        if (sceneObjects) {
+            const worldToClipTransform = drawContext.worldToClipTransform;
+            //drawContext.worldToClipTransform = drawContext.worldToClipTransform.clone().transform(modelToWorldMatrix);
+            //drawContext.worldToClipTransform = frag.Transform(engine, modelToWorldMatrix).transform(drawContext.worldToClipTransform.getMatrix());
+            //drawContext.worldToClipTransform = frag.Transform(engine, modelToClipMatrix);
+
+            for (let i = 0; i < sceneObjects.length; i++)
+                sceneObjects[i].draw(drawContext);
+
+            drawContext.worldToClipTransform = worldToClipTransform;
+        }
 
         return public;
     }

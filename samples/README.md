@@ -93,7 +93,7 @@ Things to mess around with on this sample:
 * Add materials to the asset package that paints the model in PBR materials exported from Substance Player
 * Change the features that are enabled on the `groundShader` to see the effect that they have
 * Change the number of facets on the ground `Plane` mesh and observe the impact on the ground appearence, game start-up time and rendering frame rate
-* Instead of one big ground tile, break the ground into multiple tiles
+* Instead of one big ground tile, break the ground into multiple tiles. Which one is more performant, one large rectangle with many facets or many smaller rectangles with fewer facets? Where the sweet spot between performance and appearence?
 * Update the model in Blender. Export a Frag model from Blender and rebuild the model package
 * Generate some other fonts, package them and draw some text in different styles and colors
 

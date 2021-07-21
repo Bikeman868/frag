@@ -6,12 +6,14 @@ window.frag.SceneObject = function (engine, model) {
         enabled: true,
         location: null,
         animationLocation: null,
-        animationMap: {}
+        animationMap: {},
+        childMap: {},
     };
 
     const public = {
         __private: private,
-        animations: {}
+        animations: {},
+        parent: null,
     };
 
     for (let i = 0; i < model.animations.length; i++) {
@@ -30,6 +32,31 @@ window.frag.SceneObject = function (engine, model) {
         const objectAnimation = window.frag.SceneObjectAnimation(engine, animation, private.animationMap);
         public.animations[animation.modelAnimation.getName()] = objectAnimation;
     };
+
+    public.addObject = function(sceneObject, childName) {
+        if (sceneObject.parent) 
+            sceneObject.parent.removeObject(sceneObject);
+        sceneObject.parent = public;
+
+        if (!childName) childName = ".";
+        if (!private.childMap[childName]) private.childMap[childName] = [];
+        private.childMap[childName].push(sceneObject);
+        return public;
+    };
+
+    public.removeObject = function(sceneObject) {
+        for (let childName in private.childMap) {
+            const children = private.childMap[childName];
+            for (let i = 0; i < children.length; i++) {
+                if (children[i] === sceneObject) {
+                    children.splice(i, 1);
+                    sceneObject.parent = null;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private.getLocation = function () {
         if (private.location) return private.location;
@@ -104,6 +131,7 @@ window.frag.SceneObject = function (engine, model) {
      */
     public.dispose = function() {
         public.disable();
+        if (private.parent) private.parent.removeObject(sceneObject);
         for (let animationName in public.animations) {
             public.animations[animationName].dispose();
         }
@@ -133,7 +161,7 @@ window.frag.SceneObject = function (engine, model) {
             drawContext.sceneObjects.push(public);
         }
 
-        private.model.draw(drawContext, modelToWorldMatrix, modelToClipMatrix, private.animationMap);
+        private.model.draw(drawContext, modelToWorldMatrix, modelToClipMatrix, private.animationMap, private.childMap);
 
         return public;
     };

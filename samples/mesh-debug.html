@@ -60,9 +60,17 @@
             .mesh(mesh)
             .shader(shader);
 
-        const cube = frag.SceneObject(engine, model);
-        cube.getPosition().scale(40);
-        scene.addObject(cube);
+        const cube1 = frag.SceneObject(engine, model);
+        cube1.getPosition().scale(40);
+        scene.addObject(cube1);
+
+        const cube2 = frag.SceneObject(engine, model);
+        cube2.getPosition().scale(20);
+        cube1.addObject(cube2);
+
+        const cube3 = frag.SceneObject(engine, model);
+        cube3.getPosition().scale(10);
+        cube2.addObject(cube3);
 
         const spinningAnimation = frag.Animation(engine)
             .perform(
@@ -70,7 +78,7 @@
                     .setDuration(2000)
                     .onStep((a, r) => {
                         const angle = Math.PI * 2 * r;
-                        cube.getPosition().rotateXYZ(angle, -angle, 0)
+                        cube1.getPosition().rotateXYZ(angle, -angle, 0)
                     }),
                 true);
         spinningAnimation.start();
