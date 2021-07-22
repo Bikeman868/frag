@@ -309,6 +309,7 @@ window.frag.Engine = function(config) {
     addProxy("Observable");
     addProxy("Transform");
     addProxy("Transform2D");
+    addProxy("Transform3D");
     addProxy("Location");
     
     addProxy("CustomShader");

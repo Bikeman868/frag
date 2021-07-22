@@ -54,7 +54,7 @@ window.frag.Location = function (engine, is3d) {
 
         let transform;
         if (public.is3d) {
-            transform = window.frag.Transform(engine)
+            transform = window.frag.Transform3D(engine)
                 .translateXYZ(public.translateX, public.translateY, public.translateZ)
                 .rotateXYZ(public.rotateX, public.rotateY, public.rotateZ)
                 .scaleXYZ(public.scaleX, public.scaleY, public.scaleZ);

@@ -1,5 +1,5 @@
 // This is a wrapper around a 3x3 matrix. It provides methods to operate on the matrix
-// and can appply the matrix to a shader for rendering. It also provides an observable
+// and can apply the matrix to a shader for rendering. It also provides an observable
 // that you can subscribe to changes in the matrix
 window.frag.Transform2D = function (engine, matrix) {
     const frag = window.frag;
@@ -33,7 +33,7 @@ window.frag.Transform2D = function (engine, matrix) {
         return public;
     }
 
-    private.transform = function (matrix) {
+    public.transform = function (matrix) {
         if (private.matrix)
             return public.setMatrix(frag.Matrix.m3Xm3(private.matrix, matrix));
         return public.setMatrix(matrix);
@@ -48,7 +48,7 @@ window.frag.Transform2D = function (engine, matrix) {
     }
 
     public.scale = function (s) {
-        return private.transform([
+        return public.transform([
             s, _, _,
             _, s, _,
             _, _, 1,
@@ -56,7 +56,7 @@ window.frag.Transform2D = function (engine, matrix) {
     }
 
     public.scaleXY = function (x, y) {
-        return private.transform([
+        return public.transform([
             x, _, _,
             _, y, _,
             _, _, 1,
@@ -64,7 +64,7 @@ window.frag.Transform2D = function (engine, matrix) {
     }
 
     public.translateX = function (d) {
-        return private.transform([
+        return public.transform([
             1, _, _,
             _, 1, _,
             d, _, 1,
@@ -72,7 +72,7 @@ window.frag.Transform2D = function (engine, matrix) {
     }
 
     public.translateY = function (d) {
-        return private.transform([
+        return public.transform([
             1, _, _,
             _, 1, _,
             _, d, 1,
@@ -80,7 +80,7 @@ window.frag.Transform2D = function (engine, matrix) {
     }
 
     public.translateXY = function (x, y) {
-        return private.transform([
+        return public.transform([
             1, _, _,
             _, 1, _,
             x, y, 1,
@@ -90,7 +90,7 @@ window.frag.Transform2D = function (engine, matrix) {
     public.rotate = function (rad) {
         var c = Math.cos(rad);
         var s = Math.sin(rad);
-        return private.transform([
+        return public.transform([
             c,-s, _,
             s, c, _,
             _, _, 1,

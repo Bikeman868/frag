@@ -3,9 +3,9 @@
 
 window.frag.PerspectiveCamera = function (engine) {
     const private = {
-        locationTransform: window.frag.Transform(engine),
-        worldTransform: window.frag.Transform(engine),
-        perspectiveTransform: window.frag.Transform(engine),
+        locationTransform: window.frag.Transform3D(engine),
+        worldTransform: window.frag.Transform3D(engine),
+        perspectiveTransform: window.frag.Transform3D(engine),
         x: 0,
         y: 0,
         z: -200,
@@ -22,7 +22,7 @@ window.frag.PerspectiveCamera = function (engine) {
 
     const public = {
         __private: private,
-        worldToClipTransform: window.frag.Transform(engine)
+        worldToClipTransform: window.frag.Transform3D(engine)
     };
 
     private.computeCameraTransforms = function () {

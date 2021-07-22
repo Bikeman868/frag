@@ -15,7 +15,7 @@ window.frag.OrthographicCamera = function (engine) {
 
     const public = {
         __private: private,
-        worldToClipTransform: window.frag.Transform(engine)
+        worldToClipTransform: window.frag.Transform3D(engine)
     };
 
     const computeTransformMatrix = function () {

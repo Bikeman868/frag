@@ -220,12 +220,12 @@ window.frag.Model = function (engine, is3d, parent) {
             if (material) material.apply(drawContext.gl, shader);
 
             if (shader.uniforms.clipMatrix !== undefined) {
-                const modelToClipTransform = location.is3d ? frag.Transform(engine, modelToClipMatrix) : frag.Transform2D(engine, modelToClipMatrix);
+                const modelToClipTransform = frag.Transform(engine, modelToClipMatrix);
                 modelToClipTransform.apply(drawContext.gl, shader.uniforms.clipMatrix);
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
-                const modelToWorldTransform = location.is3d ? frag.Transform(engine, modelToWorldMatrix) : frag.Transform2D(engine, modelToWorldMatrix);
+                const modelToWorldTransform = frag.Transform(engine, modelToWorldMatrix);
                 modelToWorldTransform.apply(drawContext.gl, shader.uniforms.modelMatrix);
             }
 
@@ -246,6 +246,8 @@ window.frag.Model = function (engine, is3d, parent) {
             //drawContext.worldToClipTransform = drawContext.worldToClipTransform.clone().transform(modelToWorldMatrix);
             //drawContext.worldToClipTransform = frag.Transform(engine, modelToWorldMatrix).transform(drawContext.worldToClipTransform.getMatrix());
             //drawContext.worldToClipTransform = frag.Transform(engine, modelToClipMatrix);
+            //drawContext.worldToClipTransform = worldToClipTransform.clone().transform(localMatrix);
+            drawContext.worldToClipTransform = worldToClipTransform.clone().transform(modelToClipMatrix);
 
             for (let i = 0; i < sceneObjects.length; i++)
                 sceneObjects[i].draw(drawContext);
