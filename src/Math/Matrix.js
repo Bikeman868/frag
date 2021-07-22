@@ -188,6 +188,24 @@ window.frag.Matrix = {
             b0 * c0r3 + b1 * c1r3 + b2 * c2r3 + b3 * c3r3,
         ];
     },
+
+    mult: function (a, b) {
+        if (a.length === 9) {
+            if (Array.isArray(b)) {
+                if (b.length === 9) return frag.Matrix.m3xm3(a, b);
+                if (b.length === 3) return frag.Matrix.m3Xv3(a, b);
+            }
+            console.error('Invalid M3 matrix multiplication operation', a, b);
+        } else if (a.length === 16) {
+            if (Array.isArray(b)) {
+                if (b.length === 16) return frag.Matrix.m4Xm4(a, b);
+                if (b.length === 4) return frag.Matrix.m4Xv4(a, b);
+            }
+            console.error('Invalid M4 matrix multiplication operation', a, b);
+        } else {
+            console.error('Invalid matrix multiplication operation', a, b);
+        }
+    }
 }
 /*
 // Unit tests framework

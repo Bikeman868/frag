@@ -41,8 +41,9 @@ Things to mess around with on this sample:
 This [sample](mesh-debug.html) illustrates the following features and techniques
 * Only draws colored verticies - no textures or materials
 * Displays a cube in wireframe mode so that the mesh can be visualized
-* Displays normal vectors as short blue lines sticking out from the vertices
+* Displays "normal" vectors as short lines sticking out from the vertices
 * Spins the cube using a `ValueAnimationAction` instance
+* Parenting scene objects to other scene objects rather than the scene
 
 Things to mess around with on this sample:
 * Speed up or slow down the rotation of the cube

@@ -151,14 +151,13 @@ window.frag.SceneObject = function (engine, model) {
             location = location.clone().add(private.animationLocation);
         }
 
-        if (drawContext.isHitTest) {
-            drawContext.sceneObjects.push(public);
-        }
-
         drawContext.beginSceneObject(location, private.animationMap, private.childMap);
-        private.model.draw(drawContext);
-        drawContext.endSceneObject();
 
+        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
+
+        private.model.draw(drawContext);
+
+        drawContext.endSceneObject();
         return public;
     };
 

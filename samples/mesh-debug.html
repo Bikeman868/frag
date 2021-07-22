@@ -43,13 +43,15 @@
 
         engine.mainScene(scene);
 
+        // This shader just colors the verticies and does not support 
+        // materials, lighting or any advancedshader features
         const shader = frag.Shader(engine)
-            .name("My shader")
+            .name("Color shader")
             .colorsRGB()
-            .directionalLightGrey()
             .compile();
 
-        const mesh1 = frag.Cube(engine, 5, { color: [0.8, 0.1, 0.4] })
+        // The big cube is red with blue "normal" vectors
+        const mesh1 = frag.Cube(engine, 4, { color: [0.8, 0.1, 0.4] })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
@@ -60,38 +62,54 @@
         model1.getPosition()
             .rotateXYZ(45 * degToRad, 45 * degToRad);
 
-        const mesh2 = frag.Cube(engine, 3, { color: [0.6, 0.4, 0.1] })
+        // The medium cube is green with red "normal" vectors
+        const mesh2 = frag.Cube(engine, 2, { color: [0.4, 0.8, 0.4] })
             .shadeSmooth()
             .wireframe(true)
-            .drawNormals(0.2, [0, 1, 0]);
+            .drawNormals(0.2, [1, 0, 0]);
 
         const model2 = frag.Model(engine)
             .mesh(mesh2)
             .shader(shader);
 
-        const mesh3 = frag.Cube(engine, 3, { color: [0.1, 0.4, 0.8] })
+        // The small cube is blue with green "normal" vectors
+        const mesh3 = frag.Cube(engine, 1, { color: [0.1, 0.4, 0.8] })
             .shadeSmooth()
             .wireframe(true)
-            .drawNormals(0.2, [1, 0, 0]);
+            .drawNormals(0.2, [0, 1, 0]);
 
         const model3 = frag.Model(engine)
             .mesh(mesh3)
             .shader(shader);
 
+        // Cube1 is parented on the scene
         const cube1 = frag.SceneObject(engine, model1);
         cube1.getPosition().scale(40);
         scene.addObject(cube1);
 
+        // Cube2 has cube1 as a parent and is affected by the parent
+        // transform including scale. Setting the scale of cube2 to 0.5
+        // will make it half the size of cube1.
+        // If you do not want your child objects to scale to the parent
+        // size then you should make the visible parts of your model
+        // children of an empty root which has a scale of 1.
+        // Setting the locationX of cube2 to 1.5 offsets the center of 
+        // cube2 by 1.5x the size of cube1 in the X direction.
         const cube2 = frag.SceneObject(engine, model2);
-        cube2.getPosition().scale(20);
+        cube2.getPosition().locationX(1.5).scale(0.5);
         cube1.addObject(cube2);
 
+        // Cube3 has cube2 as a parent and is affected by the parent
+        // transform including scale. Setting the scale of cube3 to 0.5
+        // will make it half the size of its parent (cube2).
+        // Setting the locationY of cube3 to 1.5 offsets the center of 
+        // cube3 by 1.5x the size of cube1 in the Y direction.
         const cube3 = frag.SceneObject(engine, model3);
-        cube3.getPosition().scale(10);
+        cube3.getPosition().locationY(1.5).scale(0.5);
         cube2.addObject(cube3);
 
         // Just spin cube1. Cube 2 and 3 are parented off
-        // cube1 and should follow its movement.
+        // cube1 and will follow its movements
         const spinningAnimation = frag.Animation(engine)
             .perform(
                 frag.ValueAnimationAction(engine)

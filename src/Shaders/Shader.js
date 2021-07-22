@@ -304,22 +304,7 @@ window.frag.Shader = function (engine) {
         private.addUniformDeclarations(source);
         private.addVaryingDeclarations(source);
 
-        if (private.directionalLight !== none) {
-            /*
-            source.vectorShader += "highp mat4 transpose(in highp mat4 inMatrix) {\n";
-            source.vectorShader += "    highp vec4 i0 = inMatrix[0];\n";
-            source.vectorShader += "    highp vec4 i1 = inMatrix[1];\n";
-            source.vectorShader += "    highp vec4 i2 = inMatrix[2];\n";
-            source.vectorShader += "    highp vec4 i3 = inMatrix[3];\n";
-            source.vectorShader += "    highp mat4 outMatrix = mat4(\n";
-            source.vectorShader += "        vec4(i0.x, i1.x, i2.x, i3.x),\n";
-            source.vectorShader += "        vec4(i0.y, i1.y, i2.y, i3.y),\n";
-            source.vectorShader += "        vec4(i0.z, i1.z, i2.z, i3.z),\n";
-            source.vectorShader += "        vec4(i0.w, i1.w, i2.w, i3.w)\n";
-            source.vectorShader += "    );\n";
-            source.vectorShader += "    return outMatrix;\n";
-            source.vectorShader += "}\n";
-            */
+        if (private.directionalLight !== none && private.normalMap !== none) {
             source.vectorShader += "highp mat3 transpose(in highp mat3 inMatrix) {\n";
             source.vectorShader += "    highp vec3 i0 = inMatrix[0];\n";
             source.vectorShader += "    highp vec3 i1 = inMatrix[1];\n";

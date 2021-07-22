@@ -54,11 +54,26 @@ window.frag.DrawContext = function (engine) {
         public.state.animationMap = animationMap;
         public.state.childMap = childMap;
 
-        const worldToClipMatrix = public.worldToClipTransform.getMatrix();
-        public.state.modelToWorldMatrix = location.getMatrix();
-        public.state.modelToClipMatrix = public.worldToClipTransform.is3d
-            ? frag.Matrix.m4Xm4(worldToClipMatrix, public.state.modelToWorldMatrix)
-            : frag.Matrix.m3Xm3(worldToClipMatrix, public.state.modelToWorldMatrix);
+        const localMatrix = location.getMatrix();
+
+        if (public.state.modelToWorldMatrix) {
+            // This is the case where this SceneObject is parented to another model
+            const Matrix = frag.Matrix;
+            if (public.worldToClipTransform.is3d) {
+                public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
+                public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            } else {
+                public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
+                public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+            }    
+        } else {
+            // This is the case where this SceneObject is parented to the scene
+            const worldToClipMatrix = public.worldToClipTransform.getMatrix();
+            public.state.modelToWorldMatrix = localMatrix;
+            public.state.modelToClipMatrix = public.worldToClipTransform.is3d
+                ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
+                : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+        }
 
         return public;
     }
@@ -78,7 +93,7 @@ window.frag.DrawContext = function (engine) {
         const localMatrix = location.getMatrix();
 
         const Matrix = frag.Matrix;
-        if (location.is3d) {
+        if (public.worldToClipTransform.is3d) {
             public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
             public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
         } else {
