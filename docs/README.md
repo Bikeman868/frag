@@ -51,6 +51,7 @@ followed by the other samples in the order presented in the [samples readme file
 ## Subjects
 The following documents are general discussions around a specific topic
 
+* [Position, scale, orientation and parenting](transforms.md)
 * ~[Materials and shaders](materials.md)~
 * ~[Asset loaders](loaders.md)~
 * [Animation](animation.md)

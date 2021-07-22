@@ -38,6 +38,9 @@ The functioanllity that is provided:
 * Full support for custom shaders and granular application of shaders to model
   components so for example you only need the shader that supports light emmissions
   for drawing the parts of the model that emit light.
+* Models comprising a heirachy of components where each component has a mesh and material.
+* Animation of components within models that match regular expression
+* Parenting scene objects to other scene objects or components of other scene object models.
 
 This framework is great is you have an original game idea and want to fast track the
 graphics development. If you want to create a world in which you have a character 
