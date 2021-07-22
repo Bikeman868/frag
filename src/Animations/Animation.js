@@ -47,7 +47,7 @@ window.frag.Animation = function (engine, obj, isChild) {
         if (private.stopAt !== undefined && gameTick >= private.stopAt) {
             if (private.sequence) {
                 let step = private.sequence[private.sequenceIndex];
-                if (step.stop) step.stop(public, gameTick);
+                if (step && step.stop) step.stop(public, gameTick);
             }
             engine.deactivateAnimation(public);
             if (private.disposeOnStop) public.dispose();
@@ -78,8 +78,8 @@ window.frag.Animation = function (engine, obj, isChild) {
                     }
                 }
             } else {
-                private.nextStepTick = gameTick + (step.duration || DEFAULT_STEP_DURATION);
                 if (step.start) step.start(public, gameTick);
+                private.nextStepTick = gameTick + (step.duration || DEFAULT_STEP_DURATION);
             }
             private.action = step.action;
             public.nextGameTick = gameTick + (step.interval || DEFAULT_STEP_INTERVAL);
@@ -172,6 +172,7 @@ window.frag.Animation = function (engine, obj, isChild) {
 
     public.disposeOnStop = function(dispose){
         private.disposeOnStop = dispose;
+        return public;
     }
 
     if (!isChild) engine.addAnimation(public);

@@ -1,7 +1,7 @@
 # Things that need to be added or improved
 
 ## Bug fixes
-* In the excatator sample the very first movement is based on the wrong initial position
+No known bugs at this time
 
 ## Core features that are missing
 * Shader support for glossinness textures
