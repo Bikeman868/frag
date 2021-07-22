@@ -7,24 +7,27 @@ Like all 3D graphics frameworks Frag uses matricies for transformations.
 Matricies are cool because any sequence of movements, rotations and scaling 
 no matter how complex can be represented as a matrix, and multiplying the
 matrix by the coordinates of a point in space calculates the transformed
-location of that point.
+location of that point in a single operation no matter how many scales, rotate
+and translate operations went into building the matrix.
 
 Even more cool is that you can take any two matricies and multiply them
 together, and the result is the same as joining the two sequences of
-operations no matter how many steps were involved in producing each matrix.
+operations into one long list no matter how many steps were involved
+in producing each matrix.
 
-Also like other 3D graphics frameworks Frag uses 4x4 matricies for 3D
+Like other 3D graphics frameworks Frag uses 4x4 matricies for 3D
 spaces and 3x3 matricies for 2D spaces. The reason for the extra row and
 column is that it makes it possible to create a perspective effect via
 the matrix multiplication, and since perspective is so commonly used in
-3D graphics this is built into the WebGl pipeline.
+3D graphics this is built into the WebGL pipeline.
 
 ## Matrix
-The `Matrix` class provides static methdods for performing matrix math
-such as matrix multiplication, inversion, dot product etc.
+The [`Matrix`](reference/matrix.md) class provides static methdods for 
+performing matrix math such as matrix multiplication, inversion, dot product etc.
 
 ## Location
-This class encapsulates translation, rotation and scale as discrete values
+The [`Location`](reference/location.md) class encapsulates translation, 
+rotation and scale as discrete values
 and can calculate a matrix from them. Setting the `isModified` flag will
 cause the `Location` to recalculate the matrix next time it is required.
 
@@ -35,13 +38,14 @@ using a matrix and now I want to change the amount of movement in the x
 direction, I would have to undo the rotation first, apply a new translation
 then re-apply the rotation.
 
-The `Location` class always calculates the matrix by scaling first, then
-rotating, and moving last. This is what you want in a game, because you
-can change the location, rotation or scale any time without getting perculior
-effects from the combination of these transformations.
+The [`Location`](reference/location.md) class always calculates the matrix 
+by scaling first, then rotating, and moving last. This is what you want in 
+a game, because you can change the location, rotation or scale any time 
+without getting perculior effects from the combination of these transformations.
 
 ## ScenePosition
-This class is a wrapper around an instance of a `Location` object. It
+The [`ScenePosition`](reference/scene-position.md) class is a wrapper 
+around an instance of a [`Location`](reference/location.md) object. It 
 provides a collection of helper methods that make it easier to modify
 the location. For example if you call the `scale` method of `ScenePosition`
 it will change the scale in all 3 axes and set the `isModified` flag on
