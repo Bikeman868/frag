@@ -361,9 +361,10 @@ window.frag.MeshData = function (engine) {
         gl.drawArrays(fragment.renderData.primitiveType, 0, fragment.renderData.vertexCount);
     }
 
-    public.draw = function (gl, shader) {
+    public.draw = function (shader) {
         if (!private.finalized && !private.fromBuffer) private.finalize();
 
+        const gl = engine.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
 
         for (let i = 0; i < private.meshFragments.length; i++) {

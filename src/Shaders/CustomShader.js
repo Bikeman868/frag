@@ -132,13 +132,15 @@ window.frag.CustomShader = function (engine, is3d) {
         return public;
     }
 
-    public.bind = function (gl) {
+    public.bind = function () {
+        const gl = engine.gl;
         gl.useProgram(public.program);
         private.bindList.forEach(f => f(gl));
         return public;
     }
 
-    public.unbind = function (gl) {
+    public.unbind = function () {
+        const gl = engine.gl;
         private.unbindList.forEach(f => f(gl));
         return public;
     }

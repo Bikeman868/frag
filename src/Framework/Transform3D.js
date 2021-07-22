@@ -187,9 +187,9 @@ window.frag.Transform3D = function (engine, matrix) {
         return public;
     }
 
-    public.apply = function (gl, uniform) {
+    public.apply = function (uniform) {
         if (uniform !== undefined) {
-            gl.uniformMatrix4fv(uniform, false, public.getMatrix());
+            engine.gl.uniformMatrix4fv(uniform, false, public.getMatrix());
         }
         return public;
     }

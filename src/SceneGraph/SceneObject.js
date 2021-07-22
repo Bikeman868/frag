@@ -151,17 +151,13 @@ window.frag.SceneObject = function (engine, model) {
             location = location.clone().add(private.animationLocation);
         }
 
-        const worldToClipMatrix = drawContext.worldToClipTransform.getMatrix();
-        const modelToWorldMatrix = location.getMatrix();
-        const modelToClipMatrix = drawContext.worldToClipTransform.is3d
-            ? frag.Matrix.m4Xm4(worldToClipMatrix, modelToWorldMatrix)
-            : frag.Matrix.m3Xm3(worldToClipMatrix, modelToWorldMatrix);
-
         if (drawContext.isHitTest) {
             drawContext.sceneObjects.push(public);
         }
 
-        private.model.draw(drawContext, modelToWorldMatrix, modelToClipMatrix, private.animationMap, private.childMap);
+        drawContext.beginSceneObject(location, private.animationMap, private.childMap);
+        private.model.draw(drawContext);
+        drawContext.endSceneObject();
 
         return public;
     };

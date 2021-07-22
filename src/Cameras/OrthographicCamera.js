@@ -93,15 +93,17 @@ window.frag.OrthographicCamera = function (engine) {
         return public;
     }
 
-    public.setViewport = function (gl) {
+    public.setViewport = function () {
+        const gl = engine.gl;
         gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
         gl.canvas.width = gl.canvas.clientWidth;
         gl.canvas.height = gl.canvas.clientHeight;
 
-        return public.adjustToViewport(gl);
+        return public.adjustToViewport();
     };
 
-    public.adjustToViewport = function (gl) {
+    public.adjustToViewport = function () {
+        const gl = engine.gl;
         const aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
 
         if (aspectRatio != private.aspectRatio) {

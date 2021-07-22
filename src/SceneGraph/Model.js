@@ -181,28 +181,14 @@ window.frag.Model = function (engine, is3d, parent) {
         return public;
     }
 
-    public.draw = function (drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap, childMap) {
+    public.draw = function (drawContext) {
         if (!public.location) return public;
-
-        const animationState = animationMap && private.name ? animationMap[private.name] : null;
-        const location = animationState
-            ? public.location.clone().add(animationState.location)
-            : public.location;
-        const localMatrix = location.getMatrix();
-
-        const Matrix = frag.Matrix;
-        if (location.is3d) {
-            modelToWorldMatrix = Matrix.m4Xm4(modelToWorldMatrix, localMatrix);
-            modelToClipMatrix = Matrix.m4Xm4(modelToClipMatrix, localMatrix);
-        } else {
-            modelToWorldMatrix = Matrix.m3Xm3(modelToWorldMatrix, localMatrix);
-            modelToClipMatrix = Matrix.m3Xm3(modelToClipMatrix, localMatrix);
-        }
+        drawContext.beginModel(private.name, public.location);
 
         const shader = drawContext.shader || public.getShader();
 
         if (shader !== undefined && private.meshData && private.enabled) {
-            shader.bind(drawContext.gl);
+            shader.bind();
 
             if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
                 const sceneObjectId = drawContext.sceneObjects.length - 1;
@@ -213,48 +199,41 @@ window.frag.Model = function (engine, is3d, parent) {
                 const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
                 const blue = (modelId & 0xff00) >> 8;
                 const alpha = modelId & 0xff;
-                drawContext.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
+                engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
             }
 
             var material = public.getMaterial();
-            if (material) material.apply(drawContext.gl, shader);
+            if (material) material.apply(shader);
 
             if (shader.uniforms.clipMatrix !== undefined) {
-                const modelToClipTransform = frag.Transform(engine, modelToClipMatrix);
-                modelToClipTransform.apply(drawContext.gl, shader.uniforms.clipMatrix);
+                frag.Transform(engine, drawContext.state.modelToClipMatrix)
+                    .apply(shader.uniforms.clipMatrix);
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
-                const modelToWorldTransform = frag.Transform(engine, modelToWorldMatrix);
-                modelToWorldTransform.apply(drawContext.gl, shader.uniforms.modelMatrix);
+                frag.Transform(engine, drawContext.state.modelToWorldMatrix)
+                    .apply(shader.uniforms.modelMatrix);
             }
 
-            private.meshData.draw(drawContext.gl, shader);
+            private.meshData.draw(shader);
 
-            shader.unbind(drawContext.gl);
+            shader.unbind();
         }
 
         for (let i = 0; i < private.children.length; i++)
-            private.children[i].draw(drawContext, modelToWorldMatrix, modelToClipMatrix, animationMap, childMap);
+            private.children[i].draw(drawContext);
 
+        const childMap = drawContext.state.childMap;
         const sceneObjects = parent 
             ? (childMap && private.name ? childMap[private.name] : undefined)
             : (childMap ? childMap['.'] : undefined);
 
         if (sceneObjects) {
-            const worldToClipTransform = drawContext.worldToClipTransform;
-            //drawContext.worldToClipTransform = drawContext.worldToClipTransform.clone().transform(modelToWorldMatrix);
-            //drawContext.worldToClipTransform = frag.Transform(engine, modelToWorldMatrix).transform(drawContext.worldToClipTransform.getMatrix());
-            //drawContext.worldToClipTransform = frag.Transform(engine, modelToClipMatrix);
-            //drawContext.worldToClipTransform = worldToClipTransform.clone().transform(localMatrix);
-            drawContext.worldToClipTransform = worldToClipTransform.clone().transform(modelToClipMatrix);
-
             for (let i = 0; i < sceneObjects.length; i++)
                 sceneObjects[i].draw(drawContext);
-
-            drawContext.worldToClipTransform = worldToClipTransform;
         }
 
+        drawContext.endModel();
         return public;
     }
 

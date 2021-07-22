@@ -49,29 +49,49 @@
             .directionalLightGrey()
             .compile();
 
-        const mesh = frag.Cube(engine, 5, { color: [0.8, 0.1, 0.4] })
-            .name('My cube')
+        const mesh1 = frag.Cube(engine, 5, { color: [0.8, 0.1, 0.4] })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
 
-        const model = frag.Model(engine)
-            .name('My model')
-            .mesh(mesh)
+        const model1 = frag.Model(engine)
+            .mesh(mesh1)
+            .shader(shader);
+        model1.getPosition()
+            .rotateXYZ(45 * degToRad, 45 * degToRad);
+
+        const mesh2 = frag.Cube(engine, 3, { color: [0.6, 0.4, 0.1] })
+            .shadeSmooth()
+            .wireframe(true)
+            .drawNormals(0.2, [0, 1, 0]);
+
+        const model2 = frag.Model(engine)
+            .mesh(mesh2)
             .shader(shader);
 
-        const cube1 = frag.SceneObject(engine, model);
+        const mesh3 = frag.Cube(engine, 3, { color: [0.1, 0.4, 0.8] })
+            .shadeSmooth()
+            .wireframe(true)
+            .drawNormals(0.2, [1, 0, 0]);
+
+        const model3 = frag.Model(engine)
+            .mesh(mesh3)
+            .shader(shader);
+
+        const cube1 = frag.SceneObject(engine, model1);
         cube1.getPosition().scale(40);
         scene.addObject(cube1);
 
-        const cube2 = frag.SceneObject(engine, model);
+        const cube2 = frag.SceneObject(engine, model2);
         cube2.getPosition().scale(20);
         cube1.addObject(cube2);
 
-        const cube3 = frag.SceneObject(engine, model);
+        const cube3 = frag.SceneObject(engine, model3);
         cube3.getPosition().scale(10);
         cube2.addObject(cube3);
 
+        // Just spin cube1. Cube 2 and 3 are parented off
+        // cube1 and should follow its movement.
         const spinningAnimation = frag.Animation(engine)
             .perform(
                 frag.ValueAnimationAction(engine)

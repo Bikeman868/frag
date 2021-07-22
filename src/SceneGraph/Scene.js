@@ -54,24 +54,28 @@ window.frag.Scene = function(engine) {
         return private.camera;
     }
 
-    public.setViewport = function (gl) {
+    public.setViewport = function () {
         if (private.camera)
-            private.camera.setViewport(gl);
+            private.camera.setViewport();
         return public;
     }
 
-    public.adjustToViewport = function (gl) {
+    public.adjustToViewport = function () {
         if (private.camera)
-            private.camera.adjustToViewport(gl);
+            private.camera.adjustToViewport();
         return public;
     }
 
     public.draw = function (drawContext) {
-        if (private.camera) {
-            drawContext.worldToClipTransform = private.camera.worldToClipTransform;
-            for (let i = 0; i < private.sceneObjects.length; i++)
-                private.sceneObjects[i].draw(drawContext);
-        }
+        if (!private.camera || !private.sceneObjects) return public;
+
+        drawContext.beginScene(private.camera);
+
+        for (let i = 0; i < private.sceneObjects.length; i++)
+            private.sceneObjects[i].draw(drawContext);
+
+        drawContext.endScene();
+        return public;
     }
 
     return public;

@@ -38,10 +38,10 @@ window.frag.Material = function (engine) {
         return public;
     }
 
-    public.apply = function (gl, shader) {
+    public.apply = function (shader) {
         for (let textureType in private.textures) {
             const texture = private.textures[textureType];
-            if (texture) texture.apply(textureType, gl, shader);
+            if (texture) texture.apply(textureType, shader);
         }
         return public;
     };

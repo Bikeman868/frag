@@ -143,7 +143,9 @@ window.frag.Font = function (engine, _private, _instance) {
         return public;
     }
 
-    public.apply = function (gl, shader) {
+    public.apply = function (shader) {
+        const gl = engine.gl;
+        
         if (shader.uniforms["fgcolor"] !== undefined) {
             gl["uniform" + instance.textColor.length + "fv"](shader.uniforms["fgcolor"], instance.textColor);
         }

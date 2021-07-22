@@ -97,9 +97,9 @@ window.frag.Transform2D = function (engine, matrix) {
         ]);
     }
 
-    public.apply = function (gl, uniform) {
+    public.apply = function (uniform) {
         if (uniform !== undefined) {
-            gl.uniformMatrix3fv(uniform, false, public.getMatrix());
+            engine.gl.uniformMatrix3fv(uniform, false, public.getMatrix());
         }
         return public;
     }

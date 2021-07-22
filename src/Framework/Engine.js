@@ -164,23 +164,17 @@ window.frag.Engine = function(config) {
         gl.viewport(0, 0, width, height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-        const drawContext = {
-            gl,
-            shader: private.hitTestShader,
-            isHitTest: true,
-            sceneObjects: [],
-            models: [],
-        };
+        const drawContext = frag.DrawContext(public).forHitTest(private.hitTestShader);
     
         gl.disable(gl.BLEND);
     
         if (Array.isArray(scene)) {
             for (let i = 0; i < scene.length; i++) {
-                scene[i].adjustToViewport(gl);
+                scene[i].adjustToViewport();
                 scene[i].draw(drawContext);
             }
         } else {
-            scene.adjustToViewport(gl);
+            scene.adjustToViewport();
             scene.draw(drawContext);
         }
     
@@ -218,17 +212,14 @@ window.frag.Engine = function(config) {
 
         const gl = public.gl;
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        private.mainScene.setViewport(gl);
+        private.mainScene.setViewport();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        const drawContext = { 
-            engine: public,
-            gl
-        };
+        const drawContext = frag.DrawContext(public).forRender();
         private.mainScene.draw(drawContext);
 
         for (let i = 0; i < private.scenes.length; i++) {
-            private.scenes[i].adjustToViewport(gl);
+            private.scenes[i].adjustToViewport();
             private.scenes[i].draw(drawContext);
         }
 
@@ -328,7 +319,8 @@ window.frag.Engine = function(config) {
     addProxy("ScenePosition");
     addProxy("SceneObject");
     addProxy("Scene");
-    
+    addProxy("DrawContext");
+
     addProxy("UiCamera");
     addProxy("OrthographicCamera");
     addProxy("PerspectiveCamera");

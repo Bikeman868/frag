@@ -113,8 +113,8 @@ window.frag.Texture = function (engine) {
         gl.bindFramebuffer(gl.FRAMEBUFFER, private.frameBuffer);
         gl.viewport(0, 0, private.width, private.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        private.scene.adjustToViewport(gl);
-        private.scene.draw({ gl });
+        private.scene.adjustToViewport();
+        private.scene.draw(frag.DrawContext(engine).forRender());
 
         return public;
     }
@@ -138,11 +138,12 @@ window.frag.Texture = function (engine) {
         return public.update(width, height);
     }
 
-    public.apply = function (textureType, gl, shader) {
+    public.apply = function (textureType, shader) {
         const uniform = shader.uniforms[textureType];
         if (!uniform || !private.glTexture)
             return public;
         
+        const gl = engine.gl;
         gl.activeTexture(gl.TEXTURE0 + public.textureUnit);
         gl.bindTexture(gl.TEXTURE_2D, private.glTexture);
 
