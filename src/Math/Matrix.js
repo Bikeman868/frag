@@ -229,8 +229,8 @@ window.frag.Matrix = {
         }
     },
 
-    perspective: function(fov, aspect, near, far) {
-        var y = Math.tan(fov * Math.PI / 360) * near;
+    perspective: function(fovy, aspect, near, far) {
+        var y = Math.tan(fovy) * near;
         var x = y * aspect;
         return window.frag.Matrix.frustum(-x, x, -y, y, near, far);
     },
@@ -248,16 +248,16 @@ window.frag.Matrix = {
         m[6] = 0;
         m[7] = 0;
 
-        m[8] = (r + l) / (r - l);
-        m[9] = (t + b) / (t - b);
-        m[10] = -(f + n) / (f - n);
-        m[11] = -1;
-
-        m[12] = 0;
-        m[13] = 0;
-        m[14] = -2 * f * n / (f - n);
-        m[15] = 0;
+        m[8] = 0;
+        m[9] = 0;
+        m[10] = (f + n) / (f - n);
+        m[11] = 1;
       
+        m[12] = -n * (r + l) / (r - l);
+        m[13] = -n * (t + b) / (t - b);
+        m[14] = 2 * f * n / (n - f);
+        m[15] = 0;
+
         return m;
     },
 
@@ -276,7 +276,7 @@ window.frag.Matrix = {
 
         m[8] = 0;
         m[9] = 0;
-        m[10] = -2 / (f - n);
+        m[10] = 2 / (f - n);
         m[11] = 0;
 
         m[12] = -(r + l) / (r - l);
