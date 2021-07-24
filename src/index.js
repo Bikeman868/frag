@@ -30,6 +30,7 @@ require("./SceneGraph/DrawContext");
 require("./Cameras/UiCamera");
 require("./Cameras/OrthographicCamera");
 require("./Cameras/PerspectiveCamera");
+require("./Cameras/FrustumCamera");
 
 require("./Animations/Animation");
 require("./Animations/ObjectAnimationState");

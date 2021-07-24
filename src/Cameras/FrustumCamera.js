@@ -1,7 +1,7 @@
-// This camera draws objects in their actual size regardless of how far from the camera they are.
-// The frustum affects z clip space and XY scaling to the viewport but does not scale objects in the scene
+// This camera makes objects closer to the public appear larger. The frustum
+// defines clipping and scaling of the scene
 
-window.frag.OrthographicCamera = function (engine) {
+window.frag.FrustumCamera = function (engine) {
     const private = {
         worldTransform: window.frag.Transform3D(engine),
         position: window.frag.ScenePosition(engine),
@@ -14,7 +14,7 @@ window.frag.OrthographicCamera = function (engine) {
         zFar: 200,
         xScale: 100,
         aspectRatio: 1,
-    };
+    }
 
     const public = {
         __private: private,
@@ -70,7 +70,7 @@ window.frag.OrthographicCamera = function (engine) {
         }
 
         if (private.frustumChanged) {
-            private.projectionMatrix = Matrix.orthographic(
+            private.projectionMatrix = Matrix.frustum(
                 -private.xScale, 
                 private.xScale, 
                 -private.xScale / aspectRatio, 

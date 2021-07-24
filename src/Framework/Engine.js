@@ -23,7 +23,7 @@ window.frag.Engine = function(config) {
 
     const public = {
         __private: private,
-        canvas: config.canvas || document.getElementById("scene"),
+        canvas: config.canvas || document.getElementById('scene'),
         renderInterval: config.renderInterval || 15,
         gameTickMs: config.gameTickMs || 10,
         debugPackageLoader: config.debugPackageLoader === undefined ? false : config.debugPackageLoader,
@@ -34,7 +34,7 @@ window.frag.Engine = function(config) {
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }
-    public.gl = public.canvas.getContext("webgl");
+    public.gl = public.canvas.getContext('webgl');
 
     public.correctClock = function(serverTick) {
         let difference = serverTick - private.gameTick;
@@ -140,11 +140,11 @@ window.frag.Engine = function(config) {
                 '}';
 
             private.hitTestShader = frag.CustomShader(public)
-                .name("Hit test")
+                .name('Hit test')
                 .source(vertexShader, fragmentShader)
-                .attribute("position")
-                .uniform("clipMatrix")
-                .uniform("color");
+                .attribute('position')
+                .uniform('clipMatrix')
+                .uniform('color');
         }
     
         const gl = public.gl;
@@ -297,60 +297,61 @@ window.frag.Engine = function(config) {
         }
     }
 
-    addProxy("Observable");
-    addProxy("Transform");
-    addProxy("Transform2D");
-    addProxy("Transform3D");
-    addProxy("Location");
+    addProxy('Observable');
+    addProxy('Transform');
+    addProxy('Transform2D');
+    addProxy('Transform3D');
+    addProxy('Location');
     
-    addProxy("CustomShader");
-    addProxy("Shader");
-    addProxy("UiShader");
-    addProxy("FontShader");
+    addProxy('CustomShader');
+    addProxy('Shader');
+    addProxy('UiShader');
+    addProxy('FontShader');
     
-    addProxy("Texture");
-    addProxy("Font");
-    addProxy("Material");
+    addProxy('Texture');
+    addProxy('Font');
+    addProxy('Material');
     
-    addProxy("VertexData");
-    addProxy("MeshData");
-    addProxy("MeshOptimizer");
-    addProxy("Model");
-    addProxy("ScenePosition");
-    addProxy("SceneObject");
-    addProxy("Scene");
-    addProxy("DrawContext");
+    addProxy('VertexData');
+    addProxy('MeshData');
+    addProxy('MeshOptimizer');
+    addProxy('Model');
+    addProxy('ScenePosition');
+    addProxy('SceneObject');
+    addProxy('Scene');
+    addProxy('DrawContext');
 
-    addProxy("UiCamera");
-    addProxy("OrthographicCamera");
-    addProxy("PerspectiveCamera");
+    addProxy('UiCamera');
+    addProxy('OrthographicCamera');
+    addProxy('PerspectiveCamera');
+    addProxy('FrustumCamera');
     
-    addProxy("Animation");
-    addProxy("ObjectAnimationState");
-    addProxy("ModelAnimation");
-    addProxy("SceneObjectAnimation");
-    addProxy("ValueAnimationAction");
-    addProxy("KeyframeAnimationAction");
-    addProxy("ParallelAnimationAction");
-    addProxy("RepeatAnimationAction");
-    addProxy("PositionAnimationAction");
+    addProxy('Animation');
+    addProxy('ObjectAnimationState');
+    addProxy('ModelAnimation');
+    addProxy('SceneObjectAnimation');
+    addProxy('ValueAnimationAction');
+    addProxy('KeyframeAnimationAction');
+    addProxy('ParallelAnimationAction');
+    addProxy('RepeatAnimationAction');
+    addProxy('PositionAnimationAction');
     
-    addProxy("Cube");
-    addProxy("Cylinder");
-    addProxy("Disc");
-    addProxy("Plane");
-    addProxy("Sphere");
+    addProxy('Cube');
+    addProxy('Cylinder');
+    addProxy('Disc');
+    addProxy('Plane');
+    addProxy('Sphere');
     
-    addProxy("AssetCatalog");
-    addProxy("PackageLoader");
+    addProxy('AssetCatalog');
+    addProxy('PackageLoader');
     
-    addProxy("InputMethod");
-    addProxy("DigitalState");
-    addProxy("AnalogState");
-    addProxy("DigitalInput");
-    addProxy("AnalogInput");
-    addProxy("DigitalAction");
-    addProxy("AnalogAction");
+    addProxy('InputMethod');
+    addProxy('DigitalState');
+    addProxy('AnalogState');
+    addProxy('DigitalInput');
+    addProxy('AnalogInput');
+    addProxy('DigitalAction');
+    addProxy('AnalogAction');
     
     return public;
 };

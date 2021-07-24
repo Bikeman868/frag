@@ -54,7 +54,7 @@ This is the job of the camera.
 
 You can use whatever scale you want within your game, and configure the camera
 to map some portion of your world space onto the WebGL +/-1 cube by calling
-the `frustrum` method of the camera passing `fieldOfView`, `zNear` and `zFar`,
+the `frustum` method of the camera passing `fieldOfView`, `zNear` and `zFar`,
 and calling the `scaleX` method of the camera passing the amount of your world's
 space that should be visible across the width of the screen at `zNear`.
 

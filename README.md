@@ -198,7 +198,7 @@ for your benefit.
 
         // The perspective camera makes objects further from the camera look smaller
         const camera = frag.PerspectiveCamera(engine)
-            .frustrum(35 * degToRad, -100, 100)
+            .frustum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 

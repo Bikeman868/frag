@@ -38,7 +38,7 @@ const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
 const camera = engine.PerspectiveCamera()
-  .frustrum(35 * degToRad, -100, 100)
+  .frustum(35 * degToRad, -100, 100)
   .scaleX(100)
   .moveToZ(-120);
 
@@ -59,7 +59,7 @@ Moves the camera in 3 dimensions a new location so that the game player sees
 the scene from a different point of view. Note that this camera always looks
 in the Z+ direction.
 
-## frustrum(fieldOfView: float, zNear: float, zFar: float)
+## frustum(fieldOfView: float, zNear: float, zFar: float)
 `fieldOfView` is an angle in radians that defines how much of the scene is
 visible when viewed through this camera. When the field of view is larger, the
 game player can see more of the scene.

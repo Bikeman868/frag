@@ -38,7 +38,7 @@ const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
 const camera = engine.OrthographicCamera()
-  .frustrum(100, 0, 200);
+  .frustum(100, 0, 200);
 camera.getPosition().locationZ(-200);
 
 const scene = engine.Scene()
@@ -51,7 +51,7 @@ Returns a `ScenePosition` object that can be used to move and rotate the camera.
 Note that the cameras resting position is at(0, 0, 0) looking down the +Z axis, ie
 at the world origin looking into the screen.
 
-## frustrum(scale: float, zNear: float, zFar: float)
+## frustum(scale: float, zNear: float, zFar: float)
 `scale` defines the width of the viewport in scene coordinate space. For example setting
 the scale to 100 means that objects whose X-axis coordinate is between -100 and +100
 will be visible in the viewport.

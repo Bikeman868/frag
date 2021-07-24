@@ -35,7 +35,7 @@
         const degToRad = Math.PI / 180;
 
         const camera = frag.PerspectiveCamera(engine)
-            .frustrum(35 * degToRad, -100, 100)
+            .frustum(35 * degToRad, -100, 100)
             .scaleX(100)
             .moveToZ(-120);
 

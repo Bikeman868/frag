@@ -103,17 +103,17 @@
         class Catapult {
             constructor(game) {
                 this.game = game;
-                this.mesh = game.engine.Cube(1, { color: [0.6, 0.6, 0.6] });
+                this.mesh = game.engine.Cube(1, { color: [1, 0, 1] });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
                     .shader(game.shader)
                     .shadeFlat();
                 this.model.getPosition()
-                    .scaleXYZ(20, 1, 5);
+                    .scaleXYZ(20, 1, 2);
                 this.object = game.engine.SceneObject(this.model);
                 this.object.getPosition()
                     .locationY(-30)
-                    .locationZ(5);
+                    .locationZ(15);
                 game.scene.addObject(this.object);
 
                 this.ballModels = [
@@ -135,9 +135,8 @@
                 const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
                 this.ball = new Ball(this.game, ballModel);
 
-                const thisPosition = this.object.getPosition();
-                const thisLocation = thisPosition.getLocation();
-                const ballLocation = frag.Vector.add(thisLocation, [0, 5, 0]);
+                const thisLocation = this.object.getPosition().getLocation();
+                const ballLocation = frag.Vector.add(thisLocation, [0, 4, 0]);
                 this.ball.object.getPosition().location(ballLocation);
 
                 setTimeout(() => { this.fire(); }, 3000);
@@ -150,7 +149,7 @@
                 const ballPosition = ball.object.getPosition();
                 
                 const animationAction = game.engine.PositionAnimationAction(ballPosition, 1)
-                    .moveBy([0, -30, 200])
+                    .moveBy([0, -40, 200])
                     .onStop(() => { ball.dispose(); });
 
                 game.engine.Animation()
@@ -211,8 +210,8 @@
         class Game {
             constructor() {
                 this.engine = window.frag.Engine().start();
-                this.camera = this.engine.OrthographicCamera().frustrum(120, 100, 400);
-                this.camera.getPosition().locationZ(-150);
+                this.camera = this.engine.FrustumCamera().frustum(100, 100, 400);
+                this.camera.getPosition().locationXYZ(0, 80, -10).rotateX(60 * degToRad);
                 this.scene = this.engine.Scene().camera(this.camera);
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
 

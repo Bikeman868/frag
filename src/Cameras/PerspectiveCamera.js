@@ -1,23 +1,19 @@
-// This public makes objects closer to the public appear larger. The frustrum
+// This camera makes objects closer to the public appear larger. The frustum
 // defines clipping and scaling of the scene
 
 window.frag.PerspectiveCamera = function (engine) {
     const private = {
-        locationTransform: window.frag.Transform3D(engine),
         worldTransform: window.frag.Transform3D(engine),
-        perspectiveTransform: window.frag.Transform3D(engine),
-        x: 0,
-        y: 0,
-        z: -200,
-        xRot: 0,
-        yRot: 0,
-        zRot: 0,
+        position: window.frag.ScenePosition(engine),
+        projectionMatrix: null,
+        worldMatrix: null,
+        transformChanged: true,
+        positionChanged: true,
+        frustumChanged: true,
         fov: 45 * Math.PI / 180,
-        zNear: -100,
-        zFar: 100,
-        xScale: 100,
+        zNear: 100,
+        zFar: 200,
         aspectRatio: 1,
-        transformChanged: true
     }
 
     const public = {
@@ -25,135 +21,33 @@ window.frag.PerspectiveCamera = function (engine) {
         worldToClipTransform: window.frag.Transform3D(engine)
     };
 
-    private.computeCameraTransforms = function () {
-        // Position of the camera within the world
-        private.locationTransform
-            .identity()
-            .translateXYZ(private.x, private.y, private.z)
-            .rotateXYZ(private.xRot, private.yRot, private.zRot);
-
-        // const test = [5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,5];
-        // const inv = window.frag.Matrix.m4Invert(test);
-        // const ident = window.frag.Matrix.m4Xm4(test, inv);
-
-        // Position the world with the camera at the origin
-        private.worldTransform
-            .identity()
-            .rotateXYZ(-private.xRot, -private.yRot, -private.zRot)
-            .scaleXYZ(1 / private.xScale, private.aspectRatio / private.xScale, 2 / (private.zFar - private.zNear))
-            .translateXYZ(-private.x, -private.y, -private.z);
-
-        private.transformChanged = true;
+    public.dispose = function () {
+        private.position.observableMatrix.unsubscribe(private.onPositionChanged);
+        private.worldToClipTransform.dispose();
+        private.position.dispose();
     }
 
-    private.computePerspectiveTransform = function () {
-        // TODO: calculate based on private.fov
-        const ps = 0.5;
-        const pt = 0.7;
-
-        // Note that the world transform already transforms the frustrum into a 2x2x2 cube at zNear
-        const xs = 1;
-        const ys = 1;
-        const zs = 1;
-
-        const xt = 0;
-        const yt = 0;
-        const zt = -2 * (private.zNear - private.z) / (private.zFar - private.zNear) - 1;
-
-        const __ = 0;
-
-        private.perspectiveTransform.setMatrix([
-            xs, __, __, __,
-            __, ys, __, __,
-            __, __, zs, ps,
-            xt, yt, zt, pt,
-        ]);
-
-        private.transformChanged = true;
+    private.onPositionChanged = function() {
+        private.positionChanged = true;
     }
 
-    private.computeTransform = function () {
-        const transformMatrix = frag.Matrix.m4Xm4(
-            private.perspectiveTransform.getMatrix(),
-            private.worldTransform.getMatrix());
-        public.worldToClipTransform.setMatrix(transformMatrix);
+    private.position.observableMatrix.subscribe(private.onPositionChanged);
 
-        /*
-        // Opposite corners of frustrum should be [-1, -1, -1] and [1, 1, 1] in clip space
-        const t = function (matrix, x, y, z) {
-            const v = frag.Matrix.m4Xv4(matrix, [x, y, z, 1]);
-            v[0] = v[0] / v[3];
-            v[1] = v[1] / v[3];
-            v[2] = v[2] / v[3];
-            return v;
-        }
-
-        const gradient = 1 / Math.tan((Math.PI - private.fov) * 0.5);
-        const nearWidth = private.xScale * gradient;
-        const farWidth = nearWidth + (private.zFar - private.zNear) * gradient;
-        const t1 = t(private.worldTransform, -nearWidth, -nearWidth, private.zNear);
-        const t2 = t(private.worldTransform, farWidth, farWidth, private.zFar);
-
-        const t3 = t(public.worldToClipTransform, -nearWidth, -nearWidth, private.zNear);
-        const t4 = t(public.worldToClipTransform, farWidth, farWidth, private.zFar);
-        */
+    public.getPosition = function () {
+        return private.position;
     }
 
-    private.computeCameraTransforms();
-    private.computePerspectiveTransform();
+    public.frustum = function (fieldOfView, zNear, zFar) {
+        if (fieldOfView <= 0) console.error('Camera field of view must be greater than zero');
+        if (fieldOfView >= Math.PI * 0.5) console.error('Camera field of view must be less than 90 degrees');
+        if (zNear < 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
+        if (zNear >= zFar) console.error('The camera zFar must be greater than zNear');
 
-    public.moveToXY = function (x, y) {
-        private.x = x;
-        private.y = y;
-
-        private.computeCameraTransforms();
-        return public;
-    }
-
-    public.moveToX = function (x) {
-        private.x = x;
-
-        private.computeCameraTransforms();
-        return public;
-    }
-
-    public.moveToY = function (y) {
-        private.y = y;
-
-        private.computeCameraTransforms();
-        return public;
-    }
-
-    public.moveToZ = function (z) {
-        private.z = z;
-
-        private.computeCameraTransforms();
-        private.computePerspectiveTransform();
-        return public;
-    }
-
-    public.moveToXYZ = function (x, y, z) {
-        private.x = x;
-        private.y = y;
-        private.z = z;
-
-        private.computeCameraTransforms();
-        private.computePerspectiveTransform();
-        return public;
-    }
-
-    public.frustrum = function (fieldOfView, zNear, zFar) {
         private.fov = fieldOfView;
         private.zNear = zNear;
         private.zFar = zFar;
 
-        private.computePerspectiveTransform();
-        return public;
-    }
-
-    public.scaleX = function (x) {
-        private.xScale = x;
-        private.computeCameraTransforms();
+        private.frustumChanged = true;
         return public;
     }
 
@@ -168,22 +62,36 @@ window.frag.PerspectiveCamera = function (engine) {
 
     public.adjustToViewport = function () {
         const gl = engine.gl;
-        const aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
+        const Matrix = window.frag.Matrix;
 
+        const aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
         if (aspectRatio != private.aspectRatio) {
             private.aspectRatio = aspectRatio;
-            private.computeCameraTransforms();
+            private.frustumChanged = true;
         }
 
-        if (private.transformChanged) {
-            private.computeTransform();
+        if (private.frustumChanged) {
+            private.projectionMatrix = Matrix.perspective(
+                private.fieldOfView, 
+                private.aspectRatio, 
+                private.zNear, 
+                private.zFar);
+            private.frustumChanged = false;
+            private.transformChanged = true;
+        }
+
+        if (private.positionChanged) {
+            private.worldMatrix = Matrix.m4Invert(private.position.getMatrix());
+            private.positionChanged = false;
+            private.transformChanged = true;
+        }
+
+        if  (private.transformChanged) {
+            public.worldToClipTransform.setMatrix(Matrix.m4Xm4(private.projectionMatrix, private.worldMatrix));
             private.transformChanged = false;
         }
 
         return public;
-    }
-
-    public.dispose = function () {
     }
 
     return public;
