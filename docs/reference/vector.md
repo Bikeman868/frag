@@ -61,16 +61,17 @@ any number of dimensions.
 Appends a vector to the end of an array. The vector can have any number of
 dimensions.
 
-## eulerAngles(directionVector: Vector, upVector?: Vector): Vector
+## heading(directionVector: Vector, upVector?: Vector): Vector
 Calculates how to rotate a model in the scene so that it faces a specific
 direction. `directionVector` represents a direction in x, y and z. `upVector`
 defines which way is up and is optional. If you don't pass `upVector` then
 it defaults to Y+ as up.
 
-The vector returned contains `[roll, yaw, pitch]` as defined by the aircraft
+The vector returned contains `[pitch, yaw, roll]` as defined by the aircraft
 industry. You can pass this array directly to the `rotation` method of `ScenePosition`
 to orient your model. You may need to adjust the value of `yaw` according to which
-direction the "front" of your model is facing.
+direction the "front" of your model is facing unless the forward direction of your
+model is in the positive Z direction.
 
 For an example of how to use this function see the 
 [Truck on a track sample](../../samples/truck-on-track.html).

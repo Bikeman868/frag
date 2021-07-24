@@ -84,6 +84,7 @@
         const truckModel = frag.Model(engine)
             .name('Truck')
             .shader(shader);
+        truckModel.getPosition().rotateY(Math.PI * -0.5);
 
         truckModel.addChild()
             .name("Trailer")
@@ -236,10 +237,9 @@
 
             const iNext = iThis + 3 >= track.length ? 0 : iThis + 3;
             const nextTracklocation = Vector.extract3D(track, iNext);
-            const angle = Vector.eulerAngles(Vector.sub(nextTracklocation, thisTrackLocation));
-            angle[1] -= Math.PI * 0.5;
+            const heading = Vector.heading(Vector.sub(nextTracklocation, thisTrackLocation));
 
-            actions.push(frag.PositionAnimationAction(engine, position).rotateTo(angle, invAngularVelocity));
+            actions.push(frag.PositionAnimationAction(engine, position).rotateTo(heading, invAngularVelocity));
             actions.push(frag.PositionAnimationAction(engine, position).moveTo(Vector.add(nextTracklocation, truckPosition), invLinearVelocity));
         }
         frag.Animation(engine).sequence(actions, true).start();

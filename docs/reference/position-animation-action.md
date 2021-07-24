@@ -79,7 +79,7 @@ relative to the orientation at the start of the animation. The
 `invAngularVelocity` parameter is optional and defaults to the value passed
 to the constructor.
 
-## rotateTo(eulerAngles: float[], invAngularVelocity: float)
+## rotateTo(heading: float[], invAngularVelocity: float)
 Configures the position animation action to rotate the object to an absolute
 orientation. The `invAngularVelocity` parameter is optional and defaults to the 
 value passed to the constructor.

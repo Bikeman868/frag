@@ -79,20 +79,27 @@ window.frag.Vector = {
     append: function(a, v) {
         for (let i = 0; i < v.length; i++) a.push(v[i]);
     },
-    eulerAngles: function(directionVector, upVector) {
+    // Calculates pitch, yaw and roll relative to +Z axis (when Y is up)
+    // Imagine that you have a plane flying along the Z-axis in the positive direction
+    // and you want to head in a particular direction, this method will calculate
+    // how much to rotate the plane by around the x, y and z axes to point in this direction
+    // Pitch is a rotation around the x-axis
+    // Yaw is a rotation around the y-axis
+    // Roll is a rotation around the z-axis
+    heading: function(directionVector, upVector) {
         const Vector = window.frag.Vector;
         if (!upVector) upVector = [0, 1, 0];
 
         const dir = Vector.normalize(directionVector);
         const up = Vector.normalize(upVector);
 
-        const pitch = Math.asin(dir[1]);
+        const roll = Math.asin(dir[1]);
         const yaw = Math.atan2(dir[0], dir[2]);
 
         const wingDir = [-dir[2], 0, dir[0]];
         const vertical = Vector.cross(wingDir, dir);
-        const roll = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
+        const pitch = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
 
-        return [roll, yaw, pitch];
+        return [pitch, yaw, roll];
     }
 }

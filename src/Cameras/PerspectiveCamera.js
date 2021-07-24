@@ -32,6 +32,10 @@ window.frag.PerspectiveCamera = function (engine) {
             .translateXYZ(private.x, private.y, private.z)
             .rotateXYZ(private.xRot, private.yRot, private.zRot);
 
+        // const test = [5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,5];
+        // const inv = window.frag.Matrix.m4Invert(test);
+        // const ident = window.frag.Matrix.m4Xm4(test, inv);
+
         // Position the world with the camera at the origin
         private.worldTransform
             .identity()

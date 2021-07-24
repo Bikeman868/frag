@@ -84,14 +84,36 @@ window.frag.Matrix = {
         ];
     },
 
-    m4Invert: function (a) {
-        // TODO: http://blog.acipo.com/matrix-inversion-in-javascript/
-        return [
-            a[0], a[4], a[8],
-            a[1], a[5], a[9],
-            a[2], a[6], a[10],
-            a[3], a[7], a[11],
-        ];
+    m4Invert: function (m) {
+        // TODO: remove the transpose step
+        m = window.frag.Matrix.m4Transpose(m);
+
+        const r = [];
+        r[0] = m[5]*m[10]*m[15] - m[5]*m[14]*m[11] - m[6]*m[9]*m[15] + m[6]*m[13]*m[11] + m[7]*m[9]*m[14] - m[7]*m[13]*m[10];
+        r[1] = -m[4]*m[10]*m[15] + m[4]*m[14]*m[11] + m[6]*m[8]*m[15] - m[6]*m[12]*m[11] - m[7]*m[8]*m[14] + m[7]*m[12]*m[10];
+        r[2] = m[4]*m[9]*m[15] - m[4]*m[13]*m[11] - m[5]*m[8]*m[15] + m[5]*m[12]*m[11] + m[7]*m[8]*m[13] - m[7]*m[12]*m[9];
+        r[3] = -m[4]*m[9]*m[14] + m[4]*m[13]*m[10] + m[5]*m[8]*m[14] - m[5]*m[12]*m[10] - m[6]*m[8]*m[13] + m[6]*m[12]*m[9];
+
+        r[4] = -m[1]*m[10]*m[15] + m[1]*m[14]*m[11] + m[2]*m[9]*m[15] - m[2]*m[13]*m[11] - m[3]*m[9]*m[14] + m[3]*m[13]*m[10];
+        r[5] = m[0]*m[10]*m[15] - m[0]*m[14]*m[11] - m[2]*m[8]*m[15] + m[2]*m[12]*m[11] + m[3]*m[8]*m[14] - m[3]*m[12]*m[10];
+        r[6] = -m[0]*m[9]*m[15] + m[0]*m[13]*m[11] + m[1]*m[8]*m[15] - m[1]*m[12]*m[11] - m[3]*m[8]*m[13] + m[3]*m[12]*m[9];
+        r[7] = m[0]*m[9]*m[14] - m[0]*m[13]*m[10] - m[1]*m[8]*m[14] + m[1]*m[12]*m[10] + m[2]*m[8]*m[13] - m[2]*m[12]*m[9];
+
+        r[8] = m[1]*m[6]*m[15] - m[1]*m[14]*m[7] - m[2]*m[5]*m[15] + m[2]*m[13]*m[7] + m[3]*m[5]*m[14] - m[3]*m[13]*m[6];
+        r[9] = -m[0]*m[6]*m[15] + m[0]*m[14]*m[7] + m[2]*m[4]*m[15] - m[2]*m[12]*m[7] - m[3]*m[4]*m[14] + m[3]*m[12]*m[6];
+        r[10] = m[0]*m[5]*m[15] - m[0]*m[13]*m[7] - m[1]*m[4]*m[15] + m[1]*m[12]*m[7] + m[3]*m[4]*m[13] - m[3]*m[12]*m[5];
+        r[11] = -m[0]*m[5]*m[14] + m[0]*m[13]*m[6] + m[1]*m[4]*m[14] - m[1]*m[12]*m[6] - m[2]*m[4]*m[13] + m[2]*m[12]*m[5];
+
+        r[12] = -m[1]*m[6]*m[11] + m[1]*m[10]*m[7] + m[2]*m[5]*m[11] - m[2]*m[9]*m[7] - m[3]*m[5]*m[10] + m[3]*m[9]*m[6];
+        r[13] = m[0]*m[6]*m[11] - m[0]*m[10]*m[7] - m[2]*m[4]*m[11] + m[2]*m[8]*m[7] + m[3]*m[4]*m[10] - m[3]*m[8]*m[6];
+        r[14] = -m[0]*m[5]*m[11] + m[0]*m[9]*m[7] + m[1]*m[4]*m[11] - m[1]*m[8]*m[7] - m[3]*m[4]*m[9] + m[3]*m[8]*m[5];
+        r[15] = m[0]*m[5]*m[10] - m[0]*m[9]*m[6] - m[1]*m[4]*m[10] + m[1]*m[8]*m[6] + m[2]*m[4]*m[9] - m[2]*m[8]*m[5];
+      
+        var det = m[0]*r[0] + m[1]*r[1] + m[2]*r[2] + m[3]*r[3];
+        if (det === 0) console.error('Matrix can not be inverted');
+        for (var i = 0; i < 16; i++) r[i] /= det;
+
+        return r;
     },
 
     m4Transpose: function (a) {
@@ -205,40 +227,63 @@ window.frag.Matrix = {
         } else {
             console.error('Invalid matrix multiplication operation', a, b);
         }
+    },
+
+    perspective: function(fov, aspect, near, far) {
+        var y = Math.tan(fov * Math.PI / 360) * near;
+        var x = y * aspect;
+        return window.frag.Matrix.frustum(-x, x, -y, y, near, far);
+    },
+
+    frustum: function (l, r, b, t, n, f) {
+        const m = [];
+
+        m[0] = 2 * n / (r - l);
+        m[1] = 0;
+        m[2] = 0;
+        m[3] = 0;
+
+        m[4] = 0;
+        m[5] = 2 * n / (t - b);
+        m[6] = 0;
+        m[7] = 0;
+
+        m[8] = (r + l) / (r - l);
+        m[9] = (t + b) / (t - b);
+        m[10] = -(f + n) / (f - n);
+        m[11] = -1;
+
+        m[12] = 0;
+        m[13] = 0;
+        m[14] = -2 * f * n / (f - n);
+        m[15] = 0;
+      
+        return m;
+    },
+
+    orthographic: function (l, r, b, t, n, f) {
+        const m = [];
+
+        m[0] = 2 / (r - l);
+        m[1] = 0;
+        m[2] = 0;
+        m[3] = 0;
+
+        m[4] = 0;
+        m[5] = 2 / (t - b);
+        m[6] = 0;
+        m[7] = 0;
+
+        m[8] = 0;
+        m[9] = 0;
+        m[10] = -2 / (f - n);
+        m[11] = 0;
+
+        m[12] = -(r + l) / (r - l);
+        m[13] = -(t + b) / (t - b);
+        m[14] = -(f + n) / (f - n);
+        m[15] = 1;
+
+        return m;
     }
 }
-/*
-// Unit tests framework
-
-window.tests = window.tests || {};
-
-window.tests.expectArray = function (name, expected, actual) {
-    if (actual.length !== expected.length) console.log('Test ' + name + ' wrong length array');
-    for (let i = 0; i < expected.length; i++) {
-        if (Math.abs(expected[i] - actual[i]) > 0.001)
-            console.log('Test ' + name + ' index ' + i + ' was ' + actual[i] + ' expecting ' + expected[i]);
-    }
-}
-
-// Unit tests for matrix
-
-window.tests.matrix = {
-    t1: window.frag.Matrix.m4Transpose([
-         1,  2,  3,  4,
-         5,  6,  7,  8,
-         9, 10, 11, 12,
-        13, 14, 15, 16,
-    ]),
-
-    run: function (test) {
-        window.tests.expectArray("Transpose matrix", test.t1, [
-            1, 5,  9, 13,
-            2, 6, 10, 14,
-            3, 7, 11, 15,
-            4, 8, 12, 16,
-        ]);
-    }
-}
-
-window.tests.matrix.run(window.tests.matrix);
-*/

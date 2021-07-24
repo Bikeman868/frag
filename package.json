@@ -5,12 +5,15 @@
   "private": true,
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "keywords": [],
   "author": "Martin Halliday",
   "license": "Apache_2.0",
   "devDependencies": {
+    "chai": "*",
+    "mocha": "*",
     "webpack": "^5.38.1",
     "webpack-cli": "^4.7.0"
   }

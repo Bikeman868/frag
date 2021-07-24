@@ -47,10 +47,10 @@ window.frag.PositionAnimationAction = function (engine, scenePosition, invLinear
         return public;
     }
 
-    public.rotateTo = function (eulerAngles, invAngularVelocity) {
+    public.rotateTo = function (heading, invAngularVelocity) {
         if (invAngularVelocity) private.invLinearVelocity = undefined;
         private.invAngularVelocity = invAngularVelocity || private.invAngularVelocity || 10;
-        private.rotateTo = eulerAngles;
+        private.rotateTo = heading;
         return public;
     }
 

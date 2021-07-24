@@ -45,3 +45,8 @@ supposed to look like, and test each of the samples before each release.
 
 If you add any new features to the framework, make sure that at least one of the
 samples exercises this feature.
+
+There are some unit tests for classes that perform computations. To run these tests
+```bash
+npm test
+```
