@@ -3,12 +3,15 @@
 
 window.frag.OrthographicCamera = function (engine) {
     const private = {
-        x: 0,
-        y: 0,
-        z: -200,
-        fov: 35 * Math.PI / 180,
-        zNear: -100,
-        zFar: 100,
+        worldTransform: window.frag.Transform3D(engine),
+        position: window.frag.ScenePosition(engine),
+        projectionMatrix: null,
+        worldMatrix: null,
+        transformChanged: true,
+        positionChanged: true,
+        frustrumChanged: true,
+        zNear: 100,
+        zFar: 200,
         xScale: 100,
         aspectRatio: 1,
     };
@@ -18,77 +21,28 @@ window.frag.OrthographicCamera = function (engine) {
         worldToClipTransform: window.frag.Transform3D(engine)
     };
 
-    const computeTransformMatrix = function () {
-        const xScale = 1 / private.xScale;
-        const yScale = private.aspectRatio / private.xScale;
-
-        const zScale = 2 / (private.zFar - private.zNear);
-        const zOffset = 1 - (private.zFar * zScale);
-
-        public.worldToClipTransform
-            .identity()
-            .translateZ(zOffset)
-            .scaleXYZ(xScale, yScale, zScale)
-            .translateXY(-private.x, -private.y);
+    private.onPositionChanged = function() {
+        private.positionChanged = true;
     }
 
-    public.moveToXY = function (x, y) {
-        private.x = x;
-        private.y = y;
+    private.position.observableMatrix.subscribe(private.onPositionChanged);
 
-        computeTransformMatrix();
-
-        return public;
+    public.dispose = function () {
+        private.position.observableMatrix.unsubscribe(private.onPositionChanged);
     }
 
-    public.moveToXYZ = function (x, y, z) {
-        private.x = x;
-        private.y = y;
-        private.z = z;
-
-        computeTransformMatrix();
-
-        return public;
+    public.getPosition = function () {
+        return private.position;
     }
 
-    public.moveToX = function (x) {
-        private.x = x;
+    public.frustrum = function (xScale, zNear, zFar) {
+        if (zNear < 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
+        if (zNear >= zFar) console.error('The camera zFar must be greater than zNear');
 
-        computeTransformMatrix();
-
-        return public;
-    }
-
-    public.moveToY = function (y) {
-        private.y = y;
-
-        computeTransformMatrix();
-
-        return public;
-    }
-
-    public.moveToZ = function (z) {
-        private.z = z;
-
-        computeTransformMatrix();
-
-        return public;
-    }
-
-    public.frustrum = function (fieldOfView, zNear, zFar) {
-        private.fov = fieldOfView;
+        private.xScale = xScale;
         private.zNear = zNear;
         private.zFar = zFar;
-
-        computeTransformMatrix();
-
-        return public;
-    }
-
-    public.scaleX = function (x) {
-        private.xScale = x;
-
-        computeTransformMatrix();
+        private.frustrumChanged = true;
 
         return public;
     }
@@ -104,19 +58,44 @@ window.frag.OrthographicCamera = function (engine) {
 
     public.adjustToViewport = function () {
         const gl = engine.gl;
+        const Matrix = window.frag.Matrix;
+
         const aspectRatio = gl.drawingBufferWidth / gl.drawingBufferHeight;
 
         if (aspectRatio != private.aspectRatio) {
             private.aspectRatio = aspectRatio;
-            const matrix = public.worldToClipTransform.getMatrix();
-            matrix[5] = matrix[0] * aspectRatio;
-            public.worldToClipTransform.setMatrix(matrix);
+            private.frustrumChanged = true;
+        }
+
+        if (private.frustrumChanged) {
+            const left = -private.xScale;
+            const right = -left;
+            const bottom = left / private.aspectRatio;
+            const top = -bottom;
+            const near = private.zNear;
+            const far = private.zFar;
+            private.projectionMatrix = Matrix.orthographic(left, right, bottom, top, near, far);
+            private.frustrumChanged = false;
+            private.transformChanged = true;
+        }
+
+        if (private.positionChanged) {
+            private.worldMatrix = Matrix.m4Invert(private.position.getMatrix());
+            private.positionChanged = false;
+            private.transformChanged = true;
+        }
+
+        if  (private.transformChanged) {
+            public.worldToClipTransform.setMatrix(Matrix.m4Xm4(private.projectionMatrix, private.worldMatrix));
+            private.transformChanged = false;
         }
 
         return public;
     }
 
     public.dispose = function () {
+        private.worldToClipTransform.dispose();
+        private.position.dispose();
     }
 
     return public;

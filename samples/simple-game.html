@@ -49,29 +49,6 @@
             }
         }
 
-        class Floor {
-            constructor(game) {
-                this.mesh = game.engine.Plane(1, { color: [0.6, 0.6, 0.6] });
-                this.model = game.engine.Model()
-                    .mesh(this.mesh)
-                    .shader(game.shader)
-                    .shadeFlat();
-                this.model.getPosition()
-                    .scale(100)
-                    .rotateX(90 * degToRad)
-                    .locationY(-60)
-                    .locationZ(150);
-                this.object = game.engine.SceneObject(this.model);
-                game.scene.addObject(this.object);
-            }
-
-            dispose() {
-                this.object.dispose();
-                this.model.dispose();
-                this.mesh.dispose();
-            }
-        }
-
         class Cup {
             constructor(game, cupModel, start, end, invSpeed) {
                 this.object = game.engine.SceneObject(cupModel.model);
@@ -95,6 +72,98 @@
             }
         }
 
+        class BallModel {
+            constructor(game, color) {
+                this.mesh = game.engine.Sphere(8, { color });
+                this.model = game.engine.Model()
+                    .mesh(this.mesh)
+                    .shader(game.shader)
+                    .shadeSmooth();
+                this.model.getPosition()
+                    .scale(3);
+            }
+
+            dispose() {
+                this.model.dispose();
+                this.mesh.dispose();
+            }
+        }
+
+        class Ball {
+            constructor(game, ballModel) {
+                this.object = game.engine.SceneObject(ballModel.model);
+                game.scene.addObject(this.object);
+            }
+
+            dispose() {
+                this.object.dispose();
+            }
+        }
+
+        class Catapult {
+            constructor(game) {
+                this.game = game;
+                this.mesh = game.engine.Cube(1, { color: [0.6, 0.6, 0.6] });
+                this.model = game.engine.Model()
+                    .mesh(this.mesh)
+                    .shader(game.shader)
+                    .shadeFlat();
+                this.model.getPosition()
+                    .scaleXYZ(20, 1, 5);
+                this.object = game.engine.SceneObject(this.model);
+                this.object.getPosition()
+                    .locationY(-30)
+                    .locationZ(5);
+                game.scene.addObject(this.object);
+
+                this.ballModels = [
+                    new BallModel(game, [1, 0.4, 0.4]),
+                    new BallModel(game, [0.4, 1, 0.4]),
+                    new BallModel(game, [0.4, 0.4, 1])
+                ];
+
+                this.newBall();
+            }
+
+            dispose() {
+                this.object.dispose();
+                this.model.dispose();
+                this.mesh.dispose();
+            }
+
+            newBall() {
+                const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
+                this.ball = new Ball(this.game, ballModel);
+
+                const thisPosition = this.object.getPosition();
+                const thisLocation = thisPosition.getLocation();
+                const ballLocation = frag.Vector.add(thisLocation, [0, 5, 0]);
+                this.ball.object.getPosition().location(ballLocation);
+
+                setTimeout(() => { this.fire(); }, 3000);
+            }
+
+            fire() {
+                if (!this.ball) return;
+
+                const ball = this.ball;
+                const ballPosition = ball.object.getPosition();
+                
+                const animationAction = game.engine.PositionAnimationAction(ballPosition, 1)
+                    .moveBy([0, -30, 200])
+                    .onStop(() => { ball.dispose(); });
+
+                game.engine.Animation()
+                    .perform(animationAction)
+                    .disposeOnStop()
+                    .start();
+                    
+                this.ball = null;
+
+                setTimeout(() => { this.newBall(); }, 2000);
+            }
+        }
+
         class CupGenerator {
             constructor(game, cupModels) {
                 this.interval = setInterval(() => {
@@ -103,7 +172,7 @@
                         const start = [
                             Math.random() > 0.5 ? 100 : -100, 
                             -50,
-                            Math.random() * 100 + 100];
+                            Math.random() * 100 + 50];
                         const end = [-start[0], start[1], start[2]];
                         const invSpeed = Math.random() * 5 + 1;
                         const cup = new Cup(game, model, start, end, invSpeed);
@@ -116,10 +185,34 @@
             }
         }
 
+        class Floor {
+            constructor(game) {
+                this.mesh = game.engine.Plane(1, { color: [0.6, 0.6, 0.6] });
+                this.model = game.engine.Model()
+                    .mesh(this.mesh)
+                    .shader(game.shader)
+                    .shadeFlat();
+                this.model.getPosition()
+                    .scale(100)
+                    .rotateX(90 * degToRad)
+                    .locationY(-60)
+                    .locationZ(100);
+                this.object = game.engine.SceneObject(this.model);
+                game.scene.addObject(this.object);
+            }
+
+            dispose() {
+                this.object.dispose();
+                this.model.dispose();
+                this.mesh.dispose();
+            }
+        }
+
         class Game {
             constructor() {
                 this.engine = window.frag.Engine().start();
-                this.camera = this.engine.PerspectiveCamera().frustrum(35 * degToRad, -100, 100).scaleX(100).moveToZ(-120);
+                this.camera = this.engine.OrthographicCamera().frustrum(120, 100, 400);
+                this.camera.getPosition().locationZ(-150);
                 this.scene = this.engine.Scene().camera(this.camera);
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
 
@@ -141,6 +234,7 @@
         const blueCupModel = new CupModel(game, [0.4, 0.4, 1]);
 
         const floor = new Floor(game);
+        const catapult = new Catapult(game);
         const generator = new CupGenerator(game, [redCupModel, greenCupModel, blueCupModel]);
 
     </script>

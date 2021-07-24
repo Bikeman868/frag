@@ -45,6 +45,7 @@ require("./Shapes/Cube");
 require("./Shapes/Cylinder");
 require("./Shapes/Disc");
 require("./Shapes/Plane");
+require("./Shapes/Sphere");
 
 require("./Loaders/AssetCatalog");
 require("./Loaders/PackageLoader");

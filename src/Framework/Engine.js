@@ -339,6 +339,7 @@ window.frag.Engine = function(config) {
     addProxy("Cylinder");
     addProxy("Disc");
     addProxy("Plane");
+    addProxy("Sphere");
     
     addProxy("AssetCatalog");
     addProxy("PackageLoader");

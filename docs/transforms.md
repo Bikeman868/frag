@@ -21,9 +21,58 @@ column is that it makes it possible to create a perspective effect via
 the matrix multiplication, and since perspective is so commonly used in
 3D graphics this is built into the WebGL pipeline.
 
+## Coordinate system
+Every 3D graphics application and framework has to choose a coordinate system.
+There is no standard and no convention that is followed everywhere, so I
+chose the one that seems most simple and obvious to me.
+
+In Frag:
+* The X-axis increases from left to right accross the screen.
+* The Y-axis increases from bottom to top up the screen.
+* The Z-axis increases from close to the camera to further from the camera going into the screen.
+
+This is known as a left-handed coordinate system with Y up because...
+
+If you take the thumb and first two fingers of you left hand and make them 
+all at 90 degrees fron each other, then orient your hand so that your thumb 
+is pointing up and your index finger is pointing away from you, then:
+* Your thumb is pointing in the positive Y-axis direction
+* Your index finger is pointing in the positive Z-axis direction
+* Your middle finger is pointing in the positive X-axis direction
+
+You should be aware that other 3D graphics frameworks and applications use
+different coordinate systems. Some are right handed instead of left handed,
+some have Z up instead of Y and some have Z comming out of the screen instead
+of going into it. You should be aware of these differences when reading
+articles online and using code snippets from the internet.
+
+## Cameras
+The WebGL graphics pipeline maps the screen onto a cube that has (0,0,0) at
+its centre and extends to +/-1 on all 3 axes. You can use this coordinate system
+if you like, or you can project some other coordinate system onto the +/-1 cube.
+This is the job of the camera.
+
+You can use whatever scale you want within your game, and configure the camera
+to map some portion of your world space onto the WebGL +/-1 cube by calling
+the `frustrum` method of the camera passing `fieldOfView`, `zNear` and `zFar`,
+and calling the `scaleX` method of the camera passing the amount of your world's
+space that should be visible across the width of the screen at `zNear`.
+
+Anything closer to the camera than `zNear` will not be visible to the camera.
+Annything further than `zFar` from the camera will also be not visible to the
+camara, and everything in between will be visible if it is within the field
+of view.
+
+For more background see [Introduction to Projections](http://learnwebgl.brown37.net/08_projections/projections_introduction.html)
+
 ## Matrix
 The [`Matrix`](reference/matrix.md) class provides static methdods for 
 performing matrix math such as matrix multiplication, inversion, dot product etc.
+
+The Matrix class can also calculate various projections. These are used by
+the built-in cameras and are useful if you want to write your own custom camera.
+If you want to use these projections in your game, please study the unit tests
+in the [test folder](../test/Matrix.js).
 
 ## Location
 The [`Location`](reference/location.md) class encapsulates translation, 

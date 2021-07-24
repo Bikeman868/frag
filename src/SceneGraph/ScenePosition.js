@@ -1,19 +1,29 @@
 // This class provides a set of helper methods for
 // manipulating a Location object
-window.frag.ScenePosition = function (engine, location) {
+window.frag.ScenePosition = function (engine, location, is3d) {
     const private = {
         location: null,
     };
 
     const public = {
         __private: private,
+        observableMatrix: window.frag.Observable(
+            engine, 
+            (observer) => { 
+                observer(private.location.getMatrix());
+            }),
     };
 
     public.dispose = function () {
     }
 
+    private.modified = function() {
+        private.location.isModified = true;
+        public.observableMatrix.notify();
+    }
+
     public.setLocation = function (value) {
-        private.location = value || window.frag.Location(engine);
+        private.location = value || window.frag.Location(engine, is3d === undefined ? true : is3d);
         return public;
     }
     public.setLocation(location);
@@ -38,7 +48,7 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.scaleX = s;
         private.location.scaleY = s;
         private.location.scaleZ = s;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
@@ -46,25 +56,25 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.scaleX = x;
         private.location.scaleY = y;
         private.location.scaleZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.scaleX = function (x) {
         private.location.scaleX = x;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.scaleY = function (y) {
         private.location.scaleY = y;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.scaleZ = function (z) {
         private.location.scaleZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
@@ -105,7 +115,7 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.rotateX = v[0];
         if (v.length > 1) private.location.rotateY = v[1];
         if (v.length > 2) private.location.rotateZ = v[2];
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
@@ -113,25 +123,25 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.rotateX = x;
         private.location.rotateY = y;
         private.location.rotateZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.rotateX = function (x) {
         private.location.rotateX = x;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.rotateY = function (y) {
         private.location.rotateY = y;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.rotateZ = function (z) {
         private.location.rotateZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
@@ -172,7 +182,7 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.translateX = v[0];
         if (v.length > 1) private.location.translateY = v[1];
         if (v.length > 2) private.location.translateZ = v[2];
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
@@ -180,25 +190,25 @@ window.frag.ScenePosition = function (engine, location) {
         private.location.translateX = x;
         private.location.translateY = y;
         private.location.translateZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.locationX = function (x) {
         private.location.translateX = x;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.locationY = function (y) {
         private.location.translateY = y;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
     public.locationZ = function (z) {
         private.location.translateZ = z;
-        private.location.isModified = true;
+        private.modified();
         return public;
     }
 
