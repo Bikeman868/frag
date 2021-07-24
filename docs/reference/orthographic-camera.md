@@ -38,41 +38,32 @@ const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
 const camera = engine.OrthographicCamera()
-  .frustrum(35 * degToRad, -100, 100)
-  .scaleX(100)
-  .moveToZ(-200);
+  .frustrum(100, 0, 200);
+camera.getPosition().locationZ(-200);
 
 const scene = engine.Scene()
   .name('My scene')
   .camera(camera);
 ```
 
-## moveToXY(x: float, y: float)
-Moves the camera in the XY plane to a new location so that the game player sees
-the scene from a different point of view.
+## getPosition(): ScenePosition
+Returns a `ScenePosition` object that can be used to move and rotate the camera.
+Note that the cameras resting position is at(0, 0, 0) looking down the +Z axis, ie
+at the world origin looking into the screen.
 
-## moveToZ(z: float)
-Moves the camera to a new position on the Z axis. This can make the camera closer
-to or further from the scene.
-
-## moveToXYZ(x: float, y: float, z: float)
-Moves the camera in 3 dimensions a new location so that the game player sees
-the scene from a different point of view. Note that this camera always looks
-in the Z+ direction.
-
-## frustrum(fieldOfView: float, zNear: float, zFar: float)
-`fieldOfView` is an angle in radians that defines how much of the scene is
-visible when viewed through this camera. When the field of view is larger, the
-game player can see more of the scene.
-
-Any objects that are closer to the camera than`zNear` will not be rendered to the 
-screen. Similarly for objects that are further away than `zFar`.
-
-## scaleX(scale: float)
-Defines the width of the viewport in scene coordinate space. For example setting
-the x scale to 100 means that objects whose x coordinate is between -100 and +100
+## frustrum(scale: float, zNear: float, zFar: float)
+`scale` defines the width of the viewport in scene coordinate space. For example setting
+the scale to 100 means that objects whose X-axis coordinate is between -100 and +100
 will be visible in the viewport.
 
-Note that there is no y scale. This is because Frag maintains the aspect ratio of
-your models. The effective y scale value is defined by the aspect ratio of the
-canvas element on your html page.
+Note that Frag maintains the aspect ratio of your models. The effective y scale value
+is defined by the aspect ratio of the canvas element on your html page. For example if
+your canvas is twice as wide as it is high, then setting scale to 100 means that objects
+with Y-axis values between -50 and +50 will be visible in the viewport.
+
+Any objects that are closer to the camera than`zNear` will not be rendered to the 
+screen. Similarly for objects that are further away than `zFar`. Note that this is the
+distance from the camera along its Z-axis, not the Z-axis position in the scene.
+
+Initially the camera Z-axis is aligned with the world Z-axis, but if you rotate the
+camera then this is no longer the case.
