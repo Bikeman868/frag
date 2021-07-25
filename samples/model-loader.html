@@ -256,9 +256,9 @@
 
             // Use AnalogState and AnalogAction to allow the player to move the camera on the x-axis
             const cameraPanXState = engine.AnalogState(
-                engine.AnalogAction("move-camera-x"),
-                {   minValue: 100,
-                    maxValue: -100,
+                engine.AnalogAction("rotate-camera-y"),
+                {   minValue: Math.PI * 0.5,
+                    maxValue: -Math.PI * 0.5,
                 },
                 "camera pan X");
 

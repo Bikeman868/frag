@@ -27,6 +27,14 @@ window.frag.AnalogAction = function(engine, actionName, context) {
             if (axis === "z") 
                 return function(analogState) { getPosition().locationZ(analogState.value); }
         }
+        if (mode === "rotate") {
+            if (axis === "x") 
+                return function(analogState) { getPosition().rotateX(analogState.value); }
+            if (axis === "y") 
+                return function(analogState) { getPosition().rotateY(analogState.value); }
+            if (axis === "z") 
+                return function(analogState) { getPosition().rotateZ(analogState.value); }
+        }
         return null;
     }
 

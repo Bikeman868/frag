@@ -15,7 +15,7 @@
             padding: 0;
         }
 
-        canvas {
+        #scene {
             display: block;
             touch-action: none;
             width: 100%;
@@ -39,7 +39,7 @@
                     .shader(game.shader)
                     .shadeSmooth();
                 this.model.getPosition()
-                    .scale(10)
+                    .scaleXYZ(4, 4, 8)
                     .rotateX(90 * degToRad);
             }
 
@@ -164,7 +164,13 @@
         }
 
         class CupGenerator {
-            constructor(game, cupModels) {
+            constructor(game) {
+                const cupModels = [
+                    new CupModel(game, [1, 0.4, 0.4]),
+                    new CupModel(game, [0.4, 1, 0.4]),
+                    new CupModel(game, [0.4, 0.4, 1]),
+                ];
+
                 this.interval = setInterval(() => {
                     if (Math.random() > 0.7) {
                         const model = cupModels[Math.floor(Math.random() * cupModels.length)];
@@ -207,15 +213,85 @@
             }
         }
 
+        class Score {
+            constructor(game) {
+                this.game = game;
+                this.score = 0;
+                this.createFont();
+                this.createText();
+            }
+
+            createFont() {
+                // We would normally load a font asset, this is a hack 
+                // to create a font texture by drawing text on a canvas
+
+                const canvas = document.createElement("CANVAS");
+                canvas.width = 256;
+                canvas.height = 64;
+                const context = canvas.getContext('2d');
+                canvas.onload = function(){};
+
+                //const body = document.getElementsByTagName("BODY")[0];
+                //body.insertBefore(canvas, body.firstChild);
+
+                context.beginPath();
+                context.rect(0, 0, 256, 64);
+                context.fillStyle = 'black';
+                context.fill();
+
+                context.font = '40px Calibri';
+                context.fillStyle = 'white';
+                context.fillText('0123456789', 0, 40);
+
+                this.font = this.game.engine.Font()
+                    .fromImage(canvas)
+                    .backgroundColor([0, 0, 1, 0])
+                    .textColor([0, 0, 1, 1])
+                    .lineHeight(32)
+                    .addChar('0',   0, 12, 20, 32, 0, 32, 22)
+                    .addChar('1',  22, 12, 18, 32, 0, 32, 20)
+                    .addChar('2',  40, 12, 20, 32, 0, 32, 22)
+                    .addChar('3',  60, 12, 21, 32, 0, 32, 23)
+                    .addChar('4',  80, 12, 22, 32, 0, 32, 24)
+                    .addChar('5', 102, 12, 20, 32, 0, 32, 22)
+                    .addChar('6', 122, 12, 21, 32, 0, 32, 23)
+                    .addChar('7', 142, 12, 21, 32, 0, 32, 23)
+                    .addChar('8', 162, 12, 21, 32, 0, 32, 23)
+                    .addChar('9', 182, 12, 21, 32, 0, 32, 23);
+            }
+
+            createText() {
+                this.model = this.font.buildTextModel('0');
+                this.text = this.game.engine.SceneObject(this.model);
+                this.text.getPosition().scale(0.5).locationXYZ(-20, -22, 145);
+                this.game.scene.addObject(this.text);
+            }
+
+            setScore(score) {
+                this.score = score;
+                this.font.updateTextModel(this.model, score.toString());
+            }
+
+            add(score) {
+                this.setScore(this.score + score);
+            }
+        }
+
         class Game {
             constructor() {
                 this.engine = window.frag.Engine().start();
                 this.camera = this.engine.FrustumCamera().frustum(100, 100, 400);
-                this.camera.getPosition().locationXYZ(0, 80, -10).rotateX(60 * degToRad);
+                this.camera.getPosition().locationXYZ(0, 85, -10).rotateX(60 * degToRad);
                 this.scene = this.engine.Scene().camera(this.camera);
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
+                this.shader.lightDirection([-0.2, -0.6, 0.1]);
 
+                this.score = new Score(this);
                 this.engine.mainScene(this.scene);
+            }
+
+            addScore(score) {
+                this.score.add(score);
             }
 
             dispose() {
@@ -227,14 +303,12 @@
         }
 
         const game = new Game();
-
-        const redCupModel = new CupModel(game, [1, 0.4, 0.4]);
-        const greenCupModel = new CupModel(game, [0.4, 1, 0.4]);
-        const blueCupModel = new CupModel(game, [0.4, 0.4, 1]);
-
         const floor = new Floor(game);
         const catapult = new Catapult(game);
-        const generator = new CupGenerator(game, [redCupModel, greenCupModel, blueCupModel]);
+        const generator = new CupGenerator(game);
 
+        setInterval(() => { 
+            game.addScore(Math.floor(Math.random() * 10)); 
+        }, 5000);
     </script>
 </body>
