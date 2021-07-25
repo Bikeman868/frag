@@ -51,7 +51,7 @@ Returns a `ScenePosition` object that can be used to move and rotate the camera.
 Note that the cameras resting position is at(0, 0, 0) looking down the +Z axis, ie
 at the world origin looking into the screen.
 
-## frustum(scale: float, zNear: float, zFar: float)
+## frustum(scale: float, zNear: float, zFar: float): OrthographicCamera
 `scale` defines the width of the viewport in scene coordinate space. For example setting
 the scale to 100 means that objects whose X-axis coordinate is between -100 and +100
 will be visible in the viewport.
@@ -67,3 +67,15 @@ distance from the camera along its Z-axis, not the Z-axis position in the scene.
 
 Initially the camera Z-axis is aligned with the world Z-axis, but if you rotate the
 camera then this is no longer the case.
+
+## parent(parent: ScenePosition | SceneObject | Camera | undefined): OrthographicCamera
+Channges the cameras parent, adding the parent's location transformation to 
+the camera's location transformation, so that the camera behaves as if it were
+part of the parent model.
+
+For example if you want to have a first-person view of a driving game you can
+parent the camera on the car and it will then move and rotate with the car as 
+it moves. The camera's own location becomes relative to its parent.
+
+You might also want to create an empty SceneObject (with no model) and parent the
+camera on that to have the camera rotate around an arbirtary point in the scene.

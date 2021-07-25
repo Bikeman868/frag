@@ -77,12 +77,13 @@ window.frag.PositionLink = function(engine) {
     }
 
     public.source = function(scenePosition) {
-        if (scenePosition.getPosition)
-            scenePosition = scenePosition.getPosition();
-
         if (private.source) {
             private.source.observableLocation.unsubscribe(private.sourceChanged);
         }
+        
+        if (scenePosition && scenePosition.getPosition)
+            scenePosition = scenePosition.getPosition();
+
         private.source = scenePosition;
         if (scenePosition) {
             scenePosition.observableLocation.subscribe(private.sourceChanged);
@@ -91,7 +92,7 @@ window.frag.PositionLink = function(engine) {
     }
 
     public.dest = function(scenePosition) {
-        if (scenePosition.getPosition)
+        if (scenePosition && scenePosition.getPosition)
             scenePosition = scenePosition.getPosition();
         private.dest = scenePosition;
         return public

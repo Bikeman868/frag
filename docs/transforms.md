@@ -65,6 +65,17 @@ of view.
 
 For more background see [Introduction to Projections](http://learnwebgl.brown37.net/08_projections/projections_introduction.html)
 
+Cameras can have a parent. When a camera is parented, its position and orientation
+will be relative to its parent, so that when the parent moves or rotates this changes
+the world coordinate systemm from the cameras point of view. This is exactly like
+having a parent/child relationship between screen objects where the child transform
+is applied to the parent's local coordinate system.
+
+There are a few places where parenting a camera is useful.
+* You can make the position of the camera relative to something else. For example if this is a driving game, you might want the camera appear as if it is mounted to the car and follows all of its movements.
+* You can add an empty `SceneObject` (with no model) as the camera's parent, then
+rotating this enpty `SceneObject` will rotate the camera around the position of the empty `SceneObject`.
+
 ## Matrix
 The [`Matrix`](reference/matrix.md) class provides static methdods for 
 performing matrix math such as matrix multiplication, inversion, dot product etc.

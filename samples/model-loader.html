@@ -254,19 +254,29 @@
                     },
                     "camera zoom");
 
-            // Use AnalogState and AnalogAction to allow the player to move the camera on the x-axis
+            // Use AnalogState and AnalogAction to allow the player to orbit the camera around a point
+            // in space. For this to work, the camera has to be parented on an object at the centre
+            // of rotation. By rotating the cameras parent, the camera will orbit around this point.
+            const cameraOrigin = engine.SceneObject();
+            cameraOrigin.getPosition().locationZ(200);
+            camera.parent(cameraOrigin);
+            camera.getPosition().locationZ(camera.getPosition().getLocationZ() - 200);
             const cameraPanXState = engine.AnalogState(
-                engine.AnalogAction("rotate-camera-y"),
-                {   minValue: Math.PI * 0.5,
-                    maxValue: -Math.PI * 0.5,
+                engine.AnalogAction("rotate-sceneobject-y", { sceneObject: cameraOrigin }),
+                {   minValue: -Math.PI * 0.25,
+                    maxValue: Math.PI * 0.25,
+                    maxVelocity: 0.01,
+                    acceleration: 0.01,
+                    deceleration: 1,
                 },
                 "camera pan X");
-
-            // Use AnalogState and AnalogAction to allow the player to move the camera on the y-axis
             const cameraPanYState = engine.AnalogState(
-                engine.AnalogAction("move-camera-y"),
-                {   minValue: 100,
-                    maxValue: -100,
+                engine.AnalogAction("rotate-sceneobject-x", { sceneObject: cameraOrigin }),
+                {   minValue: Math.PI * 0.25,
+                    maxValue: -Math.PI * 0.05,
+                    maxVelocity: 0.01,
+                    acceleration: 0.01,
+                    deceleration: 1,
                 },
                 "camera pan Y");
 

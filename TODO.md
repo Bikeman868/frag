@@ -12,10 +12,8 @@ No known bugs at this time
 * Armatures and character animation
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation
-* Cameras and other scene objects can follow a target
 * Maintain camera pointing at a game scene object
 * Analog inputs orbit camera around what it is pointing at
-* Scene objects that have no model, just used as look at or follow target
 * Better handling of velocity and acceleration for analog inputs
 
 ## Optional nice to have features
