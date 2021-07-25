@@ -12,7 +12,10 @@ No known bugs at this time
 * Armatures and character animation
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation
-* Greater freedom of movement for cameras
+* Cameras and other scene objects can follow a target
+* Maintain camera pointing at a game scene object
+* Analog inputs orbit camera around what it is pointing at
+* Scene objects that have no model, just used as look at or follow target
 
 ## Optional nice to have features
 * Play sounds synced with animations. This is nice to have because there are better libraries for playing sounds. This is a WebGL wrapper and WebGL does not provide any sound playing capabilities.
