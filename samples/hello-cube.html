@@ -45,11 +45,9 @@
 
         const degToRad = Math.PI / 180;
 
-        // The perspective camera makes objects further from the camera look smaller
-        const camera = frag.PerspectiveCamera(engine)
-            .frustum(35 * degToRad, -100, 100)
-            .scaleX(100)
-            .moveToZ(-120);
+        // The perspective and frustum cameras make objects further from the camera look smaller
+        const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
+        camera.getPosition().locationZ(-150);
 
         // We always need at least one scene
         const scene = frag.Scene(engine)

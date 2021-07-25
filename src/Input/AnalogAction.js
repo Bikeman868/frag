@@ -18,21 +18,27 @@ window.frag.AnalogAction = function(engine, actionName, context) {
         if ((/^forward$/i).test(splits[i])) axis = "forward";
     }
 
-    if (/camera/i.test(actionName)) {
+    const scenePosition = function (getPosition) {
         if (mode === "move") {
             if (axis === "x") 
-                return function(analogState) { engine.getMainScene().getCamera().moveToX(analogState.value); }
+                return function(analogState) { getPosition().locationX(analogState.value); }
             if (axis === "y") 
-                return function(analogState) { engine.getMainScene().getCamera().moveToY(analogState.value); }
+                return function(analogState) { getPosition().locationY(analogState.value); }
             if (axis === "z") 
-                return function(analogState) { engine.getMainScene().getCamera().moveToZ(analogState.value); }
-        }        
+                return function(analogState) { getPosition().locationZ(analogState.value); }
+        }
+        return null;
+    }
+
+    if (/camera/i.test(actionName)) {
+        return scenePosition(function () {
+            return engine.getMainScene().getCamera().getPosition();
+        });
     }
 
     if (context && context.sceneObject) {
         if (/sceneobject/i.test(actionName)) {
-            return function(analogState) {
-            }
+            return scenePosition(context.sceneObject.getPosition);
         }
     }
 

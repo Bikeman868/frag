@@ -40,7 +40,7 @@ window.frag.PerspectiveCamera = function (engine) {
     public.frustum = function (fieldOfView, zNear, zFar) {
         if (fieldOfView <= 0) console.error('Camera field of view must be greater than zero');
         if (fieldOfView >= Math.PI * 0.5) console.error('Camera field of view must be less than 90 degrees');
-        if (zNear < 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
+        if (zNear <= 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
         if (zNear >= zFar) console.error('The camera zFar must be greater than zNear');
 
         private.fov = fieldOfView;

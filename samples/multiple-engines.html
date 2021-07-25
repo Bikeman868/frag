@@ -62,7 +62,8 @@
         class GameCanvas {
             constructor(canvas) {
                 this.engine = window.frag.Engine({ canvas }).start();
-                this.camera = this.engine.PerspectiveCamera().frustum(35 * degToRad, -100, 100).scaleX(100).moveToZ(-120);
+                this.camera = this.engine.FrustumCamera().frustum(50, 50, 2000);
+                this.camera.getPosition().locationZ(-150);
                 this.scene = this.engine.Scene().camera(this.camera);
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
 

@@ -18,6 +18,10 @@ window.frag.Animation = function (engine, obj, isChild) {
     const DEFAULT_REPEAT_TICKS = 20;
     const DEFAULT_REPEAT_FRAMES = 1;
 
+    public.dispose = function () {
+        engine.removeAnimation(public);
+    }
+
     public.getIsRunning = function() {
         return private.isRunning;
     }
@@ -171,15 +175,11 @@ window.frag.Animation = function (engine, obj, isChild) {
     }
 
     public.disposeOnStop = function(dispose){
-        private.disposeOnStop = dispose;
+        private.disposeOnStop = dispose === undefined ? true : dispose;
         return public;
     }
 
     if (!isChild) engine.addAnimation(public);
-
-    public.dispose = function () {
-        engine.removeAnimation(public);
-    }
 
     return public;
 }

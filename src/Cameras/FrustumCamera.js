@@ -38,7 +38,7 @@ window.frag.FrustumCamera = function (engine) {
     }
 
     public.frustum = function (xScale, zNear, zFar) {
-        if (zNear < 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
+        if (zNear <= 0) console.error('You cannot include things that are behind the camera in the cameras field of view. zNear must be greater than zero');
         if (zNear >= zFar) console.error('The camera zFar must be greater than zNear');
         if (xScale <= 0) console.error('Camera x-scale must be greater than zero');
 

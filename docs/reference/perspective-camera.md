@@ -38,26 +38,17 @@ const engine = window.frag.Engine().start();
 const degToRad = Math.PI / 180;
 
 const camera = engine.PerspectiveCamera()
-  .frustum(35 * degToRad, -100, 100)
-  .scaleX(100)
-  .moveToZ(-120);
+    .frustum(35 * degToRad, 50, 150);
+camera.getPosition().locationZ(-50)
 
 const scene = engine.Scene()
   .camera(camera);
 ```
 
-## moveToXY(x: float, y: float)
-Moves the camera in the XY plane to a new location so that the game player sees
-the scene from a different point of view.
-
-## moveToZ(z: float)
-Moves the camera to a new position on the Z axis. This can make the camera closer
-to or further from the scene.
-
-## moveToXYZ(x: float, y: float, z: float)
-Moves the camera in 3 dimensions a new location so that the game player sees
-the scene from a different point of view. Note that this camera always looks
-in the Z+ direction.
+## getPosition(): ScenePosition
+Returns a `ScenePosition` object that can be used to move and rotate the camera.
+Note that the cameras resting position is at (0, 0, 0) looking down the +Z axis, ie
+at the world origin looking into the screen.
 
 ## frustum(fieldOfView: float, zNear: float, zFar: float)
 `fieldOfView` is an angle in radians that defines how much of the scene is
@@ -65,16 +56,8 @@ visible when viewed through this camera. When the field of view is larger, the
 game player can see more of the scene.
 
 Any objects that are closer to the camera than`zNear` will not be rendered to the 
-screen. Similarly for objects that are further away than `zFar`.
+screen. Similarly for objects that are further away than `zFar`. Note that this is the
+distance from the camera along its Z-axis, not the Z-axis position in the scene.
 
-## scaleX(scale: float)
-Defines the width of the viewport in scene coordinate space where z=0. For example 
-setting the x scale to 100 means that objects whose z coordinate is 0 and whose x 
-coordinate is between -100 and +100 will be visible in the viewport. Because this is
-a perspective camera, the effective x scale varies with z. XY planes with positive z 
-coordinates will be wider then the x scale value that you set and XY planes with
-negative z coordinates will be narrower.
-
-Note that there is no y scale. This is because Frag maintains the aspect ratio of
-your models. The effective y scale value is defined by the aspect ratio of the
-canvas element on your html page.
+Initially the camera Z-axis is aligned with the world Z-axis, but if you rotate the
+camera then this is no longer the case.

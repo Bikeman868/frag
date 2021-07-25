@@ -62,10 +62,8 @@
 
         const degToRad = Math.PI / 180;
 
-        const camera = engine.PerspectiveCamera()
-            .frustum(35 * degToRad, -100, 100)
-            .scaleX(100)
-            .moveToZ(-120);
+        const camera = frag.FrustumCamera(engine).frustum(60, 50, 2000);
+        camera.getPosition().locationXYZ(0, 20, -150).rotateX(5 * degToRad);
 
         const scene = engine.Scene()
             .camera(camera);
@@ -116,7 +114,7 @@
                 .scale(10)
                 .rotateY(-30 * degToRad)
                 .rotateX(-15 * degToRad)
-                .moveByXYZ(0, -29, 0);
+                .moveByXYZ(0, -29, 50);
             scene.addObject(excavator);
 
             // **********************************************************************
@@ -136,7 +134,7 @@
             // Move the excavator from to position -80 on the x-axis whilst running the "moving" animation
             // The "moving" animation was defined in Blender, you can open the `.blend` file to see it.
             const step1 = engine.PositionAnimationAction(position, invLinearVelocity)
-                .moveTo([-60, -29, -25])
+                .moveTo([-60, -29, 50])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
@@ -148,7 +146,7 @@
             // Step 3 in the animation sequence
             // Move the excavator by +100 units on the x-axis whilst running the "moving" animation
             const step3 = engine.PositionAnimationAction(position, invLinearVelocity)
-                .moveBy([100, 0, 100])
+                .moveBy([100, 20, 80])
                 .onStart(excavator.animations.moving.start)
                 .onStop(excavator.animations.moving.stop);
 
