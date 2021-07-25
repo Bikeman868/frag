@@ -49,6 +49,8 @@ that can run around and do stuff, then a better starting point would be Unreal E
 There is nothing out there that is better if you have limited resources, want to
 target the widest possible audience, and your game has some unique gameplay.
 
+For a list of the things that we want to add take a look at the [to-do list](TODO.md).
+
 # Concepts
 These are the main elements that you will be working with
 
