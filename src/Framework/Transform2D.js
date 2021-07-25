@@ -11,7 +11,10 @@ window.frag.Transform2D = function (engine, matrix) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable(engine, (o) => { o(private.matrix) }),
+        observableMatrix: window.frag.Observable(
+            engine, (observer) => { 
+                observer(private.matrix) 
+            }),
         is3d: false,
     };
 

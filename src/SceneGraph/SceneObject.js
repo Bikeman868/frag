@@ -6,6 +6,8 @@ window.frag.SceneObject = function (engine, model) {
         enabled: true,
         location: null,
         animationLocation: null,
+        position: null,
+        animationPosition: null,
         animationMap: {},
         childMap: {},
     };
@@ -73,13 +75,15 @@ window.frag.SceneObject = function (engine, model) {
     };
 
     /**
-     * @returns a ScemePosition object that can be used to manipulate the position
+     * @returns a ScenePosition object that can be used to manipulate the position
      * scale and orientation of this object in the scene
      */
     public.getPosition = function () {
         const location = private.getLocation();
         if (!location) return null;
-        return frag.ScenePosition(engine, location);
+        if (!private.position) 
+            private.position = frag.ScenePosition(engine, location);
+        return private.position;
     };
 
     /**
@@ -90,7 +94,9 @@ window.frag.SceneObject = function (engine, model) {
     public.getAnimationPosition = function () {
         const location = private.getAnimationLocation();
         if (!location) return null;
-        return frag.ScenePosition(engine, location);
+        if (!private.animationPosition) 
+            private.animationPosition = frag.ScenePosition(engine, location);
+        return private.animationPosition;
     };
 
     /**

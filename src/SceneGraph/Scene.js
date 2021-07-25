@@ -9,16 +9,11 @@ window.frag.Scene = function(engine) {
         camera: null
     }
 
-    private.cameraUpdated = function() {
-    }
-
     const public = {
         __private: private
     };
 
     public.dispose = function() {
-        if (private.camera)
-            private.camera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
     }
 
     public.addObject = function(sceneObject) {
@@ -39,14 +34,7 @@ window.frag.Scene = function(engine) {
     }
 
     public.camera = function(camera) {
-        if (private.camera)
-            private.camera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
-
         private.camera = camera;
-
-        if (camera)
-            camera.worldToClipTransform.observableMatrix.subscribe(private.cameraUpdated);
-
         return public;
     }
 

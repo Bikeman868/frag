@@ -34,7 +34,7 @@
             // There are a number of debug console outputs that you can enable
             debugPackageLoader: true,
             debugAnimations: false,
-            debugShaderBuilder: true,
+            debugShaderBuilder: false,
             debugInputs: false,
 
             // higher renderInterval will give you lower power consumption
@@ -331,8 +331,14 @@
                 .letterSpacing(2);
 
             // The font object can construct models whose mesh is a text string
-            const fpsModel = fpsFont.buildTextModel("Unknown fps");
+            const fpsModel = fpsFont.buildTextModel("?? fps");
             const fpsObject = engine.SceneObject(fpsModel);
+
+            // Make the fps object stay above the excavator as it moves
+            const fpsLink = engine.PositionLink()
+                .locationOffset([0, 70, 0])
+                .dest(fpsObject)
+                .source(excavator);
 
             // We can manipulate this scene object just like any other model
             fpsObject.getPosition()

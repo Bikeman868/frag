@@ -320,6 +320,7 @@ window.frag.Engine = function(config) {
     addProxy('SceneObject');
     addProxy('Scene');
     addProxy('DrawContext');
+    addProxy('PositionLink');
 
     addProxy('UiCamera');
     addProxy('OrthographicCamera');

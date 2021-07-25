@@ -12,7 +12,7 @@ window.frag.cameraMixin = function(engine, priv, pub) {
     pub.worldToClipTransform = window.frag.Transform3D(engine);
 
     pub.dispose = function () {
-        priv.position.observableMatrix.unsubscribe(priv.onPositionChanged);
+        priv.position.observableLocation.unsubscribe(priv.onPositionChanged);
         priv.worldToClipTransform.dispose();
         priv.position.dispose();
     }
@@ -21,7 +21,7 @@ window.frag.cameraMixin = function(engine, priv, pub) {
         priv.positionChanged = true;
     }
 
-    priv.position.observableMatrix.subscribe(priv.onPositionChanged);
+    priv.position.observableLocation.subscribe(priv.onPositionChanged);
 
     pub.getPosition = function () {
         return priv.position;

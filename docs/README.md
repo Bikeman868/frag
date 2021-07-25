@@ -94,6 +94,7 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`OrthographicCamera`](./reference/orthographic-camera.md) draws objects in the scene at their actual size.
 * [`ParallelAnimationAction`](./reference/parallel-animation-action.md) runs multiple animation actions in parallel.
 * [`PerspectiveCamera`](./reference/perspective-camera.md) objects further from the camera appear smaller.
+* [`PositionLink`](./reference/position-link.md) makes one object mimic the movements of another object.
 * [`Scene`](./reference/scene.md) a collection of objects and a camera to draw them.
 * [`SceneObject`](./reference/scene-object.md) an instance of a model that can be positioned within a scene.
 * [`ScenePosition`](./reference/scene-position.md) location, orientation and scale.

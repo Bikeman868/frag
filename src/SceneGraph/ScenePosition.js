@@ -7,10 +7,10 @@ window.frag.ScenePosition = function (engine, location, is3d) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable(
+        observableLocation: window.frag.Observable(
             engine, 
             (observer) => { 
-                observer(private.location.getMatrix());
+                observer(private.location);
             }),
     };
 
@@ -19,7 +19,7 @@ window.frag.ScenePosition = function (engine, location, is3d) {
 
     private.modified = function() {
         private.location.isModified = true;
-        public.observableMatrix.notify();
+        public.observableLocation.notify();
     }
 
     public.setLocation = function (value) {

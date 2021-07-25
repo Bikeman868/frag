@@ -104,6 +104,13 @@ You can get a `ScenePosition` object by calling the `getPosition` method
 of anything that can be moved. The methods of `ScenePosition` are fluent
 which means that you can chain the calls together to avoid some typing.
 
+## PositionLink
+The [`PositionLink`](reference/position-link.md) class creates an invisible
+link between two objects so that the second object mimics the movement of
+the first. You can use the `PositionLink` to mimic location, scale and/or
+rotation on each axis individually, and you can offset the destination from
+the source.
+
 ## Transform2D and Transform3D
 These two classes can be used to create and/or manipulate a 2D or 3D matrix.
 They also provide an `Observable` that allows you to subscribe to any changes

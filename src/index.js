@@ -26,6 +26,7 @@ require("./SceneGraph/ScenePosition");
 require("./SceneGraph/SceneObject");
 require("./SceneGraph/Scene");
 require("./SceneGraph/DrawContext");
+require("./SceneGraph/PositionLink");
 
 require("./Cameras/cameraMixin");
 require("./Cameras/UiCamera");

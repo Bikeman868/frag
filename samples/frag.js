@@ -1057,74 +1057,74 @@ window.frag.UiCamera = function (engine) {
   \************************************/
 /***/ (() => {
 
-window.frag.cameraMixin = function(engine, private, public) {
-    private.worldTransform = window.frag.Transform3D(engine);
-    private.position = window.frag.ScenePosition(engine);
-    private.projectionMatrix = null;
-    private.worldMatrix = null;
-    private.transformChanged = true;
-    private.positionChanged = true;
-    private.frustumChanged = true;
-    private.aspectRatio = 1;
+window.frag.cameraMixin = function(engine, priv, pub) {
+    priv.worldTransform = window.frag.Transform3D(engine);
+    priv.position = window.frag.ScenePosition(engine);
+    priv.projectionMatrix = null;
+    priv.worldMatrix = null;
+    priv.transformChanged = true;
+    priv.positionChanged = true;
+    priv.frustumChanged = true;
+    priv.aspectRatio = 1;
 
-    public.__private = private;
-    public.worldToClipTransform = window.frag.Transform3D(engine);
+    pub.__private = priv;
+    pub.worldToClipTransform = window.frag.Transform3D(engine);
 
-    public.dispose = function () {
-        private.position.observableMatrix.unsubscribe(private.onPositionChanged);
-        private.worldToClipTransform.dispose();
-        private.position.dispose();
+    pub.dispose = function () {
+        priv.position.observableLocation.unsubscribe(priv.onPositionChanged);
+        priv.worldToClipTransform.dispose();
+        priv.position.dispose();
     }
 
-    private.onPositionChanged = function() {
-        private.positionChanged = true;
+    priv.onPositionChanged = function() {
+        priv.positionChanged = true;
     }
 
-    private.position.observableMatrix.subscribe(private.onPositionChanged);
+    priv.position.observableLocation.subscribe(priv.onPositionChanged);
 
-    public.getPosition = function () {
-        return private.position;
+    pub.getPosition = function () {
+        return priv.position;
     }
 
-    private.updateAspect = function () {
+    priv.updateAspect = function () {
         const aspectRatio = engine.gl.drawingBufferWidth / engine.gl.drawingBufferHeight;
-        if (aspectRatio !== private.aspectRatio) {
-            private.aspectRatio = aspectRatio;
-            private.frustumChanged = true;
+        if (aspectRatio !== priv.aspectRatio) {
+            priv.aspectRatio = aspectRatio;
+            priv.frustumChanged = true;
         }
     }
 
-    private.updateWorld = function () {
-        if (private.positionChanged) {
-            private.worldMatrix = window.frag.Matrix.m4Invert(private.position.getMatrix());
-            private.positionChanged = false;
-            private.transformChanged = true;
+    priv.updateWorld = function () {
+        if (priv.positionChanged) {
+            priv.worldMatrix = window.frag.Matrix.m4Invert(priv.position.getMatrix());
+            priv.positionChanged = false;
+            priv.transformChanged = true;
         }
     }
 
-    public.setViewport = function () {
+    pub.setViewport = function () {
         const gl = engine.gl;
         gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
         gl.canvas.width = gl.canvas.clientWidth;
         gl.canvas.height = gl.canvas.clientHeight;
 
-        return public.adjustToViewport();
+        return pub.adjustToViewport();
     };
 
-    public.adjustToViewport = function () {
+    pub.adjustToViewport = function () {
         const gl = engine.gl;
         const Matrix = window.frag.Matrix;
 
-        private.updateAspect();
-        private.updateFrustum();
-        private.updateWorld();
+        priv.updateAspect();
+        priv.updateFrustum();
+        priv.updateWorld();
 
-        if  (private.transformChanged) {
-            public.worldToClipTransform.setMatrix(Matrix.m4Xm4(private.projectionMatrix, private.worldMatrix));
-            private.transformChanged = false;
+        if  (priv.transformChanged) {
+            pub.worldToClipTransform.setMatrix(Matrix.m4Xm4(priv.projectionMatrix, priv.worldMatrix));
+            priv.transformChanged = false;
         }
 
-        return public;
+        return pub;
     }
 }
 
@@ -1458,6 +1458,7 @@ window.frag.Engine = function(config) {
     addProxy('SceneObject');
     addProxy('Scene');
     addProxy('DrawContext');
+    addProxy('PositionLink');
 
     addProxy('UiCamera');
     addProxy('OrthographicCamera');
@@ -1704,7 +1705,10 @@ window.frag.Transform2D = function (engine, matrix) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable(engine, (o) => { o(private.matrix) }),
+        observableMatrix: window.frag.Observable(
+            engine, (observer) => { 
+                observer(private.matrix) 
+            }),
         is3d: false,
     };
 
@@ -1822,7 +1826,10 @@ window.frag.Transform3D = function (engine, matrix) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable(engine, (o) => { o(private.matrix) }),
+        observableMatrix: window.frag.Observable(
+            engine, (observer) => { 
+                observer(private.matrix) 
+            }),
         is3d: true,
     };
 
@@ -5866,6 +5873,131 @@ window.frag.Model = function (engine, is3d, parent) {
 
 /***/ }),
 
+/***/ "./src/SceneGraph/PositionLink.js":
+/*!****************************************!*\
+  !*** ./src/SceneGraph/PositionLink.js ***!
+  \****************************************/
+/***/ (() => {
+
+window.frag.PositionLink = function(engine) {
+    const private = {
+        source: null,
+        dest: null,
+        locationOffset: null,
+        scaleOffset: null,
+        rotationOffset: null,
+    };
+
+    const public = {
+        __private: private,
+    };
+
+    public.dispose = function() {
+        if (private.source) {
+            private.source.observableLocation.unsubscribe(private.sourceChanged);
+        }
+    }
+
+    private.sourceChanged = function(location) {
+        if (!private.dest) return;
+
+        if (private.locationOffset) {
+            if (private.locationOffset[0] !== undefined && 
+                private.locationOffset[1] !== undefined && 
+                private.locationOffset[2] !== undefined) {
+                private.dest.locationXYZ(
+                    location.translateX + private.locationOffset[0],
+                    location.translateY + private.locationOffset[1],
+                    location.translateZ + private.locationOffset[2]);
+
+            } else {
+                if (private.locationOffset[0] !== undefined)
+                    private.dest.locationX(location.translateX + private.locationOffset[0]);
+                if (private.locationOffset[1] !== undefined)
+                    private.dest.locationY(location.translateY + private.locationOffset[1]);
+                if (private.locationOffset[2] !== undefined)
+                    private.dest.locationZ(location.translateZ + private.locationOffset[2]);
+            }
+        }
+        if (private.scaleOffset) {
+            if (private.scaleOffset[0] !== undefined && 
+                private.scaleOffset[1] !== undefined && 
+                private.scaleOffset[2] !== undefined) {
+                private.dest.scaleXYZ(
+                    location.scaleX + private.scaleOffset[0],
+                    location.scaleY + private.scaleOffset[1],
+                    location.scaleZ + private.scaleOffset[2]);
+
+            } else {
+                if (private.scaleOffset[0] !== undefined)
+                    private.dest.scaleX(location.scaleX * private.scaleOffset[0]);
+                if (private.scaleOffset[1] !== undefined)
+                    private.dest.scaleY(location.scaleY * private.scaleOffset[1]);
+                if (private.scaleOffset[2] !== undefined)
+                    private.dest.scaleZ(location.scaleZ * private.scaleOffset[2]);
+            }
+        }
+        if (private.rotationOffset) {
+            if (private.rotationOffset[0] !== undefined && 
+                private.rotationOffset[1] !== undefined && 
+                private.rotationOffset[2] !== undefined) {
+                private.dest.rotateXYZ(
+                    location.rotateX + private.rotationOffset[0],
+                    location.rotateY + private.rotationOffset[1],
+                    location.rotateZ + private.rotationOffset[2]);
+
+            } else {
+                if (private.rotationOffset[0] !== undefined)
+                    private.dest.rotateX(location.rotateX + private.rotationOffset[0]);
+                if (private.rotationOffset[1] !== undefined)
+                    private.dest.rotateY(location.rotateY + private.rotationOffset[1]);
+                if (private.rotationOffset[2] !== undefined)
+                    private.dest.rotateZ(location.rotateZ + private.rotationOffset[2]);
+            }
+        }
+    }
+
+    public.source = function(scenePosition) {
+        if (scenePosition.getPosition)
+            scenePosition = scenePosition.getPosition();
+
+        if (private.source) {
+            private.source.observableLocation.unsubscribe(private.sourceChanged);
+        }
+        private.source = scenePosition;
+        if (scenePosition) {
+            scenePosition.observableLocation.subscribe(private.sourceChanged);
+        }
+        return public
+    }
+
+    public.dest = function(scenePosition) {
+        if (scenePosition.getPosition)
+            scenePosition = scenePosition.getPosition();
+        private.dest = scenePosition;
+        return public
+    }
+
+    public.locationOffset = function(offset) {
+        private.locationOffset = offset;
+        return public
+    }
+
+    public.scaleOffset = function(offset) {
+        private.scaleOffset = offset;
+        return public
+    }
+
+    public.rotationOffset = function(offset) {
+        private.rotationOffset = offset;
+        return public
+    }
+
+    return public;
+}
+
+/***/ }),
+
 /***/ "./src/SceneGraph/Scene.js":
 /*!*********************************!*\
   !*** ./src/SceneGraph/Scene.js ***!
@@ -5883,16 +6015,11 @@ window.frag.Scene = function(engine) {
         camera: null
     }
 
-    private.cameraUpdated = function() {
-    }
-
     const public = {
         __private: private
     };
 
     public.dispose = function() {
-        if (private.camera)
-            private.camera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
     }
 
     public.addObject = function(sceneObject) {
@@ -5913,14 +6040,7 @@ window.frag.Scene = function(engine) {
     }
 
     public.camera = function(camera) {
-        if (private.camera)
-            private.camera.worldToClipTransform.observableMatrix.unsubscribe(private.cameraUpdated);
-
         private.camera = camera;
-
-        if (camera)
-            camera.worldToClipTransform.observableMatrix.subscribe(private.cameraUpdated);
-
         return public;
     }
 
@@ -5971,6 +6091,8 @@ window.frag.SceneObject = function (engine, model) {
         enabled: true,
         location: null,
         animationLocation: null,
+        position: null,
+        animationPosition: null,
         animationMap: {},
         childMap: {},
     };
@@ -6038,13 +6160,15 @@ window.frag.SceneObject = function (engine, model) {
     };
 
     /**
-     * @returns a ScemePosition object that can be used to manipulate the position
+     * @returns a ScenePosition object that can be used to manipulate the position
      * scale and orientation of this object in the scene
      */
     public.getPosition = function () {
         const location = private.getLocation();
         if (!location) return null;
-        return frag.ScenePosition(engine, location);
+        if (!private.position) 
+            private.position = frag.ScenePosition(engine, location);
+        return private.position;
     };
 
     /**
@@ -6055,7 +6179,9 @@ window.frag.SceneObject = function (engine, model) {
     public.getAnimationPosition = function () {
         const location = private.getAnimationLocation();
         if (!location) return null;
-        return frag.ScenePosition(engine, location);
+        if (!private.animationPosition) 
+            private.animationPosition = frag.ScenePosition(engine, location);
+        return private.animationPosition;
     };
 
     /**
@@ -6146,10 +6272,10 @@ window.frag.ScenePosition = function (engine, location, is3d) {
 
     const public = {
         __private: private,
-        observableMatrix: window.frag.Observable(
+        observableLocation: window.frag.Observable(
             engine, 
             (observer) => { 
-                observer(private.location.getMatrix());
+                observer(private.location);
             }),
     };
 
@@ -6158,7 +6284,7 @@ window.frag.ScenePosition = function (engine, location, is3d) {
 
     private.modified = function() {
         private.location.isModified = true;
-        public.observableMatrix.notify();
+        public.observableLocation.notify();
     }
 
     public.setLocation = function (value) {
@@ -7846,6 +7972,7 @@ __webpack_require__(/*! ./SceneGraph/ScenePosition */ "./src/SceneGraph/ScenePos
 __webpack_require__(/*! ./SceneGraph/SceneObject */ "./src/SceneGraph/SceneObject.js");
 __webpack_require__(/*! ./SceneGraph/Scene */ "./src/SceneGraph/Scene.js");
 __webpack_require__(/*! ./SceneGraph/DrawContext */ "./src/SceneGraph/DrawContext.js");
+__webpack_require__(/*! ./SceneGraph/PositionLink */ "./src/SceneGraph/PositionLink.js");
 
 __webpack_require__(/*! ./Cameras/cameraMixin */ "./src/Cameras/cameraMixin.js");
 __webpack_require__(/*! ./Cameras/UiCamera */ "./src/Cameras/UiCamera.js");
