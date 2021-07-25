@@ -1,7 +1,7 @@
 # ScenePosition
 
 `ScenePosition` objects are wrappers that provide convenient methods for manipulating
-a `Location` object. The Scene Position lets you modify the translation, scale and
+a [`Location`](location.md) object. The Scene Position lets you modify the translation, scale and
 orientation easily, and flags the `Location` as modified to that the next time the
 `getMatrix()` funtion is called hte matrix will be recalculated.
 
@@ -53,10 +53,10 @@ sceneObject.getPosition().scale(40);
 scene.addObject(sceneObject);
 ```
 
-## setLocation(location: Location)
+## setLocation(location: Location): ScenePosition
 Changes the location that will be updated by this scene position object.
 
-## getMatrix()
+## getMatrix(): Matrix
 Calls the `getMatrix()` function of the enclosed `Location` object. This matrix can be
 used to transform coordinates according to the translation, rotation and scale defined
 by the location.
@@ -111,5 +111,5 @@ These methods affect the translating effect of the matrix transform:
 * `locationY(value: float)` sets the position along the Y axis
 * `locationZ(value: float)` sets the position along the Z axis
 * `locationXYZ(x: float, y: float, z: float)` sets the position along all 3 axes indepenently
-* `moveBy(angles: float[])` moves the object on all 3 axes
+* `moveBy(locations: float[])` moves the object on all 3 axes
 * `moveByXYZ(x: float, y: float, z: float)` moves the object along all 3 axes

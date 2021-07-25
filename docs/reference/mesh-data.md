@@ -98,21 +98,21 @@ data is added by calculation. These properties are all booleans as follows:
 ## dispose()
 Frees resources consumed by the mesh.
 
-## name(name: string)
+## name(name: string): MeshData
 Sets the name of the mesh. This is only useful for debugging.
 
-## clear()
+## clear(): MeshData
 Deletes all of the mesh fragments but keeps retains the draw buffer so
 that the mesh can still be rendered, it just won't draw anything until
 you add some more mesh fragments to it.
 
-## shadeSmooth()
+## shadeSmooth(): MeshData
 Instructs the mesh to adjust the mesh normals so that coincident vertices
 have the same normal vector. This ensures that two verticies in the same
 location on the surface of the mesh will be lit the same way making the
 obect appear to have a smooth surface.
 
-## shadeFlat()
+## shadeFlat(): MeshData
 Instructs the mesh to adjust mesh normals to be perpendicular to the face
 of the triangle that they are part of. For trangle strips and triangle fans
 this works less well because one vertex can be part of more than one triangle.
@@ -121,22 +121,22 @@ The effect of this setting is to make the surface of the object have sudden
 changes in lighting at the edge of triangles so that the triangles are more
 visible and the surface looks angular.
 
-## textureSmooth()
+## textureSmooth(): MeshData
 Instructs the mesh to adjust the mesh UV coordinates so that coincident vertices
 have the same UVs. This ensures that two verticies in the same
 location on the surface of the mesh will have the same texture.
 
-## textureFlat()
+## textureFlat(): MeshData
 Instructs the mesh to use the original UV coordinates. This can lead to jarring
 changes in texture at triangle boundaries, which of course maybe what you want.
 
-## wireframe(wireframe: bool)
+## wireframe(wireframe: bool): MeshData
 This is a useful debugging tool. It makes the mesh draw as lines connecting
 the verticies instead of flat surfaces. This allows you to see inside the model,
 allows you to see faces that might otherwise be hidden, and can reveal issues
 with you mesh geometries.
 
-## drawNormals(length: float, color?: float[])
+## drawNormals(length: float, color?: float[]): MeshData
 This is another useful debugging tool. It adds short lines to the mesh that start
 at a vertex and go outwards in the direction of the normal vector. This can
 be very useful if you are seeing strange lighting effects and you want to
@@ -151,13 +151,13 @@ The optional `color` parameter should be passed as an array of 3 floats for red,
 green and blue components of the color. As usual with WebGL floating point colors
 are always expressed in the range 0 to 1, i.e. [1,0,0] is bright red.
 
-## addVertexData(vertexData: VertexData)
+## addVertexData(vertexData: VertexData): MeshData
 Adds a fragment of mesh from a pre-prepared `VertexData` object. `VertexData` objects
 allow you to define the data needed to create a mesh. It also allows you to 
 modify individual verticies, colors, UV coordinates etc and then re-create or
 re-populate the mesh.
 
-## addTriangles2D()
+## addTriangles2D(): MeshData
 Takes function the following parameters:
 * verticies: float[]
 * colors?: float[]
@@ -167,7 +167,7 @@ Takes function the following parameters:
 * bitangents?: float[]
 Adds a mesh fragment defined by a set of discrete 2-dimensional triangles
 
-## addTriangles()
+## addTriangles(): MeshData
 Takes function the following parameters:
 * verticies: float[]
 * colors?: float[]
@@ -177,7 +177,7 @@ Takes function the following parameters:
 * bitangents?: float[]
 Adds a mesh fragment defined by a set of discrete 3-dimensional triangles
 
-## addTriangleStrip()
+## addTriangleStrip(): MeshData
 Takes function the following parameters:
 * verticies: float[]
 * colors?: float[]
@@ -190,7 +190,7 @@ Adds a mesh fragment defined by a set of 3-dimensional triangles where the
 first 3 vertices define the first triangle, then each subsequent vertex
 adds one more triangle to the strip of triangles.
 
-## addTriangleFan()
+## addTriangleFan(): MeshData
 Takes function the following parameters:
 * verticies: float[]
 * colors?: float[]
@@ -204,7 +204,7 @@ first vertex defined the center of the fan, the next 2 vertices form a triangle,
 then each subsequent vertex adds one more triangle to the fan of triangles
 which all share the first vertex.
 
-## fromBuffer()
+## fromBuffer(): MeshData
 
 Takes function the following parameters:
 * buffer: ArrayBuffer - contains binary floating point data

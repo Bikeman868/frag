@@ -4,7 +4,7 @@ For example you might want to transition gradually from one color to another
 or smoothly rotate an object in the scene.
 
 This object is an animation action, which means that you must pass it
-to the `sequence()` function of an `Animation` object.
+to the `sequence()` function of an [`Animation`](animation.md) object.
 
 ## Constructor
 ```javascript
@@ -54,16 +54,16 @@ const animation = engine.Animation({
   ]);
 ```
 
-## setDuration(gameTicks: int)
+## setDuration(gameTicks: int): ValueAnimationAction
 Specifies how long this animation will take in game ticks. If you don't call this
 function then the duration defaults to 30 game ticks.
 
-## setInterval(gameTicks: int)
+## setInterval(gameTicks: int): ValueAnimationAction
 Specifies how often the value is updated in game ticks. A lower number will produce
 smoother animation at the cost of higher CPU load. If you don't call this function
 then the default is 5 ticks.
 
-## onStart(start: function(animation, valueAnimation, gameTick))
+## onStart(start: function(animation, valueAnimation, gameTick)): ValueAnimationAction
 Supplies a function that will be executed at the start of the animation.
 
 The `animation` parameter is the animation that this action was added to.
@@ -73,7 +73,7 @@ The `valueAnimation` parameter it this value animation action.
 
 The `gameTick` parameter is the current game time in ticks.
 
-## onStop(stop: function(animation, valueAnimation, gameTick))
+## onStop(stop: function(animation, valueAnimation, gameTick)): ValueAnimationAction
 Supplies a function that will be executed at the end of the animation.
 
 The `animation` parameter is the animation that this action was added to.
@@ -83,7 +83,7 @@ The `valueAnimation` parameter it this value animation action.
 
 The `gameTick` parameter is the current game time in ticks.
 
-## onStep(step: function(animation, ratio, valueAnimation, gameTick))
+## onStep(step: function(animation, ratio, valueAnimation, gameTick)): ValueAnimationAction
 Supplies a function that will be executed each time the animated value needs to
 be updated.
 

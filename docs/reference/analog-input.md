@@ -1,7 +1,7 @@
 # Analog Input
 
 The analog input object captures player actions on input devices and mutates
-an `AnalogState` object.
+an [`AnalogState`](analog-state.md) object.
 
 Note that you must call the `enable()` method of the analog input for it to start
 capturing player inputs. There is also a `disable()` method you can call to

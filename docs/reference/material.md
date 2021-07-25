@@ -42,15 +42,15 @@ Frees resources consumed by the material. If the material is configured
 to displse of textures, then all textures referenced by the material will
 be disposed.
 
-## disposeTextures(dispose: bool)
+## disposeTextures(dispose: bool): Material
 If the material is configured to dispose of textures then it will
 dispose any textures that are no longer used by the material.
 
-## name(name: string)
+## name(name: string): Material
 The name function sets the name of the material. This is only useful for
 debugging purposes, the framework does not use the material name.
 
-## setTexture(type: string, texture: Texture)
+## setTexture(type: string, texture: Texture): Material
 Assigns a texture to the material. If there is already a texture of this
 type bound to the material then it is replaced. When textures are replaced
 like this, if the material is configured to dispose textures then the

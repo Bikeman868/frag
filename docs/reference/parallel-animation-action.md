@@ -4,7 +4,7 @@ This class provides a mechanism for executing multiple actions in parallel
 as part of an animation sequence.
 
 This object is an animation action, which means that you must pass it
-to the `sequence()` function of an `Animation` object. The `Animation` 
+to the `sequence()` function of an [`Animation`](animation.md) object. The `Animation` 
 object that you pass it to will invoke this action as part of the sequence.
 
 ## Constructor
@@ -64,11 +64,11 @@ const animation = engine.Animation()
   ]);
 ```
 
-## setDuration(gameTicks: int)
+## setDuration(gameTicks: int): ParallelAnimationAction
 Specifies how long this animation will take in game ticks. If you don't call this
 function then the duration defaults to 30 game ticks.
 
-## setInterval(gameTicks: int)
+## setInterval(gameTicks: int): ParallelAnimationAction
 Specifies how often the value is updated in game ticks. A lower number will produce
 smoother animation at the cost of higher CPU load. If you don't call this function
 then the default is 5 ticks.

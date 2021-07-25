@@ -62,48 +62,48 @@ engine.Animation().sequence([step1, step2, step3, step4, step5], true)
     .start();
 ```
 
-## moveBy(vector: float[], invLinearVelocity: float)
+## moveBy(vector: float[], invLinearVelocity: float): PositionAnimationAction
 Configures the position animation action to move the object by a vector
 relative to the position at the start of the animation. The 
 `invLinearVelocity` parameter is optional and defaults to the value passed
 to the constructor.
 
-## moveTo(location: float[], invLinearVelocity: float)
+## moveTo(location: float[], invLinearVelocity: float): PositionAnimationAction
 Configures the position animation action to move the object to an absolute
 position within the scene. The `invLinearVelocity` parameter is optional and 
 defaults to the value passed to the constructor.
 
-## rotateBy(vector: float[], invAngularVelocity: float)
+## rotateBy(vector: float[], invAngularVelocity: float): PositionAnimationAction
 Configures the position animation action to rotate the object by a euler vector
 relative to the orientation at the start of the animation. The 
 `invAngularVelocity` parameter is optional and defaults to the value passed
 to the constructor.
 
-## rotateTo(heading: float[], invAngularVelocity: float)
+## rotateTo(heading: float[], invAngularVelocity: float): PositionAnimationAction
 Configures the position animation action to rotate the object to an absolute
 orientation. The `invAngularVelocity` parameter is optional and defaults to the 
 value passed to the constructor.
 
-## moveByXYZ(x, y, z, invLinearVelocity)
+## moveByXYZ(x, y, z, invLinearVelocity): PositionAnimationAction
 This is another way of calling `moveBy`
 
-## moveByXY(x, y, invLinearVelocity)
+## moveByXY(x, y, invLinearVelocity): PositionAnimationAction
 This is another way of calling `moveBy`
 
-## moveToXYZ(x, y, z, invLinearVelocity)
+## moveToXYZ(x, y, z, invLinearVelocity): PositionAnimationAction
 This is another way of calling `moveTo`
 
-## moveToXY(x, y, invLinearVelocity)
+## moveToXY(x, y, invLinearVelocity): PositionAnimationAction
 This is another way of calling `moveTo`
 
-## rotateByXYZ(x, y, z, invLinearVelocity)
+## rotateByXYZ(x, y, z, invLinearVelocity): PositionAnimationAction
 This is another way of calling `rotateBy`
 
-## rotateByXY(x, y, invLinearVelocity)
+## rotateByXY(x, y, invLinearVelocity): PositionAnimationAction
 This is another way of calling `rotateBy`
 
-## rotateToXYZ(x, y, z, invLinearVelocity)
+## rotateToXYZ(x, y, z, invLinearVelocity): PositionAnimationAction
 This is another way of calling `rotateTo`
 
-## rotateToXY(x, y, invLinearVelocity)
+## rotateToXY(x, y, invLinearVelocity): PositionAnimationAction
 This is another way of calling `rotateTo`

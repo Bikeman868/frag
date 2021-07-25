@@ -81,7 +81,7 @@ devices controlling that input state.
 
 The `action` parameter can be undefined, a function, or an array of functions. 
 You can just write your own function and pass it here, or you can call 
-the `frag.AnalogAction()` function that will construct a function for you.
+the [`AnalogAction`](analog-action.md) function that will construct a function for you.
 
 If you write your own custom action function then is should use the following 
 method signature:

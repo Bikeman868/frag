@@ -71,7 +71,7 @@ ticks.
 ## dispose()
 Frees resources consumed by the animation.
 
-## repeatTicks(action: function(animation, gameTick, frameTick), interval: int)
+## repeatTicks(action: function(animation, gameTick, frameTick), interval: int): Animation
 Executes a function at regular time intervals. The function will be passed
 the animation object, the current game tick and the current frame tick.
 
@@ -80,11 +80,11 @@ it returns:
 * `nextGameTick` specifies the next game tick where this animation wants to run
 * `nextFrameTick` specifies the next frame tick where this animation wants to run
 
-## repeatFrames(action: function(animation, gameTick, frameTick), interval: int)
+## repeatFrames(action: function(animation, gameTick, frameTick), interval: int): Animation
 Executes a function at regular frame render intervals. See above for details
 of the `action` parameter.
 
-## stopAfter(gameTicks: int)
+## stopAfter(gameTicks: int): Animation
 Causes the animation to stop automatically after the specified number of game ticks.
 This comes into effect the next time it is started.
 
@@ -97,7 +97,7 @@ it will continue to run, but stop after the specified number of game ticks.
 This is good for things like weapon firing actions, explosions etc that have a
 limited duration.
 
-## sequence(actions: AnimationAction[], loop: bool)
+## sequence(actions: AnimationAction[], loop: bool): Animation
 Configures the animation to run a sequence of animation actions when the animation
 is started, and optionally repeat this sequence until the animation is stopped.
 
@@ -141,16 +141,16 @@ pass to the `sequence()` function including `ValueAnimationAction`,
 `ParallelAnimationAction`, `PositionAnimationAction`, `RepeatAnimationAction` and
 `KeyframeAnimationAction`.
 
-## perform(action: AnimationAction, loop: bool)
+## perform(action: AnimationAction, loop: bool): Animation
 This is exactly like calling the `sequence()` function passing an array of just one action.
 
-## start()
+## start(): Animation
 Starts the animation if it is currently stopped.
 
-## stop()
+## stop(): Animation
 Stops the animation if it is currently running.
 
-## disposeOnStop(dispose: bool)
+## disposeOnStop(dispose: bool): Animation
 Calling this method on an animation will make the animation dispose of itself as soon as
 the animation has completed. This is useful in situations where we want a vehicle to move
 to a specific location and stop when it gets there. It's unlikely that we will need that

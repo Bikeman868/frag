@@ -11,7 +11,7 @@ something to happen, and you can pass a function that will execute at that
 time.
 
 This object is an animation action, which means that you must pass it
-to the `sequence()` function of an `Animation` object. If you don't
+to the `sequence()` function of an [`Animation`](animation.md) object. If you don't
 have a sequence, then you can also call the `perform()` function of the
 `Animation` to just perform one action.
 
@@ -64,7 +64,7 @@ const animation = engine.Animation()
   );
 ```
 
-## setFrames(tickInterval: int, frameCount: int)
+## setFrames(tickInterval: int, frameCount: int): KeyframeAnimationAction
 Specifies how many game ticks will elapse between animation frames, and how
 many frames there are in your animation. Geme ticks detault to 10ms each but 
 you can customize this for your game to balance hardware requirements against 
@@ -73,7 +73,7 @@ the smoothness of the animations.
 tickInterval x frameCount is the number of game ticks that the animation will
 run for.
 
-## add(frame: int, action: function(frame, data, tick), data: any)
+## add(frame: int, action: function(frame, data, tick), data: any): KeyframeAnimationAction
 Adds an action to a specific frame in the animation. You can add multiple
 actions to the same frame if you like.
 

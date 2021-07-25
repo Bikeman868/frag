@@ -12,9 +12,9 @@ window.frag.Shader(engine: Engine)
 
 ```
 
-* `engine` is the game engine for your game. It is an instance of the `Engine` class. You can 
-  have more than one on a page but more often there is just one that is constructed at the 
-  very beginning.
+* `engine` is the game engine for your game. It is an instance of the [`Engine`](engine.md)
+  class. You can have more than one on a page but more often there is just one that is 
+  constructed at the very beginning.
 
 Note that for any constructor, you can call this function on the `engine` rather than passing
 `engine` as a parameter. In this case the call looks like:

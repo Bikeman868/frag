@@ -50,7 +50,7 @@ Returns a `ScenePosition` object that can be used to move and rotate the camera.
 Note that the cameras resting position is at (0, 0, 0) looking down the +Z axis, ie
 at the world origin looking into the screen.
 
-## frustum(fieldOfView: float, zNear: float, zFar: float)
+## frustum(fieldOfView: float, zNear: float, zFar: float): PerspectiveCamera
 `fieldOfView` is an angle in radians that defines how much of the scene is
 visible when viewed through this camera. When the field of view is larger, the
 game player can see more of the scene.
@@ -62,7 +62,7 @@ distance from the camera along its Z-axis, not the Z-axis position in the scene.
 Initially the camera Z-axis is aligned with the world Z-axis, but if you rotate the
 camera then this is no longer the case.
 
-## parent(parent: ScenePosition | SceneObject | Camera | undefined): OrthographicCamera
+## parent(parent: ScenePosition | SceneObject | Camera | undefined): PerspectiveCamera
 Channges the cameras parent, adding the parent's location transformation to 
 the camera's location transformation, so that the camera behaves as if it were
 part of the parent model.

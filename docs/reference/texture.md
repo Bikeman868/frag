@@ -60,15 +60,15 @@ is a power of 2.
 ## dispose()
 Frees resources consumed by the texture.
 
-## disposeTextures(dispose: bool)
+## disposeTextures(dispose: bool): Texture
 If the material is configured to dispose of textures then it will
 dispose any textures that are no longer used by the material.
 
-## name(name: string)
+## name(name: string): Texture
 The name function sets the name of the texture. This is only useful for
 debugging purposes, the framework does not use the texture name.
 
-## dataFormat(format: int)
+## dataFormat(format: int): Texture
 Defines the format to use in the graphics card to store this
 texture. Using more channels will pass more information to the shader
 but consumes more memory on the graphics card.
@@ -82,7 +82,7 @@ options are:
 * `engine.gl.LUMINANCE` uses 1 bytes per pixel for brightness only.
 * `engine.gl.ALPHA` uses 1 bytes per pixel for transparency only.
 
-## fromArrayBuffer(level: int, buffer: ArrayBuffer, offset: int, width: int, height: int)
+## fromArrayBuffer(level: int, buffer: ArrayBuffer, offset: int, width: int, height: int): Texture
 Allows you to supply bitmap data in an array. You can construct the array
 in code, or download the data from a back-end service.
 
@@ -110,7 +110,7 @@ const texture = engine.Texture()
   .fromArrayBuffer(level, pixelData, 0, width, height);
 ```
 
-## fromImage(level: int, image: Image)
+## fromImage(level: int, image: Image): Texture
 Sets the pixel data from an html Image element.
 
 * `level` parameter is the mip level that you are defining - see description above
@@ -120,14 +120,14 @@ If you call this method from the `onload` event of the image then the image will
 be assigned to the texture immediately, otherwise this function will attach an
 `onload` handler to the image and initialize the texture when the image finished loading.
 
-## fromUrl(level: int, url: string, crossOrigin?: string)
+## fromUrl(level: int, url: string, crossOrigin?: string): Texture
 Sets the pixel data by downloading an image from the specified url.
 
 * `level` parameter is the mip level that you are defining - see description above
 * `url` parameter is any url that is valid as the `src` attribute of an image element
 * `crossOrigin` parameter is an optional crossOrigin attribute to set for the image
 
-## fromScene(scene: Scene, width: int, height: int)
+## fromScene(scene: Scene, width: int, height: int): Texture
 Specifies that a Frag Scene should be rendered to produce the texture bitmap.
 This scene can contain anything that scenes usually contain, and must have a 
 camera defined that projects the scene onto a viewport.
@@ -140,7 +140,7 @@ scene, but also creates all of the mip levels down to 1x1 pixel, so it is very e
 * `width` the width of the bitmap to render the scene onto - should be a power of 2
 * `height` the height of the bitmap to render the scene onto - should be a power of 2
 
-## update()
+## update(): Texture
 If this texture is from a scene, calling the update method will re-render the scene,
 capture the output as a bitmap, upload this bitmap to the graphics card, generate
 all mip levels down to 1x1 pixel, and upload all of those bitmaps to the graphics card.

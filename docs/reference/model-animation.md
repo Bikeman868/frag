@@ -9,7 +9,7 @@ When you attach one or more `ModelAnimation` objects to a model, all of the
 [`SceneObject`](scene-object.md) objects that are created based on that model 
 will have animations available. These animations will be properties of 
 the `animations` property of the scene object, and they will be instances of the 
-[`Animation` class](animation.md). This is made clearer by the example below.
+[`Animation`](animation.md) class. This is made clearer by the example below.
 
 Each `ModelAnimation` comprises a number of channels, where a channel affects
 a property of all contained models whose names match the regular expression
@@ -163,26 +163,26 @@ car.animations.moving.start();
 setTimeout(car.animations.bump.start, 5000);
 ```
 
-## name(name: string)
+## name(name: string): ModelAnimation
 Sets the name of the animation. This name will become the name of a
 property on `SceneObject` instances that are based on a model that
 has this model animation attached to it.
 
-## loop(loop: bool)
+## loop(loop: bool): ModelAnimation
 Defines whether the animation begins again at the start after the
 animation reaches the end.
 
-## interval(tickInterval: int)
+## interval(tickInterval: int): ModelAnimation
 Specifies how many game ticks will elapse between animation frames .Geme 
 ticks detault to 10ms each but you can customize this for your game to 
 balance hardware requirements against the smoothness of the animations.
 
-## frames(frameCount: int)
+## frames(frameCount: int): ModelAnimation
 Specifies how many frames there are in your animation. When adding keyframes
 to the animation channels only keyframes in the range 0 to frameCount-1 will
 be used.
 
-## addChannel(channel: any)
+## addChannel(channel: any): ModelAnimation
 Adds an animation channel to the model animation. The channel defines
 which child models to affect and which attributes of those models should
 be changed, plus a graph of how that value should vary over time.

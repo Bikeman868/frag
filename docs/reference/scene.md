@@ -49,7 +49,7 @@ const scene = engine.Scene()
 ## dispose()
 Frees resources consumed by the scene.
 
-## addObject(obj: SceneObject)
+## addObject(obj: SceneObject): Scene
 Adds a `SceneObject` to the scene. The object will be drawn each time the scene
 is rendered if it is enabled. Objects can be temporarily disabled to save resources
 if the object is not visible in the viewport (for example behind the player).
@@ -58,11 +58,11 @@ The same object can be added to multiple scenes. Objects can be removed and re-a
 to the same scene as many times as you like, but it's more efficient to just disable
 the object if this is very temporary.
 
-## removeObject(obj: SceneObject)
+## removeObject(obj: SceneObject): Scene
 Removes a `SceneObject` from the scene if it is present. Returns true if the the
 object was in the scene and false if it was not.
 
-## camera(camera: Camera)
+## camera(camera: Camera): Scene
 Specifies the camera for this scene. Scenes with no camera attached to them will not
 render anything to the screen. The camera defines a projection from the 3D environment
 represented by the objects in the scene onto a viewport. A viewport is just a rectangle

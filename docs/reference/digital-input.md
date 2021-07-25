@@ -1,7 +1,7 @@
 # Digital Input
 
-The digital input object captures player actions on input devices and mutates
-a `DigitalState` object.
+The `DigitalInput` object captures player actions on input devices and mutates
+a [`DigitalState`](digital-state.md) object.
 
 Note that you must call the `enable()` method of the digital input for it to start
 capturing player inputs. There is also a `disable()` method you can call to

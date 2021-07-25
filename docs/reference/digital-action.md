@@ -1,6 +1,6 @@
 # Digital Action
 
-This class can change your game scene by responding to changes in an `DigitalState`
+This class can change your game scene by responding to changes in an [`DigitalState`](digital-state.md)
 
 ## Constructor
 ```javascript

@@ -60,7 +60,7 @@ const scene = engine.Scene()
   .camera(camera);
 ```
 
-## scaleX(scale: float)
+## scaleX(scale: float): UiCamera
 Defines the width of the viewport in scene coordinate space. For example setting
 the x scale to 100 means that objects whose x coordinate is between -100 and +100
 will be visible in the viewport.

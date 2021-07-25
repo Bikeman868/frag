@@ -96,7 +96,7 @@ butterflyModel.addChild()
 ## dispose()
 Frees resources consumed by the Model.
 
-## name(name: string)
+## name(name: string): Model
 Sets the name of this model. This is mostly for debugging purposes, but it also used
 to associate animations with child models. Animations contain channels and each
 channel has a regular expression defining the names of the child models that it
@@ -105,12 +105,12 @@ then you can define an animation channel that targets any model whose name start
 with 'wheel'. This avoids having to define the same animation multiple times, and makes
 the game run more efficiently because there are fewer animation channels.
 
-## getPosition()
+## getPosition(): Model
 Returns a `ScenePosition` object that can be used to manipulate the location of the
 model. Note that you do not have to get a `ScenePosition` object, this is just a 
 more convenient way of modifying the `location` property of the model.
 
-## shader(shader: Shader)
+## shader(shader: Shader): Model
 You must call the `shader` method for root level models to define how this model should
 be rendered into pixels. Child models will inherit the parent shader unless you also
 call the `shader` method on a child to override this.
@@ -121,26 +121,26 @@ each model, you can maximize the frame rate of your game and make it more fun to
 
 Note that 2D shaders only work with 2D models and 3D shaders only work with 3D models.
 
-## mesh(mesh: MeshData)
+## mesh(mesh: MeshData): Model
 You can call this method on any Model to define its shape. Models don't have to have
 a mesh, in which case they are just being used to group children so that they can be
 manipulated together (by an animation for example).
 
-## material(material: Material)
+## material(material: Material): Model
 This defines the material that will be used to paint the surface of the mesh. You don't
 have to assign materials, you can set vertex colors instead if you prefer.
 
 Child models will inherit the material of their parents untill you override this by
 callng the `material` function on the child models.
 
-## addChild(model: Model)
+## addChild(model: Model): Model
 Call this method to build a heirarchy of models. For example a car model might have
 4 wheel models contained within it.
 
 Animations can only be applied to descendents, so anything that you want to animate
 must be a child.
 
-## shadeSmooth(depth)
+## shadeSmooth(depth): Model
 Configures the mesh for this model to use smooth shading. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -150,7 +150,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## shadeFlat(depth)
+## shadeFlat(depth): Model
 Configures the mesh for this model to use flat shading. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -160,7 +160,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## textureSmooth(depth)
+## textureSmooth(depth): Model
 Configures the mesh for this model to use smooth textures. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -170,7 +170,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## textureFlat(depth)
+## textureFlat(depth): Model
 Configures the mesh for this model to use flat textures. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -180,7 +180,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## wireframe(drawWireframe, depth)
+## wireframe(drawWireframe, depth): Model
 Turns wireframe drawing on/off for the mesh for this model. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -190,7 +190,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## drawNormals(length, color, depth)
+## drawNormals(length, color, depth): Model
 Configuring normal drawing for the mesh for this model. If the mesh is shared by
 multiple models, then these models will be affected.
 
@@ -208,7 +208,7 @@ of 1 to change this model and its immediate children.
 
 To traverse the entire object heirarchy omit the depth parameter.
 
-## addAnimation(animation: ModelAnimation)
+## addAnimation(animation: ModelAnimation): Model
 Adds an animation to a model. The animation will affect all descendents whose names
 match the regular expressions in the animation channels.
 
