@@ -23,7 +23,7 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
-    <script src='frag.min.js'></script>
+    <script src='frag.js'></script>
     <script>
         // **********************************************************************
         // First of all we need to configure and initialize Frag
@@ -63,7 +63,7 @@
         const degToRad = Math.PI / 180;
 
         const camera = frag.FrustumCamera(engine).frustum(60, 50, 2000);
-        camera.getPosition().locationXYZ(0, 20, -150).rotateX(5 * degToRad);
+        camera.getPosition().locationXYZ(0, 20, -150).rotateX(6 * degToRad);
 
         const scene = engine.Scene()
             .camera(camera);
@@ -358,6 +358,8 @@
                 "Q=show/hide model E=show/hide bucket R=pause/play T=freeze Y=stop U=play ASDW=pan camera");
             const helpLine2Model = helpFont.buildTextModel(
                 "Drag mouse to pan. Right click for normals. Middle click for wireframe. Scroll to zoom.");
+            const helpLine3Model = helpFont.buildTextModel(
+                "Pan with 1 finger. Pinch to zoom. Two finger twist to rotate.");
             const helpLine1Object = engine.SceneObject(helpLine1Model);
             helpLine1Object.getPosition()
                 .scale(0.1)
@@ -368,6 +370,11 @@
                 .scale(0.1)
                 .moveByXYZ(-70, -45, -70);
             scene.addObject(helpLine2Object);
+            const helpLine3Object = engine.SceneObject(helpLine3Model);
+            helpLine3Object.getPosition()
+                .scale(0.1)
+                .moveByXYZ(-70, -50, -70);
+            scene.addObject(helpLine3Object);
         }
 
         // **********************************************************************

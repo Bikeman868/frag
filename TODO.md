@@ -16,6 +16,7 @@ No known bugs at this time
 * Maintain camera pointing at a game scene object
 * Analog inputs orbit camera around what it is pointing at
 * Scene objects that have no model, just used as look at or follow target
+* Better handling of velocity and acceleration for analog inputs
 
 ## Optional nice to have features
 * Play sounds synced with animations. This is nice to have because there are better libraries for playing sounds. This is a WebGL wrapper and WebGL does not provide any sound playing capabilities.
