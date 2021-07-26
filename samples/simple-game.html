@@ -26,12 +26,13 @@
 
 <body>
     <canvas id="scene"></canvas>
-    <script src='frag.js'></script>
+    <script src="OimoPhysics.min.js"></script>
+    <script src="frag.js"></script>
     
     <script>
         const degToRad = Math.PI / 180;
 
-        class CupModel {
+        class TargetModel {
             constructor(game, color) {
                 this.mesh = game.engine.Cylinder(8, { color });
                 this.model = game.engine.Model()
@@ -49,9 +50,9 @@
             }
         }
 
-        class Cup {
-            constructor(game, cupModel, start, end, invSpeed) {
-                this.object = game.engine.SceneObject(cupModel.model);
+        class Target {
+            constructor(game, model, start, end, invSpeed) {
+                this.object = game.engine.SceneObject(model.model);
                 game.scene.addObject(this.object);
 
                 const position = this.object.getPosition();
@@ -64,6 +65,14 @@
                 this.animation = game.engine.Animation()
                     .perform(animationAction)
                     .start();
+
+                const shape = new window.OIMO.Shape();
+                shape.setContactCallback(callback);
+                this.transform = shape.getTransform();
+
+                this.rigidBody = new window.OIMO.RigidBody();
+                this.rigidBody.addShape(shape);
+                game.physics.addRigidBody(this.rigidBody);
             }
 
             dispose() {
@@ -163,24 +172,24 @@
             }
         }
 
-        class CupGenerator {
+        class TargetGenerator {
             constructor(game) {
-                const cupModels = [
-                    new CupModel(game, [1, 0.4, 0.4]),
-                    new CupModel(game, [0.4, 1, 0.4]),
-                    new CupModel(game, [0.4, 0.4, 1]),
+                const models = [
+                    new TargetModel(game, [1, 0.4, 0.4]),
+                    new TargetModel(game, [0.4, 1, 0.4]),
+                    new TargetModel(game, [0.4, 0.4, 1]),
                 ];
 
                 this.interval = setInterval(() => {
                     if (Math.random() > 0.7) {
-                        const model = cupModels[Math.floor(Math.random() * cupModels.length)];
+                        const model = models[Math.floor(Math.random() * models.length)];
                         const start = [
                             Math.random() > 0.5 ? 100 : -100, 
                             -50,
                             Math.random() * 100 + 50];
                         const end = [-start[0], start[1], start[2]];
                         const invSpeed = Math.random() * 5 + 1;
-                        const cup = new Cup(game, model, start, end, invSpeed);
+                        const target = new Target(game, model, start, end, invSpeed);
                     }
                 }, 1000);
             }
@@ -204,6 +213,13 @@
                     .locationZ(100);
                 this.object = game.engine.SceneObject(this.model);
                 game.scene.addObject(this.object);
+
+                // const shape = new window.OIMO.Shape(new window.OIMO.ShapeConfig());
+                // this.transform = shape.getTransform();
+
+                // this.rigidBody = new window.OIMO.RigidBody();
+                // this.rigidBody.addShape(shape);
+                // game.physics.addRigidBody(this.rigidBody);
             }
 
             dispose() {
@@ -277,15 +293,64 @@
             }
         }
 
+        class PhysicsEngine {
+            constructor(game) {
+                this.physics = new window.OIMO.World(2, new window.OIMO.Vec3(0. -9.8, 0));
+                this.animation = game.engine.Animation()
+                    .repeatFrames(() => {
+                        this.physics.step();
+                    }, 1)
+                    .start();
+            }
+
+            addRigidBody(body) {
+                this.physics.addRigidBody(body);
+            }
+
+            setShapePosition(physicsShape, scenePosition) {
+                const physicsTransform = physicsShape.getTransform();
+
+                physicsTransform.rotateXyz(new window.OIMO.Vec3(
+                    scenePosition.getRotateX(), 
+                    scenePosition.getRotateY(),
+                    scenePosition.getRotateZ()
+                ));
+
+                physicsTransform.setPosition(new window.OIMO.Vec3(
+                    scenePosition.getLocationX(), 
+                    scenePosition.getLocationY(),
+                    scenePosition.getLocationZ()
+                ));
+            }
+
+            setScenePosition(physicsShape, scenePosition) {
+                const physicsTransform = physicsShape.getTransform();
+
+                const position = physicsTransform.getPosition();
+                // scenePosition.locationXYZ(position.x, position.y, position.z);
+
+                const orientation = physicsTransform.getOrientation();
+                // scenePosition.rotateXYZ();
+            }
+
+            dispose() {
+                this.animation.dispose();
+            }
+        }
+
         class Game {
             constructor() {
                 this.engine = window.frag.Engine().start();
+
                 this.camera = this.engine.FrustumCamera().frustum(100, 100, 400);
                 this.camera.getPosition().locationXYZ(0, 85, -10).rotateX(60 * degToRad);
+
                 this.scene = this.engine.Scene().camera(this.camera);
+
                 this.shader = this.engine.Shader().colorsRGB().directionalLightGrey().compile();
                 this.shader.lightDirection([-0.2, -0.6, 0.1]);
 
+                this.physics = new PhysicsEngine(this);
                 this.score = new Score(this);
                 this.engine.mainScene(this.scene);
             }
@@ -295,6 +360,7 @@
             }
 
             dispose() {
+                this.physics.dispose();
                 this.shader.dispose();
                 this.scene.dispose();
                 this.camera.dispose();
@@ -305,7 +371,7 @@
         const game = new Game();
         const floor = new Floor(game);
         const catapult = new Catapult(game);
-        const generator = new CupGenerator(game);
+        const generator = new TargetGenerator(game);
 
         setInterval(() => { 
             game.addScore(Math.floor(Math.random() * 10)); 

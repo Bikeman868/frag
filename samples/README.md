@@ -15,7 +15,7 @@ to get a much better understanding of how the framework works.
 ## Model loader sample
 For the model loader sample, you cannot simply open the html file in your browser
 because the asset loading will be blocked by CORS. There is no way around this, you
-have to run a web server locally.
+have to run a web server locally. For all other samples you do not need this step.
 
 To run a web server and try this sample:
 1. Open a command line, shell or VS Code terminal window
@@ -86,8 +86,10 @@ Once you have a Python http server running you can see this sample running at th
 * Loads a package of models that were exported from Blender
 * Defines the materials to use to paint the models as hard-coded 1x1 pixel textures
 * Creates an animation sequence that combines model movements within the scene with animations imported from Blender
-* Demonstrates some of the things that you can wire up to user input
-* Draws the frames per second using a packaged font
+* Wires up keyboard, mouse and touch device input to the models in the scene
+* Draws the frames per second using a font downloaded in the asset package
+* Uses a `PositionLink` to keep the fps label floating over the excavator
+* Parents the camera to an empty and rotates the empty to make the camera orbit around the scene
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator

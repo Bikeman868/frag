@@ -32,6 +32,14 @@ window.frag.ScenePosition = function (engine, location, is3d) {
         return private.location.getMatrix();
     }
 
+    public.getScale = function() {
+        return [
+            private.location.scaleX,
+            private.location.scaleY,
+            private.location.scaleZ
+        ];
+    }
+
     public.getScaleX = function () {
         return private.location.scaleX;
     }
@@ -90,6 +98,14 @@ window.frag.ScenePosition = function (engine, location, is3d) {
             private.location.scaleX * xScale,
             private.location.scaleY * yScale,
             private.location.scaleZ * zScale);
+    }
+
+    public.getRotate = function() {
+        return [
+            private.location.rotateX,
+            private.location.rotateY,
+            private.location.rotateZ
+        ];
     }
 
     public.getRotateX = function () {
