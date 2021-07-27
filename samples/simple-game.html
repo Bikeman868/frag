@@ -32,8 +32,19 @@
     <script>
         const degToRad = Math.PI / 180;
 
+        const floorWidth = 220;
+        const floorLength = 220;
+        const floorAngle = 5;
+        const floorHeight = -60;
+
+        const furnitureGroup = 1;
+        const redGroup = 2;
+        const blueGroup = 4;
+        const greenGroup = 8;
+
         class TargetModel {
-            constructor(game, color) {
+            constructor(game, color, group) {
+                this.group = group;
                 this.mesh = game.engine.Cylinder(8, { color });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
@@ -51,24 +62,27 @@
         }
 
         class Target {
-            constructor(game, model, start, speed) {
+            constructor(game, targetModel, start, speed) {
+                this.isTarget = true;
+                this.wasHit = false;
+                this.group = targetModel.group;
                 this.game = game;
-                this.sceneObject = this.game.engine.SceneObject(model.model);
+                this.sceneObject = this.game.engine.SceneObject(targetModel.model);
                 this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = this.game.physics.add(
                     this, 
                     {
                         type: 'cylinder',
-                        size: [8, 8, 16],
+                        size: [8, 16, 8],
                         pos: start,
-                        rot: [90, 0, 0],
+                        rot: [0, 0, 0],
                         move: true,
-                        density: 1,
+                        density: 20,
                         friction: 0.2,
                         restitution: 0.2,
                         belongsTo: 1,
-                        collidesWith: 0xff,
+                        collidesWith: 1,
                     });
                 if (start[0] < 0)
                     this.rigidBody.linearVelocity.set(speed, 0, 0);
@@ -83,7 +97,8 @@
         }
 
         class BallModel {
-            constructor(game, color) {
+            constructor(game, color, group) {
+                this.group = group;
                 this.mesh = game.engine.Sphere(8, { color });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
@@ -101,8 +116,12 @@
 
         class Ball {
             constructor(game, ballModel, pos) {
+                this.isBall = true;
+                this.group = ballModel.group;
                 this.game = game;
                 this.sceneObject = this.game.engine.SceneObject(ballModel.model);
+                this.scoreMultiplier = 1;
+
                 this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = this.game.physics.add(
@@ -113,12 +132,26 @@
                             pos: pos,
                             rot: [0, 0, 0],
                             move: true,
-                            density: 5,
+                            density: 100,
                             friction: 0.2,
                             restitution: 0.2,
                             belongsTo: 1,
-                            collidesWith: 0xff,
+                            collidesWith: 1,
                         });
+            }
+
+            collision(element) {
+                if (element.isTarget && !element.wasHit) {
+                    element.wasHit = true;
+                    let score = 5;
+                    score *= this.scoreMultiplier;
+                    if (element.group === this.group) {
+                        score *= 5;
+                        this.scoreMultiplier *= 2;
+                    }
+                    this.scoreMultiplier *= 2;
+                    this.game.addScore(score);
+                }
             }
 
             dispose() {
@@ -129,8 +162,9 @@
 
         class Catapult {
             constructor(game) {
+                this.isCatapult = true;
                 this.game = game;
-                this.mesh = game.engine.Cube(1, { color: [1, 0, 1] });
+                this.mesh = game.engine.Cube(1, { color: [0.4, 0.2, 0.4] });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
                     .shader(game.shader)
@@ -144,9 +178,9 @@
                 game.scene.addObject(this.sceneObject);
 
                 this.ballModels = [
-                    new BallModel(game, [1, 0.4, 0.4]),
-                    new BallModel(game, [0.4, 1, 0.4]),
-                    new BallModel(game, [0.4, 0.4, 1])
+                    new BallModel(game, [1, 0.4, 0.4], redGroup),
+                    new BallModel(game, [0.4, 1, 0.4], greenGroup),
+                    new BallModel(game, [0.4, 0.4, 1], blueGroup)
                 ];
 
                 this.rigidBody = game.physics.add(
@@ -155,13 +189,13 @@
                         type: 'box',
                         size: [20, 1, 2],
                         pos: [0, -50, 15],
-                        rot: [90, 0, 0],
+                        rot: [0, 0, 0],
                         move: false,
                         density: 1,
                         friction: 0.2,
                         restitution: 0.2,
                         belongsTo: 1,
-                        collidesWith: 0xff,
+                        collidesWith: 1,
                     });
 
                 this.newBall();
@@ -196,9 +230,9 @@
         class TargetGenerator {
             constructor(game) {
                 const models = [
-                    new TargetModel(game, [1, 0.4, 0.4]),
-                    new TargetModel(game, [0.4, 1, 0.4]),
-                    new TargetModel(game, [0.4, 0.4, 1]),
+                    new TargetModel(game, [1, 0.4, 0.4], redGroup),
+                    new TargetModel(game, [0.4, 1, 0.4], greenGroup),
+                    new TargetModel(game, [0.4, 0.4, 1], blueGroup),
                 ];
 
                 this.interval = setInterval(() => {
@@ -206,7 +240,7 @@
                         const model = models[Math.floor(Math.random() * models.length)];
                         const position = [
                             Math.random() > 0.5 ? 100 : -100, 
-                            -50,
+                            -30,
                             Math.random() * 100 + 50];
                         const speed = Math.random() * 50 + 10;
                         const target = new Target(game, model, position, speed);
@@ -221,6 +255,7 @@
 
         class Floor {
             constructor(game) {
+                this.isFloor = true;
                 this.game = game;
                 this.mesh = game.engine.Plane(1, { color: [0.6, 0.6, 0.6] });
                 this.model = game.engine.Model()
@@ -228,27 +263,29 @@
                     .shader(this.game.shader)
                     .shadeFlat();
                 this.model.getPosition()
-                    .scale(100);
+                    .scaleX(floorWidth / 2)
+                    .scaleY(floorLength / 2)
+                    .rotateX(90 * degToRad);
                 this.sceneObject = this.game.engine.SceneObject(this.model);
                 this.sceneObject.getPosition()
-                    .rotateX(90 * degToRad)
-                    .locationY(-60)
-                    .locationZ(100);
+                    .rotateX(floorAngle * degToRad)
+                    .locationY(floorHeight)
+                    .locationZ(floorLength / 2);
                     this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = game.physics.add(
                     this,
                     {
                         type: 'box',
-                        size: [200, 200, 1],
-                        pos: [0, -60, 100],
-                        rot: [90, 0, 0],
+                        size: [floorWidth, 1, floorLength],
+                        pos: [0, floorHeight, floorLength / 2],
+                        rot: [floorAngle, 0, 0],
                         move: false,
                         density: 1,
                         friction: 0.2,
                         restitution: 0.2,
                         belongsTo: 1,
-                        collidesWith: 0xff,
+                        collidesWith: 1,
                     });
             }
 
@@ -262,6 +299,7 @@
 
         class Score {
             constructor(game) {
+                this.isScore = true;
                 this.game = game;
                 this.score = 0;
                 this.createFont();
@@ -310,7 +348,7 @@
             createText() {
                 this.model = this.font.buildTextModel('0');
                 this.text = this.game.engine.SceneObject(this.model);
-                this.text.getPosition().scale(0.5).locationXYZ(-20, -22, 145);
+                this.text.getPosition().scale(0.5).locationXYZ(-20, -18, 145);
                 this.game.scene.addObject(this.text);
             }
 
@@ -341,18 +379,14 @@
                         this.physics.step();
                         for (var i = 0; i < this.objects.length; i++) {
                             const object = this.objects[i];
-                            const element = object.element;
-                            const rigidBody = object.rigidBody;
-                            const pos = element.sceneObject.getPosition();
-                            this.copyPosition(rigidBody, pos);
+                            this.updatePosition(object);
 
-                            const location = pos.getLocation();
-                            if (location[1] < -90) {
-                                element.dispose();
+                            if (this.checkFellOff(object.element)) {
                                 this.objects.splice(i, 1);
                                 i--;
                             }
                         }
+                        this.checkCollisions();
                     }, 2)
                     .start();
             }
@@ -370,12 +404,41 @@
                 this.physics.removeRigidBody(rigidBody);
             }
 
+            updatePosition(object) {
+                this.copyPosition(
+                    object.rigidBody, 
+                    object.element.sceneObject.getPosition());
+            }
+
             copyPosition(rigidBody, scenePosition) {
                 const pos = rigidBody.getPosition();
                 scenePosition.locationXYZ(pos.x, pos.y, pos.z);
 
                 const quad = rigidBody.getQuaternion();
-                scenePosition.rotate([0, 0, 0, 0]);
+                scenePosition.rotate([quad.w, quad.x, quad.y, quad.z]);
+            }
+
+            checkCollisions() {
+                for (var i = 0; i < this.objects.length; i++) {
+                    const obj1 = this.objects[i];
+                    if (!obj1.element.collision) continue;
+                    for (var j = 0; j < this.objects.length; j++) {
+                        if (j === i) continue;
+                        const obj2 = this.objects[j];
+                        const contact = this.physics.getContact(obj1.rigidBody, obj2.rigidBody);
+                        if (contact && !contact.close) {
+                            obj1.element.collision(obj2.element);
+                        }
+                    }
+                }
+            }
+
+            checkFellOff(element) {
+                if (element.sceneObject.getPosition().getLocationY() < floorHeight - 10) {
+                    element.dispose();
+                    return true;
+                }
+                return false;
             }
 
             dispose() {
@@ -418,8 +481,5 @@
         const catapult = new Catapult(game);
         const generator = new TargetGenerator(game);
 
-        setInterval(() => { 
-            game.addScore(Math.floor(Math.random() * 10)); 
-        }, 5000);
     </script>
 </body>
