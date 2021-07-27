@@ -26,7 +26,7 @@
 
 <body>
     <canvas id="scene"></canvas>
-    <script src="OimoPhysics.min.js"></script>
+    <script src="oimo.min.js"></script>
     <script src="frag.js"></script>
     
     <script>
@@ -51,33 +51,34 @@
         }
 
         class Target {
-            constructor(game, model, start, end, invSpeed) {
-                this.object = game.engine.SceneObject(model.model);
-                game.scene.addObject(this.object);
+            constructor(game, model, start, speed) {
+                this.game = game;
+                this.sceneObject = this.game.engine.SceneObject(model.model);
+                this.game.scene.addObject(this.sceneObject);
 
-                const position = this.object.getPosition();
-                position.location(start);
-                
-                const animationAction = game.engine.PositionAnimationAction(position, invSpeed)
-                    .moveTo(end)
-                    .onStop(() => { this.dispose(); });
-
-                this.animation = game.engine.Animation()
-                    .perform(animationAction)
-                    .start();
-
-                const shape = new window.OIMO.Shape();
-                shape.setContactCallback(callback);
-                this.transform = shape.getTransform();
-
-                this.rigidBody = new window.OIMO.RigidBody();
-                this.rigidBody.addShape(shape);
-                game.physics.addRigidBody(this.rigidBody);
+                this.rigidBody = this.game.physics.add(
+                    this, 
+                    {
+                        type: 'cylinder',
+                        size: [8, 8, 16],
+                        pos: start,
+                        rot: [90, 0, 0],
+                        move: true,
+                        density: 1,
+                        friction: 0.2,
+                        restitution: 0.2,
+                        belongsTo: 1,
+                        collidesWith: 0xff,
+                    });
+                if (start[0] < 0)
+                    this.rigidBody.linearVelocity.set(speed, 0, 0);
+                else
+                    this.rigidBody.linearVelocity.set(-speed, 0, 0);
             }
 
             dispose() {
-                this.animation.dispose();
-                this.object.dispose();
+                this.game.physics.remove(this.rigidBody);
+                this.sceneObject.dispose();
             }
         }
 
@@ -99,13 +100,30 @@
         }
 
         class Ball {
-            constructor(game, ballModel) {
-                this.object = game.engine.SceneObject(ballModel.model);
-                game.scene.addObject(this.object);
+            constructor(game, ballModel, pos) {
+                this.game = game;
+                this.sceneObject = this.game.engine.SceneObject(ballModel.model);
+                this.game.scene.addObject(this.sceneObject);
+
+                this.rigidBody = this.game.physics.add(
+                        this, 
+                        {
+                            type: 'sphere',
+                            size: [6, 6, 6],
+                            pos: pos,
+                            rot: [0, 0, 0],
+                            move: true,
+                            density: 5,
+                            friction: 0.2,
+                            restitution: 0.2,
+                            belongsTo: 1,
+                            collidesWith: 0xff,
+                        });
             }
 
             dispose() {
-                this.object.dispose();
+                this.game.physics.remove(this.rigidBody);
+                this.sceneObject.dispose();
             }
         }
 
@@ -119,11 +137,11 @@
                     .shadeFlat();
                 this.model.getPosition()
                     .scaleXYZ(20, 1, 2);
-                this.object = game.engine.SceneObject(this.model);
-                this.object.getPosition()
-                    .locationY(-30)
+                this.sceneObject = game.engine.SceneObject(this.model);
+                this.sceneObject.getPosition()
+                    .locationY(-50)
                     .locationZ(15);
-                game.scene.addObject(this.object);
+                game.scene.addObject(this.sceneObject);
 
                 this.ballModels = [
                     new BallModel(game, [1, 0.4, 0.4]),
@@ -131,22 +149,36 @@
                     new BallModel(game, [0.4, 0.4, 1])
                 ];
 
+                this.rigidBody = game.physics.add(
+                    this,
+                    {
+                        type: 'box',
+                        size: [20, 1, 2],
+                        pos: [0, -50, 15],
+                        rot: [90, 0, 0],
+                        move: false,
+                        density: 1,
+                        friction: 0.2,
+                        restitution: 0.2,
+                        belongsTo: 1,
+                        collidesWith: 0xff,
+                    });
+
                 this.newBall();
             }
 
             dispose() {
-                this.object.dispose();
+                this.game.physics.remove(this.rigidBody);
+                this.sceneObject.dispose();
                 this.model.dispose();
                 this.mesh.dispose();
             }
 
             newBall() {
-                const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
-                this.ball = new Ball(this.game, ballModel);
-
-                const thisLocation = this.object.getPosition().getLocation();
+                const thisLocation = this.sceneObject.getPosition().getLocation();
                 const ballLocation = frag.Vector.add(thisLocation, [0, 4, 0]);
-                this.ball.object.getPosition().location(ballLocation);
+                const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
+                this.ball = new Ball(this.game, ballModel, ballLocation);
 
                 setTimeout(() => { this.fire(); }, 3000);
             }
@@ -154,18 +186,7 @@
             fire() {
                 if (!this.ball) return;
 
-                const ball = this.ball;
-                const ballPosition = ball.object.getPosition();
-                
-                const animationAction = game.engine.PositionAnimationAction(ballPosition, 1)
-                    .moveBy([0, -40, 200])
-                    .onStop(() => { ball.dispose(); });
-
-                game.engine.Animation()
-                    .perform(animationAction)
-                    .disposeOnStop()
-                    .start();
-                    
+                this.ball.rigidBody.linearVelocity.set(0, 0, 100);
                 this.ball = null;
 
                 setTimeout(() => { this.newBall(); }, 2000);
@@ -183,13 +204,12 @@
                 this.interval = setInterval(() => {
                     if (Math.random() > 0.7) {
                         const model = models[Math.floor(Math.random() * models.length)];
-                        const start = [
+                        const position = [
                             Math.random() > 0.5 ? 100 : -100, 
                             -50,
                             Math.random() * 100 + 50];
-                        const end = [-start[0], start[1], start[2]];
-                        const invSpeed = Math.random() * 5 + 1;
-                        const target = new Target(game, model, start, end, invSpeed);
+                        const speed = Math.random() * 50 + 10;
+                        const target = new Target(game, model, position, speed);
                     }
                 }, 1000);
             }
@@ -201,29 +221,40 @@
 
         class Floor {
             constructor(game) {
+                this.game = game;
                 this.mesh = game.engine.Plane(1, { color: [0.6, 0.6, 0.6] });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
-                    .shader(game.shader)
+                    .shader(this.game.shader)
                     .shadeFlat();
                 this.model.getPosition()
-                    .scale(100)
+                    .scale(100);
+                this.sceneObject = this.game.engine.SceneObject(this.model);
+                this.sceneObject.getPosition()
                     .rotateX(90 * degToRad)
                     .locationY(-60)
                     .locationZ(100);
-                this.object = game.engine.SceneObject(this.model);
-                game.scene.addObject(this.object);
+                    this.game.scene.addObject(this.sceneObject);
 
-                // const shape = new window.OIMO.Shape(new window.OIMO.ShapeConfig());
-                // this.transform = shape.getTransform();
-
-                // this.rigidBody = new window.OIMO.RigidBody();
-                // this.rigidBody.addShape(shape);
-                // game.physics.addRigidBody(this.rigidBody);
+                this.rigidBody = game.physics.add(
+                    this,
+                    {
+                        type: 'box',
+                        size: [200, 200, 1],
+                        pos: [0, -60, 100],
+                        rot: [90, 0, 0],
+                        move: false,
+                        density: 1,
+                        friction: 0.2,
+                        restitution: 0.2,
+                        belongsTo: 1,
+                        collidesWith: 0xff,
+                    });
             }
 
             dispose() {
-                this.object.dispose();
+                this.game.physics.remove(this.rigidBody);
+                this.sceneObject.dispose();
                 this.model.dispose();
                 this.mesh.dispose();
             }
@@ -295,42 +326,56 @@
 
         class PhysicsEngine {
             constructor(game) {
-                this.physics = new window.OIMO.World(2, new window.OIMO.Vec3(0. -9.8, 0));
+                this.objects = [];
+                this.physics = new window.OIMO.World({
+                    timestep: 1/50,
+                    iterations: 8,
+                    broadphase: 2,
+                    worlscale: 1,
+                    random: false,
+                    info: false,
+                    gravity: [0, -9.8, 0]
+                });
                 this.animation = game.engine.Animation()
-                    .repeatFrames(() => {
+                    .repeatTicks(() => {
                         this.physics.step();
-                    }, 1)
+                        for (var i = 0; i < this.objects.length; i++) {
+                            const object = this.objects[i];
+                            const element = object.element;
+                            const rigidBody = object.rigidBody;
+                            const pos = element.sceneObject.getPosition();
+                            this.copyPosition(rigidBody, pos);
+
+                            const location = pos.getLocation();
+                            if (location[1] < -90) {
+                                element.dispose();
+                                this.objects.splice(i, 1);
+                                i--;
+                            }
+                        }
+                    }, 2)
                     .start();
             }
 
-            addRigidBody(body) {
-                this.physics.addRigidBody(body);
+            add(element, bodyData) {
+                const rigidBody = this.physics.add(bodyData);
+                this.objects.push({
+                    element,
+                    rigidBody
+                });
+                return rigidBody;
             }
 
-            setShapePosition(physicsShape, scenePosition) {
-                const physicsTransform = physicsShape.getTransform();
-
-                physicsTransform.rotateXyz(new window.OIMO.Vec3(
-                    scenePosition.getRotateX(), 
-                    scenePosition.getRotateY(),
-                    scenePosition.getRotateZ()
-                ));
-
-                physicsTransform.setPosition(new window.OIMO.Vec3(
-                    scenePosition.getLocationX(), 
-                    scenePosition.getLocationY(),
-                    scenePosition.getLocationZ()
-                ));
+            remove(rigidBody) {
+                this.physics.removeRigidBody(rigidBody);
             }
 
-            setScenePosition(physicsShape, scenePosition) {
-                const physicsTransform = physicsShape.getTransform();
+            copyPosition(rigidBody, scenePosition) {
+                const pos = rigidBody.getPosition();
+                scenePosition.locationXYZ(pos.x, pos.y, pos.z);
 
-                const position = physicsTransform.getPosition();
-                // scenePosition.locationXYZ(position.x, position.y, position.z);
-
-                const orientation = physicsTransform.getOrientation();
-                // scenePosition.rotateXYZ();
+                const quad = rigidBody.getQuaternion();
+                scenePosition.rotate([0, 0, 0, 0]);
             }
 
             dispose() {
