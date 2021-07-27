@@ -45,13 +45,13 @@
         class TargetModel {
             constructor(game, color, group) {
                 this.group = group;
-                this.mesh = game.engine.Cylinder(8, { color });
+                this.mesh = game.engine.Cylinder(16, { color });
                 this.model = game.engine.Model()
                     .mesh(this.mesh)
                     .shader(game.shader)
                     .shadeSmooth();
                 this.model.getPosition()
-                    .scaleXYZ(4, 4, 8)
+                    .scaleZ(8)
                     .rotateX(90 * degToRad);
             }
 
@@ -62,23 +62,24 @@
         }
 
         class Target {
-            constructor(game, targetModel, start, speed) {
+            constructor(game, targetModel, start, speed, radius, points) {
                 this.isTarget = true;
-                this.wasHit = false;
+                this.points = points;
                 this.group = targetModel.group;
                 this.game = game;
                 this.sceneObject = this.game.engine.SceneObject(targetModel.model);
+                this.sceneObject.getPosition().scaleXYZ(radius, 1, radius);
                 this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = this.game.physics.add(
                     this, 
                     {
                         type: 'cylinder',
-                        size: [8, 16, 8],
+                        size: [radius * 2, radius * 4, radius * 2],
                         pos: start,
                         rot: [0, 0, 0],
                         move: true,
-                        density: 20,
+                        density: 5,
                         friction: 0.2,
                         restitution: 0.2,
                         belongsTo: 1,
@@ -104,8 +105,6 @@
                     .mesh(this.mesh)
                     .shader(game.shader)
                     .shadeSmooth();
-                this.model.getPosition()
-                    .scale(3);
             }
 
             dispose() {
@@ -116,10 +115,12 @@
 
         class Ball {
             constructor(game, ballModel, pos) {
+                const ballRadius = 3;
                 this.isBall = true;
                 this.group = ballModel.group;
                 this.game = game;
                 this.sceneObject = this.game.engine.SceneObject(ballModel.model);
+                this.sceneObject.getPosition().scale(ballRadius);
                 this.scoreMultiplier = 1;
 
                 this.game.scene.addObject(this.sceneObject);
@@ -128,7 +129,7 @@
                         this, 
                         {
                             type: 'sphere',
-                            size: [6, 6, 6],
+                            size: [ballRadius * 2, ballRadius * 2, ballRadius * 2],
                             pos: pos,
                             rot: [0, 0, 0],
                             move: true,
@@ -141,16 +142,19 @@
             }
 
             collision(element) {
-                if (element.isTarget && !element.wasHit) {
-                    element.wasHit = true;
-                    let score = 5;
-                    score *= this.scoreMultiplier;
+                if (element.isTarget && element.points) {
+                    let score = element.points * this.scoreMultiplier;
+                    element.points = Math.floor(element.points / 2);
+
                     if (element.group === this.group) {
                         score *= 5;
-                        this.scoreMultiplier *= 2;
+                        this.scoreMultiplier += 3;
                     }
-                    this.scoreMultiplier *= 2;
+                    
+                    this.scoreMultiplier += 1;
                     this.game.addScore(score);
+                } else if (element.isBall) {
+                    this.game.addScore(1000);
                 }
             }
 
@@ -236,14 +240,16 @@
                 ];
 
                 this.interval = setInterval(() => {
-                    if (Math.random() > 0.7) {
+                    if (Math.random() > 0.4) {
                         const model = models[Math.floor(Math.random() * models.length)];
                         const position = [
                             Math.random() > 0.5 ? 100 : -100, 
                             -30,
                             Math.random() * 100 + 50];
-                        const speed = Math.random() * 50 + 10;
-                        const target = new Target(game, model, position, speed);
+                        const speed = Math.random() * 50 + 12;
+                        const radius = Math.random() * 10 + 2;
+                        const points = Math.floor(speed / radius);
+                        const target = new Target(game, model, position, speed, radius, points);
                     }
                 }, 1000);
             }
