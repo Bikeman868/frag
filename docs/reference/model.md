@@ -67,7 +67,8 @@ this code in context.
 
 Note that in this example the parent model has no mesh and therefore does not draw 
 anything, it just provides an anchor point that can be moved around the scene to
-move both butterfly wings together.
+move both butterfly wings together. I attached a shader and material to this empty
+model because these settings will be inherited by the child models.
 
 ```javascript
 const wingLength = randomFloat(0.5, 0.7);

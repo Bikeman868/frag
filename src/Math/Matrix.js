@@ -180,28 +180,28 @@ window.frag.Matrix = {
         ];
     },
 
-    m4Xv4: function (a, b) {
-        const c0r0 = a[0];
-        const c0r1 = a[1];
-        const c0r2 = a[2];
-        const c0r3 = a[3];
-        const c1r0 = a[4];
-        const c1r1 = a[5];
-        const c1r2 = a[6];
-        const c1r3 = a[7];
-        const c2r0 = a[8];
-        const c2r1 = a[9];
-        const c2r2 = a[10];
-        const c2r3 = a[11];
-        const c3r0 = a[12];
-        const c3r1 = a[13];
-        const c3r2 = a[14];
-        const c3r3 = a[15];
+    m4Xv4: function (m, v) {
+        const c0r0 = m[0];
+        const c0r1 = m[1];
+        const c0r2 = m[2];
+        const c0r3 = m[3];
+        const c1r0 = m[4];
+        const c1r1 = m[5];
+        const c1r2 = m[6];
+        const c1r3 = m[7];
+        const c2r0 = m[8];
+        const c2r1 = m[9];
+        const c2r2 = m[10];
+        const c2r3 = m[11];
+        const c3r0 = m[12];
+        const c3r1 = m[13];
+        const c3r2 = m[14];
+        const c3r3 = m[15];
 
-        const b0 = b[0];
-        const b1 = b[1];
-        const b2 = b[2];
-        const b3 = b[3];
+        const b0 = v[0];
+        const b1 = v[1];
+        const b2 = v[2];
+        const b3 = v[3];
 
         return [
             b0 * c0r0 + b1 * c1r0 + b2 * c2r0 + b3 * c3r0,

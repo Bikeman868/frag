@@ -25,6 +25,8 @@ window.frag.SceneObject(engine: Engine, model: Model | undefined)
   can be different from each other in these respects. Omiting this parameter creates
   an empty scene object that does not draw to the screen, but can be used as an anchor
   for other objects in the scene, for example using a [`PositionLink`](position-link.md).
+  You can also construct an empty model and pass this to the scene object constructor to 
+  create a scene object that will not draw anything itself, but will draw its children.
 
 Note that for any constructor, you can call this function on the `engine` rather than passing
 `engine` as a parameter. In this case the call looks like:

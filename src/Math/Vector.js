@@ -2,10 +2,12 @@ window.frag = window.frag || {};
 window.frag.Vector = {
     extract2D: function (array, offset) {
         if (!array) return null;
+        offset = offset || 0;
         return [array[offset], array[offset + 1]];
     },
     extract3D: function (array, offset) {
         if (!array) return null;
+        offset = offset || 0;
         return [array[offset], array[offset + 1], array[offset + 2]];
     },
     zero: function (dimensions) {

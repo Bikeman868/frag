@@ -76,8 +76,8 @@ window.frag.SceneObject = function (engine, model) {
     private.getAnimationLocation = function () {
         if (private.animationLocation) return private.animationLocation;
         if (private.model) {
-        if (!private.model.location) return null;
-        private.animationLocation = frag.Location(engine, private.model.location.is3d);
+            if (!private.model.location) return null;
+            private.animationLocation = frag.Location(engine, private.model.location.is3d);
         } else {
             private.animationLocation = frag.Location(engine, true);
         }

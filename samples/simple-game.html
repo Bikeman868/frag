@@ -51,7 +51,6 @@
                     .shader(game.shader)
                     .shadeSmooth();
                 this.model.getPosition()
-                    .scaleZ(8)
                     .rotateX(90 * degToRad);
             }
 
@@ -68,14 +67,14 @@
                 this.group = targetModel.group;
                 this.game = game;
                 this.sceneObject = this.game.engine.SceneObject(targetModel.model);
-                this.sceneObject.getPosition().scaleXYZ(radius, 1, radius);
+                this.sceneObject.getPosition().scaleXYZ(radius, 8, radius);
                 this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = this.game.physics.add(
                     this, 
                     {
                         type: 'cylinder',
-                        size: [radius * 2, radius * 4, radius * 2],
+                        size: [radius, 16, radius],
                         pos: start,
                         rot: [0, 0, 0],
                         move: true,
@@ -114,31 +113,42 @@
         }
 
         class Ball {
-            constructor(game, ballModel, pos) {
-                const ballRadius = 3;
+            constructor(game, ballModel, anchor) {
                 this.isBall = true;
-                this.group = ballModel.group;
                 this.game = game;
+                this.group = ballModel.group;
+                this.anchor = anchor;
+                this.ballRadius = 3;
                 this.sceneObject = this.game.engine.SceneObject(ballModel.model);
-                this.sceneObject.getPosition().scale(ballRadius);
+                this.sceneObject.getPosition().scale(this.ballRadius);
+                this.anchor.addObject(this.sceneObject);
                 this.scoreMultiplier = 1;
+            }
+
+
+            fire(velocity) {
+                const ballPosition = this.sceneObject.getPosition().getLocation();
+                const anchorMatrix = this.anchor.getPosition().getMatrix();
+                ballPosition.push(0);
+                const pos = frag.Vector.extract3D(frag.Matrix.m4Xv4(anchorMatrix, ballPosition));
 
                 this.game.scene.addObject(this.sceneObject);
 
                 this.rigidBody = this.game.physics.add(
-                        this, 
-                        {
-                            type: 'sphere',
-                            size: [ballRadius * 2, ballRadius * 2, ballRadius * 2],
-                            pos: pos,
-                            rot: [0, 0, 0],
-                            move: true,
-                            density: 100,
-                            friction: 0.2,
-                            restitution: 0.2,
-                            belongsTo: 1,
-                            collidesWith: 1,
-                        });
+                    this, 
+                    {
+                        type: 'sphere',
+                        size: [this.ballRadius, this.ballRadius, this.ballRadius],
+                        pos: pos,
+                        rot: [0, 0, 0],
+                        move: true,
+                        density: 100,
+                        friction: 0.2,
+                        restitution: 0.2,
+                        belongsTo: 1,
+                        collidesWith: 1,
+                    });
+                this.rigidBody.linearVelocity.set(velocity[0], velocity[1], velocity[2]);
             }
 
             collision(element) {
@@ -150,7 +160,7 @@
                         score *= 5;
                         this.scoreMultiplier += 3;
                     }
-                    
+
                     this.scoreMultiplier += 1;
                     this.game.addScore(score);
                 } else if (element.isBall) {
@@ -174,12 +184,17 @@
                     .shader(game.shader)
                     .shadeFlat();
                 this.model.getPosition()
-                    .scaleXYZ(20, 1, 2);
+                    .scaleXYZ(20, 1, 20);
                 this.sceneObject = game.engine.SceneObject(this.model);
                 this.sceneObject.getPosition()
                     .locationY(-50)
-                    .locationZ(15);
+                    .locationZ(30);
                 game.scene.addObject(this.sceneObject);
+
+                const anchorLocation = frag.Vector.add(this.sceneObject.getPosition().getLocation(), [0, 4, 0]);
+                this.ballAnchor = game.engine.SceneObject(game.engine.Model());
+                this.ballAnchor.getPosition().location(anchorLocation);
+                game.scene.addObject(this.ballAnchor);
 
                 this.ballModels = [
                     new BallModel(game, [1, 0.4, 0.4], redGroup),
@@ -202,10 +217,54 @@
                         collidesWith: 1,
                     });
 
+                this.fireInput = game.engine.DigitalInput(
+                    "pointer-left", 
+                    game.engine.DigitalState((state) => {
+                        if (!this.ball) return;
+
+                        if (state.isOn) {
+                            this.pullStrength.setValue(null, 0, true);
+                            this.pullDirection.setValue(null, 0, true);
+                            return;
+                        }
+
+                        this.pullStrengthAction = null;
+                        this.pullStrength.analogAction(null);
+
+                        const strength = this.pullStrength.value * -4;
+                        const direction = this.pullDirection.value;
+                        this.ball.fire([Math.sin(direction) * strength, 0, Math.cos(direction) * strength]);
+                        this.ball = null;
+
+                        setTimeout(() => { this.newBall(); }, 2000);
+                    })
+                ).enable();
+
+                this.pullStrength = game.engine.AnalogState(
+                    null,
+                    { minValue: -35, maxValue: 0 }
+                );
+                this.strengthInput = game.engine.AnalogInput(
+                    "left-pointer-vertical-inverted", 
+                    this.pullStrength
+                ).enable();
+
+                this.pullDirection = game.engine.AnalogState(
+                    game.engine.AnalogAction('sceneobject-rotate-y', { sceneObject: this.ballAnchor }), 
+                    { minValue: -Math.PI * 0.25, maxValue: Math.PI * 0.25 }
+                );
+                this.directionInput = game.engine.AnalogInput(
+                    "left-pointer-horizontal-inverted", 
+                    this.pullDirection
+                ).enable();
+
                 this.newBall();
             }
 
             dispose() {
+                this.fireInput.dispose();
+                this.strengthInput.dispose();
+                this.directionInput.dispose();
                 this.game.physics.remove(this.rigidBody);
                 this.sceneObject.dispose();
                 this.model.dispose();
@@ -213,21 +272,13 @@
             }
 
             newBall() {
-                const thisLocation = this.sceneObject.getPosition().getLocation();
-                const ballLocation = frag.Vector.add(thisLocation, [0, 4, 0]);
                 const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
-                this.ball = new Ball(this.game, ballModel, ballLocation);
+                this.ball = new Ball(this.game, ballModel, this.ballAnchor);
 
-                setTimeout(() => { this.fire(); }, 3000);
-            }
-
-            fire() {
-                if (!this.ball) return;
-
-                this.ball.rigidBody.linearVelocity.set(0, 0, 100);
-                this.ball = null;
-
-                setTimeout(() => { this.newBall(); }, 2000);
+                this.pullStrengthAction = game.engine.AnalogAction(
+                    'sceneobject-move-z', 
+                    { sceneObject: this.ball.sceneObject });
+                this.pullStrength.analogAction(this.pullStrengthAction);
             }
         }
 

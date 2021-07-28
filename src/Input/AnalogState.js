@@ -26,6 +26,10 @@ window.frag.AnalogState = function(engine, analogAction, config, name) {
         velocity: 0,
     }
 
+    public.analogAction = function(action) {
+        private.analogAction = action;
+    }
+
     if (config.maxValue < config.minValue) {
         private.inverted = true;
         public.minValue = config.maxValue;
