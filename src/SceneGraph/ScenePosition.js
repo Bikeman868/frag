@@ -109,7 +109,7 @@ window.frag.ScenePosition = function (engine, location, is3d) {
     }
 
     public.getQuaternion = function() {
-        // TODO
+        return window.frag.Vector.quaternion(public.getRotate());
     }
 
     public.getRotateX = function () {
@@ -132,14 +132,13 @@ window.frag.ScenePosition = function (engine, location, is3d) {
     }
 
     public.rotate = function(v) {
-        if (v.length === 4) {
-            // Quaternion
-            // TODO
-        } else {
-            private.location.rotateX = v[0];
-            if (v.length > 1) private.location.rotateY = v[1];
-            if (v.length > 2) private.location.rotateZ = v[2];
-        }
+        if (v.length === 4)
+            v = window.frag.Vector.euler(v);
+
+        private.location.rotateX = v[0];
+        if (v.length > 1) private.location.rotateY = v[1];
+        if (v.length > 2) private.location.rotateZ = v[2];
+
         private.modified();
         return public;
     }

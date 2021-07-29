@@ -2141,8 +2141,9 @@ window.frag.AnalogAction = function(engine, actionName, context) {
 
 // Represents an input that can be moved up and down in value. For example
 // the scroll wheel on the mouse or a joystick axis
-window.frag.AnalogInput = function(engine, inputName, analogState) {
-    const frag = window.frag;
+window.frag.AnalogInput = function(engine, inputName, analogState, options) {
+    options = options || {};
+    if (options.scale === undefined) options.scale = 1;
 
     const private = {
         inputName,
@@ -2183,6 +2184,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const moveHandler = function (evt) {
             if (buttons === 0) {
                 let fraction = vertical ? (engine.canvas.clientHeight - evt.clientY) / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -2191,6 +2194,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 let fraction = vertical 
                     ? (inverted ? (evt.clientY - downPosition) : (downPosition - evt.clientY)) / engine.canvas.clientHeight
                     : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
@@ -2301,6 +2306,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > index) || evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     let fraction = (inverted ? (downPosition - touch.clientX) : (touch.clientX - downPosition)) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     const value = downValue + (span * fraction);
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
@@ -2324,6 +2331,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > index) || evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     let fraction =  (inverted ? (touch.clientY - downPosition) : (downPosition - touch.clientY)) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     const value = downValue + (span * fraction);
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
@@ -2355,6 +2364,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > 1) || evt.touches.length === 2) {
                     const position = distance(evt);
                     let fraction = (position - downPosition) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -2386,6 +2397,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > 1) || evt.touches.length === 2) {
                     const position = angle(evt);
                     let fraction = (position - downPosition) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -2442,6 +2455,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const moveHandler = function (evt) {
             if (buttons === 0) {
                 let fraction = vertical ? evt.clientY / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -2450,6 +2465,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 let fraction = vertical 
                     ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / engine.canvas.clientHeight
                     : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
@@ -4731,6 +4748,52 @@ window.frag.Vector = {
         const pitch = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
 
         return [pitch, yaw, roll];
+    },
+    quaternion: function(euler) {
+        return window.frag.Vector.quaternionXYZ(
+            euler[0],
+            euler[1],
+            euler[2]
+        );
+    },
+    quaternionXYZ: function(x, y, z) {
+        const cr = Math.cos(x * 0.5);
+        const sr = Math.sin(x * 0.5);
+        const cp = Math.cos(y * 0.5);
+        const sp = Math.sin(y * 0.5);
+        const cy = Math.cos(z * 0.5);
+        const sy = Math.sin(z * 0.5);
+    
+        const qw = cr * cp * cy + sr * sp * sy;
+        const qx = sr * cp * cy - cr * sp * sy;
+        const qy = cr * sp * cy + sr * cp * sy;
+        const qz = cr * cp * sy - sr * sp * cy;
+
+        return [qw, qx, qy, qz];
+    },
+    euler: function(quaternion) {
+        return window.frag.Vector.eulerWXYZ(
+            quaternion[0],
+            quaternion[1],
+            quaternion[2],
+            quaternion[3]
+        );
+    },
+    eulerWXYZ: function(w, x, y, z) {
+        const sinr_cosp = 2 * (w * x + y * z);
+        const cosr_cosp = 1 - 2 * (x * x + y * y);
+        const pitch = Math.atan2(sinr_cosp, cosr_cosp);
+    
+        const sinp = 2 * (w * y - z * x);
+        const yaw = Math.abs(sinp) >= 1
+            ? (Math.PI * (sinp > 0 ? 0.5 : -0.5))
+            : Math.asin(sinp);
+    
+        const siny_cosp = 2 * (w * z + x * y);
+        const cosy_cosp = 1 - 2 * (y * y + z * z);
+        const roll = Math.atan2(siny_cosp, cosy_cosp);
+
+        return [pitch, yaw, roll];
     }
 }
 
@@ -6060,6 +6123,8 @@ window.frag.Scene = function(engine) {
     }
 
     public.addObject = function(sceneObject) {
+        if (sceneObject.parent) 
+            sceneObject.parent.removeObject(sceneObject);
         sceneObject.parent = public;
         private.sceneObjects.push(sceneObject);
         return public;
@@ -6124,7 +6189,7 @@ window.frag.SceneObject = function (engine, model) {
     const frag = window.frag;
 
     const private = {
-        model: model,
+        model,
         enabled: true,
         location: null,
         animationLocation: null,
@@ -6421,7 +6486,7 @@ window.frag.ScenePosition = function (engine, location, is3d) {
     }
 
     public.getQuaternion = function() {
-        // TODO
+        return window.frag.Vector.quaternion(public.getRotate());
     }
 
     public.getRotateX = function () {
@@ -6444,14 +6509,13 @@ window.frag.ScenePosition = function (engine, location, is3d) {
     }
 
     public.rotate = function(v) {
-        if (v.length === 4) {
-            // Quaternion
-            // TODO
-        } else {
-            private.location.rotateX = v[0];
-            if (v.length > 1) private.location.rotateY = v[1];
-            if (v.length > 2) private.location.rotateZ = v[2];
-        }
+        if (v.length === 4)
+            v = window.frag.Vector.euler(v);
+
+        private.location.rotateX = v[0];
+        if (v.length > 1) private.location.rotateY = v[1];
+        if (v.length > 2) private.location.rotateZ = v[2];
+
         private.modified();
         return public;
     }

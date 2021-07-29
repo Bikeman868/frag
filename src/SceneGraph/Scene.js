@@ -17,6 +17,8 @@ window.frag.Scene = function(engine) {
     }
 
     public.addObject = function(sceneObject) {
+        if (sceneObject.parent) 
+            sceneObject.parent.removeObject(sceneObject);
         sceneObject.parent = public;
         private.sceneObjects.push(sceneObject);
         return public;

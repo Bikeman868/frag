@@ -42,6 +42,7 @@
         const blueGroup = 4;
         const greenGroup = 8;
 
+        // Target model is a cylinder
         class TargetModel {
             constructor(game, color, group) {
                 this.group = group;
@@ -60,6 +61,7 @@
             }
         }
 
+        // Target is a cylinders that you can try to hit with a ball
         class Target {
             constructor(game, targetModel, start, speed, radius, points) {
                 this.isTarget = true;
@@ -96,6 +98,7 @@
             }
         }
 
+        // Ball model is a sphere
         class BallModel {
             constructor(game, color, group) {
                 this.group = group;
@@ -112,6 +115,7 @@
             }
         }
 
+        // You can fire a ball to try to hit the cylinders
         class Ball {
             constructor(game, ballModel, anchor) {
                 this.isBall = true;
@@ -129,7 +133,7 @@
             fire(velocity) {
                 const ballPosition = this.sceneObject.getPosition().getLocation();
                 const anchorMatrix = this.anchor.getPosition().getMatrix();
-                ballPosition.push(0);
+                ballPosition.push(1);
                 const pos = frag.Vector.extract3D(frag.Matrix.m4Xv4(anchorMatrix, ballPosition));
 
                 this.game.scene.addObject(this.sceneObject);
@@ -174,6 +178,7 @@
             }
         }
 
+        // The catapult fires balls into the game area
         class Catapult {
             constructor(game) {
                 this.isCatapult = true;
@@ -228,10 +233,11 @@
                             return;
                         }
 
+                        this.game.ballFired(this.ball);
                         this.pullStrengthAction = null;
                         this.pullStrength.analogAction(null);
 
-                        const strength = this.pullStrength.value * -4;
+                        const strength = this.pullStrength.value * -5;
                         const direction = this.pullDirection.value;
                         this.ball.fire([Math.sin(direction) * strength, 0, Math.cos(direction) * strength]);
                         this.ball = null;
@@ -246,7 +252,8 @@
                 );
                 this.strengthInput = game.engine.AnalogInput(
                     "left-pointer-vertical-inverted", 
-                    this.pullStrength
+                    this.pullStrength,
+                    { scale: 4 }
                 ).enable();
 
                 this.pullDirection = game.engine.AnalogState(
@@ -255,7 +262,8 @@
                 );
                 this.directionInput = game.engine.AnalogInput(
                     "left-pointer-horizontal-inverted", 
-                    this.pullDirection
+                    this.pullDirection,
+                    { scale: 4 }
                 ).enable();
 
                 this.newBall();
@@ -275,13 +283,14 @@
                 const ballModel = this.ballModels[Math.floor(Math.random() * this.ballModels.length)];
                 this.ball = new Ball(this.game, ballModel, this.ballAnchor);
 
-                this.pullStrengthAction = game.engine.AnalogAction(
+                this.pullStrengthAction = this.game.engine.AnalogAction(
                     'sceneobject-move-z', 
                     { sceneObject: this.ball.sceneObject });
                 this.pullStrength.analogAction(this.pullStrengthAction);
             }
         }
 
+        // Target generator randomly generates targets and starts them moving across the game area
         class TargetGenerator {
             constructor(game) {
                 const models = [
@@ -310,6 +319,7 @@
             }
         }
 
+        // Floor is there to stop gravity from pulling everything off the bottom of the screen
         class Floor {
             constructor(game) {
                 this.isFloor = true;
@@ -354,11 +364,13 @@
             }
         }
 
+        // Score displays your game score
         class Score {
             constructor(game) {
                 this.isScore = true;
                 this.game = game;
                 this.score = 0;
+                this.ballCount = 0;
                 this.createFont();
                 this.createText();
             }
@@ -383,7 +395,7 @@
 
                 context.font = '40px Calibri';
                 context.fillStyle = 'white';
-                context.fillText('0123456789', 0, 40);
+                context.fillText('0123456789/', 0, 40);
 
                 this.font = this.game.engine.Font()
                     .fromImage(canvas)
@@ -399,26 +411,38 @@
                     .addChar('6', 122, 12, 21, 32, 0, 32, 23)
                     .addChar('7', 142, 12, 21, 32, 0, 32, 23)
                     .addChar('8', 162, 12, 21, 32, 0, 32, 23)
-                    .addChar('9', 182, 12, 21, 32, 0, 32, 23);
+                    .addChar('9', 182, 12, 21, 32, 0, 32, 23)
+                    .addChar('/', 203, 12, 14, 32, 0, 32, 16);
             }
 
             createText() {
                 this.model = this.font.buildTextModel('0');
                 this.text = this.game.engine.SceneObject(this.model);
-                this.text.getPosition().scale(0.5).locationXYZ(-20, -18, 145);
+                this.text.getPosition().scale(0.5).locationXYZ(-30, -18, 145);
                 this.game.scene.addObject(this.text);
+            }
+
+            displayScore() {
+                if (this.ballCount > 0)
+                    this.font.updateTextModel(this.model, this.score.toString() + "/" + Math.floor((this.score / this.ballCount)));
             }
 
             setScore(score) {
                 this.score = score;
-                this.font.updateTextModel(this.model, score.toString());
+                this.displayScore();
             }
 
             add(score) {
                 this.setScore(this.score + score);
             }
+
+            incBallCount() {
+                this.ballCount++;
+                this.displayScore();
+            }
         }
 
+        // This integrates a physics engine, recalculating the physics world and syncing with graphics
         class PhysicsEngine {
             constructor(game) {
                 this.objects = [];
@@ -471,8 +495,8 @@
                 const pos = rigidBody.getPosition();
                 scenePosition.locationXYZ(pos.x, pos.y, pos.z);
 
-                const quad = rigidBody.getQuaternion();
-                scenePosition.rotate([quad.w, quad.x, quad.y, quad.z]);
+                // const quad = rigidBody.getQuaternion();
+                // scenePosition.rotate([quad.w, quad.x, quad.y, quad.z]);
             }
 
             checkCollisions() {
@@ -503,6 +527,7 @@
             }
         }
 
+        // Game creates all the bits needed foe the game to work
         class Game {
             constructor() {
                 this.engine = window.frag.Engine().start();
@@ -518,10 +543,17 @@
                 this.physics = new PhysicsEngine(this);
                 this.score = new Score(this);
                 this.engine.mainScene(this.scene);
+                this.floor = new Floor(this);
+                this.catapult = new Catapult(this);
+                this.generator = new TargetGenerator(this);
             }
 
             addScore(score) {
                 this.score.add(score);
+            }
+
+            ballFired(ball) {
+                this.score.incBallCount();
             }
 
             dispose() {
@@ -534,9 +566,6 @@
         }
 
         const game = new Game();
-        const floor = new Floor(game);
-        const catapult = new Catapult(game);
-        const generator = new TargetGenerator(game);
 
     </script>
 </body>

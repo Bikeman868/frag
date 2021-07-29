@@ -78,5 +78,13 @@ describe('Vector', function () {
             expect(heading[1]).to.be.approximately(0, 0.0001, "yaw");
             expect(heading[2]).to.be.approximately(0, 0.0001, "roll");
         });
+        it('can calculate quaternion', function () {
+            const original = [-1.5, 0.3, 0.7];
+            const quaternion = Vector.quaternion(original);
+            const roundtrip = Vector.euler(quaternion);
+            expect(roundtrip[0]).to.be.approximately(original[0], 0.0001, "x");
+            expect(roundtrip[1]).to.be.approximately(original[1], 0.0001, "y");
+            expect(roundtrip[2]).to.be.approximately(original[2], 0.0001, "z");
+        });
     });
 });

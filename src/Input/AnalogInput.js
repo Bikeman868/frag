@@ -1,7 +1,8 @@
 // Represents an input that can be moved up and down in value. For example
 // the scroll wheel on the mouse or a joystick axis
-window.frag.AnalogInput = function(engine, inputName, analogState) {
-    const frag = window.frag;
+window.frag.AnalogInput = function(engine, inputName, analogState, options) {
+    options = options || {};
+    if (options.scale === undefined) options.scale = 1;
 
     const private = {
         inputName,
@@ -42,6 +43,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const moveHandler = function (evt) {
             if (buttons === 0) {
                 let fraction = vertical ? (engine.canvas.clientHeight - evt.clientY) / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -50,6 +53,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 let fraction = vertical 
                     ? (inverted ? (evt.clientY - downPosition) : (downPosition - evt.clientY)) / engine.canvas.clientHeight
                     : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);
@@ -160,6 +165,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > index) || evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     let fraction = (inverted ? (downPosition - touch.clientX) : (touch.clientX - downPosition)) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     const value = downValue + (span * fraction);
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
@@ -183,6 +190,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > index) || evt.touches.length === index + 1) {
                     const touch = evt.touches.item(index);
                     let fraction =  (inverted ? (touch.clientY - downPosition) : (downPosition - touch.clientY)) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     const value = downValue + (span * fraction);
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                     private.analogState.setValue(evt, value, true);
@@ -214,6 +223,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > 1) || evt.touches.length === 2) {
                     const position = distance(evt);
                     let fraction = (position - downPosition) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -245,6 +256,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 if ((additionalTouches && evt.touches.length > 1) || evt.touches.length === 2) {
                     const position = angle(evt);
                     let fraction = (position - downPosition) / clientLength;
+                    fraction *= options.scale;
+                    if (fraction > 1) fraction = 1;
                     if (inverted) fraction = -fraction;
                     const value = downValue + span * fraction;
                     if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -301,6 +314,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
         const moveHandler = function (evt) {
             if (buttons === 0) {
                 let fraction = vertical ? evt.clientY / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
                 const value = ((private.analogState.maxValue - private.analogState.minValue) * fraction) + private.analogState.minValue;
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
@@ -309,6 +324,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState) {
                 let fraction = vertical 
                     ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / engine.canvas.clientHeight
                     : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                fraction *= options.scale;
+                if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
                 if (engine.debugInputs) console.log("Analog input", private.inputName, "=", value);
                 private.analogState.setValue(evt, value, true);

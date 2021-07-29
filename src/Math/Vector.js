@@ -103,5 +103,51 @@ window.frag.Vector = {
         const pitch = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
 
         return [pitch, yaw, roll];
+    },
+    quaternion: function(euler) {
+        return window.frag.Vector.quaternionXYZ(
+            euler[0],
+            euler[1],
+            euler[2]
+        );
+    },
+    quaternionXYZ: function(x, y, z) {
+        const cr = Math.cos(x * 0.5);
+        const sr = Math.sin(x * 0.5);
+        const cp = Math.cos(y * 0.5);
+        const sp = Math.sin(y * 0.5);
+        const cy = Math.cos(z * 0.5);
+        const sy = Math.sin(z * 0.5);
+    
+        const qw = cr * cp * cy + sr * sp * sy;
+        const qx = sr * cp * cy - cr * sp * sy;
+        const qy = cr * sp * cy + sr * cp * sy;
+        const qz = cr * cp * sy - sr * sp * cy;
+
+        return [qw, qx, qy, qz];
+    },
+    euler: function(quaternion) {
+        return window.frag.Vector.eulerWXYZ(
+            quaternion[0],
+            quaternion[1],
+            quaternion[2],
+            quaternion[3]
+        );
+    },
+    eulerWXYZ: function(w, x, y, z) {
+        const sinr_cosp = 2 * (w * x + y * z);
+        const cosr_cosp = 1 - 2 * (x * x + y * y);
+        const pitch = Math.atan2(sinr_cosp, cosr_cosp);
+    
+        const sinp = 2 * (w * y - z * x);
+        const yaw = Math.abs(sinp) >= 1
+            ? (Math.PI * (sinp > 0 ? 0.5 : -0.5))
+            : Math.asin(sinp);
+    
+        const siny_cosp = 2 * (w * z + x * y);
+        const cosy_cosp = 1 - 2 * (y * y + z * z);
+        const roll = Math.atan2(siny_cosp, cosy_cosp);
+
+        return [pitch, yaw, roll];
     }
 }
