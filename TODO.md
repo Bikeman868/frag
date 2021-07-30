@@ -14,7 +14,6 @@ No known bugs at this time
 * Analog input methods for accelerometer and device orientation
 * Set cameras and other objects to 'look at' something in the scene
 * Better handling of velocity and acceleration for analog inputs
-* Implement the sphere shape
 * Make the cylinder shape able to make truncated cones with optional end caps
 * Point source lights and shadows
 

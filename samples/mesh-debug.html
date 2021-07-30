@@ -48,8 +48,8 @@
             .colorsRGB()
             .compile();
 
-        // The big cube is red with blue "normal" vectors
-        const mesh1 = frag.Cube(engine, 4, { color: [0.8, 0.1, 0.4] })
+        // The big sphere is red with blue "normal" vectors
+        const mesh1 = frag.Sphere(engine, 12, { color: [0.8, 0.1, 0.4] })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
@@ -70,8 +70,8 @@
             .mesh(mesh2)
             .shader(shader);
 
-        // The small cube is blue with green "normal" vectors
-        const mesh3 = frag.Cube(engine, 1, { color: [0.1, 0.4, 0.8] })
+        // The small cylinder is blue with green "normal" vectors
+        const mesh3 = frag.Cylinder(engine, 12, { color: [0.1, 0.4, 0.8] })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 1, 0]);
@@ -80,41 +80,42 @@
             .mesh(mesh3)
             .shader(shader);
 
-        // Cube1 is parented on the scene
-        const cube1 = frag.SceneObject(engine, model1);
-        cube1.getPosition().scale(40);
-        scene.addObject(cube1);
+        // Sphere is parented on the scene
+        const sphere = frag.SceneObject(engine, model1);
+        sphere.getPosition().scale(40);
+        scene.addObject(sphere);
 
-        // Cube2 has cube1 as a parent and is affected by the parent
-        // transform including scale. Setting the scale of cube2 to 0.5
-        // will make it half the size of cube1.
+        // Cube has sphere as a parent and is affected by the parent
+        // transform including scale. Setting the scale of cube to 0.5
+        // will make it half the size of sphere.
         // If you do not want your child objects to scale to the parent
         // size then you should make the visible parts of your model
         // children of an empty root which has a scale of 1.
-        // Setting the locationX of cube2 to 1.5 offsets the center of 
-        // cube2 by 1.5x the size of cube1 in the X direction.
-        const cube2 = frag.SceneObject(engine, model2);
-        cube2.getPosition().locationX(1.5).scale(0.5);
-        cube1.addObject(cube2);
+        // Setting the locationX of cube to 1.5 offsets the center of 
+        // cube by 1.5x the size of sphere in the X direction.
+        const cube = frag.SceneObject(engine, model2);
+        cube.getPosition().locationX(1.5).scale(0.5);
+        sphere.addObject(cube);
 
-        // Cube3 has cube2 as a parent and is affected by the parent
-        // transform including scale. Setting the scale of cube3 to 0.5
-        // will make it half the size of its parent (cube2).
-        // Setting the locationY of cube3 to 1.5 offsets the center of 
-        // cube3 by 1.5x the size of cube1 in the Y direction.
-        const cube3 = frag.SceneObject(engine, model3);
-        cube3.getPosition().locationY(1.5).scale(0.5);
-        cube2.addObject(cube3);
+        // Cylinder has cube as a parent and is affected by the parent
+        // transform including scale. Setting the scale of cylinder to 0.5
+        // will make it half the size of its parent (cube) which is itself
+        // half the size of sphere.
+        // Setting the locationY of cylinder to 1.5 offsets the center of 
+        // cylinder by 1.5x the size of cube in the Y direction.
+        const cylinder = frag.SceneObject(engine, model3);
+        cylinder.getPosition().locationY(1.5).scale(0.5);
+        cube.addObject(cylinder);
 
-        // Just spin cube1. Cube 2 and 3 are parented off
-        // cube1 and will follow its movements
+        // Just spin sphere. Cube and cylinder are parented off
+        // sphere and will follow its movements
         const spinningAnimation = frag.Animation(engine)
             .perform(
                 frag.ValueAnimationAction(engine)
                     .setDuration(2000)
                     .onStep((a, r) => {
                         const angle = Math.PI * 2 * r;
-                        cube1.getPosition().rotateXYZ(angle, -angle, 0)
+                        sphere.getPosition().rotateXYZ(angle, -angle, 0)
                     }),
                 true);
         spinningAnimation.start();
