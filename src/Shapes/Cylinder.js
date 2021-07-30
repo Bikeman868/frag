@@ -97,7 +97,7 @@ window.frag.Cylinder = function (engine, facets, options) {
     sideNormals.push(1);
     sideNormals.push(0);
 
-    return window.frag.MeshData(engine)
+    return window.frag.Mesh(engine)
         .addTriangleFan(top, topColors, topUvs, topNormals)
         .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
         .addTriangleStrip(side, sideColors, sideUvs, sideNormals);

@@ -113,5 +113,5 @@ window.frag.Sphere = function (engine, facets, options) {
         if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.MeshData(engine).addTriangles(verticies, colors, uvs);
+    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
 };

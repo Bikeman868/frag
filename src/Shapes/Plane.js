@@ -13,7 +13,7 @@ window.frag.Plane = function (engine, facets, options) {
             0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, // bitangents
         ]);
 
-        return window.frag.MeshData(engine).fromBuffer(
+        return window.frag.Mesh(engine).fromBuffer(
             data.buffer, 3, 4, engine.gl.TRIANGLE_STRIP,
             0 * Float32Array.BYTES_PER_ELEMENT,
             12 * Float32Array.BYTES_PER_ELEMENT,
@@ -71,5 +71,5 @@ window.frag.Plane = function (engine, facets, options) {
         }
     }
 
-    return window.frag.MeshData(engine).addTriangleStrip(verticies, colors, uvs, normals);
+    return window.frag.Mesh(engine).addTriangleStrip(verticies, colors, uvs, normals);
 };

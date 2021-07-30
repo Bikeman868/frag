@@ -12,7 +12,7 @@ window.frag.Model = function (engine, is3d, parent) {
         name: null,
         parent,
         children: [],
-        meshData: null,
+        mesh: null,
         shader: null,
         material: null,
         enabled: true
@@ -64,12 +64,12 @@ window.frag.Model = function (engine, is3d, parent) {
     }
 
     public.mesh = function (value) {
-        private.meshData = value;
+        private.mesh = value;
         return public;
     }
 
     public.getMesh = function() {
-        return private.meshData;
+        return private.mesh;
     }
 
     public.material = function (value) {
@@ -103,7 +103,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.shadeSmooth = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.shadeSmooth();
+        if (private.mesh) private.mesh.shadeSmooth();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.shadeSmooth(depth-1); });
@@ -112,7 +112,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.shadeFlat = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.shadeFlat();
+        if (private.mesh) private.mesh.shadeFlat();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.shadeFlat(depth-1); });
@@ -121,7 +121,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.textureSmooth = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.textureSmooth();
+        if (private.mesh) private.mesh.textureSmooth();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.textureSmooth(depth-1); });
@@ -130,7 +130,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.textureFlat = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.textureFlat();
+        if (private.mesh) private.mesh.textureFlat();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.textureFlat(depth-1); });
@@ -139,7 +139,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.wireframe = function (drawWireframe, depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.wireframe(drawWireframe);
+        if (private.mesh) private.mesh.wireframe(drawWireframe);
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.wireframe(drawWireframe, depth-1); });
@@ -148,7 +148,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.drawNormals = function(length, color, depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.drawNormals(length, color);
+        if (private.mesh) private.mesh.drawNormals(length, color);
 
         if (depth === 0) return public;
         private.children.forEach((c) => { c.drawNormals(length, color, depth-1); });
@@ -187,7 +187,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
         const shader = drawContext.shader || public.getShader();
 
-        if (shader !== undefined && private.meshData && private.enabled) {
+        if (shader !== undefined && private.mesh && private.enabled) {
             shader.bind();
 
             if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
@@ -215,7 +215,7 @@ window.frag.Model = function (engine, is3d, parent) {
                     .apply(shader.uniforms.modelMatrix);
             }
 
-            private.meshData.draw(shader);
+            private.mesh.draw(shader);
 
             shader.unbind();
         }

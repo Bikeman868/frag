@@ -141,7 +141,7 @@ window.frag.PackageLoader = function (engine) {
     }
 
     private.loadMeshV1 = function (context, objectIndex, headerOffset) {
-        const mesh = frag.MeshData(engine);
+        const mesh = frag.Mesh(engine);
         const fragmentCount = context.header.getUint16(headerOffset, littleEndian);
         headerOffset += 2;
         if (engine.debugPackageLoader)
@@ -603,6 +603,7 @@ window.frag.PackageLoader = function (engine) {
         };
         xhttp.open("GET", url, true);
         xhttp.send();
+        return public;
     };
 
     return public;

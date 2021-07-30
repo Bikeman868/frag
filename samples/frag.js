@@ -1481,7 +1481,7 @@ window.frag.Engine = function(config) {
     addProxy('Material');
     
     addProxy('VertexData');
-    addProxy('MeshData');
+    addProxy('Mesh');
     addProxy('MeshOptimizer');
     addProxy('Model');
     addProxy('ScenePosition');
@@ -3293,7 +3293,7 @@ window.frag.PackageLoader = function (engine) {
     }
 
     private.loadMeshV1 = function (context, objectIndex, headerOffset) {
-        const mesh = frag.MeshData(engine);
+        const mesh = frag.Mesh(engine);
         const fragmentCount = context.header.getUint16(headerOffset, littleEndian);
         headerOffset += 2;
         if (engine.debugPackageLoader)
@@ -3755,6 +3755,7 @@ window.frag.PackageLoader = function (engine) {
         };
         xhttp.open("GET", url, true);
         xhttp.send();
+        return public;
     };
 
     return public;
@@ -4036,7 +4037,7 @@ window.frag.Font = function (engine, _private, _instance) {
             x = drawChar(text[i], x);
         }
 
-        return frag.MeshData(engine)
+        return frag.Mesh(engine)
             .addTriangles(verticies, undefined, uvs, normals)
             .shadeFlat()
             .textureFlat();
@@ -4921,15 +4922,15 @@ window.frag.DrawContext = function (engine) {
 
 /***/ }),
 
-/***/ "./src/SceneGraph/MeshData.js":
-/*!************************************!*\
-  !*** ./src/SceneGraph/MeshData.js ***!
-  \************************************/
+/***/ "./src/SceneGraph/Mesh.js":
+/*!********************************!*\
+  !*** ./src/SceneGraph/Mesh.js ***!
+  \********************************/
 /***/ (() => {
 
 // Represents a collection of mesh fragments where each
 // fragment is a collection of triangles
-window.frag.MeshData = function (engine) {
+window.frag.Mesh = function (engine) {
     const frag = window.frag;
     const gl = engine.gl;
 
@@ -5741,7 +5742,7 @@ window.frag.Model = function (engine, is3d, parent) {
         name: null,
         parent,
         children: [],
-        meshData: null,
+        mesh: null,
         shader: null,
         material: null,
         enabled: true
@@ -5793,12 +5794,12 @@ window.frag.Model = function (engine, is3d, parent) {
     }
 
     public.mesh = function (value) {
-        private.meshData = value;
+        private.mesh = value;
         return public;
     }
 
     public.getMesh = function() {
-        return private.meshData;
+        return private.mesh;
     }
 
     public.material = function (value) {
@@ -5832,7 +5833,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.shadeSmooth = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.shadeSmooth();
+        if (private.mesh) private.mesh.shadeSmooth();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.shadeSmooth(depth-1); });
@@ -5841,7 +5842,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.shadeFlat = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.shadeFlat();
+        if (private.mesh) private.mesh.shadeFlat();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.shadeFlat(depth-1); });
@@ -5850,7 +5851,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.textureSmooth = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.textureSmooth();
+        if (private.mesh) private.mesh.textureSmooth();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.textureSmooth(depth-1); });
@@ -5859,7 +5860,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.textureFlat = function (depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.textureFlat();
+        if (private.mesh) private.mesh.textureFlat();
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.textureFlat(depth-1); });
@@ -5868,7 +5869,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.wireframe = function (drawWireframe, depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.wireframe(drawWireframe);
+        if (private.mesh) private.mesh.wireframe(drawWireframe);
         
         if (depth === 0) return public;
         private.children.forEach((c) => { c.wireframe(drawWireframe, depth-1); });
@@ -5877,7 +5878,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.drawNormals = function(length, color, depth) {
         if (depth === undefined) depth = -1;
-        if (private.meshData) private.meshData.drawNormals(length, color);
+        if (private.mesh) private.mesh.drawNormals(length, color);
 
         if (depth === 0) return public;
         private.children.forEach((c) => { c.drawNormals(length, color, depth-1); });
@@ -5916,7 +5917,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
         const shader = drawContext.shader || public.getShader();
 
-        if (shader !== undefined && private.meshData && private.enabled) {
+        if (shader !== undefined && private.mesh && private.enabled) {
             shader.bind();
 
             if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
@@ -5944,7 +5945,7 @@ window.frag.Model = function (engine, is3d, parent) {
                     .apply(shader.uniforms.modelMatrix);
             }
 
-            private.meshData.draw(shader);
+            private.mesh.draw(shader);
 
             shader.unbind();
         }
@@ -7681,7 +7682,7 @@ window.frag.Cube = function (engine, facets, options) {
         if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.MeshData(engine).addTriangles(verticies, colors, uvs);
+    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
 };
 
 /***/ }),
@@ -7791,7 +7792,7 @@ window.frag.Cylinder = function (engine, facets, options) {
     sideNormals.push(1);
     sideNormals.push(0);
 
-    return window.frag.MeshData(engine)
+    return window.frag.Mesh(engine)
         .addTriangleFan(top, topColors, topUvs, topNormals)
         .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
         .addTriangleStrip(side, sideColors, sideUvs, sideNormals);
@@ -7832,7 +7833,7 @@ window.frag.Disc = function (engine, facets, options) {
         uvs.push((y + 1) * 0.5);
     }
 
-    return window.frag.MeshData(engine).addTriangleFan(verticies, uvs, normals);
+    return window.frag.Mesh(engine).addTriangleFan(verticies, uvs, normals);
 };
 
 /***/ }),
@@ -7858,7 +7859,7 @@ window.frag.Plane = function (engine, facets, options) {
             0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, // bitangents
         ]);
 
-        return window.frag.MeshData(engine).fromBuffer(
+        return window.frag.Mesh(engine).fromBuffer(
             data.buffer, 3, 4, engine.gl.TRIANGLE_STRIP,
             0 * Float32Array.BYTES_PER_ELEMENT,
             12 * Float32Array.BYTES_PER_ELEMENT,
@@ -7916,7 +7917,7 @@ window.frag.Plane = function (engine, facets, options) {
         }
     }
 
-    return window.frag.MeshData(engine).addTriangleStrip(verticies, colors, uvs, normals);
+    return window.frag.Mesh(engine).addTriangleStrip(verticies, colors, uvs, normals);
 };
 
 /***/ }),
@@ -8042,7 +8043,7 @@ window.frag.Sphere = function (engine, facets, options) {
         if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.MeshData(engine).addTriangles(verticies, colors, uvs);
+    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
 };
 
 /***/ })
@@ -8101,7 +8102,7 @@ __webpack_require__(/*! ./Materials/Font */ "./src/Materials/Font.js");
 __webpack_require__(/*! ./Materials/Material */ "./src/Materials/Material.js");
 
 __webpack_require__(/*! ./SceneGraph/VertexData */ "./src/SceneGraph/VertexData.js");
-__webpack_require__(/*! ./SceneGraph/MeshData */ "./src/SceneGraph/MeshData.js");
+__webpack_require__(/*! ./SceneGraph/Mesh */ "./src/SceneGraph/Mesh.js");
 __webpack_require__(/*! ./SceneGraph/MeshOptimizer */ "./src/SceneGraph/MeshOptimizer.js");
 __webpack_require__(/*! ./SceneGraph/Model */ "./src/SceneGraph/Model.js");
 __webpack_require__(/*! ./SceneGraph/ScenePosition */ "./src/SceneGraph/ScenePosition.js");

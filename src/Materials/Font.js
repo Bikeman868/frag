@@ -265,7 +265,7 @@ window.frag.Font = function (engine, _private, _instance) {
             x = drawChar(text[i], x);
         }
 
-        return frag.MeshData(engine)
+        return frag.Mesh(engine)
             .addTriangles(verticies, undefined, uvs, normals)
             .shadeFlat()
             .textureFlat();

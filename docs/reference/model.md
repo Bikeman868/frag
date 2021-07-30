@@ -122,7 +122,7 @@ each model, you can maximize the frame rate of your game and make it more fun to
 
 Note that 2D shaders only work with 2D models and 3D shaders only work with 3D models.
 
-## mesh(mesh: MeshData): Model
+## mesh(mesh: Mesh): Model
 You can call this method on any Model to define its shape. Models don't have to have
 a mesh, in which case they are just being used to group children so that they can be
 manipulated together (by an animation for example).

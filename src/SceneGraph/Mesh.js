@@ -1,6 +1,6 @@
 // Represents a collection of mesh fragments where each
 // fragment is a collection of triangles
-window.frag.MeshData = function (engine) {
+window.frag.Mesh = function (engine) {
     const frag = window.frag;
     const gl = engine.gl;
 

@@ -89,7 +89,6 @@ feature in Blender - which will just unzip the Python code into the `addons` fol
 
 ## 3. Export your models to `.frag_model` files using the Blender addon
 * Open your `.blend` file in Blender
-* Select the root object of your model. Note that this allows you to draw many models in one Blender file if you want to
 * Go to the "File|Export|Frag model" option in the Blender menu
 * Save the export. This will produce a `.frag_model` file and also a `.log` file that you can check for errors
 
@@ -253,7 +252,7 @@ This sample command will execute the packager with
 * The root path for outputting package files defined by the `-o` argument
 
 ```bash
-python package.py -i "C:\Users\marti\Dropbox\Private\Freelance\Collonizer\Git\GameServer\Assets\Models\" -o "..\"
+python package.py -i "C:\Git\GameServer\Assets\Models\" -o "..\"
 ```
 
 Note that that path separator is platform dependent

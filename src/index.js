@@ -19,7 +19,7 @@ require("./Materials/Font");
 require("./Materials/Material");
 
 require("./SceneGraph/VertexData");
-require("./SceneGraph/MeshData");
+require("./SceneGraph/Mesh");
 require("./SceneGraph/MeshOptimizer");
 require("./SceneGraph/Model");
 require("./SceneGraph/ScenePosition");

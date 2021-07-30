@@ -313,7 +313,7 @@ window.frag.Engine = function(config) {
     addProxy('Material');
     
     addProxy('VertexData');
-    addProxy('MeshData');
+    addProxy('Mesh');
     addProxy('MeshOptimizer');
     addProxy('Model');
     addProxy('ScenePosition');
