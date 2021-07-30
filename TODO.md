@@ -9,14 +9,14 @@ No known bugs at this time
 * Shader support for ambient occlusion textures
 * Shader support for metalic textures
 * Particle system
-* Armatures and character animation
+* Armatures and mesh animation
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation
-* Maintain camera pointing at a game scene object
 * Set cameras and other objects to 'look at' something in the scene
 * Better handling of velocity and acceleration for analog inputs
 * Implement the sphere shape
 * Make the cylinder shape able to make truncated cones with optional end caps
+* Point source lights and shadows
 
 ## Optional nice to have features
 * Play sounds synced with animations. This is nice to have because there are better libraries for playing sounds. This is a WebGL wrapper and WebGL does not provide any sound playing capabilities.

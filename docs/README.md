@@ -59,6 +59,7 @@ The following documents are general discussions around a specific topic
 * [Packaging models](packaging.md)
 * [Player input](inputs.md)
 * [Text rendering](text.md)
+* [Physics engine integration](physics.md)
 
 ## Reference
 The following classes are documented at detailed technical level. Note that the ones
