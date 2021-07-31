@@ -34,7 +34,7 @@
         const degToRad = Math.PI / 180;
 
         const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
-        camera.getPosition().locationZ(-150);
+        camera.getPosition().locationZ(-150).locationY(-25);
 
         const scene = frag.Scene(engine)
             .camera(camera);
@@ -44,12 +44,33 @@
         // This shader just colors the verticies and does not support 
         // materials, lighting or any advancedshader features
         const shader = frag.Shader(engine)
-            .name("Color shader")
+            .name("Color")
             .colorsRGB()
             .compile();
 
+        // Use a Plane geometry for the floor
+        const floorMesh = frag.Plane(
+            engine,
+            8,
+            {
+                color: [0, 0, 0]
+            })
+            .wireframe(true);
+
+        const floorModel = frag.Model(engine)
+            .mesh(floorMesh)
+            .shader(shader);
+            
+        const floor = frag.SceneObject(engine, floorModel);
+        floor.getPosition()
+            .rotateX(60 * degToRad)
+            .scale(80)
+            .locationY(-50)
+            .locationZ(50);
+        scene.addObject(floor);
+
         // The big sphere is red with blue "normal" vectors
-        const mesh1 = frag.Sphere(
+        const sphereMesh = frag.Sphere(
             engine, 
             6, 
             { 
@@ -57,40 +78,59 @@
                 latitudeStart: Math.PI * 0.2,
                 latitudeLength: Math.PI * 0.6,
                 longitudeFacets: 12,
+                longitudeStart: Math.PI * -0.75,
+                longitudeLength: Math.PI * 1.5,
             })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 0, 1]);
 
-        const model1 = frag.Model(engine)
-            .mesh(mesh1)
+        const sphereModel = frag.Model(engine)
+            .mesh(sphereMesh)
             .shader(shader);
-        model1.getPosition()
+        sphereModel.getPosition()
             .rotateXYZ(45 * degToRad, 45 * degToRad);
 
-        // The medium cube is green with red "normal" vectors
-        const mesh2 = frag.Cube(engine, 2, { color: [0.4, 0.8, 0.4] })
-            .shadeSmooth()
+        // The medium size cube is green with red "normal" vectors
+        const cubeMesh = frag.Cube(
+            engine, 
+            2, 
+            { 
+                color: [0.4, 0.8, 0.4],
+                topFacets: 4,
+                leftFacets: 0,
+                rightFacets: 0,
+            })
+            .shadeFlat()
             .wireframe(true)
             .drawNormals(0.2, [1, 0, 0]);
 
-        const model2 = frag.Model(engine)
-            .mesh(mesh2)
+        const cubeModel = frag.Model(engine)
+            .mesh(cubeMesh)
             .shader(shader);
 
         // The small cylinder is blue with green "normal" vectors
-        const mesh3 = frag.Cylinder(engine, 6, { color: [0.1, 0.4, 0.8] })
+        const cylinderMesh = frag.Cylinder(
+            engine, 
+            6, 
+            { 
+                color: [0.1, 0.4, 0.8],
+                sideFacets: 3,
+                topRadius: 0,
+                drawTop: true,
+                drawBottom: false,
+            })
             .shadeSmooth()
             .wireframe(true)
             .drawNormals(0.2, [0, 1, 0]);
 
-        const model3 = frag.Model(engine)
-            .mesh(mesh3)
+        const cylinderModel = frag.Model(engine)
+            .mesh(cylinderMesh)
             .shader(shader);
-        model3.getPosition().rotateX(Math.PI * 0.5);
+        cylinderModel.getPosition().rotateX(Math.PI * 0.5);
 
         // Sphere is parented on the scene
-        const sphere = frag.SceneObject(engine, model1);
+        const sphere = frag.SceneObject(engine, sphereModel);
         sphere.getPosition().scale(40);
         scene.addObject(sphere);
 
@@ -101,8 +141,9 @@
         // size then you should make the visible parts of your model
         // children of an empty root which has a scale of 1.
         // Setting the locationX of cube to 1.5 offsets the center of 
-        // cube by 1.5x the size of sphere in the X direction.
-        const cube = frag.SceneObject(engine, model2);
+        // cube by 1.5 x the size of sphere in the X direction so that
+        // the side of the cube will be touching the side of the sphere.
+        const cube = frag.SceneObject(engine, cubeModel);
         cube.getPosition().locationX(1.5).scale(0.5);
         sphere.addObject(cube);
 
@@ -112,7 +153,7 @@
         // half the size of sphere.
         // Setting the locationY of cylinder to 1.5 offsets the center of 
         // cylinder by 1.5x the size of cube in the Y direction.
-        const cylinder = frag.SceneObject(engine, model3);
+        const cylinder = frag.SceneObject(engine, cylinderModel);
         cylinder.getPosition().locationY(1.5).scale(0.5);
         cube.addObject(cylinder);
 
@@ -138,5 +179,33 @@
                     .setDuration(2000),
                 true);
         spinningAnimation.start();
+
+        // Cap off the ends of the sphere with discs
+        const discMesh = frag.Disc(
+            engine,
+            16,
+            {
+                color: [0.8, 0.1, 0.4],
+            })
+            .wireframe(true);
+
+        const discModel = frag.Model(engine)
+            .mesh(discMesh)
+            .shader(shader);
+        discModel.getPosition()
+            .scale(0.59);
+            
+        const disc1 = frag.SceneObject(engine, discModel);
+        disc1.getPosition()
+            .rotateX(90 * degToRad)
+            .locationY(0.8);
+        sphere.addObject(disc1);
+
+        const disc2 = frag.SceneObject(engine, discModel);
+        disc2.getPosition()
+            .rotateX(-90 * degToRad)
+            .locationY(-0.8);
+        sphere.addObject(disc2);
+
     </script>
 </body>

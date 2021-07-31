@@ -12,7 +12,7 @@ the `./samples` folder and open the html files in your browser (try double
 clicking on the file). I highly recommend playing around with these samples 
 to get a much better understanding of how the framework works.
 
-## Model loader sample
+## Notes about the model loader sample
 For the model loader sample, you cannot simply open the html file in your browser
 because the asset loading will be blocked by CORS. There is no way around this, you
 have to run a web server locally. For all other samples you do not need this step.
@@ -40,10 +40,12 @@ Things to mess around with on this sample:
 ## Mesh debug
 This [sample](mesh-debug.html) illustrates the following features and techniques
 * Only draws colored verticies - no textures or materials
-* Displays a cube in wireframe mode so that the mesh can be visualized
+* Draws some geometric shapes with "wireframe" mode turned on
+* Demonstrates some of the options available when constructing geometric shapes
 * Displays "normal" vectors as short lines sticking out from the vertices
-* Spins the cube using a `ValueAnimationAction` instance
-* Parenting scene objects to other scene objects rather than the scene
+* Spins the objects using a `ValueAnimationAction` instances
+* Uses a `ParallelAnimationAction` to perform 2 spin actions at the same time in one animation step
+* Parenting scene objects to other scene objects
 
 Things to mess around with on this sample:
 * Speed up or slow down the rotation of the cube

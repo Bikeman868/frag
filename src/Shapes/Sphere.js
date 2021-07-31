@@ -1,33 +1,51 @@
 // This sphere consists of a single sub-mesh so that smooth shading works correctly
-window.frag.Sphere = function (engine, facets, options) {
-    if (facets === undefined) facets = 12;
-    if (facets < 2) facets = 2;
+window.frag.Sphere = function (engine, latitudeFacets, options) {
+    if (latitudeFacets === undefined) latitudeFacets = 12;
+    let longitudeFacets = latitudeFacets * 2;
 
-    options = options || {};
-    if (options.latitudeStart === undefined) options.latitudeStart = 0;
-    if (options.latitudeLength === undefined) options.latitudeLength = Math.PI;
-    if (options.longitudeStart === undefined) options.longitudeStart = 0;
-    if (options.longitudeLength === undefined) options.longitudeLength = 2 * Math.PI;
-    if (options.longitudeFacets === undefined) options.longitudeFacets = facets;
-    if (options.longitudeFacets < 3) options.longitudeFacets = 3;
+    let latitudeStart = 0;
+    let latitudeLength = Math.PI;
+    
+    let longitudeStart = 0;
+    let longitudeLength = 2 * Math.PI;
+
+    let color;
+
+    if (options) {
+        if (options.latitudeStart !== undefined) latitudeStart = options.latitudeStart;
+        if (options.latitudeLength !== undefined) latitudeLength = options.latitudeLength;
+        if (options.latitudeFacets !== undefined) latitudeFacets = options.latitudeFacets;
+
+        if (options.longitudeStart !== undefined) longitudeStart = options.longitudeStart;
+        if (options.longitudeLength !== undefined) longitudeLength = options.longitudeLength;
+        if (options.longitudeFacets !== undefined) longitudeFacets = options.longitudeFacets;
+
+        if (options.color !== undefined) color = options.color;
+    }
+
+    if (latitudeFacets < 2) latitudeFacets = 2;
+    if (longitudeFacets < 3) longitudeFacets = 3;
+    if (latitudeStart < 0) latitudeStart = 0;
+    if (latitudeStart + latitudeLength > Math.PI) latitudeLength = Math.PI - latitudeStart;
+    if (longitudeLength > 2 * Math.PI) longitudeLength = 2 * Math.PI;
 
     const verticies = [];
     const uvs = [];
 
-    for (let iy = 0; iy <= facets; iy++) {
-        const v = iy / facets;
+    for (let iy = 0; iy <= latitudeFacets; iy++) {
+        const v = iy / latitudeFacets;
         let uOffset = 0;
-        if (iy === 0 && options.latitudeStart === 0)
-            uOffset = 0.5 / options.longitudeFacets;
-        else if (iy === facets && (options.latitudeStart + options.latitudeLength) === Math.PI)
-            uOffset = -0.5 / options.longitudeFacets;
+        if (iy === 0 && latitudeStart === 0)
+            uOffset = 0.5 / longitudeFacets;
+        else if (iy === latitudeFacets && (latitudeStart + latitudeLength) === Math.PI)
+            uOffset = -0.5 / longitudeFacets;
 
-        for (ix = 0; ix <= options.longitudeFacets; ix++) {
-            const u = ix / options.longitudeFacets;
+        for (ix = 0; ix <= longitudeFacets; ix++) {
+            const u = ix / longitudeFacets;
             vertex = {
-                x: Math.cos(options.longitudeStart + u * options.longitudeLength) * Math.sin(options.latitudeStart + v * options.latitudeLength),
-                y: Math.cos(options.latitudeStart + v * options.latitudeLength),
-                z: Math.sin(options.longitudeStart + u * options.longitudeLength) * Math.sin(options.latitudeStart + v * options.latitudeLength)
+                x: Math.cos(longitudeStart + u * longitudeLength) * Math.sin(latitudeStart + v * latitudeLength),
+                y: Math.cos(latitudeStart + v * latitudeLength),
+                z: Math.sin(longitudeStart + u * longitudeLength) * Math.sin(latitudeStart + v * latitudeLength)
             };
             verticies.push(vertex);
             uvs.push({ u, v });
@@ -35,7 +53,7 @@ window.frag.Sphere = function (engine, facets, options) {
     }
 
     const triangleVerticies = [];
-    const triangleColors = options.color ? [] : undefined;
+    const triangleColors = color ? [] : undefined;
     const triangleUvs = [];
 
     const addVertex = function(index) {
@@ -48,7 +66,7 @@ window.frag.Sphere = function (engine, facets, options) {
         triangleUvs.push(uv.u);
         triangleUvs.push(uv.v);
 
-        if (options.color) options.color.forEach(c => { triangleColors.push(c); });
+        if (color) color.forEach(c => { triangleColors.push(c); });
     }
 
     const addTriangle = function(ia, ib, ic) {
@@ -57,13 +75,13 @@ window.frag.Sphere = function (engine, facets, options) {
         addVertex(ic);
     }
 
-    for (let iy = 0; iy < facets; iy++) {
-        const r0 = iy * (options.longitudeFacets + 1);
-        const r1 = (iy + 1) * (options.longitudeFacets + 1);
-        for (let ix = 0; ix < options.longitudeFacets; ix++) {
-            if (iy !== 0 || options.latitudeStart > 0)
+    for (let iy = 0; iy < latitudeFacets; iy++) {
+        const r0 = iy * (longitudeFacets + 1);
+        const r1 = (iy + 1) * (longitudeFacets + 1);
+        for (let ix = 0; ix < longitudeFacets; ix++) {
+            if (iy !== 0 || latitudeStart > 0)
                 addTriangle(r0 + ix + 1, r0 + ix, r1 + ix + 1);
-            if (iy !== facets - 1 || (options.latitudeStart + options.latitudeLength) < Math.PI)
+            if (iy !== latitudeFacets - 1 || (latitudeStart + latitudeLength) < Math.PI)
                 addTriangle(r0 + ix, r1 + ix, r1 + ix + 1);
         }
     }

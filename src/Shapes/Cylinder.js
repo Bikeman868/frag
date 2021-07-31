@@ -1,104 +1,116 @@
-window.frag.Cylinder = function (engine, facets, options) {
-    facets = facets || 32;
-    options = options || {};
+window.frag.Cylinder = function (engine, endFacets, options) {
+    endFacets = endFacets || 16;
+    let sideFacets = 1;
+    let topRadius = 1;
+    let bottomRadius = 1;
+    let drawTop = true;
+    let drawBottom = true;
+    let color;
 
-    const top = [0, 0, -1];
-    const topUvs = [0.5, 0.5];
-    const topNormals = [0, 0, -1];
-    const topColors = options.color ? Array.from(options.color) : undefined;
+    if (options) {
+        if (options.sideFacets !== undefined) sideFacets = options.sideFacets;
+        if (options.color !== undefined) color = options.color;
+        if (options.topRadius !== undefined) topRadius = options.topRadius;
+        if (options.bottomRadius !== undefined) bottomRadius = options.bottomRadius;
+        if (options.drawTop !== undefined) drawTop = options.drawTop;
+        if (options.drawBottom !== undefined) drawBottom = options.drawBottom;
+    }
 
-    const bottom = [0, 0, 1];
-    const bottomUvs = [0.5, 0.5];
-    const bottomNormals = [0, 0, 1];
-    const bottomColors = options.color ? Array.from(options.color) : undefined;
+    if (endFacets < 3) endFacets = 3;
+    if (topRadius === 0) drawTop = false;
+    if (bottomRadius === 0) drawBottom = false;
 
-    const side = [];
-    const sideColors = options.color ? [] : undefined;
-    const sideUvs = [];
-    const sideNormals = [];
+    const step = Math.PI * 2 / endFacets;
+    const mesh = window.frag.Mesh(engine);
 
-    const step = Math.PI * 2 / facets;
+    if (sideFacets) {
+        const verticies = [];
+        const colors = color ? [] : undefined;
+        const uvs = [];
+        const radiusDelta = topRadius - bottomRadius;
 
-    for (var i = 0; i <= facets; i++) {
-        const angle = -i * step;
-        const x = Math.sin(angle);
-        const y = Math.cos(angle);
-
-        top.push(x);
-        top.push(y);
-        top.push(-1);
-
-        if (options.color) 
-            options.color.forEach(c => topColors.push(c));
-
-        topUvs.push((x + 1) * 0.5);
-        topUvs.push((y + 1) * 0.5);
-
-        topNormals.push(x);
-        topNormals.push(y);
-        topNormals.push(-1);
-
-        side.push(x);
-        side.push(y);
-        side.push(-1);
-        side.push(x);
-        side.push(y);
-        side.push(1);
-
-        if (options.color) {
-            options.color.forEach(c => sideColors.push(c));
-            options.color.forEach(c => sideColors.push(c));
+        const push = function(x, y,  z) {
+            verticies.push(x);
+            verticies.push(y);
+            verticies.push(z);
+            if (color) color.forEach(c => colors.push(c));
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
         }
 
-        sideUvs.push((x + 1) * 0.5);
-        sideUvs.push((y + 1) * 0.5);
-        sideUvs.push((x + 1) * 0.5);
-        sideUvs.push((y + 1) * 0.5);
+        for (let s = 0; s < sideFacets; s++) {
+            const f0 = s / sideFacets;
+            const f1 = (s + 1) / sideFacets;
+            const z0 = 1 - 2 * f0;
+            const z1 = 1 - 2 * f1;
+            const radius0 = radiusDelta * f0 + bottomRadius;
+            const radius1 = radiusDelta * f1 + bottomRadius;
+            for (let i = 0; i <= endFacets; i++) {
+                const angle = i * step;
+                const x = Math.sin(angle);
+                const y = Math.cos(angle);
 
-        sideNormals.push(x);
-        sideNormals.push(y);
-        sideNormals.push(0);
-        sideNormals.push(x);
-        sideNormals.push(y);
-        sideNormals.push(0);
+                push(x * radius0, y * radius0, z0);
+                push(x * radius1, y * radius1, z1);
+            }
+            push(0, radius1, z1);
+            mesh.addTriangleStrip(verticies, colors, uvs);
+        }
     }
 
-    for (var i = 0; i <= facets; i++) {
-        const angle = i * step;
-        const x = Math.sin(angle);
-        const y = Math.cos(angle);
-
-        bottom.push(x);
-        bottom.push(y);
-        bottom.push(1);
-
-        if (options.color) 
-            options.color.forEach(c => bottomColors.push(c));
-
-        bottomUvs.push((x + 1) * 0.5);
-        bottomUvs.push((y + 1) * 0.5);
-
-        bottomNormals.push(x);
-        bottomNormals.push(y);
-        bottomNormals.push(1);
-    }
-
-    side.push(0);
-    side.push(1);
-    side.push(1);
+    if (drawTop) {
+        const verticies = [0, 0, -1];
+        const uvs = [0.5, 0.5];
+        const normals = [0, 0, -1];
+        const colors = color ? Array.from(color) : undefined;
     
-    if (options.color) 
-        options.color.forEach(c => sideColors.push(c));
+        for (let i = 0; i <= endFacets; i++) {
+            const angle = -i * step;
+            const x = Math.sin(angle);
+            const y = Math.cos(angle);
 
-    sideUvs.push(0.5);
-    sideUvs.push(1);
+            verticies.push(x * topRadius);
+            verticies.push(y * topRadius);
+            verticies.push(-1);
 
-    sideNormals.push(0);
-    sideNormals.push(1);
-    sideNormals.push(0);
+            if (color) color.forEach(c => colors.push(c));
 
-    return window.frag.Mesh(engine)
-        .addTriangleFan(top, topColors, topUvs, topNormals)
-        .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
-        .addTriangleStrip(side, sideColors, sideUvs, sideNormals);
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
+
+            normals.push(x);
+            normals.push(y);
+            normals.push(-1);
+        }
+        mesh.addTriangleFan(verticies, colors, uvs, normals);
+    }
+
+    if (drawBottom) {
+        const verticies = [0, 0, 1];
+        const uvs = [0.5, 0.5];
+        const normals = [0, 0, 1];
+        const colors = color ? Array.from(color) : undefined;
+
+        for (let i = 0; i <= endFacets; i++) {
+            const angle = i * step;
+            const x = Math.sin(angle);
+            const y = Math.cos(angle);
+
+            verticies.push(x * bottomRadius);
+            verticies.push(y * bottomRadius);
+            verticies.push(1);
+
+            if (color) color.forEach(c => colors.push(c));
+
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
+
+            normals.push(x);
+            normals.push(y);
+            normals.push(1);
+        }
+        mesh.addTriangleFan(verticies, colors, uvs, normals);
+    }
+
+    return mesh;
 };

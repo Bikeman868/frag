@@ -80,27 +80,33 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`AnalogState`](reference/analog-state.md) stores a floating point value that can be controlled by the player.
 * [`Animation`](reference/animation.md) is the core animation engine.
 * [`AssetCatalog`](reference/asset-catalog.md) holds collections of names assets like materials, fonts and models.
+* [`Cube`](reference/cube.md) builds a mesh that comprises some or all of the sides of a cube.
 * [`CustomShader`](reference/custom-shader.md) the base class for all code that runs on the GPU.
+* [`Cylinder`](reference/cube.md) builds a cylinder, cone or truncated cone mesh.
 * [`DigitalAction`](reference/digital-action.md) applies digital state changes to something in the game.
 * [`DigitalInput`](reference/digital-action.md) updates a digital state from an input device.
 * [`DigitalState`](reference/digital-action.md) stores an on/off value that can be controlled by the player.
+* [`Disc`](reference/disc.md) You can do this with a `Cylinder` but this is a bit simpler.
 * [`Engine`](reference/engine.md) renders a WebGL scene onto a canvas element on the page.
 * [`Font`](reference/font.md) used to construct models that render text in the scene.
 * [`InputMethod`](reference/input-method.md) a collection of analog and digital inputs that can be enabled/disabled together.
 * [`KeyframeAnimationAction`](reference/keyframe-animation-action.md) adds keyframe action to an animation.
 * [`Material`](reference/material.md) defines the surface appearence of part of a model.
 * [`Matrix`](reference/matrix.md) performs matrix math.
+* [`Mesh`](reference/mesh.md) builds sets of triangles, triangle strips and triangle fans that define a surface.
 * [`Model`](reference/model.md) is a template for instancing scene objects.
 * [`ModelAnimation`](reference/model-animation.md) adds animation effects to a model.
-* [`PackageLoader`](reference/package-loader.md) loads asset packages from the server.
 * [`OrthographicCamera`](reference/orthographic-camera.md) draws objects in the scene at their actual size.
+* [`PackageLoader`](reference/package-loader.md) loads asset packages from the server.
 * [`ParallelAnimationAction`](reference/parallel-animation-action.md) runs multiple animation actions in parallel.
 * [`PerspectiveCamera`](reference/perspective-camera.md) objects further from the camera appear smaller.
+* [`Plane`](reference/plane.md) builds a mesh that represents a flat surface.
 * [`PositionLink`](reference/position-link.md) makes one object mimic the movements of another object.
 * [`Scene`](reference/scene.md) a collection of objects and a camera to draw them.
 * [`SceneObject`](reference/scene-object.md) an instance of a model that can be positioned within a scene.
 * [`ScenePosition`](reference/scene-position.md) location, orientation and scale.
 * [`Shader`](reference/shader.md) builds programs that run on the GPU to render the scene.
+* [`Sphere`](reference/shpere.md) builds a mesh that covers part of a sphere.
 * [`Texture`](reference/texture.md) defines one aspect of a material, for example how shiny it is.
 * ~[`Transform`](reference/transform.md)~ builds a 3x3 matrix that defines a sequence of 2D transformations.
 * ~[`Transform2D`](reference/transform-2d.md)~ builds a 4x4 matrix that defines a sequence of 3D transformations.

@@ -7568,14 +7568,27 @@ window.frag.UiShader = function(engine) {
 /***/ (() => {
 
 // This cube consists of a single sub-mesh so that smooth shading works correctly
-window.frag.Cube = function (engine, facets, options) {
-    options = options || {};
-    if (options.drawFront === undefined) options.drawFront = true;
-    if (options.drawBack === undefined) options.drawBack = true;
-    if (options.drawTop === undefined) options.drawTop = true;
-    if (options.drawBottom === undefined) options.drawBottom = true;
-    if (options.drawLeft === undefined) options.drawLeft = true;
-    if (options.drawRight === undefined) options.drawRight = true;
+window.frag.Cube = function (engine, frontFacets, options) {
+    let backFacets = frontFacets;
+    let topFacets = frontFacets;
+    let bottomFacets = frontFacets;
+    let leftFacets = frontFacets;
+    let rightFacets = frontFacets;
+
+    let color;
+    let duplicateTexture = false;
+
+    if (options) {
+        if (options.frontFacets !== undefined) frontFacets = options.frontFacets;
+        if (options.backFacets !== undefined) backFacets = options.backFacets;
+        if (options.topFacets !== undefined) topFacets = options.topFacets;
+        if (options.bottomFacets !== undefined) bottomFacets = options.bottomFacets;
+        if (options.leftFacets !== undefined) leftFacets = options.leftFacets;
+        if (options.rightFacets !== undefined) rightFacets = options.rightFacets;
+
+        if (options.color !== undefined) color = options.color;
+        if (options.duplicateTexture !== undefined) duplicateTexture = options.duplicateTexture;
+    }
 
     let u0 = 0;
     let u1 = 1 / 4;
@@ -7601,14 +7614,14 @@ window.frag.Cube = function (engine, facets, options) {
 
     const verticies = [];
     const uvs = [];
-    const colors = options.color ? [] : undefined;
+    const colors = color ? [] : undefined;
 
     const addVertex = function(v) {
         verticies.push(v[0]);
         verticies.push(v[1]);
         verticies.push(v[2]);
-        if (options.color) {
-            options.color.forEach(c => { colors.push(c); });
+        if (color) {
+            color.forEach(c => { colors.push(c); });
         }
     }
 
@@ -7635,7 +7648,7 @@ window.frag.Cube = function (engine, facets, options) {
         addUv(uRight, vTop);
     }
 
-    const addFace = function (bottomRight, bottomLeft, topLeft, uLeft, vBottom, uRight, vTop) {
+    const addFace = function (facets, bottomRight, bottomLeft, topLeft, uLeft, vBottom, uRight, vTop) {
         for (var vFacet = 0; vFacet < facets; vFacet++) {
             const vFracLow = vFacet / facets;
             const vFracHigh = (vFacet + 1) / facets;
@@ -7666,20 +7679,20 @@ window.frag.Cube = function (engine, facets, options) {
         }
     }
 
-    if (options.duplicateTexture) {
-        if (options.drawFront) addFace(1, 0, 3, u4, v3, u0, v0); // front
-        if (options.drawBottom) addFace(4, 5, 0, u4, v3, u0, v0); // bottom
-        if (options.drawLeft) addFace(0, 5, 6, u4, v3, u0, v0); // left
-        if (options.drawRight) addFace(4, 1, 2, u4, v3, u0, v0); // right
-        if (options.drawBack) addFace(5, 4, 7, u4, v3, u0, v0); // back
-        if (options.drawTop) addFace(6, 7, 2, u4, v3, u0, v0); // top
+    if (duplicateTexture) {
+        if (frontFacets) addFace(frontFacets, 1, 0, 3, u4, v3, u0, v0); // front
+        if (bottomFacets) addFace(bottomFacets, 4, 5, 0, u4, v3, u0, v0); // bottom
+        if (leftFacets) addFace(leftFacets, 0, 5, 6, u4, v3, u0, v0); // left
+        if (rightFacets) addFace(rightFacets, 4, 1, 2, u4, v3, u0, v0); // right
+        if (backFacets) addFace(backFacets, 5, 4, 7, u4, v3, u0, v0); // back
+        if (topFacets) addFace(topFacets, 6, 7, 2, u4, v3, u0, v0); // top
     } else {
-        if (options.drawFront) addFace(1, 0, 3, u1, v2, u0, v1); // front
-        if (options.drawBottom) addFace(4, 5, 0, u2, v2, u1, v1); // bottom
-        if (options.drawLeft) addFace(0, 5, 6, u2, v2, u1, v3); // left
-        if (options.drawRight) addFace(4, 1, 2, u1, v1, u2, v0); // right
-        if (options.drawBack) addFace(5, 4, 7, u2, v1, u3, v2); // back
-        if (options.drawTop) addFace(6, 7, 2, u3, v1, u4, v2); // top
+        if (frontFacets) addFace(frontFacets, 1, 0, 3, u1, v2, u0, v1); // front
+        if (bottomFacets) addFace(bottomFacets, 4, 5, 0, u2, v2, u1, v1); // bottom
+        if (leftFacets) addFace(leftFacets, 0, 5, 6, u2, v2, u1, v3); // left
+        if (rightFacets) addFace(rightFacets, 4, 1, 2, u1, v1, u2, v0); // right
+        if (backFacets) addFace(backFacets, 5, 4, 7, u2, v1, u3, v2); // back
+        if (topFacets) addFace(topFacets, 6, 7, 2, u3, v1, u4, v2); // top
     }
 
     return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
@@ -7693,110 +7706,123 @@ window.frag.Cube = function (engine, facets, options) {
   \********************************/
 /***/ (() => {
 
-window.frag.Cylinder = function (engine, facets, options) {
-    facets = facets || 32;
-    options = options || {};
+window.frag.Cylinder = function (engine, endFacets, options) {
+    endFacets = endFacets || 16;
+    let sideFacets = 1;
+    let topRadius = 1;
+    let bottomRadius = 1;
+    let drawTop = true;
+    let drawBottom = true;
+    let color;
 
-    const top = [0, 0, -1];
-    const topUvs = [0.5, 0.5];
-    const topNormals = [0, 0, -1];
-    const topColors = options.color ? Array.from(options.color) : undefined;
+    if (options) {
+        if (options.sideFacets !== undefined) sideFacets = options.sideFacets;
+        if (options.color !== undefined) color = options.color;
+        if (options.topRadius !== undefined) topRadius = options.topRadius;
+        if (options.bottomRadius !== undefined) bottomRadius = options.bottomRadius;
+        if (options.drawTop !== undefined) drawTop = options.drawTop;
+        if (options.drawBottom !== undefined) drawBottom = options.drawBottom;
+    }
 
-    const bottom = [0, 0, 1];
-    const bottomUvs = [0.5, 0.5];
-    const bottomNormals = [0, 0, 1];
-    const bottomColors = options.color ? Array.from(options.color) : undefined;
+    if (endFacets < 3) endFacets = 3;
+    if (topRadius === 0) drawTop = false;
+    if (bottomRadius === 0) drawBottom = false;
 
-    const side = [];
-    const sideColors = options.color ? [] : undefined;
-    const sideUvs = [];
-    const sideNormals = [];
+    const step = Math.PI * 2 / endFacets;
+    const mesh = window.frag.Mesh(engine);
 
-    const step = Math.PI * 2 / facets;
+    if (sideFacets) {
+        const verticies = [];
+        const colors = color ? [] : undefined;
+        const uvs = [];
+        const radiusDelta = topRadius - bottomRadius;
 
-    for (var i = 0; i <= facets; i++) {
-        const angle = -i * step;
-        const x = Math.sin(angle);
-        const y = Math.cos(angle);
-
-        top.push(x);
-        top.push(y);
-        top.push(-1);
-
-        if (options.color) 
-            options.color.forEach(c => topColors.push(c));
-
-        topUvs.push((x + 1) * 0.5);
-        topUvs.push((y + 1) * 0.5);
-
-        topNormals.push(x);
-        topNormals.push(y);
-        topNormals.push(-1);
-
-        side.push(x);
-        side.push(y);
-        side.push(-1);
-        side.push(x);
-        side.push(y);
-        side.push(1);
-
-        if (options.color) {
-            options.color.forEach(c => sideColors.push(c));
-            options.color.forEach(c => sideColors.push(c));
+        const push = function(x, y,  z) {
+            verticies.push(x);
+            verticies.push(y);
+            verticies.push(z);
+            if (color) color.forEach(c => colors.push(c));
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
         }
 
-        sideUvs.push((x + 1) * 0.5);
-        sideUvs.push((y + 1) * 0.5);
-        sideUvs.push((x + 1) * 0.5);
-        sideUvs.push((y + 1) * 0.5);
+        for (let s = 0; s < sideFacets; s++) {
+            const f0 = s / sideFacets;
+            const f1 = (s + 1) / sideFacets;
+            const z0 = 1 - 2 * f0;
+            const z1 = 1 - 2 * f1;
+            const radius0 = radiusDelta * f0 + bottomRadius;
+            const radius1 = radiusDelta * f1 + bottomRadius;
+            for (let i = 0; i <= endFacets; i++) {
+                const angle = i * step;
+                const x = Math.sin(angle);
+                const y = Math.cos(angle);
 
-        sideNormals.push(x);
-        sideNormals.push(y);
-        sideNormals.push(0);
-        sideNormals.push(x);
-        sideNormals.push(y);
-        sideNormals.push(0);
+                push(x * radius0, y * radius0, z0);
+                push(x * radius1, y * radius1, z1);
+            }
+            push(0, radius1, z1);
+            mesh.addTriangleStrip(verticies, colors, uvs);
+        }
     }
 
-    for (var i = 0; i <= facets; i++) {
-        const angle = i * step;
-        const x = Math.sin(angle);
-        const y = Math.cos(angle);
-
-        bottom.push(x);
-        bottom.push(y);
-        bottom.push(1);
-
-        if (options.color) 
-            options.color.forEach(c => bottomColors.push(c));
-
-        bottomUvs.push((x + 1) * 0.5);
-        bottomUvs.push((y + 1) * 0.5);
-
-        bottomNormals.push(x);
-        bottomNormals.push(y);
-        bottomNormals.push(1);
-    }
-
-    side.push(0);
-    side.push(1);
-    side.push(1);
+    if (drawTop) {
+        const verticies = [0, 0, -1];
+        const uvs = [0.5, 0.5];
+        const normals = [0, 0, -1];
+        const colors = color ? Array.from(color) : undefined;
     
-    if (options.color) 
-        options.color.forEach(c => sideColors.push(c));
+        for (let i = 0; i <= endFacets; i++) {
+            const angle = -i * step;
+            const x = Math.sin(angle);
+            const y = Math.cos(angle);
 
-    sideUvs.push(0.5);
-    sideUvs.push(1);
+            verticies.push(x * topRadius);
+            verticies.push(y * topRadius);
+            verticies.push(-1);
 
-    sideNormals.push(0);
-    sideNormals.push(1);
-    sideNormals.push(0);
+            if (color) color.forEach(c => colors.push(c));
 
-    return window.frag.Mesh(engine)
-        .addTriangleFan(top, topColors, topUvs, topNormals)
-        .addTriangleFan(bottom, bottomColors, bottomUvs, bottomNormals)
-        .addTriangleStrip(side, sideColors, sideUvs, sideNormals);
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
+
+            normals.push(x);
+            normals.push(y);
+            normals.push(-1);
+        }
+        mesh.addTriangleFan(verticies, colors, uvs, normals);
+    }
+
+    if (drawBottom) {
+        const verticies = [0, 0, 1];
+        const uvs = [0.5, 0.5];
+        const normals = [0, 0, 1];
+        const colors = color ? Array.from(color) : undefined;
+
+        for (let i = 0; i <= endFacets; i++) {
+            const angle = i * step;
+            const x = Math.sin(angle);
+            const y = Math.cos(angle);
+
+            verticies.push(x * bottomRadius);
+            verticies.push(y * bottomRadius);
+            verticies.push(1);
+
+            if (color) color.forEach(c => colors.push(c));
+
+            uvs.push((x + 1) * 0.5);
+            uvs.push((y + 1) * 0.5);
+
+            normals.push(x);
+            normals.push(y);
+            normals.push(1);
+        }
+        mesh.addTriangleFan(verticies, colors, uvs, normals);
+    }
+
+    return mesh;
 };
+
 
 /***/ }),
 
@@ -7808,11 +7834,16 @@ window.frag.Cylinder = function (engine, facets, options) {
 
 window.frag.Disc = function (engine, facets, options) {
     facets = facets || 32;
-    options = options || {};
+    let color;
+
+    if (options) {
+        if (options.color !== undefined) color = options.color;
+    }
 
     const verticies = [0, 0, 0];
     const uvs = [0.5, 0.5];
     const normals = [0, 0, -1];
+    const colors = color ? Array.from(color) : undefined;
 
     const step = Math.PI * 2 / facets;
 
@@ -7824,6 +7855,8 @@ window.frag.Disc = function (engine, facets, options) {
         verticies.push(x);
         verticies.push(y);
         verticies.push(0);
+        
+        if (color) color.forEach(c => colors.push(c));
 
         normals.push(0);
         normals.push(0);
@@ -7833,7 +7866,7 @@ window.frag.Disc = function (engine, facets, options) {
         uvs.push((y + 1) * 0.5);
     }
 
-    return window.frag.Mesh(engine).addTriangleFan(verticies, uvs, normals);
+    return window.frag.Mesh(engine).addTriangleFan(verticies, colors, uvs, normals);
 };
 
 /***/ }),
@@ -7918,35 +7951,53 @@ window.frag.Plane = function (engine, facets, options) {
 /***/ (() => {
 
 // This sphere consists of a single sub-mesh so that smooth shading works correctly
-window.frag.Sphere = function (engine, facets, options) {
-    if (facets === undefined) facets = 12;
-    if (facets < 2) facets = 2;
+window.frag.Sphere = function (engine, latitudeFacets, options) {
+    if (latitudeFacets === undefined) latitudeFacets = 12;
+    let longitudeFacets = latitudeFacets * 2;
 
-    options = options || {};
-    if (options.latitudeStart === undefined) options.latitudeStart = 0;
-    if (options.latitudeLength === undefined) options.latitudeLength = Math.PI;
-    if (options.longitudeStart === undefined) options.longitudeStart = 0;
-    if (options.longitudeLength === undefined) options.longitudeLength = 2 * Math.PI;
-    if (options.longitudeFacets === undefined) options.longitudeFacets = facets;
-    if (options.longitudeFacets < 3) options.longitudeFacets = 3;
+    let latitudeStart = 0;
+    let latitudeLength = Math.PI;
+    
+    let longitudeStart = 0;
+    let longitudeLength = 2 * Math.PI;
+
+    let color;
+
+    if (options) {
+        if (options.latitudeStart !== undefined) latitudeStart = options.latitudeStart;
+        if (options.latitudeLength !== undefined) latitudeLength = options.latitudeLength;
+        if (options.latitudeFacets !== undefined) latitudeFacets = options.latitudeFacets;
+
+        if (options.longitudeStart !== undefined) longitudeStart = options.longitudeStart;
+        if (options.longitudeLength !== undefined) longitudeLength = options.longitudeLength;
+        if (options.longitudeFacets !== undefined) longitudeFacets = options.longitudeFacets;
+
+        if (options.color !== undefined) color = options.color;
+    }
+
+    if (latitudeFacets < 2) latitudeFacets = 2;
+    if (longitudeFacets < 3) longitudeFacets = 3;
+    if (latitudeStart < 0) latitudeStart = 0;
+    if (latitudeStart + latitudeLength > Math.PI) latitudeLength = Math.PI - latitudeStart;
+    if (longitudeLength > 2 * Math.PI) longitudeLength = 2 * Math.PI;
 
     const verticies = [];
     const uvs = [];
 
-    for (let iy = 0; iy <= facets; iy++) {
-        const v = iy / facets;
+    for (let iy = 0; iy <= latitudeFacets; iy++) {
+        const v = iy / latitudeFacets;
         let uOffset = 0;
-        if (iy === 0 && options.latitudeStart === 0)
-            uOffset = 0.5 / options.longitudeFacets;
-        else if (iy === facets && (options.latitudeStart + options.latitudeLength) === Math.PI)
-            uOffset = -0.5 / options.longitudeFacets;
+        if (iy === 0 && latitudeStart === 0)
+            uOffset = 0.5 / longitudeFacets;
+        else if (iy === latitudeFacets && (latitudeStart + latitudeLength) === Math.PI)
+            uOffset = -0.5 / longitudeFacets;
 
-        for (ix = 0; ix <= options.longitudeFacets; ix++) {
-            const u = ix / options.longitudeFacets;
+        for (ix = 0; ix <= longitudeFacets; ix++) {
+            const u = ix / longitudeFacets;
             vertex = {
-                x: Math.cos(options.longitudeStart + u * options.longitudeLength) * Math.sin(options.latitudeStart + v * options.latitudeLength),
-                y: Math.cos(options.latitudeStart + v * options.latitudeLength),
-                z: Math.sin(options.longitudeStart + u * options.longitudeLength) * Math.sin(options.latitudeStart + v * options.latitudeLength)
+                x: Math.cos(longitudeStart + u * longitudeLength) * Math.sin(latitudeStart + v * latitudeLength),
+                y: Math.cos(latitudeStart + v * latitudeLength),
+                z: Math.sin(longitudeStart + u * longitudeLength) * Math.sin(latitudeStart + v * latitudeLength)
             };
             verticies.push(vertex);
             uvs.push({ u, v });
@@ -7954,7 +8005,7 @@ window.frag.Sphere = function (engine, facets, options) {
     }
 
     const triangleVerticies = [];
-    const triangleColors = options.color ? [] : undefined;
+    const triangleColors = color ? [] : undefined;
     const triangleUvs = [];
 
     const addVertex = function(index) {
@@ -7967,7 +8018,7 @@ window.frag.Sphere = function (engine, facets, options) {
         triangleUvs.push(uv.u);
         triangleUvs.push(uv.v);
 
-        if (options.color) options.color.forEach(c => { triangleColors.push(c); });
+        if (color) color.forEach(c => { triangleColors.push(c); });
     }
 
     const addTriangle = function(ia, ib, ic) {
@@ -7976,13 +8027,13 @@ window.frag.Sphere = function (engine, facets, options) {
         addVertex(ic);
     }
 
-    for (let iy = 0; iy < facets; iy++) {
-        const r0 = iy * (options.longitudeFacets + 1);
-        const r1 = (iy + 1) * (options.longitudeFacets + 1);
-        for (let ix = 0; ix < options.longitudeFacets; ix++) {
-            if (iy !== 0 || options.latitudeStart > 0)
+    for (let iy = 0; iy < latitudeFacets; iy++) {
+        const r0 = iy * (longitudeFacets + 1);
+        const r1 = (iy + 1) * (longitudeFacets + 1);
+        for (let ix = 0; ix < longitudeFacets; ix++) {
+            if (iy !== 0 || latitudeStart > 0)
                 addTriangle(r0 + ix + 1, r0 + ix, r1 + ix + 1);
-            if (iy !== facets - 1 || (options.latitudeStart + options.latitudeLength) < Math.PI)
+            if (iy !== latitudeFacets - 1 || (latitudeStart + latitudeLength) < Math.PI)
                 addTriangle(r0 + ix, r1 + ix, r1 + ix + 1);
         }
     }
