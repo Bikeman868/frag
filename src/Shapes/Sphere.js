@@ -38,7 +38,7 @@ window.frag.Sphere = function (engine, facets, options) {
     const triangleColors = options.color ? [] : undefined;
     const triangleUvs = [];
 
-    const addTriangleVertex = function(index) {
+    const addVertex = function(index) {
         const vertex = verticies[index];
         triangleVerticies.push(vertex.x);
         triangleVerticies.push(vertex.y);
@@ -52,9 +52,9 @@ window.frag.Sphere = function (engine, facets, options) {
     }
 
     const addTriangle = function(ia, ib, ic) {
-        addTriangleVertex(ia);
-        addTriangleVertex(ib);
-        addTriangleVertex(ic);
+        addVertex(ia);
+        addVertex(ib);
+        addVertex(ic);
     }
 
     for (let iy = 0; iy < facets; iy++) {

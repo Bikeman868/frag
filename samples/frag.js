@@ -7875,49 +7875,38 @@ window.frag.Plane = function (engine, facets, options) {
     const normals = [];
     const colors = options.color ? [] : undefined;
 
-    const add = function (x, y) {
-        verticies.push(x);
-        verticies.push(y);
+    const add = function (u, v) {
+        verticies.push(u * 2 - 1);
+        verticies.push(v * 2 - 1);
         verticies.push(0);
 
         if (options.color)
             options.color.forEach(c => colors.push(c));
 
-        uvs.push((x + 1) * 0.5);
-        uvs.push((y + 1) * 0.5);
+        uvs.push(u);
+        uvs.push(v);
 
         normals.push(0);
         normals.push(0);
         normals.push(-1);
     }
 
-    for (var row = 0; row < facets; row++) {
-        const y0 = (facets - row - 1) * 2 / facets - 1;
-        const y1 = (facets - row) * 2 / facets - 1;
-        const evenRow = (row & 1) === 0;
-
-        if (evenRow) {
-            add(1, y0);
-            for (var column = 0; column < facets; column++) {
-                const x0 = (facets - column - 1) * 2 / facets - 1;
-                const x1 = (facets - column) * 2 / facets - 1;
-                add(x1, y1);
-                add(x0, y0);
-            }
-            add(-1, y1);
-        } else {
-            add(-1, y1);
-            for (var column = 0; column < facets; column++) {
-                const x0 = column * 2 / facets - 1;
-                const x1 = (column + 1) * 2 / facets - 1;
-                add(x0, y0);
-                add(x1, y1);
-            }
-            add(1, y0);
+    for (let row = 0; row < facets; row++) {
+        const v0 = row / facets;
+        const v1 = (row + 1) / facets;
+        for (let column = 0; column < facets; column++) {
+            const u0 = column / facets;
+            const u1 = (column + 1) / facets;
+            add(u0, v0);
+            add(u1, v0);
+            add(u1, v1);
+            add(u0, v0);
+            add(u1, v1);
+            add(u0, v1);
         }
     }
 
-    return window.frag.Mesh(engine).addTriangleStrip(verticies, colors, uvs, normals);
+    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs, normals);
 };
 
 /***/ }),
@@ -7968,7 +7957,7 @@ window.frag.Sphere = function (engine, facets, options) {
     const triangleColors = options.color ? [] : undefined;
     const triangleUvs = [];
 
-    const addTriangleVertex = function(index) {
+    const addVertex = function(index) {
         const vertex = verticies[index];
         triangleVerticies.push(vertex.x);
         triangleVerticies.push(vertex.y);
@@ -7982,9 +7971,9 @@ window.frag.Sphere = function (engine, facets, options) {
     }
 
     const addTriangle = function(ia, ib, ic) {
-        addTriangleVertex(ia);
-        addTriangleVertex(ib);
-        addTriangleVertex(ic);
+        addVertex(ia);
+        addVertex(ib);
+        addVertex(ic);
     }
 
     for (let iy = 0; iy < facets; iy++) {
