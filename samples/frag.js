@@ -461,7 +461,7 @@ window.frag.ObjectAnimationState = function (engine) {
   \***************************************************/
 /***/ (() => {
 
-window.frag.ParallelAnimationAction = function (engine, [actions]) {
+window.frag.ParallelAnimationAction = function (engine, actions) {
     const private = {
         actions
     };
@@ -7923,10 +7923,10 @@ window.frag.Sphere = function (engine, facets, options) {
     if (facets < 2) facets = 2;
 
     options = options || {};
-    if (options.startLatitude === undefined) options.latitudeStart = 0;
-    if (options.endLatitude === undefined) options.latitudeLength = Math.PI;
-    if (options.startLongitude === undefined) options.longitudeStart = 0;
-    if (options.endLongitude === undefined) options.longitudeLength = 2 * Math.PI;
+    if (options.latitudeStart === undefined) options.latitudeStart = 0;
+    if (options.latitudeLength === undefined) options.latitudeLength = Math.PI;
+    if (options.longitudeStart === undefined) options.longitudeStart = 0;
+    if (options.longitudeLength === undefined) options.longitudeLength = 2 * Math.PI;
     if (options.longitudeFacets === undefined) options.longitudeFacets = facets;
     if (options.longitudeFacets < 3) options.longitudeFacets = 3;
 
@@ -7977,8 +7977,8 @@ window.frag.Sphere = function (engine, facets, options) {
     }
 
     for (let iy = 0; iy < facets; iy++) {
-        const r0 = iy * (facets + 1);
-        const r1 = (iy + 1) * (facets + 1);
+        const r0 = iy * (options.longitudeFacets + 1);
+        const r1 = (iy + 1) * (options.longitudeFacets + 1);
         for (let ix = 0; ix < options.longitudeFacets; ix++) {
             if (iy !== 0 || options.latitudeStart > 0)
                 addTriangle(r0 + ix + 1, r0 + ix, r1 + ix + 1);
