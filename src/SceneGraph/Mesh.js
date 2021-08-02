@@ -285,80 +285,79 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
-    private.drawFragmentPosition = function(shader, fragment) {
+    private.bindFragmentPosition = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.position >= 0) {
             if (fragment.vertexDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.position)
                 gl.vertexAttribPointer(shader.attributes.position, fragment.renderData.vertexDimensions, gl.FLOAT, false, 0, fragment.vertexDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.position)
+                gl.enableVertexAttribArray(shader.attributes.position)
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.position)} );
             }
         }
     }
 
-    private.drawFragmentColor = function(shader, fragment) {
+    private.bindFragmentColor = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.color >= 0) {
             if (fragment.colorDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.color)
                 gl.vertexAttribPointer(shader.attributes.color, fragment.renderData.colorDimensions, gl.FLOAT, false, 0, fragment.colorDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.color)
+                gl.enableVertexAttribArray(shader.attributes.color)
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.color)} );
             }
         }
     }
 
-    private.drawFragmentTexture = function(shader, fragment) {
+    private.bindFragmentTexture = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.texcoord >= 0) {
             if (fragment.uvDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.texcoord);
                 gl.vertexAttribPointer(shader.attributes.texcoord, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.texcoord)
+                gl.enableVertexAttribArray(shader.attributes.texcoord);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.texcoord)} );
             }
         }
     }
 
-    private.drawFragmentNormals = function(shader, fragment) {
+    private.bindFragmentNormals = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.normal >= 0) {
             if (fragment.normalDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.normal);
                 gl.vertexAttribPointer(shader.attributes.normal, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.normalDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.normal)
+                gl.enableVertexAttribArray(shader.attributes.normal);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.normal)} );
             }
         }
     }
 
-    private.drawFragmentTangents = function(shader, fragment) {
+    private.bindFragmentTangents = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.tangent >= 0) {
             if (fragment.tangentDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.tangent);
                 gl.vertexAttribPointer(shader.attributes.tangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.tangentDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.tangent)
+                gl.enableVertexAttribArray(shader.attributes.tangent);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.tangent)} );
             }
         }
     }
 
-    private.drawFragmentBitangents = function(shader, fragment) {
+    private.bindFragmentBitangents = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.bitangent >= 0) {
             if (fragment.bitangentDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.bitangent);
                 gl.vertexAttribPointer(shader.attributes.bitangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.bitangentDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.bitangent)
+                gl.enableVertexAttribArray(shader.attributes.bitangent);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.bitangent)} );
             }
         }
     }
 
     private.drawFragment = function(shader, fragment) {
-        private.drawFragmentPosition(shader, fragment);
-        private.drawFragmentColor(shader, fragment);
-        private.drawFragmentTexture(shader, fragment);
-        private.drawFragmentNormals(shader, fragment);
-        private.drawFragmentTangents(shader, fragment);
-        private.drawFragmentBitangents(shader, fragment);
+        const unbindFuncs = [];
+
+        private.bindFragmentPosition(shader, fragment, unbindFuncs);
+        private.bindFragmentColor(shader, fragment, unbindFuncs);
+        private.bindFragmentTexture(shader, fragment, unbindFuncs);
+        private.bindFragmentNormals(shader, fragment, unbindFuncs);
+        private.bindFragmentTangents(shader, fragment, unbindFuncs);
+        private.bindFragmentBitangents(shader, fragment, unbindFuncs);
+
         gl.drawArrays(fragment.renderData.primitiveType, 0, fragment.renderData.vertexCount);
+
+        for (let i = 0; i < unbindFuncs.length; i++) unbindFuncs[i]();
     }
 
     public.draw = function (shader) {

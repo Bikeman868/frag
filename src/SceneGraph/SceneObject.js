@@ -147,11 +147,10 @@ window.frag.SceneObject = function (engine, model) {
      */
     public.dispose = function() {
         public.disable();
-        if (private.parent) private.parent.removeObject(sceneObject);
+        if (public.parent) public.parent.removeObject(public);
         for (let animationName in public.animations) {
             public.animations[animationName].dispose();
         }
-        return public;
     }
 
     /**

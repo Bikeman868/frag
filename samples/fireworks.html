@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+<head>
+    <title>Fireorks</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #scene {
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='scene'></canvas>
+    <script src='frag.js'></script>
+    <script>
+        const frag = window.frag;
+        const engine = frag.Engine({
+            debugParticles: true
+        })
+        .start();
+
+        const degToRad = Math.PI / 180;
+
+        const camera = frag.FrustumCamera(engine).frustum(50, 50, 500);
+        camera.getPosition().locationZ(-150).locationY(-25);
+        const scene = frag.Scene(engine).camera(camera);
+        engine.mainScene(scene);
+
+        const r = function(range, mid) {
+            mid = mid || 0;
+            return mid + range * (Math.random() - 0.5);
+        };
+
+        const particleEmitter = {
+            birthParticles: function(particleSystem, gameTick) {
+                particleSystem.addParticles([{
+                    lifetime: r(100, 500),
+                    frameStart: 0,
+                    startTime: 0,
+                    startSize: 50,
+                    endSize: 10,
+                    spinStart: 0,
+                    spinSpeed: 0,
+                    position: [r(5), 0, r(5)],
+                    velocity: [r(5), r(20, 100), r(5)],
+                    acceleration: [0, r(5, -10), 0],
+                }, {
+                    lifetime: r(100, 500),
+                    frameStart: 0,
+                    startTime: 0,
+                    startSize: 50,
+                    endSize: 10,
+                    spinStart: 0,
+                    spinSpeed: 0,
+                    position: [r(5), 0, r(5)],
+                    velocity: [r(5), r(10, 60), r(5)],
+                    acceleration: [0, r(2, -6), 0],
+                }]);
+            },
+            deadParticles: function(particleSystem, gameTick) {
+                return [Math.floor(Math.random() * 2)];
+            }
+        };
+
+        const particleSystem = engine.CustomParticleSystem();
+        particleSystem.getPosition().locationXYZ(0, 0, 0);
+        scene.addObject(particleSystem);
+
+        particleSystem.addEmitter(particleEmitter);
+    </script>
+</body>

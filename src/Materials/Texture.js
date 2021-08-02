@@ -101,7 +101,7 @@ window.frag.Texture = function (engine) {
         return public;
     }
 
-    public.update = function (width, height) {
+    public.update = function (width, height, gameTick) {
         if (!private.scene) return public;
         
         if (width !== undefined && height !== undefined) {
@@ -114,7 +114,7 @@ window.frag.Texture = function (engine) {
         gl.viewport(0, 0, private.width, private.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         private.scene.adjustToViewport();
-        private.scene.draw(frag.DrawContext(engine).forRender());
+        private.scene.draw(frag.DrawContext(engine).forRender(gameTick));
 
         return public;
     }

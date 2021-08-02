@@ -129,9 +129,10 @@ a uniform variable within the vertex shader or fragment shader program. This var
 within your shader code must match the `name` parameter with a `u_` prefix. See the 
 example above to see how this works.
 
-If you pass a `glType` parameter then a function will be added to the shader that sets
-the value of this uniform. The `glType` string defines a data type that must match the
-data type of the uniform variable in your shader code.
+If you pass a `glType` parameter then a function will be added to the shader with
+the same name as the uniform, that sets the value of this uniform. The `glType` 
+string defines a data type that must match the data type of the uniform variable
+in your shader code.
 
 The first character of `glType` is a number between 1 and 4 that specifies how many 
 dimensions there are to the value. For example if this was a r, g, b color value you
@@ -150,7 +151,7 @@ Other parts of the Frag framework look for uniforms with specific names and bind
 certain kinds of information to them. If you want your shader to work with the 
 framework you must use this naming convention.
 
-Uniforms are bound to static values that ate the same for every vertex
+Uniforms are bound to static values that are the same for every vertex
 in the model and every pixel that that is drawn to the screen.
 
 The standard uniform names are:

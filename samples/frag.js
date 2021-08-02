@@ -1199,6 +1199,7 @@ window.frag.Engine = function(config) {
         debugAnimations: config.debugAnimations === undefined ? false : config.debugAnimations,
         debugMeshes: config.debugMeshes === undefined ? false : config.debugMeshes,
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
+        debugParticles: config.debugParticles === undefined ? false : config.debugParticles,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }
@@ -1383,7 +1384,7 @@ window.frag.Engine = function(config) {
         private.mainScene.setViewport();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        const drawContext = frag.DrawContext(public).forRender();
+        const drawContext = frag.DrawContext(public).forRender(private.gameTick);
         private.mainScene.draw(drawContext);
 
         for (let i = 0; i < private.scenes.length; i++) {
@@ -1522,6 +1523,8 @@ window.frag.Engine = function(config) {
     addProxy('DigitalAction');
     addProxy('AnalogAction');
     
+    addProxy('CustomParticleSystem');
+
     return public;
 };
 
@@ -4235,7 +4238,7 @@ window.frag.Texture = function (engine) {
         return public;
     }
 
-    public.update = function (width, height) {
+    public.update = function (width, height, gameTick) {
         if (!private.scene) return public;
         
         if (width !== undefined && height !== undefined) {
@@ -4248,7 +4251,7 @@ window.frag.Texture = function (engine) {
         gl.viewport(0, 0, private.width, private.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         private.scene.adjustToViewport();
-        private.scene.draw(frag.DrawContext(engine).forRender());
+        private.scene.draw(frag.DrawContext(engine).forRender(gameTick));
 
         return public;
     }
@@ -4597,6 +4600,83 @@ window.frag.Matrix = {
 
 /***/ }),
 
+/***/ "./src/Math/Quaternion.js":
+/*!********************************!*\
+  !*** ./src/Math/Quaternion.js ***!
+  \********************************/
+/***/ (() => {
+
+window.frag = window.frag || {};
+window.frag.Quaternion = {
+    // Returns a quaternion that rotates around the X-axis
+    rotationX: function(angle) {
+        return [Math.sin(angle / 2), 0, 0, Math.cos(angle / 2)];
+    },
+    // Returns a quaternion that rotates around the Y-axis
+    rotationY: function(angle) {
+        return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
+    },
+    // Returns a quaternion that rotates around the Z-axis
+    rotationZ: function(angle) {
+        return [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)];
+    },
+    // Creates a quaternion which rotates around the given axis by the given angle.
+    axisRotation: function(axis, angle) {
+        var d = 1 / Math.sqrt(axis[0] * axis[0] +
+                              axis[1] * axis[1] +
+                              axis[2] * axis[2]);
+        var sin = Math.sin(angle / 2);
+        var cos = Math.cos(angle / 2);
+        return [sin * axis[0] * d, sin * axis[1] * d, sin * axis[2] * d, cos];
+    },
+    // Returns a unit length quaternion
+    normalize: function(q) {
+        var d = 1 / Math.sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+        return [q[0] * d, q[1] * d, q[2] * d, q[3] * d];
+    },
+    // Computes a 4x4 matrix that performs a Quaternion rotation
+    toMatrix: function(q) {
+        var qX = q[0];
+        var qY = q[1];
+        var qZ = q[2];
+        var qW = q[3];
+      
+        var qWqW = qW * qW;
+        var qWqX = qW * qX;
+        var qWqY = qW * qY;
+        var qWqZ = qW * qZ;
+        var qXqW = qX * qW;
+        var qXqX = qX * qX;
+        var qXqY = qX * qY;
+        var qXqZ = qX * qZ;
+        var qYqW = qY * qW;
+        var qYqX = qY * qX;
+        var qYqY = qY * qY;
+        var qYqZ = qY * qZ;
+        var qZqW = qZ * qW;
+        var qZqX = qZ * qX;
+        var qZqY = qZ * qY;
+        var qZqZ = qZ * qZ;
+      
+        var d = qWqW + qXqX + qYqY + qZqZ;
+      
+        return [
+          [(qWqW + qXqX - qYqY - qZqZ) / d,
+           2 * (qWqZ + qXqY) / d,
+           2 * (qXqZ - qWqY) / d, 0],
+          [2 * (qXqY - qWqZ) / d,
+           (qWqW - qXqX + qYqY - qZqZ) / d,
+           2 * (qWqX + qYqZ) / d, 0],
+          [2 * (qWqY + qXqZ) / d,
+           2 * (qYqZ - qWqX) / d,
+           (qWqW - qXqX - qYqY + qZqZ) / d, 0],
+          [0, 0, 0, 1]];
+      },
+}
+
+
+/***/ }),
+
 /***/ "./src/Math/Triangle.js":
 /*!******************************!*\
   !*** ./src/Math/Triangle.js ***!
@@ -4801,6 +4881,353 @@ window.frag.Vector = {
 
 /***/ }),
 
+/***/ "./src/Particles/CustomParticleSystem.js":
+/*!***********************************************!*\
+  !*** ./src/Particles/CustomParticleSystem.js ***!
+  \***********************************************/
+/***/ (() => {
+
+window.frag.CustomParticleSystem = function (engine, is3d, shader) {
+    if (shader !== undefined) is3d = shader.is3d;
+    if (is3d === undefined) is3d = true;
+
+    const frag = window.frag;
+    const gl = engine.gl;
+
+    const UV_LIFE_TIME_FRAME_START_IDX = 0;
+    const POSITION_START_TIME_IDX = 4;
+    const VELOCITY_START_SIZE_IDX = 8;
+    const ACCELERATION_END_SIZE_IDX = 12;
+    const SPIN_START_SPIN_SPEED_IDX = 16;
+    const ORIENTATION_IDX = 20;
+    const COLOR_MULT_IDX = 24;
+    const LAST_IDX = 28;
+
+    const VERTEX_COUNT_PER_PARTICLE = 4; // 4 corners
+    const INDEX_COUNT_PER_PARTICLE = 6;  // 2 triangles
+    
+    const private = {
+        name: "Custom",
+        shader: shader || (is3d ? frag.ParticleShader3D(engine) : frag.ParticleShader2D(engine)),
+        location: window.frag.Location(engine, is3d),
+        emitters: [],
+        particleBuffer: gl.createBuffer(),
+        indexBuffer: gl.createBuffer(),
+        particles: [],
+        aliveCount: 0,
+        bufferedCount: 0,
+        nextEmitterId: 0,
+        velocity: [0, 0, 0],
+        acceleration: [0, 0, 0],
+        timeRange: 99999999,
+        timeOffset: 0,
+        numFrames: 1,
+        frameDuration: 1,
+    };
+
+    const public = {
+        __private: private,
+        parent: null,
+    }
+
+    const corners = [
+        [-0.5, -0.5],
+        [+0.5, -0.5],
+        [+0.5, +0.5],
+        [-0.5, +0.5]];
+
+    private.populateParticleBuffer = function(particle, buffer, offset) {
+        let offset0 = offset;
+        let offset1 = offset + 1;
+        let offset2 = offset + 2;
+        let offset3 = offset + 3;
+
+        for (let i = 0; i < VERTEX_COUNT_PER_PARTICLE; i++) {
+            buffer[offset0 + UV_LIFE_TIME_FRAME_START_IDX] = corners[i][0];
+            buffer[offset1 + UV_LIFE_TIME_FRAME_START_IDX] = corners[i][1];
+            buffer[offset2 + UV_LIFE_TIME_FRAME_START_IDX] = particle.lifetime;
+            buffer[offset3 + UV_LIFE_TIME_FRAME_START_IDX] = particle.frameStart;
+
+            buffer[offset0 + POSITION_START_TIME_IDX] = particle.position[0];
+            buffer[offset1 + POSITION_START_TIME_IDX] = particle.position[1];
+            buffer[offset2 + POSITION_START_TIME_IDX] = particle.position[2];
+            buffer[offset3 + POSITION_START_TIME_IDX] = particle.startTime;
+
+            buffer[offset0 + VELOCITY_START_SIZE_IDX] = particle.velocity[0];
+            buffer[offset1 + VELOCITY_START_SIZE_IDX] = particle.velocity[1];
+            buffer[offset2 + VELOCITY_START_SIZE_IDX] = particle.velocity[2];
+            buffer[offset3 + VELOCITY_START_SIZE_IDX] = particle.startSize;
+
+            buffer[offset0 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[0];
+            buffer[offset1 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[1];
+            buffer[offset2 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[2];
+            buffer[offset3 + ACCELERATION_END_SIZE_IDX] = particle.endSize;
+
+            buffer[offset0 + ACCELERATION_END_SIZE_IDX] = particle.spinStart;
+            buffer[offset1 + ACCELERATION_END_SIZE_IDX] = particle.spinSpeed;
+            buffer[offset2 + ACCELERATION_END_SIZE_IDX] = 0;
+            buffer[offset3 + ACCELERATION_END_SIZE_IDX] = 0;
+
+            offset0 += LAST_IDX;
+            offset1 += LAST_IDX;
+            offset2 += LAST_IDX;
+            offset3 += LAST_IDX;
+        }
+    }
+
+    // Copies a range of particles indexes to the GPU based on their array index
+    private.bufferParticleRange = function(startIndex, particleCount) {
+        const particleFloatCount = LAST_IDX * VERTEX_COUNT_PER_PARTICLE;
+        const buffer = new Float32Array(particleFloatCount * particleCount);
+        let offset = 0;
+        for (let i = startIndex; i < startIndex + particleCount; i++) {
+            private.populateParticleBuffer(private.particles[i], buffer, offset);
+            offset += particleFloatCount;
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, buffer.particleFloatCount * buffer.BYTES_PER_ELEMENT * startIndex, buffer);
+    }
+
+    // Copies a list of changed particles to the GPU based on their array indexes
+    // Only works if the buffer in the GPU is big enough, ie number of particles 
+    // is the same or less
+    private.bufferSpecificParticles = function(particleIndexes) {
+        particleIndexes.sort(function(a, b) { return a - b; });
+        let rangeStart = 0;
+        let rangeCount = 0;
+        for (let i = 0; i < particleIndexes.length; i++) {
+            const index = particleIndexes[i];
+            if (i > 0 && index !== particleIndexes[i - 1]) {
+                if (rangeCount > 0) {
+                    private.bufferParticleRange(rangeStart, rangeCount);
+                    rangeCount = 0;
+                }
+            }
+            if (rangeCount === 0) {
+                rangeStart = index;
+                rangeCount = 1;
+            } else {
+                rangeCount++;
+            }
+        }
+        if (rangeCount > 0) private.bufferParticleRange(rangeStart, rangeCount);
+    }
+
+    // Copies all particles to the GPU. You must do this if the number of particles increases
+    private.bufferAllParticles = function() {
+        const particleFloatCount = LAST_IDX * VERTEX_COUNT_PER_PARTICLE;
+        const buffer = new Float32Array(particleFloatCount * private.aliveCount);
+        let offset = 0;
+        for (let i = 0; i < private.aliveCount; i++) {
+            private.populateParticleBuffer(private.particles[i], buffer, offset);
+            offset += particleFloatCount;
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);
+    }
+
+    // Creates an index that maps the 4 corners of each particle onto 2 triangles. This 
+    // needs to be done if the number of particles changes at all.
+    private.bufferIndexes = function() {
+        if (private.bufferedCount === private.aliveCount) return;
+
+        var indices = new Uint16Array(INDEX_COUNT_PER_PARTICLE * private.aliveCount);
+        var idx = 0;
+        var vertexStart = 0;
+        for (let i = 0; i < private.aliveCount; i++) {
+            indices[idx++] = vertexStart + 0;
+            indices[idx++] = vertexStart + 1;
+            indices[idx++] = vertexStart + 2;
+            indices[idx++] = vertexStart + 0;
+            indices[idx++] = vertexStart + 2;
+            indices[idx++] = vertexStart + 3;
+            vertexStart += VERTEX_COUNT_PER_PARTICLE;
+        }
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+        private.bufferedCount = private.aliveCount;
+    }
+
+    public.dispose = function () {
+        public.disable();
+        if (public.parent) public.parent.removeObject(public);
+        if (private.particleBuffer) {
+            gl.deleteBuffer(private.particleBuffer);
+            private.particleBuffer = null;
+        }
+        if (private.indexBuffer) {
+            gl.deleteBuffer(private.indexBuffer);
+            private.indexBuffer = null;
+        }
+    }
+
+    public.name = function (name) {
+        private.name = name;
+        return public;
+    }
+
+    public.getName = function () {
+        return private.name;
+    }
+
+    public.getPosition = function() {
+        if (!private.position) 
+            private.position = frag.ScenePosition(engine, private.location);
+        return private.position;
+    }
+
+    public.enable = function () {
+        private.enabled = true;
+        return public;
+    };
+
+    public.disable = function () {
+        private.enabled = false;
+        return public;
+    };
+
+    public.rampTexture = function(texture) {
+        private.rampTexture = texture;
+        return public;
+    }
+
+    public.colorTexture = function(texture) {
+        private.colorTexture = texture;
+        return public;
+    }
+
+    public.addEmitter = function(emitter) {
+        emitter.id = private.nextEmitterId++;
+        private.emitters.push(emitter);
+        return public;
+    }
+
+    public.removeEmitter = function(emitter) {
+        for (let i = 0; i < private.emitters.length; i++) {
+            if (private.emitters[i] === emitter) {
+                private.emitters.splice(i, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public.addParticles = function(particles) {
+        for (let i = 0; i < particles.length; i++) {
+            private.particles.push(particles[i]);
+        }
+        private.aliveCount = private.particles.count;
+    }
+
+    private.draw = function(drawContext) {
+        const shader = private.shader;
+        shader.bind();
+
+        private.rampTexture.apply('rampSampler', shader);
+        private.colorTexture.apply('colorSampler', shader);
+
+        if (shader.uniforms.clipMatrix !== undefined) {
+            frag.Transform(engine, drawContext.state.modelToClipMatrix)
+                .apply(shader.uniforms.clipMatrix);
+        }
+
+        if (shader.uniforms.modelMatrix !== undefined) {
+            frag.Transform(engine, drawContext.state.modelToWorldMatrix)
+                .apply(shader.uniforms.modelMatrix);
+        }
+
+        if (shader.uniforms.clipMatrixInverse !== undefined) {
+            frag.Transform(engine, frag.Matrix.m4Invert(drawContext.state.modelToClipMatrix))
+                .apply(shader.uniforms.clipMatrixInverse);
+        }
+    
+        if (shader.time !== undefined) shader.time(drawContext.gameTick);
+
+        if (shader.velocity !== undefined) shader.velocity(private.velocity);
+        if (shader.acceleration !== undefined) shader.acceleration(private.acceleration);
+        if (shader.timeRange !== undefined) shader.timeRange(private.timeRange);
+        if (shader.timeOffset !== undefined) shader.timeOffset(private.timeOffset);
+        if (shader.numFrames !== undefined) shader.numFrames(private.numFrames);
+        if (shader.frameDuration !== undefined) shader.frameDuration(private.frameDuration);
+
+        // TODO: Only buffer changed particles
+        private.bufferAllParticles();
+        private.bufferIndexes();
+
+        var sizeofFloat = 4;
+        var stride = sizeofFloat * LAST_IDX;
+
+        const bindAttribute = function(attribute, offset, unbind) {
+            if (attribute >= 0) {
+                gl.vertexAttribPointer(attribute, 4, gl.FLOAT, false, stride, sizeofFloat * offset);
+                gl.enableVertexAttribArray(attribute);
+                unbind.push(function(){ gl.disableVertexAttribArray(attribute); });
+            }
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
+
+        const unbind = [];
+        bindAttribute(shader.uvLifeTimeFrameStart, UV_LIFE_TIME_FRAME_START_IDX, unbind);
+        bindAttribute(shader.positionStartTime, POSITION_START_TIME_IDX, unbind);
+        bindAttribute(shader.velocityStartSize, VELOCITY_START_SIZE_IDX, unbind);
+        bindAttribute(shader.accelerationEndSize, ACCELERATION_END_SIZE_IDX, unbind);
+        bindAttribute(shader.spinStartSpinSpeed, SPIN_START_SPIN_SPEED_IDX, unbind);
+        bindAttribute(shader.orientation, ORIENTATION_IDX, unbind);
+        bindAttribute(shader.colorMult, COLOR_MULT_IDX, unbind);
+
+        gl.drawElements(gl.TRIANGLES, 0, private.bufferedCount * INDEX_COUNT_PER_PARTICLE, gl.UNSIGNED_SHORT, 0);
+
+        for (let i = 0; i < unbind.length; i++) unbind[i]();
+    }
+
+    public.draw = function(drawContext) {
+        if (drawContext.isHitTest) return public;
+
+        // TODO: Only birth and kill particles every N game ticks
+
+        const deadParticleIndexes = [];
+
+        for (let i = 0; i < private.emitters.length; i++) {
+            const deadParticles = private.emitters[i].deadParticles(public, drawContext.gameTick);
+            if (deadParticles) {
+                for (let j = 0; j < deadParticles.length; j++)
+                    deadParticleIndexes.push(deadParticles[j]);
+            }
+        }
+
+        if (deadParticleIndexes) {
+            deadParticleIndexes.sort(function(a, b) { return b - a; });
+            for (let i = 0; i < deadParticleIndexes.length; i++) {
+                private.particles.splice(deadParticleIndexes[i], 1);
+            }
+        }
+
+        private.aliveCount = private.particles.count;
+
+        for (let i = 0; i < private.emitters.length; i++) {
+            private.emitters[i].birthParticles(public, drawContext.gameTick);
+        }
+
+        private.aliveCount = private.particles.count;
+
+        if (!private.enabled) return public;
+
+        drawContext.beginSceneObject(private.location, {}, {});
+        private.draw(drawContext);
+        drawContext.endSceneObject();
+
+        return public;
+    }
+
+    return public;
+}
+
+
+/***/ }),
+
 /***/ "./src/SceneGraph/DrawContext.js":
 /*!***************************************!*\
   !*** ./src/SceneGraph/DrawContext.js ***!
@@ -4819,6 +5246,7 @@ window.frag.DrawContext = function (engine) {
         sceneObjects: null,
         models: null,
         worldToClipTransform: null,
+        gameTick: 0,
         state: {
             animationMap: null,
             childMap: null,
@@ -4844,7 +5272,8 @@ window.frag.DrawContext = function (engine) {
         return public;
     }
 
-    public.forRender = function() {
+    public.forRender = function(gameTick) {
+        public.gameTick = gameTick;
         return public;
     }
 
@@ -5215,80 +5644,79 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
-    private.drawFragmentPosition = function(shader, fragment) {
+    private.bindFragmentPosition = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.position >= 0) {
             if (fragment.vertexDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.position)
                 gl.vertexAttribPointer(shader.attributes.position, fragment.renderData.vertexDimensions, gl.FLOAT, false, 0, fragment.vertexDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.position)
+                gl.enableVertexAttribArray(shader.attributes.position)
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.position)} );
             }
         }
     }
 
-    private.drawFragmentColor = function(shader, fragment) {
+    private.bindFragmentColor = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.color >= 0) {
             if (fragment.colorDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.color)
                 gl.vertexAttribPointer(shader.attributes.color, fragment.renderData.colorDimensions, gl.FLOAT, false, 0, fragment.colorDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.color)
+                gl.enableVertexAttribArray(shader.attributes.color)
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.color)} );
             }
         }
     }
 
-    private.drawFragmentTexture = function(shader, fragment) {
+    private.bindFragmentTexture = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.texcoord >= 0) {
             if (fragment.uvDataOffset != undefined) {
-                gl.enableVertexAttribArray(shader.attributes.texcoord);
                 gl.vertexAttribPointer(shader.attributes.texcoord, fragment.renderData.uvDimensions, gl.FLOAT, false, 0, fragment.uvDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.texcoord)
+                gl.enableVertexAttribArray(shader.attributes.texcoord);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.texcoord)} );
             }
         }
     }
 
-    private.drawFragmentNormals = function(shader, fragment) {
+    private.bindFragmentNormals = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.normal >= 0) {
             if (fragment.normalDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.normal);
                 gl.vertexAttribPointer(shader.attributes.normal, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.normalDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.normal)
+                gl.enableVertexAttribArray(shader.attributes.normal);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.normal)} );
             }
         }
     }
 
-    private.drawFragmentTangents = function(shader, fragment) {
+    private.bindFragmentTangents = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.tangent >= 0) {
             if (fragment.tangentDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.tangent);
                 gl.vertexAttribPointer(shader.attributes.tangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.tangentDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.tangent)
+                gl.enableVertexAttribArray(shader.attributes.tangent);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.tangent)} );
             }
         }
     }
 
-    private.drawFragmentBitangents = function(shader, fragment) {
+    private.bindFragmentBitangents = function(shader, fragment, unbindFuncs) {
         if (shader.attributes.bitangent >= 0) {
             if (fragment.bitangentDataOffset != null) {
-                gl.enableVertexAttribArray(shader.attributes.bitangent);
                 gl.vertexAttribPointer(shader.attributes.bitangent, fragment.renderData.normalDimensions, gl.FLOAT, true, 0, fragment.bitangentDataOffset);
-            } else {
-                gl.disableVertexAttribArray(shader.attributes.bitangent)
+                gl.enableVertexAttribArray(shader.attributes.bitangent);
+                unbindFuncs.push(function() {gl.disableVertexAttribArray(shader.attributes.bitangent)} );
             }
         }
     }
 
     private.drawFragment = function(shader, fragment) {
-        private.drawFragmentPosition(shader, fragment);
-        private.drawFragmentColor(shader, fragment);
-        private.drawFragmentTexture(shader, fragment);
-        private.drawFragmentNormals(shader, fragment);
-        private.drawFragmentTangents(shader, fragment);
-        private.drawFragmentBitangents(shader, fragment);
+        const unbindFuncs = [];
+
+        private.bindFragmentPosition(shader, fragment, unbindFuncs);
+        private.bindFragmentColor(shader, fragment, unbindFuncs);
+        private.bindFragmentTexture(shader, fragment, unbindFuncs);
+        private.bindFragmentNormals(shader, fragment, unbindFuncs);
+        private.bindFragmentTangents(shader, fragment, unbindFuncs);
+        private.bindFragmentBitangents(shader, fragment, unbindFuncs);
+
         gl.drawArrays(fragment.renderData.primitiveType, 0, fragment.renderData.vertexCount);
+
+        for (let i = 0; i < unbindFuncs.length; i++) unbindFuncs[i]();
     }
 
     public.draw = function (shader) {
@@ -6335,11 +6763,10 @@ window.frag.SceneObject = function (engine, model) {
      */
     public.dispose = function() {
         public.disable();
-        if (private.parent) private.parent.removeObject(sceneObject);
+        if (public.parent) public.parent.removeObject(public);
         for (let animationName in public.animations) {
             public.animations[animationName].dispose();
         }
-        return public;
     }
 
     /**
@@ -7137,6 +7564,241 @@ window.frag.FontShader = function(engine) {
         .uniform("diffuse");
         
     return engine.fontShader;
+}
+
+/***/ }),
+
+/***/ "./src/Shaders/ParticleShader2D.js":
+/*!*****************************************!*\
+  !*** ./src/Shaders/ParticleShader2D.js ***!
+  \*****************************************/
+/***/ (() => {
+
+window.frag.ParticleShader2D = function(engine) {
+    if (engine.particleShader2D) return engine.particleShader2D;
+    
+    const vertexShader = 
+        'uniform mat4 u_clipMatrix;\n' +
+        'uniform mat4 u_modelMatrix;\n' +
+        'uniform mat4 u_clipMatrixInverse;\n' +
+        'uniform vec3 u_velocity;\n' +
+        'uniform vec3 u_acceleration;\n' +
+        'uniform float u_timeRange;\n' +
+        'uniform float u_time;\n' +
+        'uniform float u_timeOffset;\n' +
+        'uniform float u_frameDuration;\n' +
+        'uniform float u_numFrames;\n' +
+        '\n' +
+        'attribute vec4 a_uvLifeTimeFrameStart; // uv, lifeTime, frameStart\n' +
+        'attribute vec4 a_positionStartTime;    // position.xyz, startTime\n' +
+        'attribute vec4 a_velocityStartSize;    // velocity.xyz, startSize\n' +
+        'attribute vec4 a_accelerationEndSize;  // acceleration.xyz, endSize\n' +
+        'attribute vec4 a_spinStartSpinSpeed;   // spinStart.x, spinSpeed.y\n' +
+        'attribute vec4 a_orientation;          // a_orientation quaternion\n' +
+        'attribute vec4 a_colorMult;            // multiplies color and ramp textures\n' +
+        '\n' +
+        'varying vec2 v_texcoord;\n' +
+        'varying float v_percentLife;\n' +
+        'varying vec4 v_colorMult;\n' +
+        '\n' +
+        'void main() {\n' +
+        '  vec2 uv = a_uvLifeTimeFrameStart.xy;\n' +
+        '  float lifeTime = a_uvLifeTimeFrameStart.z;\n' +
+        '  float frameStart = a_uvLifeTimeFrameStart.w;\n' +
+        '  vec3 position = a_positionStartTime.xyz;\n' +
+        '  float startTime = a_positionStartTime.w;\n' +
+        '  vec3 velocity = (u_modelMatrix * vec4(a_velocityStartSize.xyz, 0.)).xyz + u_velocity;\n' +
+        '  float startSize = a_velocityStartSize.w;\n' +
+        '  vec3 acceleration = (u_modelMatrix * vec4(a_accelerationEndSize.xyz, 0)).xyz + u_acceleration;\n' +
+        '  float endSize = a_accelerationEndSize.w;\n' +
+        '  float spinStart = a_spinStartSpinSpeed.x;\n' +
+        '  float spinSpeed = a_spinStartSpinSpeed.y;\n' +
+        '\n' +
+        '  float localTime = mod((u_time - u_timeOffset - startTime), u_timeRange);\n' +
+        '  float percentLife = localTime / lifeTime;\n' +
+        '\n' +
+        '  float frame = mod(floor(localTime / u_frameDuration + frameStart), u_numFrames);\n' +
+        '  float uOffset = frame / u_numFrames;\n' +
+        '  float u = uOffset + (uv.x + 0.5) * (1. / u_numFrames);\n' +
+        '\n' +
+        '  v_texcoord = vec2(u, uv.y + 0.5);\n' +
+        '  v_colorMult = a_colorMult;\n' +
+        '\n' +
+        '  vec3 basisX = u_clipMatrixInverse[0].xyz;\n' +
+        '  vec3 basisZ = u_clipMatrixInverse[1].xyz;\n' +
+        '\n' +
+        '  float size = mix(startSize, endSize, percentLife);\n' +
+        '  size = (percentLife < 0. || percentLife > 1.) ? 0. : size;\n' +
+        '  float s = sin(spinStart + spinSpeed * localTime);\n' +
+        '  float c = cos(spinStart + spinSpeed * localTime);\n' +
+        '\n' +
+        '  vec4 rotatedPoint = vec2(uv.x * c + uv.y * s, -uv.x * s + uv.y * c);\n' +
+        '  vec3 localPosition = vec3(basisX * rotatedPoint.x + basisZ * rotatedPoint.y) * size +\n' + 
+        '    velocity * localTime + acceleration * localTime * localTime + position;\n' +
+        '\n' +
+        '  v_percentLife = percentLife;\n' +
+        '  gl_Position = u_clipMatrix * vec4(localPosition + u_modelMatrix[3].xyz, 1.);\n' +
+        '}\n';
+  
+    const fragmentShader = 
+        'precision mediump float;\n' +
+        'uniform sampler2D u_rampSampler;\n' +
+        'uniform sampler2D u_colorSampler;\n' +
+        '\n' +
+        'varying vec2 v_texcoord;\n' +
+        'varying float v_percentLife;\n' +
+        'varying vec4 v_colorMult;\n' +
+        '\n' +
+        'void main() {\n' +
+        '  vec4 colorMult = texture2D(u_rampSampler, vec2(v_percentLife, 0.5)) * v_colorMult;\n' +
+        '  gl_FragColor = texture2D(u_colorSampler, v_texcoord) * colorMult;\n' +
+        '}\n'
+  
+    engine.particleShader2D = frag.CustomShader(engine)
+        .name("Particle 2D")
+        .source(vertexShader, fragmentShader)
+
+        .attribute("uvLifeTimeFrameStart")
+        .attribute("positionStartTime")
+        .attribute("velocityStartSize")
+        .attribute("accelerationEndSize")
+        .attribute("spinStartSpinSpeed")
+        .attribute("orientation")
+        .attribute("colorMult")
+
+        .uniform("clipMatrix")
+        .uniform("clipMatrixInverse")
+        .uniform("modelMatrix")
+        .uniform("rampSampler")
+        .uniform("colorSampler")
+        .uniform("velocity", "3fv", [0, 100, 0])
+        .uniform("acceleration", "3fv", [0, -9.8, 0])
+        .uniform("timeRange", "1f", 500)
+        .uniform("time", "1f", 0)
+        .uniform("timeOffset", "1f", 0)
+        .uniform("frameDuration", "1f", 0)
+        .uniform("numFrames", "1f", 50);
+        
+    return engine.particleShader2D;
+}
+
+/***/ }),
+
+/***/ "./src/Shaders/ParticleShader3D.js":
+/*!*****************************************!*\
+  !*** ./src/Shaders/ParticleShader3D.js ***!
+  \*****************************************/
+/***/ (() => {
+
+window.frag.ParticleShader3D = function(engine) {
+    if (engine.particleShader3D) return engine.particleShader3D;
+    
+    const vertexShader = 
+        'uniform mat4 u_clipMatrix;\n' +
+        'uniform mat4 u_modelMatrix;\n' +
+        'uniform vec3 u_velocity;\n' +
+        'uniform vec3 u_acceleration;\n' +
+        'uniform float u_timeRange;\n' +
+        'uniform float u_time;\n' +
+        'uniform float u_timeOffset;\n' +
+        'uniform float u_frameDuration;\n' +
+        'uniform float u_numFrames;\n' +
+        '\n' +
+        'attribute vec4 a_uvLifeTimeFrameStart; // uv, lifeTime, frameStart\n' +
+        'attribute vec4 a_positionStartTime;    // position.xyz, startTime\n' +
+        'attribute vec4 a_velocityStartSize;    // velocity.xyz, startSize\n' +
+        'attribute vec4 a_accelerationEndSize;  // acceleration.xyz, endSize\n' +
+        'attribute vec4 a_spinStartSpinSpeed;   // spinStart.x, spinSpeed.y\n' +
+        'attribute vec4 a_orientation;          // a_orientation quaternion\n' +
+        'attribute vec4 a_colorMult;            // multiplies color and ramp textures\n' +
+        '\n' +
+        'varying vec2 v_texcoord;\n' +
+        'varying float v_percentLife;\n' +
+        'varying vec4 v_colorMult;\n' +
+        '\n' +
+        'void main() {\n' +
+        '  vec2 uv = a_uvLifeTimeFrameStart.xy;\n' +
+        '  float lifeTime = a_uvLifeTimeFrameStart.z;\n' +
+        '  float frameStart = a_uvLifeTimeFrameStart.w;\n' +
+        '  vec3 position = a_positionStartTime.xyz;\n' +
+        '  float startTime = a_positionStartTime.w;\n' +
+        '  vec3 velocity = (u_modelMatrix * vec4(a_velocityStartSize.xyz, 0.)).xyz + u_velocity;\n' +
+        '  float startSize = a_velocityStartSize.w;\n' +
+        '  vec3 acceleration = (u_modelMatrix * vec4(a_accelerationEndSize.xyz, 0)).xyz + u_acceleration;\n' +
+        '  float endSize = a_accelerationEndSize.w;\n' +
+        '  float spinStart = a_spinStartSpinSpeed.x;\n' +
+        '  float spinSpeed = a_spinStartSpinSpeed.y;\n' +
+        '\n' +
+        '  float localTime = mod((u_time - u_timeOffset - startTime), u_timeRange);\n' +
+        '  float percentLife = localTime / lifeTime;\n' +
+        '\n' +
+        '  float frame = mod(floor(localTime / u_frameDuration + frameStart), u_numFrames);\n' +
+        '  float uOffset = frame / u_numFrames;\n' +
+        '  float u = uOffset + (uv.x + 0.5) * (1. / u_numFrames);\n' +
+        '\n' +
+        '  v_texcoord = vec2(u, uv.y + 0.5);\n' +
+        '  v_colorMult = a_colorMult;\n' +
+        '\n' +
+        '  float size = mix(startSize, endSize, percentLife);\n' +
+        '  size = (percentLife < 0. || percentLife > 1.) ? 0. : size;\n' +
+        '  float s = sin(spinStart + spinSpeed * localTime);\n' +
+        '  float c = cos(spinStart + spinSpeed * localTime);\n' +
+        '\n' +
+        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, 0., (uv.x * s - uv.y * c) * size, 1.);\n' +
+        '  vec3 center = velocity * localTime + acceleration * localTime * localTime + position;\n' +
+        '\n' +
+        '  vec4 q2 = a_orientation + a_orientation;\n' +
+        '  vec4 qx = a_orientation.xxxw * q2.xyzx;\n' +
+        '  vec4 qy = a_orientation.xyyw * q2.xyzy;\n' +
+        '  vec4 qz = a_orientation.xxzw * q2.xxzz;\n' +
+        '\n' +
+        '  mat4 localMatrix = mat4(\n' + 
+        '    (1.0 - qy.y) - qz.z, qx.y + qz.w, qx.z - qy.w, 0,\n' +
+        '    qx.y - qz.w, (1.0 - qx.x) - qz.z, qy.z + qx.w, 0,\n' +
+        '    qx.z + qy.w, qy.z - qx.w, (1.0 - qx.x) - qy.y, 0,\n' +
+        '    center.x, center.y, center.z, 1);\n' +
+        '  rotatedPoint = localMatrix * rotatedPoint;\n' +
+        '  v_percentLife = percentLife;\n' +
+        '  gl_Position = u_clipMatrix * rotatedPoint;\n' +
+        '}\n';
+  
+    const fragmentShader = 
+        'precision mediump float;\n' +
+        'uniform sampler2D u_rampSampler;\n' +
+        'uniform sampler2D u_colorSampler;\n' +
+        '\n' +
+        'varying vec2 v_texcoord;\n' +
+        'varying float v_percentLife;\n' +
+        'varying vec4 v_colorMult;\n' +
+        '\n' +
+        'void main() {\n' +
+        '  vec4 colorMult = texture2D(u_rampSampler, vec2(v_percentLife, 0.5)) * v_colorMult;\n' +
+        '  gl_FragColor = texture2D(u_colorSampler, v_texcoord) * colorMult;\n' +
+        '}\n'
+  
+    engine.particleShader3D = frag.CustomShader(engine)
+        .name("Particle 3D")
+        .source(vertexShader, fragmentShader)
+        .attribute("uvLifeTimeFrameStart")
+        .attribute("positionStartTime")
+        .attribute("velocityStartSize")
+        .attribute("accelerationEndSize")
+        .attribute("spinStartSpinSpeed")
+        .attribute("orientation")
+        .attribute("colorMult")
+        .uniform("clipMatrix")
+        .uniform("modelMatrix")
+        .uniform("rampSampler")
+        .uniform("colorSampler")
+        .uniform("velocity", "3fv", [0, 100, 0])
+        .uniform("acceleration", "3fv", [0, -9.8, 0])
+        .uniform("timeRange", "1f", 500)
+        .uniform("time", "1f", 0)
+        .uniform("timeOffset", "1f", 0)
+        .uniform("frameDuration", "1f", 0)
+        .uniform("numFrames", "1f", 50);
+        
+    return engine.particleShader3D;
 }
 
 /***/ }),
@@ -8079,6 +8741,7 @@ var __webpack_exports__ = {};
 __webpack_require__(/*! ./Math/Vector */ "./src/Math/Vector.js");
 __webpack_require__(/*! ./Math/Triangle */ "./src/Math/Triangle.js");
 __webpack_require__(/*! ./Math/Matrix */ "./src/Math/Matrix.js");
+__webpack_require__(/*! ./Math/Quaternion */ "./src/Math/Quaternion.js")
 
 __webpack_require__(/*! ./Framework/Observable */ "./src/Framework/Observable.js");
 __webpack_require__(/*! ./Framework/Transform */ "./src/Framework/Transform.js");
@@ -8091,6 +8754,8 @@ __webpack_require__(/*! ./Shaders/CustomShader */ "./src/Shaders/CustomShader.js
 __webpack_require__(/*! ./Shaders/Shader */ "./src/Shaders/Shader.js");
 __webpack_require__(/*! ./Shaders/UiShader */ "./src/Shaders/UiShader.js");
 __webpack_require__(/*! ./Shaders/FontShader */ "./src/Shaders/FontShader.js");
+__webpack_require__(/*! ./Shaders/ParticleShader3D */ "./src/Shaders/ParticleShader3D.js");
+__webpack_require__(/*! ./Shaders/ParticleShader2D */ "./src/Shaders/ParticleShader2D.js");
 
 __webpack_require__(/*! ./Materials/Texture */ "./src/Materials/Texture.js");
 __webpack_require__(/*! ./Materials/Font */ "./src/Materials/Font.js");
@@ -8138,6 +8803,8 @@ __webpack_require__(/*! ./Input/DigitalInput */ "./src/Input/DigitalInput.js");
 __webpack_require__(/*! ./Input/AnalogInput */ "./src/Input/AnalogInput.js");
 __webpack_require__(/*! ./Input/DigitalAction */ "./src/Input/DigitalAction.js");
 __webpack_require__(/*! ./Input/AnalogAction */ "./src/Input/AnalogAction.js");
+
+__webpack_require__(/*! ./Particles/CustomParticleSystem */ "./src/Particles/CustomParticleSystem.js");
 
 })();
 

@@ -10,6 +10,7 @@ window.frag.DrawContext = function (engine) {
         sceneObjects: null,
         models: null,
         worldToClipTransform: null,
+        gameTick: 0,
         state: {
             animationMap: null,
             childMap: null,
@@ -35,7 +36,8 @@ window.frag.DrawContext = function (engine) {
         return public;
     }
 
-    public.forRender = function() {
+    public.forRender = function(gameTick) {
+        public.gameTick = gameTick;
         return public;
     }
 

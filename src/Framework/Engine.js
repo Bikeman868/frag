@@ -31,6 +31,7 @@ window.frag.Engine = function(config) {
         debugAnimations: config.debugAnimations === undefined ? false : config.debugAnimations,
         debugMeshes: config.debugMeshes === undefined ? false : config.debugMeshes,
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
+        debugParticles: config.debugParticles === undefined ? false : config.debugParticles,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }
@@ -215,7 +216,7 @@ window.frag.Engine = function(config) {
         private.mainScene.setViewport();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        const drawContext = frag.DrawContext(public).forRender();
+        const drawContext = frag.DrawContext(public).forRender(private.gameTick);
         private.mainScene.draw(drawContext);
 
         for (let i = 0; i < private.scenes.length; i++) {
@@ -354,5 +355,7 @@ window.frag.Engine = function(config) {
     addProxy('DigitalAction');
     addProxy('AnalogAction');
     
+    addProxy('CustomParticleSystem');
+
     return public;
 };

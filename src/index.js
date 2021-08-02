@@ -1,6 +1,7 @@
 require("./Math/Vector");
 require("./Math/Triangle");
 require("./Math/Matrix");
+require("./Math/Quaternion")
 
 require("./Framework/Observable");
 require("./Framework/Transform");
@@ -13,6 +14,8 @@ require("./Shaders/CustomShader");
 require("./Shaders/Shader");
 require("./Shaders/UiShader");
 require("./Shaders/FontShader");
+require("./Shaders/ParticleShader3D");
+require("./Shaders/ParticleShader2D");
 
 require("./Materials/Texture");
 require("./Materials/Font");
@@ -60,3 +63,5 @@ require("./Input/DigitalInput");
 require("./Input/AnalogInput");
 require("./Input/DigitalAction");
 require("./Input/AnalogAction");
+
+require("./Particles/CustomParticleSystem");
