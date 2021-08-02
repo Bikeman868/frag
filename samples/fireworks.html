@@ -29,7 +29,10 @@
         const engine = frag.Engine({
             debugParticles: true
         })
-        .start();
+        engine.onStart((engine) => {
+            engine.gl.disable(engine.gl.CULL_FACE); // We want to be able to see the back of the wings
+        });
+        engine.start();
 
         const degToRad = Math.PI / 180;
 
@@ -46,36 +49,39 @@
         const particleEmitter = {
             birthParticles: function(particleSystem, gameTick) {
                 particleSystem.addParticles([{
-                    lifetime: r(100, 500),
+                    lifetime: r(100, 5000),
                     frameStart: 0,
                     startTime: 0,
-                    startSize: 50,
-                    endSize: 10,
+                    startSize: 1,
+                    endSize: 3,
                     spinStart: 0,
                     spinSpeed: 0,
                     position: [r(5), 0, r(5)],
-                    velocity: [r(5), r(20, 100), r(5)],
-                    acceleration: [0, r(5, -10), 0],
+                    velocity: [r(1), r(1, 5), r(1)],
+                    acceleration: [0, 0, 0],
                 }, {
-                    lifetime: r(100, 500),
+                    lifetime: r(100, 5000),
                     frameStart: 0,
                     startTime: 0,
-                    startSize: 50,
-                    endSize: 10,
+                    startSize: 2,
+                    endSize: 2,
                     spinStart: 0,
                     spinSpeed: 0,
                     position: [r(5), 0, r(5)],
-                    velocity: [r(5), r(10, 60), r(5)],
-                    acceleration: [0, r(2, -6), 0],
+                    velocity: [r(1), r(2, 8), r(1)],
+                    acceleration: [0, 0, 0],
                 }]);
             },
             deadParticles: function(particleSystem, gameTick) {
-                return [Math.floor(Math.random() * 2)];
+                if (particleSystem.particles.length > 2)
+                    return [Math.floor(Math.random() * 2)];
+                return [];
             }
         };
 
-        const particleSystem = engine.CustomParticleSystem();
-        particleSystem.getPosition().locationXYZ(0, 0, 0);
+        const shader = window.frag.ParticleShaderDebug(engine);
+        const particleSystem = engine.CustomParticleSystem(true, shader);
+        particleSystem.getPosition().locationXYZ(0, -50, 0);
         scene.addObject(particleSystem);
 
         particleSystem.addEmitter(particleEmitter);

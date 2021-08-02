@@ -22,11 +22,14 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         shader: shader || (is3d ? frag.ParticleShader3D(engine) : frag.ParticleShader2D(engine)),
         location: window.frag.Location(engine, is3d),
         emitters: [],
+        enabled: true,
+        rampTexture: null,
+        colorTexture: null,
         particleBuffer: gl.createBuffer(),
         indexBuffer: gl.createBuffer(),
-        particles: [],
         aliveCount: 0,
-        bufferedCount: 0,
+        bufferedIndexCount: 0,
+        bufferedParticleCount: 0,
         nextEmitterId: 0,
         velocity: [0, 0, 0],
         acceleration: [0, 0, 0],
@@ -39,6 +42,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
     const public = {
         __private: private,
         parent: null,
+        particles: [],
     }
 
     const corners = [
@@ -46,6 +50,29 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         [+0.5, -0.5],
         [+0.5, +0.5],
         [-0.5, +0.5]];
+
+    const defaultRampData = new Float32Array([1, 1, 1, 1, 1, 1, 1, 0]);
+    private.rampTexture = frag.Texture(engine)
+        .name("particle-ramp-texture")
+        .dataFormat(gl.RGBA)
+        .fromArrayBuffer(0, defaultRampData.buffer, 0, 2, 1);
+
+    const defaultColorBase = [0, 0.20, 0.70, 1, 0.70, 0.20, 0, 0];
+    const defaultColorData = new Float32Array(8 * 8);
+    let ix = 0;
+    for (let y = 0; y < 8; y++) {
+        for (var x = 0; x < 8; x++) {
+            var pixel = defaultColorBase[x] * defaultColorBase[y];
+            defaultColorData[ix++] = pixel;
+            defaultColorData[ix++] = pixel;
+            defaultColorData[ix++] = pixel;
+            defaultColorData[ix++] = pixel;
+        }
+    }
+    private.colorTexture = frag.Texture(engine)
+        .name("particle-color-texture")
+        .dataFormat(gl.RGBA)
+        .fromArrayBuffer(0, defaultColorData.buffer, 0, 8, 8);
 
     private.populateParticleBuffer = function(particle, buffer, offset) {
         let offset0 = offset;
@@ -92,7 +119,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         const buffer = new Float32Array(particleFloatCount * particleCount);
         let offset = 0;
         for (let i = startIndex; i < startIndex + particleCount; i++) {
-            private.populateParticleBuffer(private.particles[i], buffer, offset);
+            private.populateParticleBuffer(public.particles[i], buffer, offset);
             offset += particleFloatCount;
         }
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
@@ -130,18 +157,20 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         const buffer = new Float32Array(particleFloatCount * private.aliveCount);
         let offset = 0;
         for (let i = 0; i < private.aliveCount; i++) {
-            private.populateParticleBuffer(private.particles[i], buffer, offset);
+            private.populateParticleBuffer(public.particles[i], buffer, offset);
             offset += particleFloatCount;
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);
+
+        private.bufferedParticleCount = private.aliveCount;
     }
 
     // Creates an index that maps the 4 corners of each particle onto 2 triangles. This 
     // needs to be done if the number of particles changes at all.
     private.bufferIndexes = function() {
-        if (private.bufferedCount === private.aliveCount) return;
+        if (private.bufferedIndexCount === private.aliveCount) return;
 
         var indices = new Uint16Array(INDEX_COUNT_PER_PARTICLE * private.aliveCount);
         var idx = 0;
@@ -157,7 +186,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-        private.bufferedCount = private.aliveCount;
+        private.bufferedIndexCount = private.aliveCount;
     }
 
     public.dispose = function () {
@@ -226,9 +255,9 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
     public.addParticles = function(particles) {
         for (let i = 0; i < particles.length; i++) {
-            private.particles.push(particles[i]);
+            public.particles.push(particles[i]);
         }
-        private.aliveCount = private.particles.count;
+        private.aliveCount += particles.length;
     }
 
     private.draw = function(drawContext) {
@@ -253,7 +282,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                 .apply(shader.uniforms.clipMatrixInverse);
         }
     
-        if (shader.time !== undefined) shader.time(drawContext.gameTick);
+        if (shader.time !== undefined) shader.time(drawContext.gameTick * engine.gameTickMs / 1000);
 
         if (shader.velocity !== undefined) shader.velocity(private.velocity);
         if (shader.acceleration !== undefined) shader.acceleration(private.acceleration);
@@ -281,15 +310,15 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
 
         const unbind = [];
-        bindAttribute(shader.uvLifeTimeFrameStart, UV_LIFE_TIME_FRAME_START_IDX, unbind);
-        bindAttribute(shader.positionStartTime, POSITION_START_TIME_IDX, unbind);
-        bindAttribute(shader.velocityStartSize, VELOCITY_START_SIZE_IDX, unbind);
-        bindAttribute(shader.accelerationEndSize, ACCELERATION_END_SIZE_IDX, unbind);
-        bindAttribute(shader.spinStartSpinSpeed, SPIN_START_SPIN_SPEED_IDX, unbind);
-        bindAttribute(shader.orientation, ORIENTATION_IDX, unbind);
-        bindAttribute(shader.colorMult, COLOR_MULT_IDX, unbind);
+        bindAttribute(shader.attributes.uvLifeTimeFrameStart, UV_LIFE_TIME_FRAME_START_IDX, unbind);
+        bindAttribute(shader.attributes.positionStartTime, POSITION_START_TIME_IDX, unbind);
+        bindAttribute(shader.attributes.velocityStartSize, VELOCITY_START_SIZE_IDX, unbind);
+        bindAttribute(shader.attributes.accelerationEndSize, ACCELERATION_END_SIZE_IDX, unbind);
+        bindAttribute(shader.attributes.spinStartSpinSpeed, SPIN_START_SPIN_SPEED_IDX, unbind);
+        bindAttribute(shader.attributes.orientation, ORIENTATION_IDX, unbind);
+        bindAttribute(shader.attributes.colorMult, COLOR_MULT_IDX, unbind);
 
-        gl.drawElements(gl.TRIANGLES, 0, private.bufferedCount * INDEX_COUNT_PER_PARTICLE, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, private.bufferedIndexCount * INDEX_COUNT_PER_PARTICLE, gl.UNSIGNED_SHORT, 0);
 
         for (let i = 0; i < unbind.length; i++) unbind[i]();
     }
@@ -312,17 +341,14 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         if (deadParticleIndexes) {
             deadParticleIndexes.sort(function(a, b) { return b - a; });
             for (let i = 0; i < deadParticleIndexes.length; i++) {
-                private.particles.splice(deadParticleIndexes[i], 1);
+                public.particles.splice(deadParticleIndexes[i], 1);
+                private.aliveCount--;
             }
         }
-
-        private.aliveCount = private.particles.count;
 
         for (let i = 0; i < private.emitters.length; i++) {
             private.emitters[i].birthParticles(public, drawContext.gameTick);
         }
-
-        private.aliveCount = private.particles.count;
 
         if (!private.enabled) return public;
 

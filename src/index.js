@@ -65,3 +65,8 @@ require("./Input/DigitalAction");
 require("./Input/AnalogAction");
 
 require("./Particles/CustomParticleSystem");
+
+var env = process.env.NODE_ENV || "development";
+if (env === "development") {
+    require("./Shaders/ParticleShaderDebug");
+}
