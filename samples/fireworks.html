@@ -37,7 +37,7 @@
         const degToRad = Math.PI / 180;
 
         const camera = frag.FrustumCamera(engine).frustum(50, 50, 500);
-        camera.getPosition().locationZ(-150).locationY(-25);
+        camera.getPosition().locationZ(-150).locationY(25);
         const scene = frag.Scene(engine).camera(camera);
         engine.mainScene(scene);
 
@@ -47,35 +47,20 @@
         };
 
         const particleEmitter = {
-            birthParticles: function(particleSystem, gameTick) {
-                particleSystem.addParticles([{
-                    lifetime: r(100, 5000),
-                    frameStart: 0,
-                    startTime: 0,
-                    startSize: 1,
-                    endSize: 3,
-                    spinStart: 0,
-                    spinSpeed: 0,
-                    position: [r(5), 0, r(5)],
-                    velocity: [r(1), r(1, 5), r(1)],
-                    acceleration: [0, 0, 0],
-                }, {
-                    lifetime: r(100, 5000),
-                    frameStart: 0,
-                    startTime: 0,
-                    startSize: 2,
-                    endSize: 2,
-                    spinStart: 0,
-                    spinSpeed: 0,
-                    position: [r(5), 0, r(5)],
-                    velocity: [r(1), r(2, 8), r(1)],
-                    acceleration: [0, 0, 0],
-                }]);
-            },
-            deadParticles: function(particleSystem, gameTick) {
-                if (particleSystem.particles.length > 2)
-                    return [Math.floor(Math.random() * 2)];
-                return [];
+            birthParticles: function(particleSystem, time) {
+                const newParticles = [];
+                while (Math.random() > 0.05) {
+                    newParticles.push({
+                        lifetime: r(5, 40),
+                        startSize: 0.5,
+                        endSize: 2,
+                        position: [r(1), 0, r(1)],
+                        velocity: [r(4), r(4, 10), r(4)],
+                        orientation: frag.Quaternion.rotationX(90 * degToRad),
+                        acceleration: [0, -0.2, 0],
+                    });
+                };
+                return newParticles;
             }
         };
 

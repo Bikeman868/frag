@@ -58,6 +58,14 @@ window.frag.Engine = function(config) {
         return public;
     }
 
+    public.getGameTick = function() {
+        return private.gameTick;
+    }
+
+    public.getElapsedSeconds = function() {
+        return private.gameTick * public.gameTickMs / 1000;
+    }
+
     public.getMainScene = function () {
         return private.mainScene;
     }

@@ -1,18 +1,18 @@
 window.frag = window.frag || {};
 window.frag.Quaternion = {
-    // Returns a quaternion that rotates around the X-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the X-axis
     rotationX: function(angle) {
         return [Math.sin(angle / 2), 0, 0, Math.cos(angle / 2)];
     },
-    // Returns a quaternion that rotates around the Y-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the Y-axis
     rotationY: function(angle) {
         return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
     },
-    // Returns a quaternion that rotates around the Z-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the Z-axis
     rotationZ: function(angle) {
         return [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)];
     },
-    // Creates a quaternion which rotates around the given axis by the given angle.
+    // Creates a quaternion [x, y, z, w] which rotates around the given axis by the given angle.
     axisRotation: function(axis, angle) {
         var d = 1 / Math.sqrt(axis[0] * axis[0] +
                               axis[1] * axis[1] +

@@ -78,13 +78,13 @@ window.frag.ParticleShaderDebug = function(engine) {
         .attribute("orientation")
         .uniform("clipMatrix")
         .uniform("modelMatrix")
-        .uniform("velocity", "3fv", [0, 100, 0])
-        .uniform("acceleration", "3fv", [0, -9.8, 0])
-        .uniform("timeRange", "1f", 500)
-        .uniform("time", "1f", 0)
-        .uniform("timeOffset", "1f", 0)
-        .uniform("frameDuration", "1f", 0)
-        .uniform("numFrames", "1f", 50);
+        .uniform("velocity", "3fv")
+        .uniform("acceleration", "3fv")
+        .uniform("timeRange", "1f")
+        .uniform("time", "1f")
+        .uniform("timeOffset", "1f")
+        .uniform("frameDuration", "1f")
+        .uniform("numFrames", "1f");
         
     return engine.particleShaderDebug;
 }

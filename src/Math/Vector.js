@@ -124,17 +124,17 @@ window.frag.Vector = {
         const qy = cr * sp * cy + sr * cp * sy;
         const qz = cr * cp * sy - sr * sp * cy;
 
-        return [qw, qx, qy, qz];
+        return [qx, qy, qz, qw];
     },
     euler: function(quaternion) {
-        return window.frag.Vector.eulerWXYZ(
+        return window.frag.Vector.eulerXYZW(
             quaternion[0],
             quaternion[1],
             quaternion[2],
             quaternion[3]
         );
     },
-    eulerWXYZ: function(w, x, y, z) {
+    eulerXYZW: function(x, y, z, w) {
         const sinr_cosp = 2 * (w * x + y * z);
         const cosr_cosp = 1 - 2 * (x * x + y * y);
         const pitch = Math.atan2(sinr_cosp, cosr_cosp);

@@ -1226,6 +1226,14 @@ window.frag.Engine = function(config) {
         return public;
     }
 
+    public.getGameTick = function() {
+        return private.gameTick;
+    }
+
+    public.getElapsedSeconds = function() {
+        return private.gameTick * public.gameTickMs / 1000;
+    }
+
     public.getMainScene = function () {
         return private.mainScene;
     }
@@ -4608,19 +4616,19 @@ window.frag.Matrix = {
 
 window.frag = window.frag || {};
 window.frag.Quaternion = {
-    // Returns a quaternion that rotates around the X-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the X-axis
     rotationX: function(angle) {
         return [Math.sin(angle / 2), 0, 0, Math.cos(angle / 2)];
     },
-    // Returns a quaternion that rotates around the Y-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the Y-axis
     rotationY: function(angle) {
         return [0, Math.sin(angle / 2), 0, Math.cos(angle / 2)];
     },
-    // Returns a quaternion that rotates around the Z-axis
+    // Returns a quaternion [x, y, z, w] that rotates around the Z-axis
     rotationZ: function(angle) {
         return [0, 0, Math.sin(angle / 2), Math.cos(angle / 2)];
     },
-    // Creates a quaternion which rotates around the given axis by the given angle.
+    // Creates a quaternion [x, y, z, w] which rotates around the given axis by the given angle.
     axisRotation: function(axis, angle) {
         var d = 1 / Math.sqrt(axis[0] * axis[0] +
                               axis[1] * axis[1] +
@@ -4850,17 +4858,17 @@ window.frag.Vector = {
         const qy = cr * sp * cy + sr * cp * sy;
         const qz = cr * cp * sy - sr * sp * cy;
 
-        return [qw, qx, qy, qz];
+        return [qx, qy, qz, qw];
     },
     euler: function(quaternion) {
-        return window.frag.Vector.eulerWXYZ(
+        return window.frag.Vector.eulerXYZW(
             quaternion[0],
             quaternion[1],
             quaternion[2],
             quaternion[3]
         );
     },
-    eulerWXYZ: function(w, x, y, z) {
+    eulerXYZW: function(x, y, z, w) {
         const sinr_cosp = 2 * (w * x + y * z);
         const cosr_cosp = 1 - 2 * (x * x + y * y);
         const pitch = Math.atan2(sinr_cosp, cosr_cosp);
@@ -4910,7 +4918,10 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         name: "Custom",
         shader: shader || (is3d ? frag.ParticleShader3D(engine) : frag.ParticleShader2D(engine)),
         location: window.frag.Location(engine, is3d),
-        emitters: [],
+        lifetimeGameTickInterval: 25,
+        nextLifetimeGameTick: 0,
+        emitters: {},
+        particles: [],
         enabled: true,
         rampTexture: null,
         colorTexture: null,
@@ -4931,7 +4942,6 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
     const public = {
         __private: private,
         parent: null,
-        particles: [],
     }
 
     const corners = [
@@ -4985,15 +4995,25 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             buffer[offset2 + VELOCITY_START_SIZE_IDX] = particle.velocity[2];
             buffer[offset3 + VELOCITY_START_SIZE_IDX] = particle.startSize;
 
+            buffer[offset0 + SPIN_START_SPIN_SPEED_IDX] = particle.spinStart;
+            buffer[offset1 + SPIN_START_SPIN_SPEED_IDX] = particle.spinSpeed;
+            buffer[offset2 + SPIN_START_SPIN_SPEED_IDX] = 0;
+            buffer[offset3 + SPIN_START_SPIN_SPEED_IDX] = 0;
+
             buffer[offset0 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[0];
             buffer[offset1 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[1];
             buffer[offset2 + ACCELERATION_END_SIZE_IDX] = particle.acceleration[2];
             buffer[offset3 + ACCELERATION_END_SIZE_IDX] = particle.endSize;
 
-            buffer[offset0 + ACCELERATION_END_SIZE_IDX] = particle.spinStart;
-            buffer[offset1 + ACCELERATION_END_SIZE_IDX] = particle.spinSpeed;
-            buffer[offset2 + ACCELERATION_END_SIZE_IDX] = 0;
-            buffer[offset3 + ACCELERATION_END_SIZE_IDX] = 0;
+            buffer[offset0 + ORIENTATION_IDX] = particle.orientation[0];
+            buffer[offset1 + ORIENTATION_IDX] = particle.orientation[1];
+            buffer[offset2 + ORIENTATION_IDX] = particle.orientation[2];
+            buffer[offset3 + ORIENTATION_IDX] = particle.orientation[3];
+
+            buffer[offset0 + COLOR_MULT_IDX] = particle.colorMult[0];
+            buffer[offset1 + COLOR_MULT_IDX] = particle.colorMult[1];
+            buffer[offset2 + COLOR_MULT_IDX] = particle.colorMult[2];
+            buffer[offset3 + COLOR_MULT_IDX] = particle.colorMult[3];
 
             offset0 += LAST_IDX;
             offset1 += LAST_IDX;
@@ -5008,7 +5028,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         const buffer = new Float32Array(particleFloatCount * particleCount);
         let offset = 0;
         for (let i = startIndex; i < startIndex + particleCount; i++) {
-            private.populateParticleBuffer(public.particles[i], buffer, offset);
+            private.populateParticleBuffer(private.particles[i], buffer, offset);
             offset += particleFloatCount;
         }
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
@@ -5046,7 +5066,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         const buffer = new Float32Array(particleFloatCount * private.aliveCount);
         let offset = 0;
         for (let i = 0; i < private.aliveCount; i++) {
-            private.populateParticleBuffer(public.particles[i], buffer, offset);
+            private.populateParticleBuffer(private.particles[i], buffer, offset);
             offset += particleFloatCount;
         }
 
@@ -5126,27 +5146,21 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         return public;
     }
 
+    public.lifetimeGameTickInterval = function(value) {
+        private.lifetimeGameTickInterval = value;
+        return public;
+    }
+
     public.addEmitter = function(emitter) {
         emitter.id = private.nextEmitterId++;
-        private.emitters.push(emitter);
+        private.emitters[emitter.id] = emitter;
         return public;
     }
 
     public.removeEmitter = function(emitter) {
-        for (let i = 0; i < private.emitters.length; i++) {
-            if (private.emitters[i] === emitter) {
-                private.emitters.splice(i, 1);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public.addParticles = function(particles) {
-        for (let i = 0; i < particles.length; i++) {
-            public.particles.push(particles[i]);
-        }
-        private.aliveCount += particles.length;
+        if (!private.emitters[emitter.id]) return false;
+        delete private.emitters[emitter.id];
+        return true;
     }
 
     private.draw = function(drawContext) {
@@ -5171,7 +5185,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                 .apply(shader.uniforms.clipMatrixInverse);
         }
     
-        if (shader.time !== undefined) shader.time(drawContext.gameTick * engine.gameTickMs / 1000);
+        if (shader.time !== undefined) shader.time(engine.getElapsedSeconds());
 
         if (shader.velocity !== undefined) shader.velocity(private.velocity);
         if (shader.acceleration !== undefined) shader.acceleration(private.acceleration);
@@ -5212,31 +5226,61 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         for (let i = 0; i < unbind.length; i++) unbind[i]();
     }
 
-    public.draw = function(drawContext) {
-        if (drawContext.isHitTest) return public;
-
-        // TODO: Only birth and kill particles every N game ticks
+    private.addAndRemoveParticles = function(drawContext) {
+        const time = engine.getElapsedSeconds();
 
         const deadParticleIndexes = [];
-
-        for (let i = 0; i < private.emitters.length; i++) {
-            const deadParticles = private.emitters[i].deadParticles(public, drawContext.gameTick);
-            if (deadParticles) {
-                for (let j = 0; j < deadParticles.length; j++)
-                    deadParticleIndexes.push(deadParticles[j]);
+        for (let i = 0; i < private.particles.length; i++) {
+            const particle = private.particles[i];
+            if (time > particle.startTime + particle.lifetime) {
+                deadParticleIndexes.push(i);
+            } else {
+                const emitter = private.emitters[particle.id];
+                if (emitter && emitter.isDead && emitter.isDead(particle))
+                    deadParticleIndexes.push(i);
             }
         }
 
         if (deadParticleIndexes) {
             deadParticleIndexes.sort(function(a, b) { return b - a; });
             for (let i = 0; i < deadParticleIndexes.length; i++) {
-                public.particles.splice(deadParticleIndexes[i], 1);
+                private.particles.splice(deadParticleIndexes[i], 1);
                 private.aliveCount--;
             }
         }
 
-        for (let i = 0; i < private.emitters.length; i++) {
-            private.emitters[i].birthParticles(public, drawContext.gameTick);
+        for(var id in private.emitters) {
+            const emitter = private.emitters[id];
+            const newParticles = emitter.birthParticles(public, time);
+            if (newParticles) {
+                for (let j = 0; j < newParticles.length; j++) {
+                    const particle = newParticles[j];
+                    particle.id = id;
+                    particle.startTime = time;
+                    if (particle.lifetime === undefined) particle.lifetime = 20;
+                    if (particle.frameStart === undefined) particle.frameStart = 0;
+                    if (particle.spinStart === undefined) particle.spinStart = 0;
+                    if (particle.spinSpeed === undefined) particle.spinSpeed = 0;
+                    if (particle.startSize === undefined) particle.startSize = 1;
+                    if (particle.endSize === undefined) particle.endSize = particle.startSize;
+                    if (particle.position === undefined) particle.position = [0, 0, 0];
+                    if (particle.velocity === undefined) particle.velocity = [0, 1, 0];
+                    if (particle.acceleration === undefined) particle.acceleration = [0, 0, 0];
+                    if (particle.orientation === undefined) particle.orientation = [0, 0, 0, 0];
+                    if (particle.colorMult === undefined) particle.colorMult = [1, 1, 1, 1];
+                    private.particles.push(particle);
+                }
+                private.aliveCount += newParticles.length;
+            }
+        }
+    }
+
+    public.draw = function(drawContext) {
+        if (drawContext.isHitTest) return public;
+
+        if (drawContext.gameTick >= private.nextLifetimeGameTick) {
+            private.addAndRemoveParticles(drawContext);
+            private.nextLifetimeGameTick = drawContext.gameTick + private.lifetimeGameTickInterval;
         }
 
         if (!private.enabled) return public;
@@ -7915,13 +7959,13 @@ window.frag.ParticleShaderDebug = function(engine) {
         .attribute("orientation")
         .uniform("clipMatrix")
         .uniform("modelMatrix")
-        .uniform("velocity", "3fv", [0, 100, 0])
-        .uniform("acceleration", "3fv", [0, -9.8, 0])
-        .uniform("timeRange", "1f", 500)
-        .uniform("time", "1f", 0)
-        .uniform("timeOffset", "1f", 0)
-        .uniform("frameDuration", "1f", 0)
-        .uniform("numFrames", "1f", 50);
+        .uniform("velocity", "3fv")
+        .uniform("acceleration", "3fv")
+        .uniform("timeRange", "1f")
+        .uniform("time", "1f")
+        .uniform("timeOffset", "1f")
+        .uniform("frameDuration", "1f")
+        .uniform("numFrames", "1f");
         
     return engine.particleShaderDebug;
 }
