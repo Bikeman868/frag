@@ -4913,7 +4913,26 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
     const VERTEX_COUNT_PER_PARTICLE = 4; // 4 corners
     const INDEX_COUNT_PER_PARTICLE = 6;  // 2 triangles
+    const EXTRA_PARTICLES_TO_BUFFER = 500;
+    const MAX_PARTICLE_COUNT = 65536 / VERTEX_COUNT_PER_PARTICLE;
     
+    // Notes:
+    // The `particles` array contains references to particle instances. Dead particles have null
+    // pointers in the array because we don't want to send all the data to the GPU again just
+    // because one particle died.
+    // Each particle instance has its own velocity, acceleration etc which is added to the 
+    // particle system velocity, acceleration etc.
+    // Particles can be freely moved within the `particles` array without re-building the
+    // index. The index just creates triangles out of quads but defines how many particle
+    // quads will be drawn.
+    // The `aliveCount` says how many of the particles in the `particles` array are alive.
+    // The rest of the array contains dead particles that can be overwritten with new ones.
+    // `bufferedParticleCount` says how many of the particles in the `particles` array are
+    // currently in the GPU.
+    // `bufferedIndexCount` is the size of the index in the GPU and this is how many particles
+    // will get drawn on each refresh. This can include some dead particles which will output
+    // no pixels but consume GPU cycles to compute.
+
     const private = {
         name: "Custom",
         shader: shader || (is3d ? frag.ParticleShader3D(engine) : frag.ParticleShader2D(engine)),
@@ -4973,11 +4992,25 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         .dataFormat(gl.RGBA)
         .fromArrayBuffer(0, defaultColorData.buffer, 0, 8, 8);
 
+    private.checkError = function(description) {
+        const error = gl.getError();
+        if (error !== 0) 
+            console.error(private.name, 'error', error, 'in', description);
+    }
+
+    // Copies particle attributes to an array buffer so that it can
+    // be uploaded into the GPU. For dead particles pass `null` for
+    // the `particle` parameter
     private.populateParticleBuffer = function(particle, buffer, offset) {
         let offset0 = offset;
         let offset1 = offset + 1;
         let offset2 = offset + 2;
         let offset3 = offset + 3;
+
+        if (!particle) {
+            buffer.fill(0, offset, offset + LAST_IDX * VERTEX_COUNT_PER_PARTICLE - 1);
+            return;
+        }
 
         for (let i = 0; i < VERTEX_COUNT_PER_PARTICLE; i++) {
             buffer[offset0 + UV_LIFE_TIME_FRAME_START_IDX] = corners[i][0];
@@ -5023,7 +5056,13 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
     }
 
     // Copies a range of particles indexes to the GPU based on their array index
+    // Only works if the buffer in the GPU is big enough, ie number of particles 
+    // is the same or than bufferedParticleCount. 
     private.bufferParticleRange = function(startIndex, particleCount) {
+        if (startIndex >= private.aliveCount) return;
+        if (startIndex + particleCount > private.aliveCount)
+            particleCount = private.aliveCount - startIndex - 1;
+
         const particleFloatCount = LAST_IDX * VERTEX_COUNT_PER_PARTICLE;
         const buffer = new Float32Array(particleFloatCount * particleCount);
         let offset = 0;
@@ -5033,58 +5072,71 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         }
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, buffer.particleFloatCount * buffer.BYTES_PER_ELEMENT * startIndex, buffer);
-    }
+        private.checkError('bufferSubData');
+
+        if (engine.debugParticles)
+            console.log(private.name, 'copied particles', startIndex, '-', startIndex + particleCount - 1, 'to the GPU');
+}
 
     // Copies a list of changed particles to the GPU based on their array indexes
-    // Only works if the buffer in the GPU is big enough, ie number of particles 
-    // is the same or less
+    // particleIndexes must be sorted from high to low
     private.bufferSpecificParticles = function(particleIndexes) {
-        particleIndexes.sort(function(a, b) { return a - b; });
+        // TODO: if there are small gaps in the ranges it makes sense to combine them
         let rangeStart = 0;
         let rangeCount = 0;
         for (let i = 0; i < particleIndexes.length; i++) {
             const index = particleIndexes[i];
-            if (i > 0 && index !== particleIndexes[i - 1]) {
-                if (rangeCount > 0) {
+            if (i > 0) {
+                const prior = particleIndexes[i - 1];
+                if (prior === index) continue;
+                if (prior !== index + 1 && rangeCount > 0) {
                     private.bufferParticleRange(rangeStart, rangeCount);
                     rangeCount = 0;
                 }
             }
-            if (rangeCount === 0) {
-                rangeStart = index;
-                rangeCount = 1;
-            } else {
-                rangeCount++;
-            }
+            rangeStart = index;
+            rangeCount++;
         }
-        if (rangeCount > 0) private.bufferParticleRange(rangeStart, rangeCount);
+        if (rangeCount > 0) 
+            private.bufferParticleRange(rangeStart, rangeCount);
     }
 
-    // Copies all particles to the GPU. You must do this if the number of particles increases
+    // Copies all particles to the GPU. You must do this if the number of alive 
+    // particles is bigger than bufferedParticleCount
     private.bufferAllParticles = function() {
+        const count = private.aliveCount + EXTRA_PARTICLES_TO_BUFFER;
+        while (private.particles.length < count) private.particles.push(null);
+
         const particleFloatCount = LAST_IDX * VERTEX_COUNT_PER_PARTICLE;
-        const buffer = new Float32Array(particleFloatCount * private.aliveCount);
+        const buffer = new Float32Array(particleFloatCount * count);
         let offset = 0;
-        for (let i = 0; i < private.aliveCount; i++) {
+        for (let i = 0; i < count; i++) {
             private.populateParticleBuffer(private.particles[i], buffer, offset);
             offset += particleFloatCount;
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.DYNAMIC_DRAW);
+        private.checkError('bufferData for particle buffer');
 
-        private.bufferedParticleCount = private.aliveCount;
-    }
+        private.bufferedParticleCount = count;
+
+        if (engine.debugParticles)
+            console.log(private.name, 'initialized GPU particle buffer with', count, 'particles');
+}
 
     // Creates an index that maps the 4 corners of each particle onto 2 triangles. This 
-    // needs to be done if the number of particles changes at all.
+    // needs to be done if the number of particles changes at all, but note that the
+    // `particles` array contains dead particles and is only resized when needed
     private.bufferIndexes = function() {
-        if (private.bufferedIndexCount === private.aliveCount) return;
+        let count = private.particles.length;
+        if (count > MAX_PARTICLE_COUNT) count = MAX_PARTICLE_COUNT;
+        if (private.bufferedIndexCount >= count) return;
 
-        var indices = new Uint16Array(INDEX_COUNT_PER_PARTICLE * private.aliveCount);
+        var indices = new Uint16Array(INDEX_COUNT_PER_PARTICLE * count);
         var idx = 0;
         var vertexStart = 0;
-        for (let i = 0; i < private.aliveCount; i++) {
+        for (let i = 0; i < count; i++) {
             indices[idx++] = vertexStart + 0;
             indices[idx++] = vertexStart + 1;
             indices[idx++] = vertexStart + 2;
@@ -5095,7 +5147,12 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-        private.bufferedIndexCount = private.aliveCount;
+        private.checkError('bufferData for index buffer');
+
+        private.bufferedIndexCount = count;
+
+        if (engine.debugParticles)
+            console.log(private.name, 'initialized GPU index buffer with', count, 'particle index');
     }
 
     public.dispose = function () {
@@ -5151,6 +5208,36 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         return public;
     }
 
+    public.velocity = function(vector) {
+        private.velocity = vector;
+        return public;
+    }
+
+    public.acceleration = function(vector) {
+        private.acceleration = vector;
+        return public;
+    }
+
+    public.timeRange = function(value) {
+        private.timeRange = value;
+        return public;
+    }
+
+    public.timeOffset = function(value) {
+        private.timeOffset = value;
+        return public;
+    }
+
+    public.numFrames = function(value) {
+        private.numFrames = value;
+        return public;
+    }
+
+    public.frameDuration = function(value) {
+        private.frameDuration = value;
+        return public;
+    }
+
     public.addEmitter = function(emitter) {
         emitter.id = private.nextEmitterId++;
         private.emitters[emitter.id] = emitter;
@@ -5194,20 +5281,19 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         if (shader.numFrames !== undefined) shader.numFrames(private.numFrames);
         if (shader.frameDuration !== undefined) shader.frameDuration(private.frameDuration);
 
-        // TODO: Only buffer changed particles
-        private.bufferAllParticles();
-        private.bufferIndexes();
-
         var sizeofFloat = 4;
         var stride = sizeofFloat * LAST_IDX;
-
         const bindAttribute = function(attribute, offset, unbind) {
             if (attribute >= 0) {
                 gl.vertexAttribPointer(attribute, 4, gl.FLOAT, false, stride, sizeofFloat * offset);
+                private.checkError('vertexAttribPointer');
+
                 gl.enableVertexAttribArray(attribute);
+                private.checkError('enableVertexAttribArray');
+
                 unbind.push(function(){ gl.disableVertexAttribArray(attribute); });
             }
-        }
+        };
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.particleBuffer);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, private.indexBuffer);
@@ -5221,10 +5307,14 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         bindAttribute(shader.attributes.orientation, ORIENTATION_IDX, unbind);
         bindAttribute(shader.attributes.colorMult, COLOR_MULT_IDX, unbind);
 
-        gl.drawElements(gl.TRIANGLES, private.bufferedIndexCount * INDEX_COUNT_PER_PARTICLE, gl.UNSIGNED_SHORT, 0);
+        let drawCount = private.aliveCount;
+        if (drawCount > MAX_PARTICLE_COUNT) drawCount = MAX_PARTICLE_COUNT;
+        gl.drawElements(gl.TRIANGLES, drawCount * INDEX_COUNT_PER_PARTICLE, gl.UNSIGNED_SHORT, 0);
+        private.checkError('drawElements');
 
         for (let i = 0; i < unbind.length; i++) unbind[i]();
     }
+
 
     private.addAndRemoveParticles = function(drawContext) {
         const time = engine.getElapsedSeconds();
@@ -5232,6 +5322,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         const deadParticleIndexes = [];
         for (let i = 0; i < private.particles.length; i++) {
             const particle = private.particles[i];
+            if (!particle) continue;
             if (time > particle.startTime + particle.lifetime) {
                 deadParticleIndexes.push(i);
             } else {
@@ -5241,14 +5332,17 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             }
         }
 
-        if (deadParticleIndexes) {
+        if (deadParticleIndexes.length) {
             deadParticleIndexes.sort(function(a, b) { return b - a; });
             for (let i = 0; i < deadParticleIndexes.length; i++) {
-                private.particles.splice(deadParticleIndexes[i], 1);
+                const deadIndex = deadParticleIndexes[i];
                 private.aliveCount--;
+                private.particles[deadIndex] = private.particles[private.aliveCount];
+                private.particles[private.aliveCount] = null;
             }
         }
 
+        let lowWaterMark = private.aliveCount;
         for(var id in private.emitters) {
             const emitter = private.emitters[id];
             const newParticles = emitter.birthParticles(public, time);
@@ -5268,11 +5362,34 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                     if (particle.acceleration === undefined) particle.acceleration = [0, 0, 0];
                     if (particle.orientation === undefined) particle.orientation = [0, 0, 0, 0];
                     if (particle.colorMult === undefined) particle.colorMult = [1, 1, 1, 1];
-                    private.particles.push(particle);
+
+                    if (private.particles.length > private.aliveCount)
+                        private.particles[private.aliveCount] = particle;
+                    else
+                        private.particles.push(particle);
+                    private.aliveCount++;
+
+                    if (private.aliveCount > MAX_PARTICLE_COUNT)
+                        console.error(private.name, 'has too many particles');
                 }
-                private.aliveCount += newParticles.length;
             }
         }
+
+        if (engine.debugParticles)
+            console.log(
+                private.name, 'alive=' + private.aliveCount + '/' + private.particles.length, 
+                ', GPU particles=' + private.bufferedParticleCount, ', GPU index=' + private.bufferedIndexCount);
+
+        const bufferCount = private.aliveCount + EXTRA_PARTICLES_TO_BUFFER;
+        if (true) {
+            if (private.particles.length > bufferCount)
+                private.particles.length = bufferCount;
+            private.bufferAllParticles();
+            if (engine.debugParticles)
+                console.log(private.name, 'copied all', private.aliveCount, 'alive particles to the GPU');
+        } else {}
+        private.bufferIndexes();    
+        if (engine.debugParticles) console.log('');
     }
 
     public.draw = function(drawContext) {
@@ -5291,7 +5408,6 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
         return public;
     }
-
     return public;
 }
 
