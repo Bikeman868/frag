@@ -49,9 +49,9 @@
         };
 
         const randomColor = function() {
-            const red = Math.random();
-            const green = Math.random();
-            const blue = Math.random();
+            const red = r(0.5, 0.5);
+            const green = r(0.5, 0.5);
+            const blue = r(0.5, 0.5);
             
             let scale = 1 / red;
             if (green > red) scale = 1 / green;
@@ -84,11 +84,11 @@
             .numFrames(1)
             .rampTexture(rampTexture)
             .colorTexture(colorTexture)
-            .acceleration([0, -0.2, 0]);
+            .acceleration([0, -9.8, 0]);
         particleSystem.getPosition().locationXYZ(0, -50, 0);
         scene.addObject(particleSystem);
 
-        const romanCandle = function(position, color, duration) {
+        const romanCandleEmitter = function(position, color, duration) {
             const emitter = {
                 birthParticles: function() {
                     const newParticles = [];
@@ -98,9 +98,10 @@
                             startSize: 0.5,
                             endSize: 1,
                             position,
-                            velocity: [r(1), r(4, 8), r(4, 1)],
+                            velocity: [r(2), r(4, 8), r(2)],
+                            acceleration: [0, 9.6, 0],
                             orientation: frag.Quaternion.rotationX(90 * degToRad),
-                            colorMult: color,
+                            color,
                         });
                     };
                     return newParticles;
@@ -110,7 +111,31 @@
             setTimeout(function(){ particleSystem.removeEmitter(emitter) }, duration * 1000);
         };
 
-        const mortar = function(position, color, size) {
+        const mineEmitter = function(position, color, size) {
+            const emitter = {
+                birthParticles: function() {
+                    const newParticles = [];
+                    for (let i = 0; i < 100; i++) {
+                        const velocity = [r(size * 0.2), r(size * 0.4, size), r(size * 0.2)];
+                        const acceleration = [velocity[0] * 1.2, -10, velocity[2] * 1.2];
+                        newParticles.push({
+                            lifetime: 2,
+                            startSize: 0.5,
+                            position,
+                            velocity,
+                            acceleration,
+                            orientation: frag.Quaternion.rotationX(90 * degToRad),
+                            color,
+                        });
+                    };
+                    return newParticles;
+                }
+            };
+            particleSystem.addEmitter(emitter);
+            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, 500);
+        };
+
+        const mortarEmitter = function(position, color, size) {
             const emitter = {
                 birthParticles: function() {
                     const newParticles = [];
@@ -130,8 +155,9 @@
                                 startSize: 0.5,
                                 position,
                                 velocity: [vx, vy, vz],
+                                acceleration: [0, 4, 0],
                                 orientation: frag.Quaternion.rotationX(90 * degToRad),
-                                colorMult: color,
+                                color,
                             });
                         }
                     };
@@ -145,21 +171,30 @@
         const romanCandles = function() {
             const color = randomColor();
             const durationSec = 20;
-            romanCandle([-50, 0, 0], color, durationSec);
-            romanCandle([0, 0, 0], color, durationSec);
-            romanCandle([50, 0, 0], color, durationSec);
+            romanCandleEmitter([-80, 0, 0], color, durationSec);
+            romanCandleEmitter([0, 0, 0], color, durationSec);
+            romanCandleEmitter([80, 0, 0], color, durationSec);
         };
 
         setInterval(romanCandles, 30000);
         romanCandles();
 
+        const mines = function() {
+            const color = randomColor();
+            const size = r(25, 50);
+            mineEmitter([-40, 0, 0], color, size);
+            mineEmitter([40, 0, 0], color, size);
+        };
+
+        setInterval(mines, 3000);
+
         const mortars = function() {
             const count = Math.floor(Math.random() * 3) + 1;
             for (let i = 0; i < count; i++) {
-                const position = [r(100), r(20, 80), 0];
+                const position = [r(150), r(30, 110), 0];
                 const color = randomColor();
                 const size = r(10, 15);
-                mortar(position, color, size);
+                mortarEmitter(position, color, size);
             }
         };
 

@@ -142,10 +142,10 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             buffer[offset2 + ORIENTATION_IDX] = particle.orientation[2];
             buffer[offset3 + ORIENTATION_IDX] = particle.orientation[3];
 
-            buffer[offset0 + COLOR_MULT_IDX] = particle.colorMult[0];
-            buffer[offset1 + COLOR_MULT_IDX] = particle.colorMult[1];
-            buffer[offset2 + COLOR_MULT_IDX] = particle.colorMult[2];
-            buffer[offset3 + COLOR_MULT_IDX] = particle.colorMult[3];
+            buffer[offset0 + COLOR_MULT_IDX] = particle.color[0];
+            buffer[offset1 + COLOR_MULT_IDX] = particle.color[1];
+            buffer[offset2 + COLOR_MULT_IDX] = particle.color[2];
+            buffer[offset3 + COLOR_MULT_IDX] = particle.color[3];
 
             offset0 += LAST_IDX;
             offset1 += LAST_IDX;
@@ -470,7 +470,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                     if (particle.velocity === undefined) particle.velocity = [0, 1, 0];
                     if (particle.acceleration === undefined) particle.acceleration = [0, 0, 0];
                     if (particle.orientation === undefined) particle.orientation = [0, 0, 0, 0];
-                    if (particle.colorMult === undefined) particle.colorMult = [1, 1, 1, 1];
+                    if (particle.color === undefined) particle.color = [1, 1, 1, 1];
 
                     if (private.particles.length > private.aliveCount)
                         private.particles[private.aliveCount] = particle;

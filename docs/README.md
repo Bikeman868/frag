@@ -60,6 +60,7 @@ The following documents are general discussions around a specific topic
 * [Player input](inputs.md)
 * [Text rendering](text.md)
 * [Physics engine integration](physics.md)
+* [Particle systems](particles.md)
 
 ## Reference
 The following classes are documented at detailed technical level. Note that the ones
@@ -81,6 +82,7 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`Animation`](reference/animation.md) is the core animation engine.
 * [`AssetCatalog`](reference/asset-catalog.md) holds collections of names assets like materials, fonts and models.
 * [`Cube`](reference/cube.md) builds a mesh that comprises some or all of the sides of a cube.
+* [`CustomParticleSystem`](reference/custom-particle-system.md) creates large numbers of meshes with lifetime and simple physics.
 * [`CustomShader`](reference/custom-shader.md) the base class for all code that runs on the GPU.
 * [`Cylinder`](reference/cube.md) builds a cylinder, cone or truncated cone mesh.
 * [`DigitalAction`](reference/digital-action.md) applies digital state changes to something in the game.

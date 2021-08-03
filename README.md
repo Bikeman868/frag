@@ -38,6 +38,8 @@ The functioanllity that is provided:
 * Full support for custom shaders and granular application of shaders to model
   components so for example you only need the shader that supports light emmissions
   for drawing the parts of the model that emit light.
+* A particle system for creating effects like fog and explosions. Standard effects are
+  available out of the box as well as fully customized particle effects.
 * Models comprising a heirachy of components where each component has a mesh and material.
 * Animation of components within models that match regular expression
 * Parenting scene objects to other scene objects or components of other scene object models.
@@ -139,6 +141,12 @@ a line of text in a particular font. This is done internally by building a mesh
 comprising one rectangle per character, where the texture coordinates for the
 rectangle map to the pixels in the material that are a drawing of a specific
 character.
+
+## Particle System
+Manages a very large collection of dynamically created meshes that each comprise
+two triangles forming a square. Particles have velocity, acceleration and spin
+to define their movement within the scene, and have a very flexible system to 
+define how their appearence changes throughout their lifetime.
 
 # Example scenes
 

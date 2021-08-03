@@ -33,14 +33,13 @@ window.frag.ParticleShaderDebug = function(engine) {
         '  float spinSpeed = a_spinStartSpinSpeed.y;\n' +
         '\n' +
         '  float localTime = mod((u_time - u_timeOffset - startTime), u_timeRange);\n' +
-        '  float percentLife = localTime / lifeTime;\n' +
+        '  float percentLife = clamp(localTime / lifeTime, 0., 1.);\n' +
         '\n' +
         '  float frame = mod(floor(localTime / u_frameDuration + frameStart), u_numFrames);\n' +
         '  float uOffset = frame / u_numFrames;\n' +
         '  float u = uOffset + (uv.x + 0.5) * (1. / u_numFrames);\n' +
         '\n' +
         '  float size = mix(startSize, endSize, percentLife);\n' +
-        '  size = (percentLife < 0. || percentLife > 1.) ? 0. : size;\n' +
         '  float s = sin(spinStart + spinSpeed * localTime);\n' +
         '  float c = cos(spinStart + spinSpeed * localTime);\n' +
         '\n' +

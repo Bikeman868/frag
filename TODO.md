@@ -8,7 +8,6 @@ No known bugs at this time
 * Shader support for roughness textures
 * Shader support for ambient occlusion textures
 * Shader support for metalic textures
-* Particle system
 * Armatures, bones and mesh animation
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation

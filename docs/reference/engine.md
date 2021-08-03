@@ -44,12 +44,13 @@ All of these properties are optional.
 * `canvas` the html canvas object to render to. Defaults to `document.getElementById("scene")`
 * `renderInterval` the number of millisecornds to pause between screen refreshes. Defaults to 15ms.
 * `gameTickMs` the duration of one game tick in milliseconds. Defaults to 10ms.
+* `transparency` set to `true` to enable transparency in the scene. Mostly only needed for `Font` drawing.
 * `debugPackageLoader` set to `true` to debug issues with loading asset packages.
 * `debugShaderBuilder` set to `true` to debug issues with shaders.
 * `debugAnimations` set to `true` to debug issues with animations.
 * `debugMeshes` set to `true` to debug issues with meshes.
 * `debugInputs` set to `true` to debug issues with player inputs.
-* `transparency` set to `true` to enable transparency in the scene. Mostly only needed for `Font` drawing.
+* `debugParticles` set to `true` to debug issues with particle systems.
 
 ## Properties
 The `Engine` instance has the following properties that you can access

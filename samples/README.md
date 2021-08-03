@@ -127,3 +127,16 @@ Things to mess around with on this sample:
 * Add a check box that toggles the cubes between flat and smooth shading
 * Add some game UI features using Vue.js
 * Add a color picker and re-build the cube mesh with the color chosen
+
+## Fireworks
+This [sample](fireworks.html) illustrates the following features and techniques:
+* Building and configuring a custom particle system
+* Defining custom particle emitters
+* Creating and disposing particle emitters
+* Creating textures in code
+
+Things to mess around with on this sample:
+* Create your own firework display
+* Push the limits of your graphcs card by splitting the display into multiple particle systems
+* Create some new firework effects, for example fireworks that change color over time
+* Script a firework display using the animation engine

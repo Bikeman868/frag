@@ -5041,10 +5041,10 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             buffer[offset2 + ORIENTATION_IDX] = particle.orientation[2];
             buffer[offset3 + ORIENTATION_IDX] = particle.orientation[3];
 
-            buffer[offset0 + COLOR_MULT_IDX] = particle.colorMult[0];
-            buffer[offset1 + COLOR_MULT_IDX] = particle.colorMult[1];
-            buffer[offset2 + COLOR_MULT_IDX] = particle.colorMult[2];
-            buffer[offset3 + COLOR_MULT_IDX] = particle.colorMult[3];
+            buffer[offset0 + COLOR_MULT_IDX] = particle.color[0];
+            buffer[offset1 + COLOR_MULT_IDX] = particle.color[1];
+            buffer[offset2 + COLOR_MULT_IDX] = particle.color[2];
+            buffer[offset3 + COLOR_MULT_IDX] = particle.color[3];
 
             offset0 += LAST_IDX;
             offset1 += LAST_IDX;
@@ -5369,7 +5369,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                     if (particle.velocity === undefined) particle.velocity = [0, 1, 0];
                     if (particle.acceleration === undefined) particle.acceleration = [0, 0, 0];
                     if (particle.orientation === undefined) particle.orientation = [0, 0, 0, 0];
-                    if (particle.colorMult === undefined) particle.colorMult = [1, 1, 1, 1];
+                    if (particle.color === undefined) particle.color = [1, 1, 1, 1];
 
                     if (private.particles.length > private.aliveCount)
                         private.particles[private.aliveCount] = particle;
@@ -8036,14 +8036,13 @@ window.frag.ParticleShaderDebug = function(engine) {
         '  float spinSpeed = a_spinStartSpinSpeed.y;\n' +
         '\n' +
         '  float localTime = mod((u_time - u_timeOffset - startTime), u_timeRange);\n' +
-        '  float percentLife = localTime / lifeTime;\n' +
+        '  float percentLife = clamp(localTime / lifeTime, 0., 1.);\n' +
         '\n' +
         '  float frame = mod(floor(localTime / u_frameDuration + frameStart), u_numFrames);\n' +
         '  float uOffset = frame / u_numFrames;\n' +
         '  float u = uOffset + (uv.x + 0.5) * (1. / u_numFrames);\n' +
         '\n' +
         '  float size = mix(startSize, endSize, percentLife);\n' +
-        '  size = (percentLife < 0. || percentLife > 1.) ? 0. : size;\n' +
         '  float s = sin(spinStart + spinSpeed * localTime);\n' +
         '  float c = cos(spinStart + spinSpeed * localTime);\n' +
         '\n' +
