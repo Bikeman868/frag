@@ -117,7 +117,7 @@
                     const newParticles = [];
                     for (let i = 0; i < 100; i++) {
                         const velocity = [r(size * 0.2), r(size * 0.4, size), r(size * 0.2)];
-                        const acceleration = [velocity[0] * 1.2, -10, velocity[2] * 1.2];
+                        const acceleration = [velocity[0] * 1.2, 0, velocity[2] * 1.2];
                         newParticles.push({
                             lifetime: 2,
                             startSize: 0.5,
@@ -155,7 +155,6 @@
                                 startSize: 0.5,
                                 position,
                                 velocity: [vx, vy, vz],
-                                acceleration: [0, 4, 0],
                                 orientation: frag.Quaternion.rotationX(90 * degToRad),
                                 color,
                             });
@@ -181,7 +180,7 @@
 
         const mines = function() {
             const color = randomColor();
-            const size = r(25, 50);
+            const size = r(15, 50);
             mineEmitter([-40, 0, 0], color, size);
             mineEmitter([40, 0, 0], color, size);
         };
