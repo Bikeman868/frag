@@ -27,10 +27,11 @@
     <script>
         const frag = window.frag;
         const engine = frag.Engine({
-            debugParticles: false
+            debugParticles: false,
+            transparency: true,
         })
         engine.onStart((engine) => {
-            engine.gl.disable(engine.gl.CULL_FACE); // We want to be able to see the back of the wings
+            engine.gl.disable(engine.gl.CULL_FACE);
             engine.gl.clearColor(0, 0, 0, 1);
         });
         engine.start();
@@ -47,34 +48,121 @@
             return mid + range * (Math.random() - 0.5);
         };
 
-        const particleEmitter = {
-            birthParticles: function(particleSystem, time) {
-                const newParticles = [];
-                for (let i = 0; i < 50; i++) {
-                    newParticles.push({
-                        lifetime: r(5, 40),
-                        startSize: 0.5,
-                        endSize: 2,
-                        position: [r(1), r(5), r(1)],
-                        velocity: [r(4), r(4, 12), r(4, 4)],
-                        orientation: frag.Quaternion.rotationX(90 * degToRad),
-                    });
-                };
-                return newParticles;
-            }
-        };
+        const randomColor = function() {
+            const red = Math.random();
+            const green = Math.random();
+            const blue = Math.random();
+            
+            let scale = 1 / red;
+            if (green > red) scale = 1 / green;
+            if (blue > red && blue > green) scale = 1 / blue;
+            return [red * scale, green * scale, blue * scale, 1];
+        }
 
-        const shader = window.frag.ParticleShaderDebug(engine);
-        // const shader = null;
+        const rampTexture = engine.Texture()
+            .dataFormat(engine.gl.RGBA)
+            .fromArrayBuffer(
+                0, 
+                new Uint8Array([
+                    255, 255, 255, 255,
+                    255, 255, 255, 255,
+                    255, 255, 255, 255,
+                    255, 255, 255, 0,
+                ]), 
+                0, 4, 1);
 
-        const particleSystem = engine.CustomParticleSystem(true, shader)
+        const colorTexture = engine.Texture()
+            .dataFormat(engine.gl.RGBA)
+            .fromArrayBuffer(
+                0, 
+                new Uint8Array([255, 255, 255, 255]), 
+                0, 1, 1);
+
+        const particleSystem = engine.CustomParticleSystem()
             .name('Fireworks')
-            .lifetimeGameTickInterval(25)
+            .lifetimeGameTickInterval(10)
+            .numFrames(1)
+            .rampTexture(rampTexture)
+            .colorTexture(colorTexture)
             .acceleration([0, -0.2, 0]);
-
         particleSystem.getPosition().locationXYZ(0, -50, 0);
         scene.addObject(particleSystem);
 
-        particleSystem.addEmitter(particleEmitter);
+        const romanCandle = function(position, color, duration) {
+            const emitter = {
+                birthParticles: function() {
+                    const newParticles = [];
+                    for (let i = 0; i < 10; i++) {
+                        newParticles.push({
+                            lifetime: 6,
+                            startSize: 0.5,
+                            endSize: 1,
+                            position,
+                            velocity: [r(1), r(4, 8), r(4, 1)],
+                            orientation: frag.Quaternion.rotationX(90 * degToRad),
+                            colorMult: color,
+                        });
+                    };
+                    return newParticles;
+                }
+            };
+            particleSystem.addEmitter(emitter);
+            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, duration * 1000);
+        };
+
+        const mortar = function(position, color, size) {
+            const emitter = {
+                birthParticles: function() {
+                    const newParticles = [];
+                    const latitudeCount = 15;
+                    const delta = Math.PI / latitudeCount;
+                    for (let i = 0; i <= latitudeCount; i++) {
+                        const baseLatitude = Math.PI * (2 * i / latitudeCount - 1);
+                        const longitudeCount = i <= latitudeCount / 2 ? (i + 1) * 2 : (latitudeCount - i) * 2 ;
+                        for (let j = 0; j <= longitudeCount; j++) {
+                            const longitude = r(delta, Math.PI * (2 * j / longitudeCount - 1));
+                            const latitude = r(delta, baseLatitude);
+                            vx = Math.cos(longitude) * Math.sin(latitude) * size;
+                            vy = Math.cos(latitude) * size;
+                            vz = Math.sin(longitude) * Math.sin(latitude) * size;
+                            newParticles.push({
+                                lifetime: 3,
+                                startSize: 0.5,
+                                position,
+                                velocity: [vx, vy, vz],
+                                orientation: frag.Quaternion.rotationX(90 * degToRad),
+                                colorMult: color,
+                            });
+                        }
+                    };
+                    return newParticles;
+                }
+            };
+            particleSystem.addEmitter(emitter);
+            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, 150);
+        };
+
+        const romanCandles = function() {
+            const color = randomColor();
+            const durationSec = 20;
+            romanCandle([-50, 0, 0], color, durationSec);
+            romanCandle([0, 0, 0], color, durationSec);
+            romanCandle([50, 0, 0], color, durationSec);
+        };
+
+        setInterval(romanCandles, 30000);
+        romanCandles();
+
+        const mortars = function() {
+            const count = Math.floor(Math.random() * 3) + 1;
+            for (let i = 0; i < count; i++) {
+                const position = [r(100), r(20, 80), 0];
+                const color = randomColor();
+                const size = r(10, 15);
+                mortar(position, color, size);
+            }
+        };
+
+        setInterval(mortars, 500);
     </script>
 </body>

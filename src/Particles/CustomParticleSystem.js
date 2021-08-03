@@ -57,7 +57,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         acceleration: [0, 0, 0],
         timeRange: 99999999,
         timeOffset: 0,
-        numFrames: 1,
+        numFrames: 4,
         frameDuration: 1,
     };
 
@@ -72,28 +72,24 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         [+0.5, +0.5],
         [-0.5, +0.5]];
 
-    const defaultRampData = new Float32Array([1, 1, 1, 1, 1, 1, 1, 0]);
     private.rampTexture = frag.Texture(engine)
         .name("particle-ramp-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultRampData.buffer, 0, 2, 1);
+        .fromArrayBuffer(
+            0,
+            new Uint8Array([
+                255, 255, 255, 255, 
+                255, 255, 255, 0
+            ]), 
+            0, 2, 1);
 
-    const defaultColorBase = [0, 0.20, 0.70, 1, 0.70, 0.20, 0, 0];
-    const defaultColorData = new Float32Array(8 * 8);
-    let ix = 0;
-    for (let y = 0; y < 8; y++) {
-        for (var x = 0; x < 8; x++) {
-            var pixel = defaultColorBase[x] * defaultColorBase[y];
-            defaultColorData[ix++] = pixel;
-            defaultColorData[ix++] = pixel;
-            defaultColorData[ix++] = pixel;
-            defaultColorData[ix++] = pixel;
-        }
-    }
     private.colorTexture = frag.Texture(engine)
         .name("particle-color-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultColorData.buffer, 0, 8, 8);
+        .fromArrayBuffer(
+            0, 
+            new Uint8Array([255, 255, 255, 255]), 
+            0, 1, 1);
 
     private.checkError = function(description) {
         const error = gl.getError();
@@ -269,6 +265,14 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             gl.deleteBuffer(private.indexBuffer);
             private.indexBuffer = null;
         }
+        if (private.rampTexture) {
+            private.rampTexture.dispose();
+            private.rampTexture = null;
+        }
+        if (private.colorTexture) {
+            private.colorTexture.dispose();
+            private.colorTexture = null;
+        }
     }
 
     public.name = function (name) {
@@ -297,11 +301,13 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
     };
 
     public.rampTexture = function(texture) {
+        if (private.rampTexture) private.rampTexture.dispose();
         private.rampTexture = texture;
         return public;
     }
 
     public.colorTexture = function(texture) {
+        if (private.colorTexture) private.colorTexture.dispose();
         private.colorTexture = texture;
         return public;
     }
@@ -454,7 +460,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
                     const particle = newParticles[j];
                     particle.id = id;
                     particle.startTime = time;
-                    if (particle.lifetime === undefined) particle.lifetime = 20;
+                    if (particle.lifetime === undefined) particle.lifetime = 5;
                     if (particle.frameStart === undefined) particle.frameStart = 0;
                     if (particle.spinStart === undefined) particle.spinStart = 0;
                     if (particle.spinSpeed === undefined) particle.spinSpeed = 0;

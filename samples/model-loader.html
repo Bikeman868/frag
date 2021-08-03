@@ -37,9 +37,14 @@
             debugShaderBuilder: false,
             debugInputs: false,
 
-            // higher renderInterval will give you lower power consumption
-            // and higher framr rate. The default value is 15ms which will cap
-            // the frame rate at about 60 frames per second.
+            // Higher renderInterval will give you lower power consumption
+            // and lower frame rate. The default value is 15ms which will cap
+            // the frame rate at about 60 frames per second, and give you about
+            // 40 frames per second on a moderately complex game. For very complex
+            // games you will need to set renderInterval to a smaller number to
+            // achieve an acceptable frame rate, but the game will consume more 
+            // power in this case. Don't set renderInterval to 0 unless you know
+            // exectly what you are doing.
             renderInterval: 20,
 
             // Animation sequences, keyframe animations and speeds are based on
