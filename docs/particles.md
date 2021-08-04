@@ -23,4 +23,11 @@ at the [`CustomParticleSystem` class documentation](reference/custom-particle-sy
 For standard effects like fog, we wrote these effects for you. Here is the 
 full list:
 
-NO PRE-BUILT PARTICLE EFFECTS YET ... watch this space.
+* `MineExplosionEmitter` short blast of material shoots up from the ground.
+* `SphericalExplosionEmitter` like a firework bursting in the sky.
+* `SprayEmitter` sprays particles like a garden hose.
+
+There is also a `CustomParticleEmitter` that allows you to create many different
+particle effects without writing a particle emitter from scratch. To see how to
+use the `CustomParticleEmitter` take a look at the source code for the other
+emitter types that are all based on the `CustomParticleEmitter`.

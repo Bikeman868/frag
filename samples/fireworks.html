@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
 <head>
-    <title>Fireorks</title>
+    <title>Fireworks</title>
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <style>
         html,
@@ -80,8 +80,6 @@
 
         const particleSystem = engine.CustomParticleSystem()
             .name('Fireworks')
-            .lifetimeGameTickInterval(10)
-            .numFrames(1)
             .rampTexture(rampTexture)
             .colorTexture(colorTexture)
             .acceleration([0, -9.8, 0]);
@@ -89,82 +87,22 @@
         scene.addObject(particleSystem);
 
         const romanCandleEmitter = function(position, color, duration) {
-            const emitter = {
-                birthParticles: function() {
-                    const newParticles = [];
-                    for (let i = 0; i < 10; i++) {
-                        newParticles.push({
-                            lifetime: 6,
-                            startSize: 0.5,
-                            endSize: 1,
-                            position,
-                            velocity: [r(2), r(4, 8), r(2)],
-                            acceleration: [0, 9.6, 0],
-                            orientation: frag.Quaternion.rotationX(90 * degToRad),
-                            color,
-                        });
-                    };
-                    return newParticles;
-                }
-            };
-            particleSystem.addEmitter(emitter);
-            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, duration * 1000);
+            const emitter = engine.SprayEmitter(position, [0, 8, 0], 2)
+                .color(function() { return color; })
+                .acceleration(function() { return [0, 9.6, 0]; });
+            emitter.start(particleSystem, duration * 1000);
         };
 
         const mineEmitter = function(position, color, size) {
-            const emitter = {
-                birthParticles: function() {
-                    const newParticles = [];
-                    for (let i = 0; i < 100; i++) {
-                        const velocity = [r(size * 0.2), r(size * 0.4, size), r(size * 0.2)];
-                        const acceleration = [velocity[0] * 1.2, 0, velocity[2] * 1.2];
-                        newParticles.push({
-                            lifetime: 2,
-                            startSize: 0.5,
-                            position,
-                            velocity,
-                            acceleration,
-                            orientation: frag.Quaternion.rotationX(90 * degToRad),
-                            color,
-                        });
-                    };
-                    return newParticles;
-                }
-            };
-            particleSystem.addEmitter(emitter);
-            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, 500);
+            const emitter = engine.MineExplosionEmitter(position, size)
+                .color(function() { return color; });
+            emitter.fire(particleSystem, r(200, 400));
         };
 
         const mortarEmitter = function(position, color, size) {
-            const emitter = {
-                birthParticles: function() {
-                    const newParticles = [];
-                    const latitudeCount = 15;
-                    const delta = Math.PI / latitudeCount;
-                    for (let i = 0; i <= latitudeCount; i++) {
-                        const baseLatitude = Math.PI * (2 * i / latitudeCount - 1);
-                        const longitudeCount = i <= latitudeCount / 2 ? (i + 1) * 2 : (latitudeCount - i) * 2 ;
-                        for (let j = 0; j <= longitudeCount; j++) {
-                            const longitude = r(delta, Math.PI * (2 * j / longitudeCount - 1));
-                            const latitude = r(delta, baseLatitude);
-                            vx = Math.cos(longitude) * Math.sin(latitude) * size;
-                            vy = Math.cos(latitude) * size;
-                            vz = Math.sin(longitude) * Math.sin(latitude) * size;
-                            newParticles.push({
-                                lifetime: 3,
-                                startSize: 0.5,
-                                position,
-                                velocity: [vx, vy, vz],
-                                orientation: frag.Quaternion.rotationX(90 * degToRad),
-                                color,
-                            });
-                        }
-                    };
-                    return newParticles;
-                }
-            };
-            particleSystem.addEmitter(emitter);
-            setTimeout(function(){ particleSystem.removeEmitter(emitter) }, 150);
+            const emitter = engine.SphericalExplosionEmitter(position, size)
+                .color(function() { return color; });
+            emitter.fire(particleSystem, r(100, 100));
         };
 
         const romanCandles = function() {

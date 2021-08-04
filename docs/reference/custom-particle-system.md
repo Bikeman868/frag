@@ -81,7 +81,7 @@ because this color value is multiplied by a sample from the ramp texture and the
 ## lifetimeGameTickInterval(interval: int): CustomParticleSystem
 Configures how frequently the particle system will manage particle lifetimes. Using
 a lower value will make particles create more smoothly as the cost of higher
-CPU utilization. The default is 25 game ticks, which is 1/4 second with the default
+CPU utilization. The default is 10 game ticks, which is 100ms with the default
 configuration.
 
 ## velocity(value: float[]): CustomParticleSystem
@@ -126,6 +126,9 @@ particles. Each particle can have any of the following properties:
 * `velocity` is an array of x, y and z initial velocity of the particle. The
   velocity of the particle system will be added to this value, and the particle
   might accelerate over its lifetime. The default is `[0, 0, 0]`.
+* `acceleration` is an array of x, y and z acceleration of the particle. The
+  acceleration of the particle system will be added to this value. The default 
+  is `[0, 0, 0]`.
 * `orientation` is an array of x, y, z and w direction expressed as a Quaternion.
   The [`window.frag.Quaternion`](quaternion.md) class can help you to construct
   the Quaternion you need. The default is `[0, 0, 0, 0]`.

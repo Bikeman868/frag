@@ -40,7 +40,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         name: "Custom",
         shader: shader || (is3d ? frag.ParticleShader3D(engine) : frag.ParticleShader2D(engine)),
         location: window.frag.Location(engine, is3d),
-        lifetimeGameTickInterval: 25,
+        lifetimeGameTickInterval: 10,
         nextLifetimeGameTick: 0,
         emitters: {},
         particles: [],

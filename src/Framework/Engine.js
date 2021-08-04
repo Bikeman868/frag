@@ -364,6 +364,10 @@ window.frag.Engine = function(config) {
     addProxy('AnalogAction');
     
     addProxy('CustomParticleSystem');
+    addProxy('CustomParticleEmitter');
+    addProxy('MineExplosionEmitter');
+    addProxy('SphericalExplosionEmitter');
+    addProxy('SprayEmitter');
 
     return public;
 };
