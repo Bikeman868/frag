@@ -1,7 +1,7 @@
 # Things that need to be added or improved
 
 ## Bug fixes
-No known bugs at this time
+In the truck on a track sample, the pitch of the truck in not adjusted to the rise and fall of the track.
 
 ## Core features that are missing
 * Shader support for glossinness textures
