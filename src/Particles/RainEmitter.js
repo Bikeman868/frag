@@ -1,5 +1,4 @@
 window.frag.RainEmitter = function(engine, position, width, depth, height, velocity, density) {
-    if (velocity[1] >= 0) console.error('Rain must come down, velocity in Y axis must be negative.');
     const velocityRange = window.frag.Vector.length(velocity) * 0.05;
 
     const emitter = window.frag.CustomParticleEmitter(engine)

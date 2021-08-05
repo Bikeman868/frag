@@ -91,7 +91,14 @@
         particleSystem.getPosition().locationXYZ(0, -50, 0);
         scene.addObject(particleSystem);
 
-        // Roman candles type fireworks use a spray emitter
+        // Allow the user to rotate the particle system by dragging
+        // the pointer with the first button pressed.
+        const rotateState = engine.AnalogState(
+            engine.AnalogAction("rotate-sceneobject-y", { sceneObject: particleSystem }),
+            { minValue: Math.PI * 0.5, maxValue: -Math.PI * 0.5, });
+        engine.AnalogInput("left-pointer", rotateState).enable();
+
+        // Roman candle type fireworks use a spray emitter
         const romanCandleEmitter = function(position, color, duration) {
             const emitter = engine.SprayEmitter(position, [0, 8, 0], 2)
                 .color(function() { return color; })

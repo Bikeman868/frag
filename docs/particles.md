@@ -32,13 +32,17 @@ To create a particle effect in your game you need these components:
 
 ## Particle emitters
 The Frag framework comes with the following particle emitters out of the box:
-* `MineExplosionEmitter` short blast of material shoots up from the ground.
-* `SphericalExplosionEmitter` like a firework bursting in the sky.
-* `SprayEmitter` sprays particles like a garden hose.
-* `RainEmitter` produces particles with similar velocity and direction over an area.
+* [`MineExplosionEmitter`](reference/mine-explosion-emitter.md) short blast of material shoots up from the ground.
+* [`SphericalExplosionEmitter`](reference/spherical-explosion-emitter.md) like a firework bursting in the sky.
+* [`SprayEmitter`](reference/spray-emitter.md) sprays particles like a garden hose.
+* [`RainEmitter`](reference/rain-emitter.md) produces particles with similar velocity and direction over a horizontal area.
 
 There is also a [`CustomParticleSystem` class](reference/custom-particle-system.md)
 that allows you to create many different particle effects without writing 
 a particle emitter from scratch. To see how to use the `CustomParticleEmitter` 
 take a look at the source code for the other emitter types, they are use
 `CustomParticleEmitter` under the hood.
+
+Note that the current position of each particle is calculated by the GPU, so this information
+is not available to your JavaScript code. The GPU calculates particle position dynamically from the 
+starting position, velocity, acceleration and elapsed time.
