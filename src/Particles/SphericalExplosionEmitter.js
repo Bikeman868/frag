@@ -11,10 +11,6 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
         .spinStart(function(){ return 0; })
         .spinSpeed(function(){ return 0; });
 
-    const r = function(range, mid) {
-        return mid + range * (Math.random() - 0.5);
-    };
-
     emitter.birthParticles = function() {
         const newParticles = [];
         const latitudeCount = 15;
@@ -26,8 +22,8 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
                 particle = emitter.createParticle();
                 newParticles.push(particle);
 
-                const longitude = r(delta, Math.PI * (2 * j / longitudeCount - 1));
-                const latitude = r(delta, baseLatitude);
+                const longitude = emitter.randomValue(delta, Math.PI * (2 * j / longitudeCount - 1));
+                const latitude = emitter.randomValue(delta, baseLatitude);
                 vx = Math.cos(longitude) * Math.sin(latitude) * size;
                 vy = Math.cos(latitude) * size;
                 vz = Math.sin(longitude) * Math.sin(latitude) * size;

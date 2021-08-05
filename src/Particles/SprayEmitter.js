@@ -8,9 +8,9 @@ window.frag.SprayEmitter = function(engine, position, axis, width) {
             const velocity = Array.from(axis);
             for (var i = 0; i < 3; i++) {
                 if (axis[i] === 0)
-                    velocity[i] += (Math.random() - 0.5) * width;
+                    velocity[i] += emitter.randomValue(width);
                 else
-                    velocity[i] *= 1 + Math.random() * 0.5;
+                    velocity[i] *= emitter.randomValue(0.5, 1.5);
             }
             return velocity;
         })

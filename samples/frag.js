@@ -1536,6 +1536,7 @@ window.frag.Engine = function(config) {
     addProxy('MineExplosionEmitter');
     addProxy('SphericalExplosionEmitter');
     addProxy('SprayEmitter');
+    addProxy('RainEmitter');
 
     return public;
 };
@@ -4968,6 +4969,8 @@ window.frag.CustomParticleEmitter = function (engine) {
         __private: private,
     };
 
+    public.dispose = function() {}
+
     public.name = function(name) {
         private.name = name;
         return public;
@@ -4982,9 +4985,14 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
+    public.randomValue = function(range, middle, kind) {
+        return private.distribution(private.random(), range, middle, kind);
+    }
+
     // Probability distribution
 
     private.distribution = function(random, range, middle, kind) {
+        middle = middle || 0;
         return middle + range * (random - 0.5);
     }
 
@@ -4996,7 +5004,7 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Lifetime
 
     private.lifetime = function() {
-        return private.distribution(private.random(), private.lifetimeRange, private.lifetimeMiddle, 'lifetime');
+        return public.randomValue(private.lifetimeRange, private.lifetimeMiddle, 'lifetime');
     }
 
     public.lifetime = function(lifetime) {
@@ -5013,9 +5021,9 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Position
 
     private.position = function() {
-        const x = private.distribution(private.random(), private.xPositionRange, private.xPositionMiddle, 'position');
-        const y = private.distribution(private.random(), private.yPositionRange, private.yPositionMiddle, 'position');
-        const z = private.distribution(private.random(), private.zPositionRange, private.zPositionMiddle, 'position');
+        const x = public.randomValue(private.xPositionRange, private.xPositionMiddle, 'position');
+        const y = public.randomValue(private.yPositionRange, private.yPositionMiddle, 'position');
+        const z = public.randomValue(private.zPositionRange, private.zPositionMiddle, 'position');
         
         return [x, y, z];
     }
@@ -5025,15 +5033,15 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    public.positionRange = function(xPositionMin, xPositionMax, yPositionMin, yPositionMax, zPositionMin, zPositionMax) {
-        private.xPositionRange = xPositionMax - xPositionMin;
-        private.xPositionMiddle = (xPositionMax + xPositionMin) * 0.5;
+    public.positionRange = function(min, max) {
+        private.xPositionRange = max[0] - min[0];
+        private.xPositionMiddle = (max[0] + min[0]) * 0.5;
 
-        private.yPositionRange = yPositionMax - yPositionMin;
-        private.yPositionMiddle = (yPositionMax + yPositionMin) * 0.5;
+        private.yPositionRange = max[1] - min[1];
+        private.yPositionMiddle = (max[1] + min[1]) * 0.5;
 
-        private.zPositionRange = zPositionMax - zPositionMin;
-        private.zPositionMiddle = (zPositionMax + zPositionMin) * 0.5;
+        private.zPositionRange = max[2] - min[2];
+        private.zPositionMiddle = (max[2] + min[2]) * 0.5;
 
         return public;
     }
@@ -5041,9 +5049,9 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Velocity
 
     private.velocity = function() {
-        const x = private.distribution(private.random(), private.xVelocityRange, private.xVelocityMiddle, 'velocity');
-        const y = private.distribution(private.random(), private.yVelocityRange, private.yVelocityMiddle, 'velocity');
-        const z = private.distribution(private.random(), private.zVelocityRange, private.zVelocityMiddle, 'velocity');
+        const x = public.randomValue(private.xVelocityRange, private.xVelocityMiddle, 'velocity');
+        const y = public.randomValue(private.yVelocityRange, private.yVelocityMiddle, 'velocity');
+        const z = public.randomValue(private.zVelocityRange, private.zVelocityMiddle, 'velocity');
         
         return [x, y, z];
     }
@@ -5053,15 +5061,15 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    public.velocityRange = function(xVelocityMin, xVelocityMax, yVelocityMin, yVelocityMax, zVelocityMin, zVelocityMax) {
-        private.xVelocityRange = xVelocityMax - xVelocityMin;
-        private.xVelocityMiddle = (xVelocityMax + xVelocityMin) * 0.5;
+    public.velocityRange = function(min, max) {
+        private.xVelocityRange = max[0] - min[0];
+        private.xVelocityMiddle = (max[0] + min[0]) * 0.5;
 
-        private.yVelocityRange = yVelocityMax - yVelocityMin;
-        private.yVelocityMiddle = (yVelocityMax + yVelocityMin) * 0.5;
+        private.yVelocityRange = max[1] - min[1];
+        private.yVelocityMiddle = (max[1] + min[1]) * 0.5;
 
-        private.zVelocityRange = zVelocityMax - zVelocityMin;
-        private.zVelocityMiddle = (zVelocityMax + zVelocityMin) * 0.5;
+        private.zVelocityRange = max[2] - min[2];
+        private.zVelocityMiddle = (max[2] + min[2]) * 0.5;
 
         return public;
     }
@@ -5069,9 +5077,9 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Acceleration
 
     private.acceleration = function() {
-        const x = private.distribution(private.random(), private.xAccelerationRange, private.xAccelerationMiddle, 'acceleration');
-        const y = private.distribution(private.random(), private.yAccelerationRange, private.yAccelerationMiddle, 'acceleration');
-        const z = private.distribution(private.random(), private.zAccelerationRange, private.zAccelerationMiddle, 'acceleration');
+        const x = public.randomValue(private.xAccelerationRange, private.xAccelerationMiddle, 'acceleration');
+        const y = public.randomValue(private.yAccelerationRange, private.yAccelerationMiddle, 'acceleration');
+        const z = public.randomValue(private.zAccelerationRange, private.zAccelerationMiddle, 'acceleration');
         
         return [x, y, z];
     }
@@ -5081,15 +5089,15 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    public.accelerationRange = function(xAccelerationMin, xAccelerationMax, yAccelerationMin, yAccelerationMax, zAccelerationMin, zAccelerationMax) {
-        private.xAccelerationRange = xAccelerationMax - xAccelerationMin;
-        private.xAccelerationMiddle = (xAccelerationMax + xAccelerationMin) * 0.5;
+    public.accelerationRange = function(min, max) {
+        private.xAccelerationRange = max[0] - min[0];
+        private.xAccelerationMiddle = (max[0] + min[0]) * 0.5;
 
-        private.yAccelerationRange = yAccelerationMax - yAccelerationMin;
-        private.yAccelerationMiddle = (yAccelerationMax + yAccelerationMin) * 0.5;
+        private.yAccelerationRange = max[1] - min[1];
+        private.yAccelerationMiddle = (max[1] + min[1]) * 0.5;
 
-        private.zAccelerationRange = zAccelerationMax - zAccelerationMin;
-        private.zAccelerationMiddle = (zAccelerationMax + zAccelerationMin) * 0.5;
+        private.zAccelerationRange = max[2] - min[2];
+        private.zAccelerationMiddle = (max[2] + min[2]) * 0.5;
 
         return public;
     }
@@ -5097,10 +5105,10 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Orientation
 
     private.orientation = function() {
-        const x = private.distribution(private.random(), private.xOrientationRange, private.xOrientationMiddle, 'orientation');
-        const y = private.distribution(private.random(), private.yOrientationRange, private.yOrientationMiddle, 'orientation');
-        const z = private.distribution(private.random(), private.zOrientationRange, private.zOrientationMiddle, 'orientation');
-        const w = private.distribution(private.random(), private.wOrientationRange, private.wOrientationMiddle, 'orientation');
+        const x = public.randomValue(private.xOrientationRange, private.xOrientationMiddle, 'orientation');
+        const y = public.randomValue(private.yOrientationRange, private.yOrientationMiddle, 'orientation');
+        const z = public.randomValue(private.zOrientationRange, private.zOrientationMiddle, 'orientation');
+        const w = public.randomValue(private.wOrientationRange, private.wOrientationMiddle, 'orientation');
         
         return [x, y, z, w];
     }
@@ -5110,18 +5118,18 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    public.orientationRange = function(xOrientationMin, xOrientationMax, yOrientationMin, yOrientationMax, zOrientationMin, zOrientationMax, wOrientationMin, wOrientationMax) {
-        private.xOrientationRange = xOrientationMax - xOrientationMin;
-        private.xOrientationMiddle = (xOrientationMax + xOrientationMin) * 0.5;
+    public.orientationRange = function(min, max) {
+        private.xOrientationRange = max[0] - min[0];
+        private.xOrientationMiddle = (max[0] + min[0]) * 0.5;
 
-        private.yOrientationRange = yOrientationMax - yOrientationMin;
-        private.yOrientationMiddle = (yOrientationMax + yOrientationMin) * 0.5;
+        private.yOrientationRange = max[1] - min[1];
+        private.yOrientationMiddle = (max[1] + min[1]) * 0.5;
 
-        private.zOrientationRange = zOrientationMax - zOrientationMin;
-        private.zOrientationMiddle = (zOrientationMax + zOrientationMin) * 0.5;
+        private.zOrientationRange = max[2] - min[2];
+        private.zOrientationMiddle = (max[2] + min[2]) * 0.5;
 
-        private.wOrientationRange = wOrientationMax - wOrientationMin;
-        private.wOrientationMiddle = (wOrientationMax + wOrientationMin) * 0.5;
+        private.wOrientationRange = max[3] - min[3];
+        private.wOrientationMiddle = (max[3] + min[3]) * 0.5;
 
         return public;
     }
@@ -5129,10 +5137,10 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Color
 
     private.color = function() {
-        const red = private.distribution(private.random(), private.redRange, private.redMiddle, 'color');
-        const green = private.distribution(private.random(), private.greenRange, private.greenMiddle, 'color');
-        const blue = private.distribution(private.random(), private.blueRange, private.blueMiddle, 'color');
-        const alpha = private.distribution(private.random(), private.alphaRange, private.alphaMiddle, 'aplha');
+        const red = public.randomValue(private.redRange, private.redMiddle, 'color');
+        const green = public.randomValue(private.greenRange, private.greenMiddle, 'color');
+        const blue = public.randomValue(private.blueRange, private.blueMiddle, 'color');
+        const alpha = public.randomValue(private.alphaRange, private.alphaMiddle, 'aplha');
         
         let scale = 1 / red;
         if (green > red) scale = 1 / green;
@@ -5145,18 +5153,18 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    public.colorRange = function(redMin, redMax, greenMin, greenMax, blueMin, blueMax, alphaMin, alphaMax) {
-        private.redRange = redMax - redMin;
-        private.redMiddle = (redMax + redMin) * 0.5;
+    public.colorRange = function(min, max) {
+        private.redRange = max[0] - min[0];
+        private.redMiddle = (max[0] + min[0]) * 0.5;
 
-        private.greenRange = greenMax - greenMin;
-        private.greenMiddle = (greenMax + greenMin) * 0.5;
+        private.greenRange = max[1] - min[1];
+        private.greenMiddle = (max[1] + min[1]) * 0.5;
 
-        private.blueRange = blueMax - blueMin;
-        private.blueMiddle = (blueMax + blueMin) * 0.5;
+        private.blueRange = max[2] - min[2];
+        private.blueMiddle = (max[2] + min[2]) * 0.5;
 
-        private.alphaRange = alphaMax - alphaMin;
-        private.alphaMiddle = (alphaMax + alphaMin) * 0.5;
+        private.alphaRange = max[3] - min[3];
+        private.alphaMiddle = (max[3] + min[3]) * 0.5;
 
         return public;
     }
@@ -5164,15 +5172,21 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Size
 
     private.startSize = function() {
-        return private.distribution(private.random(), private.startSizeRange, private.startSizeMiddle, 'size');
+        return public.randomValue(private.startSizeRange, private.startSizeMiddle, 'size');
     }
 
     private.endSize = function(startSize) {
-        return startSize + private.distribution(private.random(), private.sizeIncreaseRange, private.sizeIncreaseMiddle, 'size');
+        return startSize + public.randomValue(private.sizeIncreaseRange, private.sizeIncreaseMiddle, 'size');
     }
 
     public.startSize = function(startSize) {
         private.startSize = startSize;
+        return public;
+    }
+
+    public.startSizeRange = function(startMin, startMax) {
+        private.startSizeRange = startMax - startMin;
+        private.startSizeMiddle = (startMax + startMin) * 0.5;
         return public;
     }
 
@@ -5193,7 +5207,7 @@ window.frag.CustomParticleEmitter = function (engine) {
     // Frame
 
     private.frameStart = function() {
-        return Math.floor(private.distribution(private.random(), private.lifetimeRange, private.lifetimeMiddle, 'lifetime'));
+        return Math.floor(public.randomValue(private.lifetimeRange, private.lifetimeMiddle, 'frame'));
     }
 
     public.frameStart = function(frameStart) {
@@ -5207,14 +5221,10 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
-    // Spin
+    // Spin start
 
     private.spinStart = function() {
-        return private.distribution(private.random(), private.spinStartRange, private.spinStartMiddle, 'spin');
-    }
-
-    private.spinSpeed = function() {
-        return private.distribution(private.random(), private.spinSpeedRange, private.spinSpeedMiddle, 'spin');
+        return public.randomValue(private.spinStartRange, private.spinStartMiddle, 'spin');
     }
 
     public.spinStart = function(spinStart) {
@@ -5222,15 +5232,24 @@ window.frag.CustomParticleEmitter = function (engine) {
         return public;
     }
 
+    public.spinStartRange = function(startMin, startMax) {
+        private.spinStartRange = startMax - startMin;
+        private.spinStartMiddle = (startMax + startMin) * 0.5;
+        return public;
+    }
+
+    // Spin speed
+
+    private.spinSpeed = function() {
+        return public.randomValue(private.spinSpeedRange, private.spinSpeedMiddle, 'spin');
+    }
+
     public.spinSpeed = function(spinSpeed) {
         private.spinSpeed = spinSpeed;
         return public;
     }
 
-    public.spinRange = function(startMin, startMax, speedMin, speedMax) {
-        private.spinStartRange = startMax - startMin;
-        private.spinStartMiddle = (startMax + startMin) * 0.5;
-
+    public.spinSpeedRange = function(speedMin, speedMax) {
         private.spinSpeedRange = speedMax - speedMin;
         private.spinSpeedMiddle = (speedMax + speedMin) * 0.5;
         return public;
@@ -5238,8 +5257,7 @@ window.frag.CustomParticleEmitter = function (engine) {
 
     // Particle birthing
 
-    private.adjust = function(particle) {
-    }
+    private.adjust = null;
 
     public.adjust = function(adjust) {
         private.adjust = adjust;
@@ -5260,7 +5278,7 @@ window.frag.CustomParticleEmitter = function (engine) {
             spinSpeed: private.spinSpeed(),
         };
         particle.endSize = private.endSize(particle.startSize);
-        private.adjust(particle);
+        if (private.adjust) private.adjust(particle);
         return particle;
     }
 
@@ -5279,7 +5297,7 @@ window.frag.CustomParticleEmitter = function (engine) {
 
     public.birthParticles = function() {
         const newParticles = [];
-        const count = private.distribution(private.random(), private.birthRange, private.birthMiddle, 'rate');
+        const count = Math.floor(public.randomValue(private.birthRange, private.birthMiddle, 'rate'));
         for (let i = 0; i < count; i++) {
             newParticles.push(private.birthParticle());
         }
@@ -5835,7 +5853,7 @@ window.frag.MineExplosionEmitter = function(engine, position, size) {
         .birthRate(100, 100)
         .lifetime(function(){ return 2; })
         .position(function(){ return position; })
-        .velocityRange(size * -0.1, size * 0.1, size * 0.8, size * 1.2, size * -0.1, size * 0.1)
+        .velocityRange([size * -0.1, size * 0.8, size * -0.1], [size * 0.1, size * 1.2, size * 0.1])
         .acceleration(function(){ return [0, 0, 0]; })
         .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
@@ -5851,6 +5869,47 @@ window.frag.MineExplosionEmitter = function(engine, position, size) {
         duration = duration || 500;
         particleSystem.addEmitter(emitter);
         setTimeout(function(){ particleSystem.removeEmitter(emitter) }, duration);
+    }
+
+    return emitter;
+}
+
+/***/ }),
+
+/***/ "./src/Particles/RainEmitter.js":
+/*!**************************************!*\
+  !*** ./src/Particles/RainEmitter.js ***!
+  \**************************************/
+/***/ (() => {
+
+window.frag.RainEmitter = function(engine, position, width, depth, height, velocity, density) {
+    if (velocity[1] >= 0) console.error('Rain must come down, velocity in Y axis must be negative.');
+    const velocityRange = window.frag.Vector.length(velocity) * 0.05;
+
+    const emitter = window.frag.CustomParticleEmitter(engine)
+        .name("Rain")
+        .birthRate(density * 0.05, density)
+        .lifetime(function(){ return height; })
+        .position(function(){ 
+            return window.frag.Vector.add(position, [emitter.randomValue(width), 0, emitter.randomValue(depth)]); 
+        })
+        .velocity(function(){
+            return window.frag.Vector.mult(velocity, emitter.randomValue(velocityRange, 1));
+        })
+        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
+        .startSize(function(){ return 1.5 })
+        .endSize(function(){ return 1.5 })
+        .color(function(){ return [0.5, 0.5, 0.5, 0.1]; });
+
+    emitter.stop = function() {
+        emitter.particleSystem.removeEmitter(emitter);
+    }
+
+    emitter.start = function(particleSystem, duration) {
+        emitter.particleSystem = particleSystem;
+        particleSystem.addEmitter(emitter);
+        if (duration)
+            setTimeout(emitter.stop, duration);
     }
 
     return emitter;
@@ -5877,10 +5936,6 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
         .spinStart(function(){ return 0; })
         .spinSpeed(function(){ return 0; });
 
-    const r = function(range, mid) {
-        return mid + range * (Math.random() - 0.5);
-    };
-
     emitter.birthParticles = function() {
         const newParticles = [];
         const latitudeCount = 15;
@@ -5892,8 +5947,8 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
                 particle = emitter.createParticle();
                 newParticles.push(particle);
 
-                const longitude = r(delta, Math.PI * (2 * j / longitudeCount - 1));
-                const latitude = r(delta, baseLatitude);
+                const longitude = emitter.randomValue(delta, Math.PI * (2 * j / longitudeCount - 1));
+                const latitude = emitter.randomValue(delta, baseLatitude);
                 vx = Math.cos(longitude) * Math.sin(latitude) * size;
                 vy = Math.cos(latitude) * size;
                 vz = Math.sin(longitude) * Math.sin(latitude) * size;
@@ -5930,9 +5985,9 @@ window.frag.SprayEmitter = function(engine, position, axis, width) {
             const velocity = Array.from(axis);
             for (var i = 0; i < 3; i++) {
                 if (axis[i] === 0)
-                    velocity[i] += (Math.random() - 0.5) * width;
+                    velocity[i] += emitter.randomValue(width);
                 else
-                    velocity[i] *= 1 + Math.random() * 0.5;
+                    velocity[i] *= emitter.randomValue(0.5, 1.5);
             }
             return velocity;
         })
@@ -9633,9 +9688,10 @@ __webpack_require__(/*! ./Particles/CustomParticleEmitter */ "./src/Particles/Cu
 __webpack_require__(/*! ./Particles/MineExplosionEmitter */ "./src/Particles/MineExplosionEmitter.js");
 __webpack_require__(/*! ./Particles/SphericalExplosionEmitter */ "./src/Particles/SphericalExplosionEmitter.js");
 __webpack_require__(/*! ./Particles/SprayEmitter */ "./src/Particles/SprayEmitter.js");
+__webpack_require__(/*! ./Particles/RainEmitter */ "./src/Particles/RainEmitter.js");
 
 var env = "development" || 0;
-if (env === "development") {
+if (env === 'development') {
     __webpack_require__(/*! ./Shaders/ParticleShaderDebug */ "./src/Shaders/ParticleShaderDebug.js");
 }
 

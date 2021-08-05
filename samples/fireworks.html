@@ -150,5 +150,10 @@
 
         // Repeat mortars twice per second
         setInterval(mortars, 500);
+
+        // Let it rain for the first minute
+        const rain = engine.RainEmitter([0, 150, 0], 200, 100, 4, [0, -10, 0], 100)
+        rain.start(particleSystem, 60000);
+
     </script>
 </body>

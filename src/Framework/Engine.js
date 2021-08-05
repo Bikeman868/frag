@@ -368,6 +368,7 @@ window.frag.Engine = function(config) {
     addProxy('MineExplosionEmitter');
     addProxy('SphericalExplosionEmitter');
     addProxy('SprayEmitter');
+    addProxy('RainEmitter');
 
     return public;
 };

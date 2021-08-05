@@ -18,16 +18,27 @@ To see the particle system in action, check out the [fireworks sample](../sample
 It comes close to the 16,384 particle limit and you can easily modify it
 to see what happens whent the limit is exceeded.
 
-If you want to create your own particle based effect, you should take a look
-at the [`CustomParticleSystem` class documentation](reference/custom-particle-system.md).
-For standard effects like fog, we wrote these effects for you. Here is the 
-full list:
+## Components
+To create a particle effect in your game you need these components:
+* A particle system object that defines most aspects of the particle appearence.
+  The particle system must be added to a scene to display the particles.
+* One or more particle emitters. These define quantity of particles as well
+  as the speed, direction, spin speed, and color of each particle.
+* A shader that is specifically coded to draw particles must be attached to the
+  particle system. The Frag framework comes with a 3D and a 2D version of a
+  very flexible particle shader. If you have specific needs you can create
+  a copy of the built-in shader and customize it to make it more efficient for 
+  your specific needs.
 
+## Particle emitters
+The Frag framework comes with the following particle emitters out of the box:
 * `MineExplosionEmitter` short blast of material shoots up from the ground.
 * `SphericalExplosionEmitter` like a firework bursting in the sky.
 * `SprayEmitter` sprays particles like a garden hose.
+* `RainEmitter` produces particles with similar velocity and direction over an area.
 
-There is also a `CustomParticleEmitter` that allows you to create many different
-particle effects without writing a particle emitter from scratch. To see how to
-use the `CustomParticleEmitter` take a look at the source code for the other
-emitter types that are all based on the `CustomParticleEmitter`.
+There is also a [`CustomParticleSystem` class](reference/custom-particle-system.md)
+that allows you to create many different particle effects without writing 
+a particle emitter from scratch. To see how to use the `CustomParticleEmitter` 
+take a look at the source code for the other emitter types, they are use
+`CustomParticleEmitter` under the hood.

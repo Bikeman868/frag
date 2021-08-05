@@ -4,7 +4,7 @@ window.frag.MineExplosionEmitter = function(engine, position, size) {
         .birthRate(100, 100)
         .lifetime(function(){ return 2; })
         .position(function(){ return position; })
-        .velocityRange(size * -0.1, size * 0.1, size * 0.8, size * 1.2, size * -0.1, size * 0.1)
+        .velocityRange([size * -0.1, size * 0.8, size * -0.1], [size * 0.1, size * 1.2, size * 0.1])
         .acceleration(function(){ return [0, 0, 0]; })
         .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
