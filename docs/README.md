@@ -144,7 +144,7 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 
 #### Shapes
 * [`Cube`](reference/cube.md) builds a mesh that comprises some or all of the sides of a cube.
-* [`Cylinder`](reference/cube.md) builds a cylinder, cone or truncated cone mesh.
+* [`Cylinder`](reference/cylinder.md) builds a cylinder, cone or truncated cone mesh.
 * [`Disc`](reference/disc.md) You can do this with a `Cylinder` but this is a bit simpler.
 * [`Sphere`](reference/shpere.md) builds a mesh that covers part of a sphere.
 
@@ -158,7 +158,7 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`CustomParticleEmitter`](reference/custom-particle-emitter.md) births particles and adds them to a particle system.
 * [`CustomParticleSystem`](reference/custom-particle-system.md) manages a large numbers of meshes with lifetime and sends changes to a particle shader.
 * [`CustomShader`](reference/custom-shader.md) the base class for all code that runs on the GPU.
-* [`Cylinder`](reference/cube.md) builds a cylinder, cone or truncated cone mesh.
+* [`Cylinder`](reference/cylinder.md) builds a cylinder, cone or truncated cone mesh.
 * [`DigitalAction`](reference/digital-action.md) applies digital state changes to something in the game.
 * [`DigitalInput`](reference/digital-action.md) updates a digital state from an input device.
 * [`DigitalState`](reference/digital-action.md) stores an on/off value that can be controlled by the player.

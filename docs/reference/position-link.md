@@ -66,7 +66,7 @@ position changes.
 
 ## locationOffset(offset: Array<float | undefined> | undefined): PositionLink
 Tells the position link to copy location data from source to destination, adding
-an offset along the way. You can also omit the `source` parameter to stop
+an offset along the way. You can also omit the `offset` parameter to stop
 copying location data.
 
 The offset parameter must be an array of 3 elements for the X, Y and Z axes
@@ -85,7 +85,7 @@ across by default.
 
 ## scaleOffset(offset: Array<float | undefined> | undefined): PositionLink
 Tells the position link to copy scale data from source to destination, multiplying
-by an offset along the way. You can also omit the `source` parameter to stop
+by an offset along the way. You can also omit the `offset` parameter to stop
 copying scale data.
 
 The offset parameter must be an array of 3 elements for the X, Y and Z axes
@@ -104,7 +104,7 @@ across by default.
 
 ## rotationOffset(offset: Array<float | undefined> | undefined): PositionLink
 Tells the position link to copy rotation data from source to destination, adding
-an offset along the way. You can also omit the `source` parameter to stop
+an offset along the way. You can also omit the `offset` parameter to stop
 copying rotation data.
 
 The offset parameter must be an array of 3 elements for the X, Y and Z axes
@@ -113,11 +113,38 @@ where `undefined` means do not copy this axis rotation.
 
 For example:
 ```javascript
-link.locationOffset([undefined, Math.PI / 2, undefined]);
+link.rotationOffset([undefined, Math.PI / 2, undefined]);
 ```
 Means take the Y axis rotation of the source, add a quarter turn and store this
 in the Y rotation of the destination. Do not change the X or Z axes in the 
 destination.
 
 The rotation offset defaults to `undefined` so no rotation data is copied
+across by default.
+
+## lookAtOffset(offset: Array<float | undefined> | undefined): PositionLink
+Tells the position link to calculate the direction you would need to travel in
+to get from the `source` to the `dest` then copies this into the rotation data
+of the `dest` so that the `dest` is "looking at" the `source`. You can also 
+omit the `offset` parameter to stop copying rotation data.
+
+The offset parameter must be an array of 3 elements for the X, Y and Z axes
+respectively. Each array element can be a floating point number or `undefined`
+where `undefined` means do not copy this axis rotation.
+
+For example:
+```javascript
+link.lookAtOffset([undefined, Math.PI / 2, undefined]);
+```
+This line of code means; find the direction from source to destination, then take 
+the Y axis heading deom this direction, add a quarter turn and store this in the Y rotation 
+of the destination. Do not change the X or Z axes in the destination.
+
+The most common usage of this methos is:
+```javascript
+link.lookAtOffset([0, 0, 0]);
+```
+Which makes the destination object keep looking directly at the source object.
+
+The look at offset defaults to `undefined` so no rotation data is copied
 across by default.

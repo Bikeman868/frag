@@ -11,7 +11,6 @@ No known bugs at this time
 * Armatures, bones and mesh animation
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation
-* Set cameras and other objects to 'look at' something in the scene
 * Better handling of velocity and acceleration for analog inputs
 * Make the cylinder shape able to make truncated cones with optional end caps
 * Point source lights and shadows

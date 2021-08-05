@@ -148,6 +148,30 @@
         truck.getPosition().scale(6).location([-10, -50, 0]);
         scene.addObject(truck);
 
+        // Create a simple flag that always points towards the truck
+        const flagpoleModel = frag.Model(engine)
+            .name("Pole")
+            .shader(shader)
+            .material(trailerMaterial)
+            .mesh(frag.Cube(engine, 1));
+        flagpoleModel.getPosition().scaleXYZ(1, 10, 1);
+        const flagpole = frag.SceneObject(engine, flagpoleModel);
+        flagpole.getPosition().scale(2).location([0, -45, 150]);
+        scene.addObject(flagpole);
+        const flagModel = frag.Model(engine)
+            .name("Flag")
+            .shader(shader)
+            .material(engineMaterial)
+            .mesh(frag.Cylinder(engine, 12, { bottomRadius: 0 }));
+        flagModel.getPosition().locationZ(1);
+        const flag = frag.SceneObject(engine, flagModel);
+        flag.getPosition().scale(8).location([0, -30, 150]);
+        scene.addObject(flag);
+        frag.PositionLink(engine)
+            .lookAtOffset([0, 0, 0])
+            .dest(flag)
+            .source(truck);
+
         // Define a track that the truck will move along. This is just a list
         // of x, y, z coordinates in the scene
         const track = [

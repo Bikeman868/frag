@@ -7192,6 +7192,7 @@ window.frag.PositionLink = function(engine) {
         locationOffset: null,
         scaleOffset: null,
         rotationOffset: null,
+        lookAtOffset: null,
     };
 
     const public = {
@@ -7241,6 +7242,27 @@ window.frag.PositionLink = function(engine) {
                     private.dest.scaleY(location.scaleY * private.scaleOffset[1]);
                 if (private.scaleOffset[2] !== undefined)
                     private.dest.scaleZ(location.scaleZ * private.scaleOffset[2]);
+            }
+        }
+        if (private.lookAtOffset) {
+            const sourceLocation = private.source.getLocation();
+            const destLocation =  private.dest.getLocation();
+            const heading = window.frag.Vector.heading(window.frag.Vector.sub(sourceLocation, destLocation));
+            if (private.lookAtOffset[0] !== undefined && 
+                private.lookAtOffset[1] !== undefined && 
+                private.lookAtOffset[2] !== undefined) {
+                private.dest.rotateXYZ(
+                    heading[0] + private.lookAtOffset[0],
+                    heading[1] + private.lookAtOffset[1],
+                    heading[2] + private.lookAtOffset[2]);
+
+            } else {
+                if (private.lookAtOffset[0] !== undefined)
+                    private.dest.rotateX(heading[0] + private.lookAtOffset[0]);
+                if (private.lookAtOffset[1] !== undefined)
+                    private.dest.rotateY(heading[1] + private.lookAtOffset[1]);
+                if (private.lookAtOffset[2] !== undefined)
+                    private.dest.rotateZ(heading[2] + private.lookAtOffset[2]);
             }
         }
         if (private.rotationOffset) {
@@ -7297,6 +7319,11 @@ window.frag.PositionLink = function(engine) {
 
     public.rotationOffset = function(offset) {
         private.rotationOffset = offset;
+        return public
+    }
+
+    public.lookAtOffset = function(offset) {
+        private.lookAtOffset = offset;
         return public
     }
 
