@@ -377,7 +377,9 @@
 
             createFont() {
                 // We would normally load a font asset, this is a hack 
-                // to create a font texture by drawing text on a canvas
+                // to create a font texture by drawing text on a canvas.
+                // This technique will not work on all device platforms
+                // because fonts vary.
 
                 const canvas = document.createElement("CANVAS");
                 canvas.width = 256;
@@ -495,8 +497,8 @@
                 const pos = rigidBody.getPosition();
                 scenePosition.locationXYZ(pos.x, pos.y, pos.z);
 
-                // const quad = rigidBody.getQuaternion();
-                // scenePosition.rotate([quad.w, quad.x, quad.y, quad.z]);
+                //const quad = rigidBody.getQuaternion();
+                //scenePosition.rotate([quad.x, quad.y, quad.z, quad.w]);
             }
 
             checkCollisions() {

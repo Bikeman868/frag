@@ -224,7 +224,7 @@ for your benefit.
         // create custom shaders that implement special effects. The shader
         // builder lets you choose the features you want then builds a shader
         // with those features. The more features you enable the lower the frame
-        // rate will be for your game. Shaders run on the gpaphics card GPU.
+        // rate will be for your game. Shaders run on the graphics card GPU.
         const shader = frag.Shader(engine)
             .name("My shader")
             .diffuseTexture()
@@ -272,14 +272,14 @@ for your benefit.
         // You can create as many instances of each model in the scene
         // that you need. Each instance can be independently moved,
         // rotated, scaled and animated but they all share the same
-        // mesh, material and shader defined bu the model.
+        // mesh, material and shader defined by the model.
         const cube = frag.SceneObject(engine, model);
         cube.getPosition().scale(40);
         scene.addObject(cube);
 
         // There are several animation option available including
         // keyframes and smooth transitions over time. Here we are
-        // using the simplest animation technique of executing a
+        // using the lowest level animation technique of executing a
         // function at regular intervals
         const spinningAnimation = frag.Animation(engine)
             .repeatTicks(function () {
