@@ -14,7 +14,6 @@ window.frag.SprayEmitter = function(engine, position, axis, width) {
             }
             return velocity;
         })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
         .endSize(function(){ return 1 });
 

@@ -51,7 +51,7 @@ window.frag.ParticleShader3D = function(engine) {
         '  float s = sin(spinStart + spinSpeed * localTime);\n' +
         '  float c = cos(spinStart + spinSpeed * localTime);\n' +
         '\n' +
-        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, 0., (uv.x * s - uv.y * c) * size, 1.);\n' +
+        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, (uv.x * s + uv.y * c) * size, 0., 1.);\n' +
         '  vec3 center = velocity * localTime + acceleration * localTime * localTime + position;\n' +
         '\n' +
         '  vec4 q2 = a_orientation + a_orientation;\n' +

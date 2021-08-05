@@ -11,7 +11,6 @@ window.frag.RainEmitter = function(engine, position, width, depth, height, veloc
         .velocity(function(){
             return window.frag.Vector.mult(velocity, emitter.randomValue(velocityRange, 1));
         })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 1.5 })
         .endSize(function(){ return 1.5 })
         .color(function(){ return [0.5, 0.5, 0.5, 0.1]; });

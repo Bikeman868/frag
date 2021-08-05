@@ -4,7 +4,6 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
         .lifetime(function(){ return 3; })
         .position(function(){ return position; })
         .acceleration(function(){ return [0, 0, 0]; })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
         .endSize(function(){ return 0.5 })
         .frameStart(function(){ return 0; })

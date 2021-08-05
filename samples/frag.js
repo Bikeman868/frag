@@ -5855,7 +5855,6 @@ window.frag.MineExplosionEmitter = function(engine, position, size) {
         .position(function(){ return position; })
         .velocityRange([size * -0.1, size * 0.8, size * -0.1], [size * 0.1, size * 1.2, size * 0.1])
         .acceleration(function(){ return [0, 0, 0]; })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
         .endSize(function(){ return 0.5 })
         .frameStart(function(){ return 0; })
@@ -5883,7 +5882,6 @@ window.frag.MineExplosionEmitter = function(engine, position, size) {
 /***/ (() => {
 
 window.frag.RainEmitter = function(engine, position, width, depth, height, velocity, density) {
-    if (velocity[1] >= 0) console.error('Rain must come down, velocity in Y axis must be negative.');
     const velocityRange = window.frag.Vector.length(velocity) * 0.05;
 
     const emitter = window.frag.CustomParticleEmitter(engine)
@@ -5896,7 +5894,6 @@ window.frag.RainEmitter = function(engine, position, width, depth, height, veloc
         .velocity(function(){
             return window.frag.Vector.mult(velocity, emitter.randomValue(velocityRange, 1));
         })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 1.5 })
         .endSize(function(){ return 1.5 })
         .color(function(){ return [0.5, 0.5, 0.5, 0.1]; });
@@ -5929,7 +5926,6 @@ window.frag.SphericalExplosionEmitter = function(engine, position, size) {
         .lifetime(function(){ return 3; })
         .position(function(){ return position; })
         .acceleration(function(){ return [0, 0, 0]; })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
         .endSize(function(){ return 0.5 })
         .frameStart(function(){ return 0; })
@@ -5991,7 +5987,6 @@ window.frag.SprayEmitter = function(engine, position, axis, width) {
             }
             return velocity;
         })
-        .orientation(function(){ return window.frag.Quaternion.rotationX(Math.PI * 0.5); })
         .startSize(function(){ return 0.5 })
         .endSize(function(){ return 1 });
 
@@ -8525,7 +8520,7 @@ window.frag.ParticleShader3D = function(engine) {
         '  float s = sin(spinStart + spinSpeed * localTime);\n' +
         '  float c = cos(spinStart + spinSpeed * localTime);\n' +
         '\n' +
-        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, 0., (uv.x * s - uv.y * c) * size, 1.);\n' +
+        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, (uv.x * s + uv.y * c) * size, 0., 1.);\n' +
         '  vec3 center = velocity * localTime + acceleration * localTime * localTime + position;\n' +
         '\n' +
         '  vec4 q2 = a_orientation + a_orientation;\n' +
@@ -8635,7 +8630,7 @@ window.frag.ParticleShaderDebug = function(engine) {
         '  float s = sin(spinStart + spinSpeed * localTime);\n' +
         '  float c = cos(spinStart + spinSpeed * localTime);\n' +
         '\n' +
-        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, 0., (uv.x * s - uv.y * c) * size, 1.);\n' +
+        '  vec4 rotatedPoint = vec4((uv.x * c + uv.y * s) * size, (uv.x * s + uv.y * c) * size, 0., 1.);\n' +
         '  vec3 center = velocity * localTime + acceleration * localTime * localTime + position;\n' +
         '\n' +
         '  vec4 q2 = a_orientation + a_orientation;\n' +
