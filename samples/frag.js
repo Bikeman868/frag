@@ -1206,6 +1206,7 @@ window.frag.Engine = function(config) {
         fps: 0,
     }
     public.gl = public.canvas.getContext('webgl');
+    public.maxTextureUnits = public.gl.getParameter(public.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
     public.correctClock = function(serverTick) {
         let difference = serverTick - private.gameTick;
@@ -1455,7 +1456,6 @@ window.frag.Engine = function(config) {
         engine.canvas.addEventListener('contextmenu', event => event.preventDefault());
 
         const gl = engine.gl;
-        engine.maxTextureUnits = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
 
         gl.clearColor(1, 1, 1, 1);
         gl.enable(gl.CULL_FACE);
