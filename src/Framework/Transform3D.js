@@ -150,6 +150,10 @@ window.frag.Transform3D = function (engine, matrix) {
         ]);
     }
 
+    public.translate = function(vector) {
+        return public.translateXYZ(vector[0], vector[1], vector[2]);
+    }
+
     public.rotateX = function (rad) {
         var c = Math.cos(rad);
         var s = Math.sin(rad);
@@ -188,6 +192,12 @@ window.frag.Transform3D = function (engine, matrix) {
         if (y) public.rotateY(y);
         if (z) public.rotateZ(z);
         return public;
+    }
+
+    public.rotate = function (angles) {
+        if (angles.length === 4)
+            angles = window.frag.Vector.euler(angles);
+        return public.rotateXYZ(angles[0], angles[1], angles[2]);
     }
 
     public.apply = function (uniform) {

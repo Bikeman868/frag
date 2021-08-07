@@ -84,9 +84,9 @@ Rotations are defined in radians. To convert degrees to radians multiply by
 `Math.PI` and divide by `180`.
 
 Rotations are specified as an anti-clockwise rotation around an axis, where 
-anti-clockwise is defined by the axis positive direction coming towards you.
+anti-clockwise is defined by the axis positive direction going away from you.
 In other words if you orient the scene so that the positive direction of the 
-x-axis is pointing towards your eye, then a positive rotation will turn the
+x-axis is pointing away from your eye, then a positive rotation will turn the
 object in the opposite direction to how the hands on a clock move.
 
 You can use rotation angles that are greater than 2 x pi or less than -2 x pi.
