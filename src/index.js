@@ -3,6 +3,7 @@ require('./Math/Triangle');
 require('./Math/Matrix');
 require('./Math/Quaternion')
 
+require('./Framework/classes');
 require('./Framework/Observable');
 require('./Framework/ObservableValue');
 require('./Framework/Transform');
@@ -75,4 +76,5 @@ require('./Particles/RainEmitter');
 var env = process.env.NODE_ENV || 'development';
 if (env === 'development') {
     require('./Shaders/ParticleShaderDebug');
+    require('./debug');
 }

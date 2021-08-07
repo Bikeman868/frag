@@ -1191,6 +1191,8 @@ window.frag.Engine = function(config) {
 
     const public = {
         __private: private,
+        isEngine: true,
+        isRendering: false,
         canvas: config.canvas || document.getElementById('scene'),
         renderInterval: config.renderInterval || 15,
         gameTickMs: config.gameTickMs || 10,
@@ -1392,6 +1394,7 @@ window.frag.Engine = function(config) {
         private.mainScene.setViewport();
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        public.isRendering = true;
         const drawContext = frag.DrawContext(public).forRender(private.gameTick);
         private.mainScene.draw(drawContext);
 
@@ -1399,6 +1402,7 @@ window.frag.Engine = function(config) {
             private.scenes[i].adjustToViewport();
             private.scenes[i].draw(drawContext);
         }
+        public.isRendering = false;
 
         const t1 = performance.now();
         private.currentFrameCount++;
@@ -1466,77 +1470,15 @@ window.frag.Engine = function(config) {
 
     // This method allows you to call engine.Constructor() instead of
     // having to write frag.Constructor(engine)
-    const addProxy = function (name) {
-        public[name] = function () {
+
+    for (let i = 0; i < window.frag.classes.length; i++) {
+        const classname = window.frag.classes[i];
+        public[classname] = function () {
             const args = Array.prototype.slice.call(arguments);
             args.unshift(public);
-            return frag[name].apply(null, args); 
+            return frag[classname].apply(null, args); 
         }
     }
-
-    addProxy('Observable');
-    addProxy('Transform');
-    addProxy('Transform2D');
-    addProxy('Transform3D');
-    addProxy('Location');
-    
-    addProxy('CustomShader');
-    addProxy('Shader');
-    addProxy('UiShader');
-    addProxy('FontShader');
-    
-    addProxy('Texture');
-    addProxy('Font');
-    addProxy('Material');
-    
-    addProxy('VertexData');
-    addProxy('Mesh');
-    addProxy('MeshOptimizer');
-    addProxy('Model');
-    addProxy('ScenePosition');
-    addProxy('SceneObject');
-    addProxy('Scene');
-    addProxy('DrawContext');
-    addProxy('PositionLink');
-
-    addProxy('UiCamera');
-    addProxy('OrthographicCamera');
-    addProxy('PerspectiveCamera');
-    addProxy('FrustumCamera');
-    
-    addProxy('Animation');
-    addProxy('ObjectAnimationState');
-    addProxy('ModelAnimation');
-    addProxy('SceneObjectAnimation');
-    addProxy('ValueAnimationAction');
-    addProxy('KeyframeAnimationAction');
-    addProxy('ParallelAnimationAction');
-    addProxy('RepeatAnimationAction');
-    addProxy('PositionAnimationAction');
-    
-    addProxy('Cube');
-    addProxy('Cylinder');
-    addProxy('Disc');
-    addProxy('Plane');
-    addProxy('Sphere');
-    
-    addProxy('AssetCatalog');
-    addProxy('PackageLoader');
-    
-    addProxy('InputMethod');
-    addProxy('DigitalState');
-    addProxy('AnalogState');
-    addProxy('DigitalInput');
-    addProxy('AnalogInput');
-    addProxy('DigitalAction');
-    addProxy('AnalogAction');
-    
-    addProxy('CustomParticleSystem');
-    addProxy('CustomParticleEmitter');
-    addProxy('MineExplosionEmitter');
-    addProxy('SphericalExplosionEmitter');
-    addProxy('SprayEmitter');
-    addProxy('RainEmitter');
 
     return public;
 };
@@ -2102,6 +2044,90 @@ window.tests.transform = {
 
 window.tests.transform.run(window.tests.transform);
 */
+
+/***/ }),
+
+/***/ "./src/Framework/classes.js":
+/*!**********************************!*\
+  !*** ./src/Framework/classes.js ***!
+  \**********************************/
+/***/ (() => {
+
+window.frag = window.frag || {};
+window.frag.classes = [
+    // Framework
+    'Observable',
+    'ObservableValue',
+    'Transform',
+    'Transform2D',
+    'Transform3D',
+    'Location',
+
+    // Shader
+    'CustomShader',
+    'Shader',
+    'UiShader',
+    'FontShader',
+
+    // Materials
+    'Texture',
+    'Font',
+    'Material',
+
+    // SceneGraph
+    'VertexData',
+    'Mesh',
+    'MeshOptimizer',
+    'Model',
+    'ScenePosition',
+    'SceneObject',
+    'Scene',
+    'DrawContext',
+    'PositionLink',
+    'UiCamera',
+    'OrthographicCamera',
+    'PerspectiveCamera',
+    'FrustumCamera',
+
+    // Animations
+    'Animation',
+    'ObjectAnimationState',
+    'ModelAnimation',
+    'SceneObjectAnimation',
+    'ValueAnimationAction',
+    'KeyframeAnimationAction',
+    'ParallelAnimationAction',
+    'RepeatAnimationAction',
+    'PositionAnimationAction',
+
+    // Shapes
+    'Cube',
+    'Cylinder',
+    'Disc',
+    'Plane',
+    'Sphere',
+
+    // Loaders
+    'AssetCatalog',
+    'PackageLoader',
+
+    // Input
+    'InputMethod',
+    'DigitalState',
+    'AnalogState',
+    'DigitalInput',
+    'AnalogInput',
+    'DigitalAction',
+    'AnalogAction',
+
+    // Particles
+    'CustomParticleSystem',
+    'CustomParticleEmitter',
+    'MineExplosionEmitter',
+    'SphericalExplosionEmitter',
+    'SprayEmitter',
+    'RainEmitter'];
+
 
 /***/ }),
 
@@ -9623,6 +9649,34 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
     return window.frag.Mesh(engine).addTriangles(triangleVerticies, triangleColors, triangleUvs);
 };
 
+/***/ }),
+
+/***/ "./src/debug.js":
+/*!**********************!*\
+  !*** ./src/debug.js ***!
+  \**********************/
+/***/ (() => {
+
+(function() {
+    window._frag = {};
+    for (let i = 0; i < window.frag.classes.length; i++) {
+        const classname = window.frag.classes[i];
+        window._frag[classname] = window.frag[classname];
+        window.frag[classname] = function(engine) {
+            if (engine && engine.isEngine) {
+                if (!engine.isRendering)  {
+                    if (!(['Transform', 'Transform3D', 'Transform2D', `Location`, 'Observable'].includes(classname)))
+                        console.log(classname, arguments);
+                }
+                return window._frag[classname].apply(null, arguments)
+            } else {
+                console.error('You must pass the Frag engine as the first parameter to window.frag.' + classname, arguments);
+            }
+        }
+    }
+})();
+
+
 /***/ })
 
 /******/ 	});
@@ -9663,6 +9717,7 @@ __webpack_require__(/*! ./Math/Triangle */ "./src/Math/Triangle.js");
 __webpack_require__(/*! ./Math/Matrix */ "./src/Math/Matrix.js");
 __webpack_require__(/*! ./Math/Quaternion */ "./src/Math/Quaternion.js")
 
+__webpack_require__(/*! ./Framework/classes */ "./src/Framework/classes.js");
 __webpack_require__(/*! ./Framework/Observable */ "./src/Framework/Observable.js");
 __webpack_require__(/*! ./Framework/ObservableValue */ "./src/Framework/ObservableValue.js");
 __webpack_require__(/*! ./Framework/Transform */ "./src/Framework/Transform.js");
@@ -9735,6 +9790,7 @@ __webpack_require__(/*! ./Particles/RainEmitter */ "./src/Particles/RainEmitter.
 var env = "development" || 0;
 if (env === 'development') {
     __webpack_require__(/*! ./Shaders/ParticleShaderDebug */ "./src/Shaders/ParticleShaderDebug.js");
+    __webpack_require__(/*! ./debug */ "./src/debug.js");
 }
 
 })();
