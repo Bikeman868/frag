@@ -1672,7 +1672,16 @@ window.frag.Observable = function (engine, notify) {
     return public;
 };
 
-window.frag.ObservableValue = function () {
+
+/***/ }),
+
+/***/ "./src/Framework/ObservableValue.js":
+/*!******************************************!*\
+  !*** ./src/Framework/ObservableValue.js ***!
+  \******************************************/
+/***/ (() => {
+
+window.frag.ObservableValue = function (engine) {
     let value = null;
     const observable = frag.Observable(engine, (fn) => { fn(value); });
 
@@ -9655,6 +9664,7 @@ __webpack_require__(/*! ./Math/Matrix */ "./src/Math/Matrix.js");
 __webpack_require__(/*! ./Math/Quaternion */ "./src/Math/Quaternion.js")
 
 __webpack_require__(/*! ./Framework/Observable */ "./src/Framework/Observable.js");
+__webpack_require__(/*! ./Framework/ObservableValue */ "./src/Framework/ObservableValue.js");
 __webpack_require__(/*! ./Framework/Transform */ "./src/Framework/Transform.js");
 __webpack_require__(/*! ./Framework/Transform2D */ "./src/Framework/Transform2D.js");
 __webpack_require__(/*! ./Framework/Transform3D */ "./src/Framework/Transform3D.js");

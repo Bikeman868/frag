@@ -4,6 +4,7 @@ require('./Math/Matrix');
 require('./Math/Quaternion')
 
 require('./Framework/Observable');
+require('./Framework/ObservableValue');
 require('./Framework/Transform');
 require('./Framework/Transform2D');
 require('./Framework/Transform3D');
