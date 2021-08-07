@@ -9,46 +9,52 @@ from material_writer_v1 import MaterialWriter as MaterialWriterV1
 logger = Logger()
 
 def packageModels(inputPath: str, package: dict, modelWriter):
-    for modelPattern in package['models']:
-        modelName = modelPattern.get('modelName', r'{filename}')
-        include = modelPattern.get('include', r'{filename}.frag_model')
-        exclude = modelPattern.get('exclude', '')
-        logger.log('Adding ' + modelName + ' models to the package', 1)
-        for model in AssetFile.enumerateAssets(inputPath, modelName, include, exclude):
-            logger.log('Adding ' + model.name + ' from ' + model.filename, 2)
-            modelWriter.write(model, 3)
+    modelPatterns = package.get('models')
+    if modelPatterns:
+        for modelPattern in modelPatterns:
+            modelName = modelPattern.get('modelName', r'{filename}')
+            include = modelPattern.get('include', r'{filename}.frag_model')
+            exclude = modelPattern.get('exclude', '')
+            logger.log('Adding ' + modelName + ' models to the package', 1)
+            for model in AssetFile.enumerateAssets(inputPath, modelName, include, exclude):
+                logger.log('Adding ' + model.name + ' from ' + model.filename, 2)
+                modelWriter.write(model, 3)
 
 def packageFonts(inputPath: str, package: dict, fontWriter):
-    for fontPattern in package['fonts']:
-        fontName = fontPattern.get('fontName', r'{filename}')
-        include = fontPattern.get('include', r'{filename}.png')
-        exclude = fontPattern.get('exclude', '')
-        logger.log('Adding ' + fontName + ' fonts to the package', 1)
-        for font in AssetFile.enumerateAssets(inputPath, fontName, include, exclude):
-            fontWriter.write(font, 2)
+    fontPatterns = package.get('fonts')
+    if fontPatterns:
+        for fontPattern in fontPatterns:
+            fontName = fontPattern.get('fontName', r'{filename}')
+            include = fontPattern.get('include', r'{filename}.png')
+            exclude = fontPattern.get('exclude', '')
+            logger.log('Adding ' + fontName + ' fonts to the package', 1)
+            for font in AssetFile.enumerateAssets(inputPath, fontName, include, exclude):
+                fontWriter.write(font, 2)
 
 def packageMaterials(inputPath: str, package: dict, materialWriter):
-    for materialPattern in package['materials']:
-        defaultTextures = {
-            'ambient': r'{name}_Ambient_Occlusion.jpg',
-            'diffuse': r'{name}_Base_Color.jpg',
-            'glossiness': r'{name}_Glossiness.jpg',
-            'height': r'{name}_Height.jpg',
-            'metal': r'{name}_Metalic.jpg',
-            'normal': r'{name}_NormalOgl.jpg',
-            'roughness': r'{name}_Roughness.jpg'
-        }
-        materialName = materialPattern.get('materialName', r'{name}')
-        folder = materialPattern.get('folder', '')
-        exclude = materialPattern.get('exclude', '')
-        textures = materialPattern.get('textures', defaultTextures)
-        materials = dict()
-        for textureType in textures:
-            for texture in AssetFile.enumerateAssets(inputPath, materialName, folder + textures[textureType], exclude):
-                if not texture.name in materials: materials[texture.name] = dict()
-                materials[texture.name][textureType] = texture
-        for material in materials:
-            materialWriter.write(material, materials[material], 1)
+    materialPatterns = package.get('materials')
+    if materialPatterns:
+        for materialPattern in materialPatterns:
+            defaultTextures = {
+                'ambient': r'{name}_Ambient_Occlusion.jpg',
+                'diffuse': r'{name}_Base_Color.jpg',
+                'glossiness': r'{name}_Glossiness.jpg',
+                'height': r'{name}_Height.jpg',
+                'metalic': r'{name}_Metalic.jpg',
+                'normal': r'{name}_NormalOgl.jpg',
+                'roughness': r'{name}_Roughness.jpg'
+            }
+            materialName = materialPattern.get('materialName', r'{name}')
+            folder = materialPattern.get('folder', '')
+            exclude = materialPattern.get('exclude', '')
+            textures = materialPattern.get('textures', defaultTextures)
+            materials = dict()
+            for textureType in textures:
+                for texture in AssetFile.enumerateAssets(inputPath, materialName, folder + textures[textureType], exclude):
+                    if not texture.name in materials: materials[texture.name] = dict()
+                    materials[texture.name][textureType] = texture
+            for material in materials:
+                materialWriter.write(material, materials[material], 1)
 
 def writePackageFile(output: str, littleEndian: bool, version: int, package: dict):
     if version == 0: version = 1 # Most recent version
