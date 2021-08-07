@@ -5,7 +5,7 @@ window.frag.ObjectAnimationState = function (engine) {
 
     const public = {
         __private: private,
-        location: window.frag.Location(),
+        location: window.frag.Location(engine),
     };
 
     public.getMatrix = function () {

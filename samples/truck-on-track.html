@@ -62,7 +62,7 @@
                 .name(name)
                 .dataFormat(engine.gl.RGB)
                 .fromArrayBuffer(0, new Uint8Array(rgb), 0, 1, 1);
-            return frag.Material()
+            return frag.Material(engine)
                 .name(name)
                 .setTexture('diffuse', texture);
         }
