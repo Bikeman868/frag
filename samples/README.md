@@ -140,3 +140,20 @@ Things to mess around with on this sample:
 * Push the limits of your graphcs card by splitting the display into multiple particle systems
 * Create some new firework effects, for example fireworks that change color over time
 * Script a firework display using the animation engine
+
+## Terrain
+This [sample](terrain.html) illustrates the following features and techniques:
+* Defining a large terrain with different materials and height for each map tile.
+* Creating a small mesh that displays only part of the terrain.
+* Scrolling the mesh accross the terrain to show a different part as the playr moves around.
+* Scroll using the mouse, pen or touch screen.
+* Right mouse click to show the mesh.
+
+Things to mess around with on this sample:
+* To keep this demo to a small html file I used a small number of solid colors. Real terrain 
+  would need realistic looking materials. Create these materials in substance player, package
+  them and download them into the game to get some better looking terrain.
+* I made the terrain small so that you can see what's going on, but a real game would want the
+  terrain to fill the frustum.
+* Allow the player to zoom in and out. You will need to re-create the mesh to show larger or 
+  smaller amount of the terrain.

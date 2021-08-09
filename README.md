@@ -26,8 +26,10 @@ The functioanllity that is provided:
 * Support for old devices that only support OpenGL 1.1
 * Bulk loading of models, fonts and materials designed in tools like Blender and Substance Player
 * Separation of models from materials so that the same models can be used with different
-  skins in different parts of the game.
+  skins in different parts of the game or for different players.
 * Powerful animation engine that can run many parallel animations on the same model
+* Dynamic terrain support where only the small part of the terrain that the player can
+  see is rendered to a mesh that can be scrolled over the terrain data.
 * Efficient reuse of assets. For example you can draw a wheel mesh once then scale it 
   and paint it differetly on various models to create all the different types of wheel 
   that you need without duplicating the mesh. Meshes, textures, materials, and animations
@@ -39,10 +41,11 @@ The functioanllity that is provided:
   components so for example you only need the shader that supports light emmissions
   for drawing the parts of the model that emit light.
 * A particle system for creating effects like fog and explosions. Standard effects are
-  available out of the box as well as fully customized particle effects.
+  available out of the box as well as highly customizable particle effects.
 * Models comprising a heirachy of components where each component has a mesh and material.
 * Animation of components within models that match regular expression
 * Parenting scene objects to other scene objects or components of other scene object models.
+* Objects can selectively mimic the actions of other objects in the scene or look at them.
 
 This framework is great is you have an original game idea and want to fast track the
 graphics development. If you want to create a world in which you have a character 

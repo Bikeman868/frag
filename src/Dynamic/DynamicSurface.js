@@ -44,12 +44,17 @@ window.frag.DynamicSurface = function (engine, data) {
     }
     
     public.setOrigin = function(x, z) {
+        x = private.sanitizeX(x);
+        z = private.sanitizeX(z);
+
         for (let i = 0; i < private.tiles.length; i++) {
             const offset = private.getOffset(i);
             private.tiles[i].x(offset.x + x).z(offset.z + z);
         }
+
         private.fragmentsModified = true;
     }
+    
     public.createSquares = function(width, depth) {
         private.tiles.length = 0;
         private.meshFragments.length = 0;
@@ -64,6 +69,20 @@ window.frag.DynamicSurface = function (engine, data) {
                 x: Math.floor(i / depth),
                 z: i % depth
             }
+        }
+
+        private.sanitizeX = function(x) {
+            if (x < 0) return 0;
+            const max = data.getWidth() - width;
+            if (x >= max) return max;
+            return Math.floor(x);
+        }
+
+        private.sanitizeZ = function(z) {
+            if (z < 0) return 0;
+            const max = data.getDepth() - depth;
+            if (z >= max) return max;
+            return Math.floor(z);
         }
 
         private.updateMeshFragments = function() {
@@ -90,8 +109,8 @@ window.frag.DynamicSurface = function (engine, data) {
                     .z(z);
                 private.tiles.push(tile);
 
-                const verticies = [x, 0, z, x+1, 0, z, x+1, 0, z+1, x, 0, z+1];
-                const uvs = [0, 0, 0, 1, 1, 1, 0, 1];
+                const verticies = [x+1, 0, z, x+1, 0, z+1, x, 0, z, x, 0, z+1];
+                const uvs = [1, 0, 1, 1, 0, 0, 0, 1];
                 const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
 
                 const meshFragment = private.mesh.addTriangleStrip({ verticies, uvs, normals });
@@ -109,29 +128,29 @@ window.frag.DynamicSurface = function (engine, data) {
                     window.frag.SharedVertex(engine).addTile(tile),
                 ];
                 if (x !== 0) {
-                    tile.sharedVerticies[0].addTile(private.tileAt(x-1, z));
+                    tile.sharedVerticies[2].addTile(private.tileAt(x-1, z));
                     tile.sharedVerticies[3].addTile(private.tileAt(x-1, z));
                     if (z !== 0) {
-                        tile.sharedVerticies[0].addTile(private.tileAt(x-1, z-1));
+                        tile.sharedVerticies[2].addTile(private.tileAt(x-1, z-1));
                     }
                     if (z !== depth-1) {
                         tile.sharedVerticies[3].addTile(private.tileAt(x-1, z+1));
                     }
                 }
                 if (x !== width-1) {
+                    tile.sharedVerticies[0].addTile(private.tileAt(x+1, z));
                     tile.sharedVerticies[1].addTile(private.tileAt(x+1, z));
-                    tile.sharedVerticies[2].addTile(private.tileAt(x+1, z));
                 }
                 if (z !== 0) {
                     tile.sharedVerticies[0].addTile(private.tileAt(x, z-1));
-                    tile.sharedVerticies[1].addTile(private.tileAt(x, z-1));
+                    tile.sharedVerticies[2].addTile(private.tileAt(x, z-1));
                     if (x !== width-1) {
-                        tile.sharedVerticies[1].addTile(private.tileAt(x+1, z-1));
+                        tile.sharedVerticies[0].addTile(private.tileAt(x+1, z-1));
                     }
                 }
                 if (z !== depth-1) {
-                    tile.sharedVerticies[0].addTile(private.tileAt(x, z+1));
                     tile.sharedVerticies[1].addTile(private.tileAt(x, z+1));
+                    tile.sharedVerticies[3].addTile(private.tileAt(x, z+1));
                     if (x !== width-1) {
                         tile.sharedVerticies[1].addTile(private.tileAt(x+1, z+1));
                     }

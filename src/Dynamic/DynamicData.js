@@ -34,5 +34,13 @@ window.frag.DynamicData = function (engine, width, depth) {
         return private.data[x * private.depth + z];
     }
 
+    public.getWidth = function() {
+        return private.width;
+    }
+
+    public.getDepth = function() {
+        return private.depth;
+    }
+
     return public;
 }
