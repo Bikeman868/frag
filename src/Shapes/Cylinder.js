@@ -54,7 +54,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
                 push(x * radius1, y * radius1, z1);
             }
             push(0, radius1, z1);
-            mesh.addTriangleStrip(verticies, colors, uvs);
+            mesh.addTriangleStrip({ verticies, colors, uvs });
         }
     }
 
@@ -82,7 +82,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
             normals.push(y);
             normals.push(-1);
         }
-        mesh.addTriangleFan(verticies, colors, uvs, normals);
+        mesh.addTriangleFan({ verticies, colors, uvs, normals });
     }
 
     if (drawBottom) {
@@ -109,7 +109,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
             normals.push(y);
             normals.push(1);
         }
-        mesh.addTriangleFan(verticies, colors, uvs, normals);
+        mesh.addTriangleFan({ verticies, colors, uvs, normals });
     }
 
     return mesh;

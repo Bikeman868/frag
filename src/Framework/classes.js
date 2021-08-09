@@ -71,4 +71,11 @@ window.frag.classes = [
     'MineExplosionEmitter',
     'SphericalExplosionEmitter',
     'SprayEmitter',
-    'RainEmitter'];
+    'RainEmitter',
+
+    // Dynamic
+    'DynamicData',
+    'DynamicSurface',
+    'DynamicTile',
+    'SharedVertex',
+];

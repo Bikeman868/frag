@@ -110,23 +110,23 @@ window.frag.VertexData = function(engine) {
         return private.setVector(public.bitangents, public.bitangentIndex(index), v);
     };
 
-    public.setTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangles2D = function (data) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 2;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             for (let i = 0; i < public.vertexCount; i += 3) {
@@ -137,23 +137,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangles = function (data) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             for (let i = 0; i < public.vertexCount; i += 3) {
@@ -164,23 +164,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangleStrip = function (data) {
         public.primitiveType = gl.TRIANGLE_STRIP;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             const triangleCount = public.vertexCount - 2;
@@ -193,23 +193,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangleFan = function (data) {
         public.primitiveType = gl.TRIANGLE_FAN;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             const triangleCount = public.vertexCount - 2;
@@ -221,21 +221,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLines2D = function (verticies, colors, uvs, normals) {
+    public.setLines2D = function () {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 2;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 
@@ -244,21 +244,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLines = function (verticies, colors, uvs, normals) {
+    public.setLines = function (data) {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 
@@ -267,21 +267,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLineStrip = function (verticies, colors, uvs, normals) {
+    public.setLineStrip = function (data) {
         public.primitiveType = gl.LINE_STRIP;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 

@@ -355,12 +355,12 @@ window.frag.PackageLoader = function (engine) {
             const vertexData = frag.VertexData(engine);
             if (vertexFormat === 1 || vertexFormat === 2) {
                 if (is3D)
-                    vertexData.setTriangles(verticies, colors, uvs, normals, tangents, bitangents)
+                    vertexData.setTriangles({verticies, colors, uvs, normals, tangents, bitangents})
                 else
-                    vertexData.setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
+                    vertexData.setTriangles2D({verticies, colors, uvs, normals, tangents, bitangents});
             }
-            else if (vertexFormat === 3) vertexData.setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
-            else if (vertexFormat === 4) vertexData.setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
+            else if (vertexFormat === 3) vertexData.setTriangleStrip({verticies, colors, uvs, normals, tangents, bitangents});
+            else if (vertexFormat === 4) vertexData.setTriangleFan({verticies, colors, uvs, normals, tangents, bitangents});
 
             mesh.addVertexData(vertexData);
         }

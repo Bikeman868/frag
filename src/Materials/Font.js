@@ -265,10 +265,11 @@ window.frag.Font = function (engine, _private, _instance) {
             x = drawChar(text[i], x);
         }
 
-        return frag.Mesh(engine)
-            .addTriangles(verticies, undefined, uvs, normals)
+        const mesh = frag.Mesh(engine)
             .shadeFlat()
             .textureFlat();
+        mesh.addTriangles({ verticies, uvs, normals });
+        return mesh;
     }
 
     public.buildTextModel = function(text) {

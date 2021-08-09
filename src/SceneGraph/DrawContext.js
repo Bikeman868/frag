@@ -53,8 +53,8 @@ window.frag.DrawContext = function (engine) {
     public.beginSceneObject = function(location, animationMap, childMap) {
         private.pushState();
 
-        public.state.animationMap = animationMap;
-        public.state.childMap = childMap;
+        public.state.animationMap = animationMap || {};
+        public.state.childMap = childMap || {};
 
         const localMatrix = location.getMatrix();
 
@@ -107,6 +107,30 @@ window.frag.DrawContext = function (engine) {
     public.endModel = function() {
         private.popState();
         return public;
+    }
+
+    public.setupShader = function(shader, model) {
+        if (shader.uniforms.clipMatrix !== undefined) {
+            window.frag.Transform(engine, public.state.modelToClipMatrix)
+                .apply(shader.uniforms.clipMatrix);
+        }
+
+        if (shader.uniforms.modelMatrix !== undefined) {
+            frag.Transform(engine, public.state.modelToWorldMatrix)
+                .apply(shader.uniforms.modelMatrix);
+        }
+
+        if (shader.uniforms.color !== undefined && public.isHitTest) {
+            const sceneObjectId = public.sceneObjects.length - 1;
+            const modelId = public.models.length;
+            public.models.push(model);
+
+            const red = sceneObjectId >> 4;
+            const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
+            const blue = (modelId & 0xff00) >> 8;
+            const alpha = modelId & 0xff;
+            engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
+        }
     }
 
     return public;

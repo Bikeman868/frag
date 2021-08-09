@@ -42,6 +42,11 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
+    public.fragmentsUpdated = function() {
+        if (!private.fromBuffer)
+            private.finalized = false;
+    }
+
     public.shadeSmooth = function () {
         private.smoothShading = true;
         private.finalized = false;
@@ -79,75 +84,78 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
-    private.Fragment = function(vertexData) {
+    private.Fragment = function(vertexData, material) {
         return {
             vertexData,
             renderData: null,
+            material: null,
             vertexDataOffset: undefined,
             colorDataOffset: undefined,
             uvDataOffset: undefined,
             normalDataOffset: undefined,
             tangentDataOffset: undefined,
             bitangentDataOffset: undefined,
+            material,
         };
     }
 
-    private.addFragment = function (vertexData) {
-        private.meshFragments.push(private.Fragment(vertexData));
+    private.addFragment = function (vertexData, material) {
+        const fragment = private.Fragment(vertexData, material);
+        private.meshFragments.push(fragment);
         private.finalized = false;
-        return public;
+        return fragment;
     }
 
-    public.addVertexData = function (vertexData) {
+    public.addVertexData = function (vertexData, material) {
+        return private.addFragment(vertexData, material);
+    }
+
+    public.addTriangles2D = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangles2D(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangles = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangles(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangles(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangleStrip = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangleStrip(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangleFan = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangleFan(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
-        return private.addFragment(vertexData);
-    }
-
-    public.fromBuffer = function (buffer, size, count, primitiveType, vertexDataOffset, colorDataOffset, uvDataOffset, normalDataOffset, tangentDataOffset, bitangentDataOffset)
+    public.fromBuffer = function(data)
     {
         const vertexData = frag.VertexData(engine);
-        vertexData.vertexDimensions = size;
-        vertexData.vertexCount = count;
-        vertexData.primitiveType = primitiveType;
+        vertexData.vertexDimensions = data.size;
+        vertexData.vertexCount = data.count;
+        vertexData.primitiveType = data.primitiveType;
         vertexData.extractTriangles = function () { };
 
-        private.addFragment(vertexData);
-        const fragment = private.meshFragments[private.meshFragments.length - 1];
+        const fragment = private.addFragment(vertexData);
 
         fragment.renderData = vertexData;
-        fragment.vertexDataOffset = vertexDataOffset;
-        fragment.colorDataOffset = colorDataOffset;
-        fragment.uvDataOffset = uvDataOffset;
-        fragment.normalDataOffset = normalDataOffset;
-        fragment.tangentDataOffset = tangentDataOffset;
-        fragment.bitangentDataOffset = bitangentDataOffset;
+        fragment.vertexDataOffset = data.vertexDataOffset;
+        fragment.colorDataOffset = data.colorDataOffset;
+        fragment.uvDataOffset = data.uvDataOffset;
+        fragment.normalDataOffset = data.normalDataOffset;
+        fragment.tangentDataOffset = data.tangentDataOffset;
+        fragment.bitangentDataOffset = data.bitangentDataOffset;
+        fragment.material = data.material;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
 
         private.finalized = true;
         private.fromBuffer = true;
 
-        return public;
+        return fragment;
     }
 
     private.addFragmentDebugInfo = function(fragment) {
@@ -218,9 +226,9 @@ window.frag.Mesh = function (engine) {
         });
 
         if (fragment.vertexData.vertexDimensions == 2)
-            newFragment.renderData = frag.VertexData(engine).setLines2D(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines2D({verticies, colors, uvs, normals});
         else
-            newFragment.renderData = frag.VertexData(engine).setLines(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines({verticies, colors, uvs, normals});
     }
 
     private.finalize = function () {
@@ -346,6 +354,10 @@ window.frag.Mesh = function (engine) {
     }
 
     private.drawFragment = function(shader, fragment) {
+        if (fragment.material) {
+            fragment.material.apply(shader);
+        }
+
         const unbindFuncs = [];
 
         private.bindFragmentPosition(shader, fragment, unbindFuncs);

@@ -126,5 +126,7 @@ window.frag.Cube = function (engine, frontFacets, options) {
         if (topFacets) addFace(topFacets, 6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangles({ verticies, colors, uvs });
+    return mesh;
 };

@@ -75,8 +75,8 @@
         ];
         const wingMesh = frag.Mesh(engine)
             .name('Wing')
-            .shadeSmooth()
-            .addTriangleFan(wingVerticies, wingColors, wingUVs);
+            .shadeSmooth();
+        wingMesh.addTriangleFan({ verticies: wingVerticies, colors: wingColors, uvs: wingUVs });
 
         // Create animations that flaps the wings
 

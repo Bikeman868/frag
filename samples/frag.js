@@ -1160,6 +1160,377 @@ window.frag.cameraMixin = function(engine, _private, _public) {
 
 /***/ }),
 
+/***/ "./src/Dynamic/DynamicData.js":
+/*!************************************!*\
+  !*** ./src/Dynamic/DynamicData.js ***!
+  \************************************/
+/***/ (() => {
+
+/*
+ * This class defines the data beneath a dynamic surface. Verticies in
+ * the mesh will draw data from this structure, the mesh itself
+ * typically reflects only a small portion of this data, for example drawing
+ * ground close to the player and not drawing ground that is behind
+ * or too far away to see.
+ * The data is assumed to lie in a 2D surface with a height at each point.
+ * This works well for ground any maybe adaptable to other kinds of
+ * dynamic mesh.
+*/
+window.frag.DynamicData = function (engine, width, depth) {
+
+    const private = {
+        width,
+        depth,
+        data: [],
+    };
+
+    for (let i = 0; i < width * depth; i++)
+        private.data.push({
+            height: 0,
+            material: null,
+            state: 0,
+        });
+
+    const public = {
+        __private: private,
+    }
+
+    public.dispose = function () {
+    }
+
+    public.get = function(x, z) {
+        return private.data[x * private.depth + z];
+    }
+
+    return public;
+}
+
+/***/ }),
+
+/***/ "./src/Dynamic/DynamicSurface.js":
+/*!***************************************!*\
+  !*** ./src/Dynamic/DynamicSurface.js ***!
+  \***************************************/
+/***/ (() => {
+
+/*
+ * This class a mesh that is dynamically constructed from part of a
+ * larger data set. The part of the dataset that is represented can
+ * be remapped visually scrolling the mesh acroll the underlying data
+*/
+window.frag.DynamicSurface = function (engine, data) {
+
+    const private = {
+        data,
+        tiles: [],
+        meshFragments: [],
+        mesh: null,
+        location: window.frag.Location(engine, true),
+        position: null,
+        enabled: true,
+        shader: null,
+        fragmentsModified: true,
+    };
+
+    private.position = window.frag.ScenePosition(engine, private.location)
+
+    const public = {
+        __private: private,
+    }
+
+    public.dispose = function () {
+    }
+
+    public.enabled = function(enabled) {
+        private.enabled = enabled;
+    }
+
+    public.getPosition = function () {
+        return private.position;
+    };
+
+    public.getMesh = function() {
+        return private.mesh;
+    }
+
+    public.shader = function(shader) {
+        private.shader = shader;
+        return public;
+    }
+    
+    public.setOrigin = function(x, z) {
+        for (let i = 0; i < private.tiles.length; i++) {
+            const offset = private.getOffset(i);
+            private.tiles[i].x(offset.x + x).z(offset.z + z);
+        }
+        private.fragmentsModified = true;
+    }
+    public.createSquares = function(width, depth) {
+        private.tiles.length = 0;
+        private.meshFragments.length = 0;
+        private.mesh = window.frag.Mesh(engine);
+
+        private.tileAt = function(x, z) {
+            return private.tiles[x * depth + z];
+        }
+
+        private.getOffset = function(i) {
+            return {
+                x: Math.floor(i / depth),
+                z: i % depth
+            }
+        }
+
+        private.updateMeshFragments = function() {
+            for (let i = 0; i < private.tiles.length; i++) {
+                const tile = private.tiles[i];
+                const meshFragment = private.meshFragments[i];
+                meshFragment.material = tile.getMaterial();
+
+                const vertexData = meshFragment.vertexData;
+                for (var j = 0; j < 4; j++) {
+                    const vertex = vertexData.getVertexVector(j);
+                    vertex[1] = tile.sharedVerticies[j].getHeight();
+                    vertexData.setVertexVector(j, vertex);
+                }
+            }
+            private.mesh.fragmentsUpdated();
+        }
+
+        for (let x = 0; x < width; x++) {
+            for (let z = 0; z < depth; z++) {
+                const tile = window.frag.DynamicTile(engine)
+                    .data(private.data)
+                    .x(x)
+                    .z(z);
+                private.tiles.push(tile);
+
+                const verticies = [x, 0, z, x+1, 0, z, x+1, 0, z+1, x, 0, z+1];
+                const uvs = [0, 0, 0, 1, 1, 1, 0, 1];
+                const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
+
+                const meshFragment = private.mesh.addTriangleStrip({ verticies, uvs, normals });
+                private.meshFragments.push(meshFragment);
+            }
+        }
+
+        for (let x = 0; x < width; x++) {
+            for (let z = 0; z < depth; z++) {
+                const tile = private.tileAt(x, z);
+                tile.sharedVerticies = [
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                ];
+                if (x !== 0) {
+                    tile.sharedVerticies[0].addTile(private.tileAt(x-1, z));
+                    tile.sharedVerticies[3].addTile(private.tileAt(x-1, z));
+                    if (z !== 0) {
+                        tile.sharedVerticies[0].addTile(private.tileAt(x-1, z-1));
+                    }
+                    if (z !== depth-1) {
+                        tile.sharedVerticies[3].addTile(private.tileAt(x-1, z+1));
+                    }
+                }
+                if (x !== width-1) {
+                    tile.sharedVerticies[1].addTile(private.tileAt(x+1, z));
+                    tile.sharedVerticies[2].addTile(private.tileAt(x+1, z));
+                }
+                if (z !== 0) {
+                    tile.sharedVerticies[0].addTile(private.tileAt(x, z-1));
+                    tile.sharedVerticies[1].addTile(private.tileAt(x, z-1));
+                    if (x !== width-1) {
+                        tile.sharedVerticies[1].addTile(private.tileAt(x+1, z-1));
+                    }
+                }
+                if (z !== depth-1) {
+                    tile.sharedVerticies[0].addTile(private.tileAt(x, z+1));
+                    tile.sharedVerticies[1].addTile(private.tileAt(x, z+1));
+                    if (x !== width-1) {
+                        tile.sharedVerticies[1].addTile(private.tileAt(x+1, z+1));
+                    }
+                }
+            }
+        }
+        return public;
+    }
+
+    public.createHorizontalHexagons = function(width, depth) {
+        console.error('Dynamic surface of hexagons is not yet implementted');
+        return public;
+    }
+
+    public.createVerticalHexagons = function(width, depth) {
+        console.error('Dynamic surface of hexagons is not yet implementted');
+        return public;
+    }
+
+    public.draw = function (drawContext) {
+        if (!private.enabled || !private.mesh) return public;
+
+        const shader = drawContext.shader || private.shader;
+        if (!shader) return public;
+
+        if (private.fragmentsModified) {
+            private.updateMeshFragments();
+            private.fragmentsModified = false;
+        }
+
+        shader.bind();
+        drawContext.beginSceneObject(private.location);
+
+        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
+
+        drawContext.setupShader(shader, public);
+    
+        private.mesh.draw(shader);
+
+        drawContext.endSceneObject();
+        return public;
+    };
+
+    return public;
+}
+
+/***/ }),
+
+/***/ "./src/Dynamic/DynamicTile.js":
+/*!************************************!*\
+  !*** ./src/Dynamic/DynamicTile.js ***!
+  \************************************/
+/***/ (() => {
+
+/*
+ * This class represents a tile in a dynamic surface. The tile has neighbors
+ * and connects with and underlying data set that defines the height of this
+ * tile and the material to use to draw it.
+ */
+window.frag.DynamicTile = function (engine) {
+
+    const private = {
+        data: null,
+        x: 0,
+        z: 0,
+        height: 0,
+        material: null,
+        modified: true,
+    };
+
+    const public = {
+        __private: private,
+        sharedVerticies: [],
+    }
+
+    private.update = function() {
+        if (private.modified) {
+            const data = public.getData();
+            private.height = data.height;
+            private.material = data.material;
+            private.modified = false;
+        }
+    }
+
+    public.dispose = function () {
+    }
+
+    public.data = function(data) {
+        private.data = data;
+        private.modified = true;
+        return public;
+    }
+
+    public.x = function(x) {
+        private.x = x;
+        private.modified = true;
+        return public;
+    }
+
+    public.getX = function() {
+        return private.x;
+    }
+
+    public.z = function(z) {
+        private.z = z;
+        private.modified = true;
+        return public;
+    }
+
+    public.getZ = function() {
+        return private.z;
+    }
+
+    public.getData = function() {
+        return private.data.get(private.x, private.z);
+    }
+
+    public.getMaterial = function() {
+        private.update();
+        return private.material;
+    }
+
+    public.getHeight = function() {
+        private.update();
+        return private.height;
+    }
+
+    public.getState = function() {
+        private.update();
+        return private.height;
+    }
+
+    return public;
+}
+
+/***/ }),
+
+/***/ "./src/Dynamic/SharedVertex.js":
+/*!*************************************!*\
+  !*** ./src/Dynamic/SharedVertex.js ***!
+  \*************************************/
+/***/ (() => {
+
+/*
+ * Shared vertexes exist between tiles where tiles meet at the corners.
+ * These verticles calculate height as an average of the tiles that they
+ * are joining. In rectangular grids of tiles each join is between
+ * 4 tiles. In hexagonal grids each join is between 3 tiles.
+ */
+window.frag.SharedVertex = function (engine) {
+
+    const private = {
+        tiles: [],
+    };
+
+    const public = {
+        __private: private,
+    }
+
+    public.dispose = function () {
+    }
+
+    public.clear = function() {
+        private.tiles.length = 0;
+        return public;
+    }
+
+    public.addTile = function(tile) {
+        private.tiles.push(tile);
+        return public;
+    }
+
+    public.getHeight = function() {
+        const reducer = function(sum, tile) { 
+            return sum + tile.getHeight(); 
+        }
+        return private.tiles.reduce(reducer, 0) / private.tiles.length;
+    }
+
+    return public;
+}
+
+/***/ }),
+
 /***/ "./src/Framework/Engine.js":
 /*!*********************************!*\
   !*** ./src/Framework/Engine.js ***!
@@ -1202,6 +1573,7 @@ window.frag.Engine = function(config) {
         debugMeshes: config.debugMeshes === undefined ? false : config.debugMeshes,
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
         debugParticles: config.debugParticles === undefined ? false : config.debugParticles,
+        debugConstructors: config.debugConstructors === undefined ? false : config.debugConstructors,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }
@@ -2126,7 +2498,14 @@ window.frag.classes = [
     'MineExplosionEmitter',
     'SphericalExplosionEmitter',
     'SprayEmitter',
-    'RainEmitter'];
+    'RainEmitter',
+
+    // Dynamic
+    'DynamicData',
+    'DynamicSurface',
+    'DynamicTile',
+    'SharedVertex',
+];
 
 
 /***/ }),
@@ -3568,12 +3947,12 @@ window.frag.PackageLoader = function (engine) {
             const vertexData = frag.VertexData(engine);
             if (vertexFormat === 1 || vertexFormat === 2) {
                 if (is3D)
-                    vertexData.setTriangles(verticies, colors, uvs, normals, tangents, bitangents)
+                    vertexData.setTriangles({verticies, colors, uvs, normals, tangents, bitangents})
                 else
-                    vertexData.setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
+                    vertexData.setTriangles2D({verticies, colors, uvs, normals, tangents, bitangents});
             }
-            else if (vertexFormat === 3) vertexData.setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
-            else if (vertexFormat === 4) vertexData.setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
+            else if (vertexFormat === 3) vertexData.setTriangleStrip({verticies, colors, uvs, normals, tangents, bitangents});
+            else if (vertexFormat === 4) vertexData.setTriangleFan({verticies, colors, uvs, normals, tangents, bitangents});
 
             mesh.addVertexData(vertexData);
         }
@@ -4098,10 +4477,11 @@ window.frag.Font = function (engine, _private, _instance) {
             x = drawChar(text[i], x);
         }
 
-        return frag.Mesh(engine)
-            .addTriangles(verticies, undefined, uvs, normals)
+        const mesh = frag.Mesh(engine)
             .shadeFlat()
             .textureFlat();
+        mesh.addTriangles({ verticies, uvs, normals });
+        return mesh;
     }
 
     public.buildTextModel = function(text) {
@@ -5874,7 +6254,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
         if (!private.enabled) return public;
 
-        drawContext.beginSceneObject(private.location, {}, {});
+        drawContext.beginSceneObject(private.location);
         private.draw(drawContext);
         drawContext.endSceneObject();
 
@@ -6112,8 +6492,8 @@ window.frag.DrawContext = function (engine) {
     public.beginSceneObject = function(location, animationMap, childMap) {
         private.pushState();
 
-        public.state.animationMap = animationMap;
-        public.state.childMap = childMap;
+        public.state.animationMap = animationMap || {};
+        public.state.childMap = childMap || {};
 
         const localMatrix = location.getMatrix();
 
@@ -6166,6 +6546,30 @@ window.frag.DrawContext = function (engine) {
     public.endModel = function() {
         private.popState();
         return public;
+    }
+
+    public.setupShader = function(shader, model) {
+        if (shader.uniforms.clipMatrix !== undefined) {
+            window.frag.Transform(engine, public.state.modelToClipMatrix)
+                .apply(shader.uniforms.clipMatrix);
+        }
+
+        if (shader.uniforms.modelMatrix !== undefined) {
+            frag.Transform(engine, public.state.modelToWorldMatrix)
+                .apply(shader.uniforms.modelMatrix);
+        }
+
+        if (shader.uniforms.color !== undefined && public.isHitTest) {
+            const sceneObjectId = public.sceneObjects.length - 1;
+            const modelId = public.models.length;
+            public.models.push(model);
+
+            const red = sceneObjectId >> 4;
+            const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
+            const blue = (modelId & 0xff00) >> 8;
+            const alpha = modelId & 0xff;
+            engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
+        }
     }
 
     return public;
@@ -6224,6 +6628,11 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
+    public.fragmentsUpdated = function() {
+        if (!private.fromBuffer)
+            private.finalized = false;
+    }
+
     public.shadeSmooth = function () {
         private.smoothShading = true;
         private.finalized = false;
@@ -6261,75 +6670,78 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
-    private.Fragment = function(vertexData) {
+    private.Fragment = function(vertexData, material) {
         return {
             vertexData,
             renderData: null,
+            material: null,
             vertexDataOffset: undefined,
             colorDataOffset: undefined,
             uvDataOffset: undefined,
             normalDataOffset: undefined,
             tangentDataOffset: undefined,
             bitangentDataOffset: undefined,
+            material,
         };
     }
 
-    private.addFragment = function (vertexData) {
-        private.meshFragments.push(private.Fragment(vertexData));
+    private.addFragment = function (vertexData, material) {
+        const fragment = private.Fragment(vertexData, material);
+        private.meshFragments.push(fragment);
         private.finalized = false;
-        return public;
+        return fragment;
     }
 
-    public.addVertexData = function (vertexData) {
+    public.addVertexData = function (vertexData, material) {
+        return private.addFragment(vertexData, material);
+    }
+
+    public.addTriangles2D = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangles2D(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangles2D(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangles = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangles(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangles(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangleStrip = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangleStrip(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangleStrip(verticies, colors, uvs, normals, tangents, bitangents);
+    public.addTriangleFan = function (data) {
+        const vertexData = frag.VertexData(engine).setTriangleFan(data);
         return private.addFragment(vertexData);
     }
 
-    public.addTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
-        const vertexData = frag.VertexData(engine).setTriangleFan(verticies, colors, uvs, normals, tangents, bitangents);
-        return private.addFragment(vertexData);
-    }
-
-    public.fromBuffer = function (buffer, size, count, primitiveType, vertexDataOffset, colorDataOffset, uvDataOffset, normalDataOffset, tangentDataOffset, bitangentDataOffset)
+    public.fromBuffer = function(data)
     {
         const vertexData = frag.VertexData(engine);
-        vertexData.vertexDimensions = size;
-        vertexData.vertexCount = count;
-        vertexData.primitiveType = primitiveType;
+        vertexData.vertexDimensions = data.size;
+        vertexData.vertexCount = data.count;
+        vertexData.primitiveType = data.primitiveType;
         vertexData.extractTriangles = function () { };
 
-        private.addFragment(vertexData);
-        const fragment = private.meshFragments[private.meshFragments.length - 1];
+        const fragment = private.addFragment(vertexData);
 
         fragment.renderData = vertexData;
-        fragment.vertexDataOffset = vertexDataOffset;
-        fragment.colorDataOffset = colorDataOffset;
-        fragment.uvDataOffset = uvDataOffset;
-        fragment.normalDataOffset = normalDataOffset;
-        fragment.tangentDataOffset = tangentDataOffset;
-        fragment.bitangentDataOffset = bitangentDataOffset;
+        fragment.vertexDataOffset = data.vertexDataOffset;
+        fragment.colorDataOffset = data.colorDataOffset;
+        fragment.uvDataOffset = data.uvDataOffset;
+        fragment.normalDataOffset = data.normalDataOffset;
+        fragment.tangentDataOffset = data.tangentDataOffset;
+        fragment.bitangentDataOffset = data.bitangentDataOffset;
+        fragment.material = data.material;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
 
         private.finalized = true;
         private.fromBuffer = true;
 
-        return public;
+        return fragment;
     }
 
     private.addFragmentDebugInfo = function(fragment) {
@@ -6400,9 +6812,9 @@ window.frag.Mesh = function (engine) {
         });
 
         if (fragment.vertexData.vertexDimensions == 2)
-            newFragment.renderData = frag.VertexData(engine).setLines2D(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines2D({verticies, colors, uvs, normals});
         else
-            newFragment.renderData = frag.VertexData(engine).setLines(verticies, colors, uvs, normals);
+            newFragment.renderData = frag.VertexData(engine).setLines({verticies, colors, uvs, normals});
     }
 
     private.finalize = function () {
@@ -6528,6 +6940,10 @@ window.frag.Mesh = function (engine) {
     }
 
     private.drawFragment = function(shader, fragment) {
+        if (fragment.material) {
+            fragment.material.apply(shader);
+        }
+
         const unbindFuncs = [];
 
         private.bindFragmentPosition(shader, fragment, unbindFuncs);
@@ -7171,30 +7587,10 @@ window.frag.Model = function (engine, is3d, parent) {
         if (shader !== undefined && private.mesh && private.enabled) {
             shader.bind();
 
-            if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
-                const sceneObjectId = drawContext.sceneObjects.length - 1;
-                const modelId = drawContext.models.length;
-                drawContext.models.push(public);
-
-                const red = sceneObjectId >> 4;
-                const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
-                const blue = (modelId & 0xff00) >> 8;
-                const alpha = modelId & 0xff;
-                engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
-            }
+            drawContext.setupShader(shader, public);
 
             var material = public.getMaterial();
             if (material) material.apply(shader);
-
-            if (shader.uniforms.clipMatrix !== undefined) {
-                frag.Transform(engine, drawContext.state.modelToClipMatrix)
-                    .apply(shader.uniforms.clipMatrix);
-            }
-
-            if (shader.uniforms.modelMatrix !== undefined) {
-                frag.Transform(engine, drawContext.state.modelToWorldMatrix)
-                    .apply(shader.uniforms.modelMatrix);
-            }
 
             private.mesh.draw(shader);
 
@@ -8028,23 +8424,23 @@ window.frag.VertexData = function(engine) {
         return private.setVector(public.bitangents, public.bitangentIndex(index), v);
     };
 
-    public.setTriangles2D = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangles2D = function (data) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 2;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             for (let i = 0; i < public.vertexCount; i += 3) {
@@ -8055,23 +8451,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangles = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangles = function (data) {
         public.primitiveType = gl.TRIANGLES;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             for (let i = 0; i < public.vertexCount; i += 3) {
@@ -8082,23 +8478,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangleStrip = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangleStrip = function (data) {
         public.primitiveType = gl.TRIANGLE_STRIP;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             const triangleCount = public.vertexCount - 2;
@@ -8111,23 +8507,23 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setTriangleFan = function (verticies, colors, uvs, normals, tangents, bitangents) {
+    public.setTriangleFan = function (data) {
         public.primitiveType = gl.TRIANGLE_FAN;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
-        public.tangents = tangents;
-        public.bitangents = bitangents;
+        public.normals = data.normals;
+        public.tangents = data.tangents;
+        public.bitangents = data.bitangents;
 
         public.extractTriangles = function (addTriangle) {
             const triangleCount = public.vertexCount - 2;
@@ -8139,21 +8535,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLines2D = function (verticies, colors, uvs, normals) {
+    public.setLines2D = function () {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 2;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 
@@ -8162,21 +8558,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLines = function (verticies, colors, uvs, normals) {
+    public.setLines = function (data) {
         public.primitiveType = gl.LINES;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 
@@ -8185,21 +8581,21 @@ window.frag.VertexData = function(engine) {
         return public;
     }
 
-    public.setLineStrip = function (verticies, colors, uvs, normals) {
+    public.setLineStrip = function (data) {
         public.primitiveType = gl.LINE_STRIP;
 
         public.vertexDimensions = 3;
-        public.verticies = verticies;
-        public.vertexCount = verticies.length / public.vertexDimensions;
+        public.verticies = data.verticies;
+        public.vertexCount = data.verticies.length / public.vertexDimensions;
 
         public.colorDimensions = 3;
-        public.colors = colors;
+        public.colors = data.colors;
 
         public.uvDimensions = 2;
-        public.uvs = uvs;
+        public.uvs = data.uvs;
 
         public.normalDimensions = 3;
-        public.normals = normals;
+        public.normals = data.normals;
         public.tangents = null;
         public.bitangents = null;
 
@@ -9303,7 +9699,9 @@ window.frag.Cube = function (engine, frontFacets, options) {
         if (topFacets) addFace(topFacets, 6, 7, 2, u3, v1, u4, v2); // top
     }
 
-    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangles({ verticies, colors, uvs });
+    return mesh;
 };
 
 /***/ }),
@@ -9370,7 +9768,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
                 push(x * radius1, y * radius1, z1);
             }
             push(0, radius1, z1);
-            mesh.addTriangleStrip(verticies, colors, uvs);
+            mesh.addTriangleStrip({ verticies, colors, uvs });
         }
     }
 
@@ -9398,7 +9796,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
             normals.push(y);
             normals.push(-1);
         }
-        mesh.addTriangleFan(verticies, colors, uvs, normals);
+        mesh.addTriangleFan({ verticies, colors, uvs, normals });
     }
 
     if (drawBottom) {
@@ -9425,7 +9823,7 @@ window.frag.Cylinder = function (engine, endFacets, options) {
             normals.push(y);
             normals.push(1);
         }
-        mesh.addTriangleFan(verticies, colors, uvs, normals);
+        mesh.addTriangleFan({ verticies, colors, uvs, normals });
     }
 
     return mesh;
@@ -9474,7 +9872,9 @@ window.frag.Disc = function (engine, facets, options) {
         uvs.push((y + 1) * 0.5);
     }
 
-    return window.frag.Mesh(engine).addTriangleFan(verticies, colors, uvs, normals);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangleFan({ verticies, colors, uvs, normals });
+    return mesh;
 };
 
 /***/ }),
@@ -9500,15 +9900,20 @@ window.frag.Plane = function (engine, facets, options) {
             0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, // bitangents
         ]);
 
-        return window.frag.Mesh(engine).fromBuffer(
-            data.buffer, 3, 4, engine.gl.TRIANGLE_STRIP,
-            0 * Float32Array.BYTES_PER_ELEMENT,
-            12 * Float32Array.BYTES_PER_ELEMENT,
-            24 * Float32Array.BYTES_PER_ELEMENT,
-            32 * Float32Array.BYTES_PER_ELEMENT,
-            44 * Float32Array.BYTES_PER_ELEMENT,
-            56 * Float32Array.BYTES_PER_ELEMENT,
-        );
+        const mesh = window.frag.Mesh(engine);
+        mesh.fromBuffer({
+            buffer: data.buffer, 
+            size: 3, 
+            count: 4, 
+            primitiveType: engine.gl.TRIANGLE_STRIP,
+            vertexDataOffset: 0 * Float32Array.BYTES_PER_ELEMENT,
+            colorDataOffset: 12 * Float32Array.BYTES_PER_ELEMENT,
+            uvDataOffset: 24 * Float32Array.BYTES_PER_ELEMENT,
+            normalDataOffset: 32 * Float32Array.BYTES_PER_ELEMENT,
+            tangentDataOffset: 44 * Float32Array.BYTES_PER_ELEMENT,
+            bitangentDataOffset: 56 * Float32Array.BYTES_PER_ELEMENT,
+        });
+        return mesh;
     }
  
     const verticies = [];
@@ -9547,7 +9952,9 @@ window.frag.Plane = function (engine, facets, options) {
         }
     }
 
-    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs, normals);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangles({ verticies, colors, uvs, normals });
+    return mesh;
 };
 
 /***/ }),
@@ -9646,7 +10053,9 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
         }
     }
 
-    return window.frag.Mesh(engine).addTriangles(triangleVerticies, triangleColors, triangleUvs);
+    const mesh = window.frag.Mesh(engine)
+    mesh.addTriangles({ verticies: triangleVerticies, colors: triangleColors, uvs: triangleUvs });
+    return mesh;
 };
 
 /***/ }),
@@ -9665,7 +10074,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
         window.frag[classname] = function(engine) {
             if (engine && engine.isEngine) {
                 if (!engine.isRendering)  {
-                    if (!(['Transform', 'Transform3D', 'Transform2D', `Location`, 'Observable'].includes(classname)))
+                    if (engine.debugConstructors && !(['Transform', 'Transform3D', 'Transform2D', `Location`, 'Observable'].includes(classname)))
                         console.log(classname, arguments);
                 }
                 return window._frag[classname].apply(null, arguments)
@@ -9786,6 +10195,11 @@ __webpack_require__(/*! ./Particles/MineExplosionEmitter */ "./src/Particles/Min
 __webpack_require__(/*! ./Particles/SphericalExplosionEmitter */ "./src/Particles/SphericalExplosionEmitter.js");
 __webpack_require__(/*! ./Particles/SprayEmitter */ "./src/Particles/SprayEmitter.js");
 __webpack_require__(/*! ./Particles/RainEmitter */ "./src/Particles/RainEmitter.js");
+
+__webpack_require__(/*! ./Dynamic/DynamicData */ "./src/Dynamic/DynamicData.js");
+__webpack_require__(/*! ./Dynamic/DynamicSurface */ "./src/Dynamic/DynamicSurface.js");
+__webpack_require__(/*! ./Dynamic/DynamicTile */ "./src/Dynamic/DynamicTile.js");
+__webpack_require__(/*! ./Dynamic/SharedVertex */ "./src/Dynamic/SharedVertex.js");
 
 var env = "development" || 0;
 if (env === 'development') {

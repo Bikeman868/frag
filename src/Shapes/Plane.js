@@ -13,15 +13,20 @@ window.frag.Plane = function (engine, facets, options) {
             0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, // bitangents
         ]);
 
-        return window.frag.Mesh(engine).fromBuffer(
-            data.buffer, 3, 4, engine.gl.TRIANGLE_STRIP,
-            0 * Float32Array.BYTES_PER_ELEMENT,
-            12 * Float32Array.BYTES_PER_ELEMENT,
-            24 * Float32Array.BYTES_PER_ELEMENT,
-            32 * Float32Array.BYTES_PER_ELEMENT,
-            44 * Float32Array.BYTES_PER_ELEMENT,
-            56 * Float32Array.BYTES_PER_ELEMENT,
-        );
+        const mesh = window.frag.Mesh(engine);
+        mesh.fromBuffer({
+            buffer: data.buffer, 
+            size: 3, 
+            count: 4, 
+            primitiveType: engine.gl.TRIANGLE_STRIP,
+            vertexDataOffset: 0 * Float32Array.BYTES_PER_ELEMENT,
+            colorDataOffset: 12 * Float32Array.BYTES_PER_ELEMENT,
+            uvDataOffset: 24 * Float32Array.BYTES_PER_ELEMENT,
+            normalDataOffset: 32 * Float32Array.BYTES_PER_ELEMENT,
+            tangentDataOffset: 44 * Float32Array.BYTES_PER_ELEMENT,
+            bitangentDataOffset: 56 * Float32Array.BYTES_PER_ELEMENT,
+        });
+        return mesh;
     }
  
     const verticies = [];
@@ -60,5 +65,7 @@ window.frag.Plane = function (engine, facets, options) {
         }
     }
 
-    return window.frag.Mesh(engine).addTriangles(verticies, colors, uvs, normals);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangles({ verticies, colors, uvs, normals });
+    return mesh;
 };

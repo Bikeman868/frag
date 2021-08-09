@@ -73,6 +73,11 @@ require('./Particles/SphericalExplosionEmitter');
 require('./Particles/SprayEmitter');
 require('./Particles/RainEmitter');
 
+require('./Dynamic/DynamicData');
+require('./Dynamic/DynamicSurface');
+require('./Dynamic/DynamicTile');
+require('./Dynamic/SharedVertex');
+
 var env = process.env.NODE_ENV || 'development';
 if (env === 'development') {
     require('./Shaders/ParticleShaderDebug');

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en-US'>
+<head>
+    <title>Ground</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <style>
+        html,
+        body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #scene {
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id='scene'></canvas>
+    <script src='frag.js'></script>
+    <script>
+        // Setup the basics
+        const engine = window.frag.Engine().start();
+        const degToRad = Math.PI / 180;
+
+        const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
+        camera.getPosition().locationXYZ(0, 100, -50).rotateX(50 * degToRad);
+
+        const scene = frag.Scene(engine)
+            .camera(camera);
+        engine.mainScene(scene);
+
+        const shader = frag.Shader(engine)
+            .name("Ground")
+            .diffuseTexture()
+            .directionalLightGrey()
+            .compile();
+
+        // Create some materials with a 1x1 pixel diffuse texture
+        const singleColorMaterial = function(rgb) {
+            texture = engine.Texture()
+                .dataFormat(engine.gl.RGB)
+                .fromArrayBuffer(0, new Uint8Array(rgb), 0, 1, 1);
+            return engine.Material()
+                .setTexture('diffuse', texture);
+        }
+        const redMaterial = singleColorMaterial([200, 50, 50]);
+        const greenMaterial = singleColorMaterial([50, 200, 50]);
+        const blueMaterial = singleColorMaterial([50, 50, 200]);
+
+        // Create a large virtual ground
+        const width = 500;
+        const depth = 500;
+        const materials = [redMaterial, greenMaterial, blueMaterial];
+        const groundData = engine.DynamicData(width, depth);
+        for (let x = 0; x < width; x++) {
+            for (let z = 0; z < depth; z++){
+                const data = groundData.get(x, z);
+                data.material = materials[Math.floor(Math.random() * 3)];
+                data.height = Math.random() * 0.25;
+                data.state = 0;
+            }
+        }
+
+        // Create a small mesh to display part of the ground
+        const surface = engine.DynamicSurface(groundData)
+            .shader(shader)
+            .createSquares(20, 20);
+        surface.getPosition().locationXYZ(-100, -50, 0).scale(10);
+        scene.addObject(surface);
+
+    </script>
+</body>

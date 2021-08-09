@@ -34,6 +34,7 @@ window.frag.Engine = function(config) {
         debugMeshes: config.debugMeshes === undefined ? false : config.debugMeshes,
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
         debugParticles: config.debugParticles === undefined ? false : config.debugParticles,
+        debugConstructors: config.debugConstructors === undefined ? false : config.debugConstructors,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }

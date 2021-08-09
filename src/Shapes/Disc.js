@@ -32,5 +32,7 @@ window.frag.Disc = function (engine, facets, options) {
         uvs.push((y + 1) * 0.5);
     }
 
-    return window.frag.Mesh(engine).addTriangleFan(verticies, colors, uvs, normals);
+    const mesh = window.frag.Mesh(engine);
+    mesh.addTriangleFan({ verticies, colors, uvs, normals });
+    return mesh;
 };

@@ -6,7 +6,7 @@
         window.frag[classname] = function(engine) {
             if (engine && engine.isEngine) {
                 if (!engine.isRendering)  {
-                    if (!(['Transform', 'Transform3D', 'Transform2D', `Location`, 'Observable'].includes(classname)))
+                    if (engine.debugConstructors && !(['Transform', 'Transform3D', 'Transform2D', `Location`, 'Observable'].includes(classname)))
                         console.log(classname, arguments);
                 }
                 return window._frag[classname].apply(null, arguments)

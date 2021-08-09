@@ -34,9 +34,9 @@ const vertices = [
   1, 0, 0,
   1, 1, 0];
 
-const mesh = engine.Mesh()
+const meshFragment = engine.Mesh()
   .name('My mesh')
-  .addTriangles(vertices);
+  .addTriangles({ vertices });
 ```
 
 In this case we only added a single triangle by passing 3 vertex 
@@ -55,8 +55,8 @@ in the mesh, but also imports all of the animations for each model.
 
 ## Mesh data
 A mesh must have a set of vertex positions. Everything else is
-optional. Methods like `addTriangles` take a variable number of
-parameters so that you can pass as much or as little information as 
+optional. Methods like `addTriangles` take an object with optional
+properties so that you can pass as much or as little information as 
 you like about your mesh.
 
 The other kinds of data are:
@@ -85,6 +85,7 @@ The other kinds of data are:
 * A bitangent vector for each vertex. These can redily be calculated from
   the normal vector and the tangent, or you can supply the values to
   avoid some calculations.
+* The material to use on this fragment.
 
 The `Mesh` objects have properties that control which of the missing
 data is added by calculation. These properties are all booleans as follows:
@@ -93,7 +94,6 @@ data is added by calculation. These properties are all booleans as follows:
 * `calcBitangents` is false by default on the assumption that bitangemts 
   will be computed in the shader. The Frag shader builder does build shaders
   that compute bitangebts only when needed.
-
 
 ## dispose()
 Frees resources consumed by the mesh.
@@ -151,62 +151,67 @@ The optional `color` parameter should be passed as an array of 3 floats for red,
 green and blue components of the color. As usual with WebGL floating point colors
 are always expressed in the range 0 to 1, i.e. [1,0,0] is bright red.
 
-## addVertexData(vertexData: VertexData): Mesh
+## addVertexData(vertexData: VertexData, material: Material): MeshFragment
 Adds a fragment of mesh from a pre-prepared `VertexData` object. `VertexData` objects
 allow you to define the data needed to create a mesh. It also allows you to 
 modify individual verticies, colors, UV coordinates etc and then re-create or
 re-populate the mesh.
 
-## addTriangles2D(): Mesh
-Takes function the following parameters:
+## addTriangles2D(data: object): MeshFragment
+Takes data object can have the following properties:
 * verticies: float[]
 * colors?: float[]
 * uvs?: float[]
 * normals?: float[]
 * tangents?: float[]
 * bitangents?: float[]
+* material: Material | undefined
+
 Adds a mesh fragment defined by a set of discrete 2-dimensional triangles
 
-## addTriangles(): Mesh
-Takes function the following parameters:
+## addTriangles(data: object): MeshFragment
+Takes data object can have the following properties:
 * verticies: float[]
-* colors?: float[]
-* uvs?: float[]
-* normals?: float[]
-* tangents?: float[]
-* bitangents?: float[]
+* colors: float[] | undefined
+* uvs: float[] | undefined
+* normals: float[] | undefined
+* tangents: float[] | undefined
+* bitangents: float[] | undefined
+* material: Material | undefined
+
 Adds a mesh fragment defined by a set of discrete 3-dimensional triangles
 
-## addTriangleStrip(): Mesh
-Takes function the following parameters:
+## addTriangleStrip(data: object): MeshFragment
+Takes data object can have the following properties:
 * verticies: float[]
-* colors?: float[]
-* uvs?: float[]
-* normals?: float[]
-* tangents?: float[]
-* bitangents?: float[]
+* colors: float[] | undefined
+* uvs: float[] | undefined
+* normals: float[] | undefined
+* tangents: float[] | undefined
+* bitangents: float[] | undefined
+* material: Material | undefined
 
 Adds a mesh fragment defined by a set of 3-dimensional triangles where the
 first 3 vertices define the first triangle, then each subsequent vertex
 adds one more triangle to the strip of triangles.
 
-## addTriangleFan(): Mesh
-Takes function the following parameters:
+## addTriangleFan(data: object): MeshFragment
+Takes data object can have the following properties:
 * verticies: float[]
-* colors?: float[]
-* uvs?: float[]
-* normals?: float[]
-* tangents?: float[]
-* bitangents?: float[]
+* colors: float[] | undefined
+* uvs: float[] | undefined
+* normals: float[] | undefined
+* tangents: float[] | undefined
+* bitangents: float[] | undefined
+* material: Material | undefined
 
 Adds a mesh fragment defined by a set of 3-dimensional triangles where the
 first vertex defined the center of the fan, the next 2 vertices form a triangle, 
 then each subsequent vertex adds one more triangle to the fan of triangles
 which all share the first vertex.
 
-## fromBuffer(): Mesh
-
-Takes function the following parameters:
+## fromBuffer(data: object): MeshFragment
+Takes data object can have the following properties:
 * buffer: ArrayBuffer - contains binary floating point data
 * size: int - pass 2 for 2D and 3 for 3D meshes
 * count: int - the number of verticies in the mesh
@@ -217,7 +222,9 @@ Takes function the following parameters:
 * normalDataOffset: int - offset into the buffer where normal data starts
 * tangentDataOffset: int - offset into the buffer where tangent data starts
 * bitangentDataOffset: int - offset into the buffer where bitangent data starts
+* material: Material | undefined
 
 This is a low-level interface that allows you to supply raw data for the mesh.
 This is most suited to loading pre-prepared meshes in binary format and
-dumping them directly into the graphics card.
+dumping them directly into the graphics card, or meshes that are constructed
+programatically.

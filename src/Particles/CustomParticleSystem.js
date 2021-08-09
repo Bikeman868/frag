@@ -524,7 +524,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
         if (!private.enabled) return public;
 
-        drawContext.beginSceneObject(private.location, {}, {});
+        drawContext.beginSceneObject(private.location);
         private.draw(drawContext);
         drawContext.endSceneObject();
 

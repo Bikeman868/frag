@@ -86,5 +86,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
         }
     }
 
-    return window.frag.Mesh(engine).addTriangles(triangleVerticies, triangleColors, triangleUvs);
+    const mesh = window.frag.Mesh(engine)
+    mesh.addTriangles({ verticies: triangleVerticies, colors: triangleColors, uvs: triangleUvs });
+    return mesh;
 };

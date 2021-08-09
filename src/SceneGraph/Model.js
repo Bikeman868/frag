@@ -190,30 +190,10 @@ window.frag.Model = function (engine, is3d, parent) {
         if (shader !== undefined && private.mesh && private.enabled) {
             shader.bind();
 
-            if (drawContext.isHitTest && shader.uniforms.color !== undefined) {
-                const sceneObjectId = drawContext.sceneObjects.length - 1;
-                const modelId = drawContext.models.length;
-                drawContext.models.push(public);
-
-                const red = sceneObjectId >> 4;
-                const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
-                const blue = (modelId & 0xff00) >> 8;
-                const alpha = modelId & 0xff;
-                engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
-            }
+            drawContext.setupShader(shader, public);
 
             var material = public.getMaterial();
             if (material) material.apply(shader);
-
-            if (shader.uniforms.clipMatrix !== undefined) {
-                frag.Transform(engine, drawContext.state.modelToClipMatrix)
-                    .apply(shader.uniforms.clipMatrix);
-            }
-
-            if (shader.uniforms.modelMatrix !== undefined) {
-                frag.Transform(engine, drawContext.state.modelToWorldMatrix)
-                    .apply(shader.uniforms.modelMatrix);
-            }
 
             private.mesh.draw(shader);
 

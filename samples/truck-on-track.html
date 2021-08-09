@@ -235,8 +235,8 @@
         const trackMaterial = singleColorMaterial("track", [120, 220, 90]);
         const trackMesh = frag.Mesh(engine)
             .name("Track")
-            .shadeFlat()
-            .addTriangleStrip(trackVertices);
+            .shadeFlat();
+        trackMesh.addTriangleStrip({ verticies: trackVertices });
         const trackModel = frag.Model(engine)
             .name("Track")
             .mesh(trackMesh)
