@@ -16,6 +16,7 @@ In the truck on a track sample, the pitch of the truck in not adjusted to the ri
 * Hemispherical lights
 * Place the scene inside a sphere or box with a material painted onto the inside
 * Dynamic surface comprised of hexagons
+* Frustum culling
 
 ## Optional nice to have features
 * Play sounds synced with animations. This is nice to have because there are better libraries for playing sounds. This is a WebGL wrapper and WebGL does not provide any sound playing capabilities.

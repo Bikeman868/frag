@@ -1339,6 +1339,8 @@ window.frag.DynamicSurface = function (engine, data) {
             private.mesh.fragmentsUpdated();
         }
 
+        const x0 = width * -0.5;
+        const z0 = depth * -0.5;
         for (let x = 0; x < width; x++) {
             for (let z = 0; z < depth; z++) {
                 const tile = window.frag.DynamicTile(engine)
@@ -1347,7 +1349,7 @@ window.frag.DynamicSurface = function (engine, data) {
                     .z(z);
                 private.tiles.push(tile);
 
-                const verticies = [x+1, 0, z, x+1, 0, z+1, x, 0, z, x, 0, z+1];
+                const verticies = [x0+x+1, 0, z0+z, x0+x+1, 0, z0+z+1, x0+x, 0, z0+z, x0+x, 0, z0+z+1];
                 const uvs = [1, 0, 1, 1, 0, 0, 0, 1];
                 const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
 

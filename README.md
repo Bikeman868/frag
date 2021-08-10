@@ -27,23 +27,25 @@ The functioanllity that is provided:
 * Bulk loading of models, fonts and materials designed in tools like Blender and Substance Player
 * Separation of models from materials so that the same models can be used with different
   skins in different parts of the game or for different players.
-* Powerful animation engine that can run many parallel animations on the same model
+* Powerful animation engine that can run many animations at the same time on the same model.
+  You can animate the meshes within the model and animate the model within the scene.
 * Dynamic terrain support where only the small part of the terrain that the player can
-  see is rendered to a mesh that can be scrolled over the terrain data.
+  see is rendered to a mesh that can be scrolled over the terrain data. Mesh tiles are
+  selectable and can override shader uniforms for to reflect the map time state.
 * Efficient reuse of assets. For example you can draw a wheel mesh once then scale it 
   and paint it differetly on various models to create all the different types of wheel 
   that you need without duplicating the mesh. Meshes, textures, materials, and animations
   can all be reused.
 * Animations apply to model sub-components using regular expressions so that you can
   for example define a rotating animation and apply it to any wheel in any model.
-* A shader builder that can create a shader with only the features that you need.
+* A shader builder that can create a shader with only the features that you need to
+  maximize the frame rate.
 * Full support for custom shaders and granular application of shaders to model
   components so for example you only need the shader that supports light emmissions
   for drawing the parts of the model that emit light.
 * A particle system for creating effects like fog and explosions. Standard effects are
   available out of the box as well as highly customizable particle effects.
 * Models comprising a heirachy of components where each component has a mesh and material.
-* Animation of components within models that match regular expression
 * Parenting scene objects to other scene objects or components of other scene object models.
 * Objects can selectively mimic the actions of other objects in the scene or look at them.
 
@@ -146,10 +148,11 @@ rectangle map to the pixels in the material that are a drawing of a specific
 character.
 
 ## Particle System
-Manages a very large collection of dynamically created meshes that each comprise
-two triangles forming a square. Particles have velocity, acceleration and spin
-to define their movement within the scene, and have a very flexible system to 
-define how their appearence changes throughout their lifetime.
+A particle system manages a very large collection of dynamically created meshes,
+transferring only what changed to the GPU. The GPU does all of the partcile animation
+based on the particle's velocity, acceleration and spin. Particles have a very flexible 
+system to define how their appearence changes throughout their lifetime, for example
+changing size, color, texture etc.
 
 # Example scenes
 

@@ -12,10 +12,16 @@
             margin: 0;
             padding: 0;
         }
-
+        div {
+            font-size: large;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            margin-left: 20px;
+            margin-right: 20px;
+        }
         #scene {
             width: 100vw;
-            height: 100vh;
+            height: 80vh;
             touch-action: none;
             display: block;
         }
@@ -23,14 +29,17 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
+    <div>Press 'W' to toggle wireframe mode. Drag with system poointer to scroll the terrain.</div>
+    <div>Right click with the mouse to change the state of a map tile.</div>
+    <div>Middle click with the mouse to increase the height of a map tile.</div>
     <script src='frag.js'></script>
     <script>
         // Setup the basics
         const engine = window.frag.Engine().start();
         const degToRad = Math.PI / 180;
 
-        const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
-        camera.getPosition().locationXYZ(0, 100, -50).rotateX(50 * degToRad);
+        const camera = frag.FrustumCamera(engine).frustum(80, 50, 2000);
+        camera.getPosition().locationXYZ(0, 100, -250).rotateX(70 * degToRad);
 
         const scene = frag.Scene(engine)
             .camera(camera);
@@ -85,7 +94,7 @@
         }
 
         // Create a mesh to display part of the terrain and add it to the scene
-        const surfaceLocation = [-400, -50, 100];
+        const surfaceLocation = [0, -50, 0];
         const tileWidth = 40;
         const surface = engine.DynamicSurface(terrainData)
             .shader(shader)
@@ -131,7 +140,7 @@
                     const dynamicSurface = hit.sceneObject;
                     const dynamicTile = hit.fragment;
 
-                    dynamicTile.getData().uniforms = [{ name: 'lightDirection', value: [0.1, 0.3, -0.1] }];
+                    dynamicTile.getData().uniforms = [{ name: 'lightDirection', value: [0.05, 0.2, -0.05] }];
                     dynamicSurface.dataModified();
                 }
             }
