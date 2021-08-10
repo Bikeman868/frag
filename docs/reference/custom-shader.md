@@ -129,10 +129,24 @@ a uniform variable within the vertex shader or fragment shader program. This var
 within your shader code must match the `name` parameter with a `u_` prefix. See the 
 example above to see how this works.
 
-If you pass a `glType` parameter then a function will be added to the shader with
-the same name as the uniform, that sets the value of this uniform. The `glType` 
-string defines a data type that must match the data type of the uniform variable
-in your shader code.
+If you pass a `glType` parameter then a set of functions will be added to the shader
+based on the name of the uniform as follows:
+* `{uniform}(value)` sets the value of this uniform. The `glType` string defines a 
+  data type that must match the data type of the uniform variable in your shader code.
+  The value that you pass here will be sent to the GPU whenever this shader is used
+  to draw mesh fragments.
+* `override{Uniform}(value)` is used by the drawing pipeline to override the value of
+  the uniform for a specific fragment. If you want to override uniforms per fragment
+  and did not set the `glType` property here, then you must specify the data type
+  in the fragment override.
+* `restore{Uniform}()` is used by the drawing pipeline to restore the original value
+  of the uniform if there was a fragment override in effect. If you do not specify
+  the `glType` of the uniform then this restore method will be unavailable and the
+  drawing pipeline will not restore the uniform after rendering the fragment.
+
+For example if your uniform is called "color" then the GLSL variable must be called
+`u_color` and the shader will have functions called `color()`, `overrideColor` and
+`restoreColor`.
 
 The first character of `glType` is a number between 1 and 4 that specifies how many 
 dimensions there are to the value. For example if this was a r, g, b color value you

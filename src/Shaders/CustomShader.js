@@ -121,6 +121,13 @@ window.frag.CustomShader = function (engine, is3d) {
                 private[name] = newValue;
                 return public;
             }
+            const baseName = name[0].toUpperCase() + name.substring(1);
+            public['override' + baseName] = function(value) {
+                gl["uniform" + glType](uniform, value);
+            }
+            public['restore' + baseName] = function() {
+                gl["uniform" + glType](uniform, private[name]);
+            }
             private.bindList.push(function (gl) {
                 if (private[name] !== undefined) {
                     //console.log("gl.uniform" + glType + "(" + name + "," + private[name] + ")")

@@ -40,7 +40,8 @@
             .name("Terrain")
             .diffuseTexture()
             .directionalLightGrey()
-            .compile();
+            .compile()
+            .lightDirection([-0.2, -0.6, 0.1]);
 
         // Create some materials with a 1x1 pixel diffuse texture for testing
         // Of course real terrin would use materials packaged and downloaded from the server
@@ -80,8 +81,6 @@
                 xh += Math.random() * 0.5 - 0.5 - xh * 0.05;
                 zh += Math.random() * 0.5 - 0.5 - zh * 0.05;
                 data.height = xh + zh;
-                
-                data.uniforms = [ { name: 'lightDirection', type: '3fv', value: [0.2, 0.6, -0.1] }];
             }
         }
 
@@ -124,7 +123,7 @@
             .enable();
 
         // Right click with the mouse to change map tiles into the selecetd state
-        // and show this by altering the light direction on the tile to make it darker
+        // and show this by modifying the light direction on the tile to make it darker
         const tileSelectorChange = function(digitalState, evt) {
             if (digitalState.isOn) {
                 const hit = engine.hitTest(evt.clientX, evt.clientY);
@@ -132,7 +131,7 @@
                     const dynamicSurface = hit.sceneObject;
                     const dynamicTile = hit.fragment;
 
-                    dynamicTile.getData().uniforms = [ { name: 'lightDirection', type: '3fv', value: [0.1, 0.3, -0.1] }];
+                    dynamicTile.getData().uniforms = [{ name: 'lightDirection', value: [0.1, 0.3, -0.1] }];
                     dynamicSurface.dataModified();
                 }
             }

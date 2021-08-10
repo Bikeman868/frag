@@ -160,8 +160,7 @@ re-populate the mesh.
 This method can optionally be passed a material and an array of uniform assgnments.
 These two options allow for some more advanced techniques that are not nromally required.
 A deeper understanding of the rendering pipeline is reuired to use these effectively
-because they values bound to the shader when this fragment is rendered and remain set until
-the shader is re-bound to the GPU.
+because they change the values bound to the shader when this fragment is rendered.
 
 The safest way to use these options is to set them on every fragment, but this
 carries an overhead of sending values up to the GPU on each fragment render.
@@ -171,9 +170,12 @@ The `material` parameter should be an instance of the `Material` class or nothin
 The `uniforms` parameter should be an array of uniform assignments or nothing, where
 each uniform assignment is an object with `name`, `type` and `value` properties. The
 `name` property is the name of the shader uniform to update, the `type` property can
-be `i` for integer, `f` for float, `3fv` for an array of 3 floating point values etc.
+be `1i` for integer, `1f` for float, `3fv` for an array of 3 floating point values etc.
 This is mostly useful in tha case where you are using a custom shader with uniforms
 that you defined, and you want to set these uniforms for each fragment in the model.
+Note that if you want the uniform restored to its previous value after this fragment
+is drawn, then you must specify the data type of the uniform when you add uniforms
+to your shader.
 
 ## addTriangles2D(data: object): MeshFragment
 Takes data object can have the following properties:

@@ -364,8 +364,20 @@ window.frag.Mesh = function (engine) {
         if (fragment.uniforms) {
             for (let i = 0; i < fragment.uniforms.length; i++) {
                 const uniform = fragment.uniforms[i];
-                if (shader.uniforms[uniform.name] !== undefined) {
-                    gl["uniform" + uniform.type](shader.uniforms[uniform.name], uniform.value);
+                const shaderUniform = shader.uniforms[uniform.name]
+                if (shaderUniform !== undefined) {
+                    const baseName = uniform.name[0].toUpperCase() + uniform.name.substring(1);
+                    const overrideFunction = shader['override' + baseName];
+                    if (overrideFunction) 
+                        overrideFunction(uniform.value);
+                    else if (uniform.type)
+                        gl["uniform" + uniform.type](shaderUniform, uniform.value);
+                    else
+                        console.error('To override a uniform on a mesh fragment you must specify the type either in the override or in the uniform definition on the shader');
+                    const restoreFunction = shader['restore' + baseName];
+                    if (restoreFunction) {
+                        unbindFuncs.push(restoreFunction);
+                    }
                 }
             }
         }
