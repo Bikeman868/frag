@@ -1224,7 +1224,7 @@ window.frag.DynamicData = function (engine, width, depth) {
 /*
  * This class a mesh that is dynamically constructed from part of a
  * larger data set. The part of the dataset that is represented can
- * be remapped visually scrolling the mesh acroll the underlying data
+ * be remapped visually scrolling the mesh accross the underlying data
 */
 window.frag.DynamicSurface = function (engine, data) {
 
@@ -1287,6 +1287,10 @@ window.frag.DynamicSurface = function (engine, data) {
         private.fragmentsModified = true;
     }
 
+    public.dataModified = function() {
+        private.fragmentsModified = true;
+    }
+
     public.createSquares = function(width, depth) {
         private.tiles.length = 0;
         private.meshFragments.length = 0;
@@ -1336,7 +1340,7 @@ window.frag.DynamicSurface = function (engine, data) {
         for (let x = 0; x < width; x++) {
             for (let z = 0; z < depth; z++) {
                 const tile = window.frag.DynamicTile(engine)
-                    .data(private.data)
+                    .dynamicData(private.data)
                     .x(x)
                     .z(z);
                 private.tiles.push(tile);
@@ -1447,7 +1451,7 @@ window.frag.DynamicTile = function (engine) {
 
     const public = {
         __private: private,
-        isDynamcTile: true,
+        isDynamicTile: true,
         sharedVerticies: [],
     }
 
@@ -1461,7 +1465,7 @@ window.frag.DynamicTile = function (engine) {
     public.dispose = function () {
     }
 
-    public.data = function(data) {
+    public.dynamicData = function(data) {
         private.dynamicData = data;
         private.modified = true;
         return public;

@@ -86,19 +86,22 @@
         }
 
         // Create a small mesh to display part of the terrain
+        const surfaceLocation = [-400, -50, 100];
+        const tileWidth = 40;
         const surface = engine.DynamicSurface(terrainData)
             .shader(shader)
             .createSquares(meshWidth, meshDepth);
-        surface.getPosition().locationXYZ(-400, -50, 100).scale(40);
+        surface.getPosition().location(surfaceLocation).scale(tileWidth);
         scene.addObject(surface);
 
         // Scroll the dynamic mesh over the data with pointer drag
-        const maxScrollX = terrainWidth - meshWidth - 1;
-        const maxScrollZ = terrainDepth - meshDepth - 1;
+        const maxScrollX = terrainWidth - meshWidth;
+        const maxScrollZ = terrainDepth - meshDepth;
         let scrollX;
         let scrollZ;
         const updateScroll = function() {
-            surface.setOrigin(scrollX.value, scrollZ.value); 
+            surface.getPosition().location(window.frag.Vector.add(surfaceLocation, [(1 - (scrollX.value % 1)) * tileWidth , 0, (1 - (scrollZ.value % 1)) * tileWidth]));
+            surface.setOrigin(Math.floor(scrollX.value), Math.floor(scrollZ.value));
         }
         scrollX = engine.AnalogState(
             updateScroll,
@@ -120,7 +123,36 @@
             )
             .enable();
 
-        // Right click with mouse to select map tile
+        // Right click with mouse to select map tiles
+        const tileSelectorChange = function(digitalState, evt) {
+            if (digitalState.isOn) {
+                const hit = engine.hitTest(evt.clientX, evt.clientY);
+                if (hit && hit.fragment.isDynamicTile) {
+                    const dynamicSurface = hit.sceneObject;
+                    const dynamicTile = hit.fragment;
 
+                    dynamicTile.getData().material = greyMaterial;
+                    dynamicSurface.dataModified();
+                }
+            }
+        };
+        const tileSelectorState = engine.DigitalState(tileSelectorChange, { isOn: false });
+        engine.DigitalInput("right-mouse", tileSelectorState).enable();
+
+        // Middle click with mouse to elevate map tiles
+        const tileLifterChange = function(digitalState, evt) {
+            if (digitalState.isOn) {
+                const hit = engine.hitTest(evt.clientX, evt.clientY);
+                if (hit && hit.fragment.isDynamicTile) {
+                    const dynamicSurface = hit.sceneObject;
+                    const dynamicTile = hit.fragment;
+                    
+                    dynamicTile.getData().height += 2;
+                    dynamicSurface.dataModified();
+                }
+            }
+        };
+        const tileLifterState = engine.DigitalState(tileLifterChange, { isOn: false });
+        engine.DigitalInput("middle-mouse", tileLifterState).enable();
     </script>
 </body>

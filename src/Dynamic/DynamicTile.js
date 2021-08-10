@@ -15,7 +15,7 @@ window.frag.DynamicTile = function (engine) {
 
     const public = {
         __private: private,
-        isDynamcTile: true,
+        isDynamicTile: true,
         sharedVerticies: [],
     }
 
@@ -29,7 +29,7 @@ window.frag.DynamicTile = function (engine) {
     public.dispose = function () {
     }
 
-    public.data = function(data) {
+    public.dynamicData = function(data) {
         private.dynamicData = data;
         private.modified = true;
         return public;
