@@ -1244,6 +1244,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
     const public = {
         __private: private,
+        isDynamicSurface: true,
     }
 
     public.dispose = function () {
@@ -1251,6 +1252,10 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.enabled = function(enabled) {
         private.enabled = enabled;
+    }
+
+    public.getLocation = function() {
+        return private.location;
     }
 
     public.getPosition = function () {
@@ -1265,6 +1270,10 @@ window.frag.DynamicSurface = function (engine, data) {
         private.shader = shader;
         return public;
     }
+
+    public.getShader = function() {
+        return private.shader;
+    }
     
     public.setOrigin = function(x, z) {
         x = private.sanitizeX(x);
@@ -1277,7 +1286,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
         private.fragmentsModified = true;
     }
-    
+
     public.createSquares = function(width, depth) {
         private.tiles.length = 0;
         private.meshFragments.length = 0;
@@ -1395,25 +1404,18 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.draw = function (drawContext) {
         if (!private.enabled || !private.mesh) return public;
-
-        const shader = drawContext.shader || private.shader;
-        if (!shader) return public;
-
+        
         if (private.fragmentsModified) {
             private.updateMeshFragments();
             private.fragmentsModified = false;
         }
 
-        shader.bind();
-        drawContext.beginSceneObject(private.location);
-
-        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
-
-        drawContext.setupShader(shader, public);
-    
-        private.mesh.draw(shader);
-
+        drawContext.beginSceneObject(public);
+        private.mesh.draw(drawContext, function(_1, index) {
+            return private.tiles[index];
+        });
         drawContext.endSceneObject();
+
         return public;
     };
 
@@ -1436,24 +1438,22 @@ window.frag.DynamicSurface = function (engine, data) {
 window.frag.DynamicTile = function (engine) {
 
     const private = {
-        data: null,
+        dynamicData: null,
+        tileData: null,
         x: 0,
         z: 0,
-        height: 0,
-        material: null,
         modified: true,
     };
 
     const public = {
         __private: private,
+        isDynamcTile: true,
         sharedVerticies: [],
     }
 
     private.update = function() {
         if (private.modified) {
-            const data = public.getData();
-            private.height = data.height;
-            private.material = data.material;
+            private.tileData = private.dynamicData.get(private.x, private.z);
             private.modified = false;
         }
     }
@@ -1462,7 +1462,7 @@ window.frag.DynamicTile = function (engine) {
     }
 
     public.data = function(data) {
-        private.data = data;
+        private.dynamicData = data;
         private.modified = true;
         return public;
     }
@@ -1488,22 +1488,28 @@ window.frag.DynamicTile = function (engine) {
     }
 
     public.getData = function() {
-        return private.data.get(private.x, private.z);
+        private.update();
+        return private.tileData;
     }
 
     public.getMaterial = function() {
         private.update();
-        return private.material;
+        return private.tileData.material;
     }
 
     public.getHeight = function() {
         private.update();
-        return private.height;
+        return private.tileData.height;
     }
 
-    public.getState = function() {
+    public.getColorMult = function() {
         private.update();
-        return private.height;
+        return private.tileData.colorMult;
+    }
+
+    public.getColor = function() {
+        private.update();
+        return private.tileData.color;
     }
 
     return public;
@@ -1768,13 +1774,13 @@ window.frag.Engine = function(config) {
         const blue = pixel[2];
         const alpha = pixel[3];
     
-        const modelId = alpha | (blue << 8) | ((green & 0x0f) << 16);
+        const fragmentId = alpha | (blue << 8) | ((green & 0x0f) << 16);
         const sceneObjectId = ((green & 0xf0) >> 4) | (red << 4);
     
-        if ((modelId < drawContext.models.length) && (sceneObjectId < drawContext.sceneObjects.length))
+        if ((fragmentId < drawContext.fragments.length) && (sceneObjectId < drawContext.sceneObjects.length))
             return {
                 sceneObject: drawContext.sceneObjects[sceneObjectId],
-                model: drawContext.models[modelId]
+                fragment: drawContext.fragments[fragmentId]
             };
     
         return null;
@@ -6054,6 +6060,10 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         return private.name;
     }
 
+    public.getLocation = function() {
+        return private.location;
+    }
+
     public.getPosition = function() {
         if (!private.position) 
             private.position = frag.ScenePosition(engine, private.location);
@@ -6281,7 +6291,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
         if (!private.enabled) return public;
 
-        drawContext.beginSceneObject(private.location);
+        drawContext.beginSceneObject(public);
         private.draw(drawContext);
         drawContext.endSceneObject();
 
@@ -6466,23 +6476,37 @@ window.frag.SprayEmitter = function(engine, position, axis, width) {
 
 window.frag.DrawContext = function (engine) {
     const private = {
-        stack: []
+        stack: [],
+        matriciesChanged: false,
+        activeShader: null,
+        overrideShader: null,
     }
 
     const public = {
         __private: private,
-        shader: null,
         isHitTest: false,
         sceneObjects: null,
-        models: null,
+        fragments: null,
         worldToClipTransform: null,
         gameTick: 0,
         state: {
             animationMap: null,
             childMap: null,
             modelToWorldMatrix: null,
-            modelToClipMatrix: null
+            modelToClipMatrix: null,
+            shader: null,
         }
+    }
+
+    private.setShader = function(shader) {
+        if (shader === private.activeShader) return;
+
+        if (private.activeShader)
+            private.activeShader.unbind();
+
+        private.activeShader = shader;
+
+        if (shader) shader.bind();
     }
 
     private.pushState = function() {
@@ -6492,12 +6516,15 @@ window.frag.DrawContext = function (engine) {
 
     private.popState = function() {
         public.state = private.stack.pop();
+        private.matriciesChanged = true;
+        if (!private.overrideShader)
+            private.setShader(public.state.shader);
     }
 
     public.forHitTest = function(shader) {
-        public.shader = shader;
+        private.overrideShader = shader;
         public.sceneObjects = [];
-        public.models = [];
+        public.fragments = [];
         public.isHitTest = true;
         return public;
     }
@@ -6507,40 +6534,76 @@ window.frag.DrawContext = function (engine) {
         return public;
     }
 
-    public.beginScene = function(camera) {
-        public.worldToClipTransform = camera.worldToClipTransform;
+    public.shader = function(shader) {
+        if (!private.overrideShader)
+        {
+            public.state.shader = shader;
+            private.setShader(shader);
+        }
+        return public;
+    }
+
+    public.getShader = function() {
+        return private.activeShader;
+    }
+
+    /*
+     * A scene consists of a camera and collection of objects that are positioned
+     * within the scene. The scene must implement these methods:
+     * getCamera() - returns the camera that provides the world to clip transform
+     */
+    public.beginScene = function(scene) {
+        private.setShader(private.overrideShader);
+        public.worldToClipTransform = scene.getCamera().worldToClipTransform;
         return public;
     }
 
     public.endScene = function() {
+        private.setShader(null);
         return public;
     }
 
-    public.beginSceneObject = function(location, animationMap, childMap) {
+    /*
+     * A scene object is a 2D or 3D shape within the scene. Scene objects
+     * can be instances of models, dynamic surfaces, or anything else that
+     * has a mesh or mesh heirachy within it. Scene objects can implement
+     * the following methods to integrate with the drawing pipeline:
+     * getLocation() - returns the location in the scene
+     * getShader() - returns the shader to use for drawing fragments
+     * getAnimationMap() - returns a map of child mesh names to animations
+     * getChildMap() - returns a map of child mesh names to lists scene objects
+     */
+    public.beginSceneObject = function(sceneObject) {
         private.pushState();
 
-        public.state.animationMap = animationMap || {};
-        public.state.childMap = childMap || {};
+        if (public.sceneObjects) public.sceneObjects.push(sceneObject);
+        if (sceneObject.getShader) public.shader(sceneObject.getShader());
 
-        const localMatrix = location.getMatrix();
+        if (sceneObject.getLocation) {
+            const localMatrix = sceneObject.getLocation().getMatrix();
 
-        if (public.state.modelToWorldMatrix) {
-            // This is the case where this SceneObject is parented to another model
-            const Matrix = frag.Matrix;
-            if (public.worldToClipTransform.is3d) {
-                public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
-                public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            public.state.animationMap = sceneObject.getAnimationMap ? sceneObject.getAnimationMap() : null;
+            public.state.childMap = sceneObject.getChildMap ? sceneObject.getChildMap() : null;
+
+            if (public.state.modelToWorldMatrix) {
+                // This is the case where this SceneObject is parented to another model
+                const Matrix = frag.Matrix;
+                if (public.worldToClipTransform.is3d) {
+                    public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
+                    public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+                } else {
+                    public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
+                    public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+                }    
             } else {
-                public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
-                public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
-            }    
-        } else {
-            // This is the case where this SceneObject is parented to the scene
-            const worldToClipMatrix = public.worldToClipTransform.getMatrix();
-            public.state.modelToWorldMatrix = localMatrix;
-            public.state.modelToClipMatrix = public.worldToClipTransform.is3d
-                ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
-                : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+                // This is the case where this SceneObject is parented to the scene
+                const worldToClipMatrix = public.worldToClipTransform.getMatrix();
+                public.state.modelToWorldMatrix = localMatrix;
+                public.state.modelToClipMatrix = public.worldToClipTransform.is3d
+                    ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
+                    : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+            }
+            private.matriciesChanged = true;
         }
 
         return public;
@@ -6551,11 +6614,22 @@ window.frag.DrawContext = function (engine) {
         return public;
     }
 
-    public.beginModel = function(name, location) {
+    /*
+     * A mesh is a collection of drawing primitives that are all drawn wth the same
+     * shader. This is most oftena  model. The model must implement the following:
+     * getShader() - returns the shader to use for drawing fragments
+     * getName() - returns the name of the mesh. Enables mesh animation and scene object attachment.
+     * getLocation() - the location of the mesh relative to its parent.
+     */
+    public.beginMesh = function(mesh) {
         private.pushState();
 
+        if (mesh.getShader) public.shader(mesh.getShader());
+
+        const name = mesh.getName ? mesh.getName() : null;
         const animationMap = public.state.animationMap;
 
+        let location = mesh.getLocation();
         const animationState = animationMap && name ? animationMap[name] : null;
         if (animationState) location = location.clone().add(animationState.location);
         const localMatrix = location.getMatrix();
@@ -6568,28 +6642,30 @@ window.frag.DrawContext = function (engine) {
             public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
             public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
         }
+        private.matriciesChanged = true;
     }
 
-    public.endModel = function() {
+    public.endMesh = function() {
         private.popState();
         return public;
     }
 
-    public.setupShader = function(shader, model) {
-        if (shader.uniforms.clipMatrix !== undefined) {
-            window.frag.Transform(engine, public.state.modelToClipMatrix)
-                .apply(shader.uniforms.clipMatrix);
-        }
+    /*
+     * A fragment is a set of drawing primitive (for example a triangle strip) that
+     * are drawn by the shader in a single operation. The fragment is the smallest
+     * unit that can be detected by the hit test mechanism. During hit test renders
+     * the fragment is rendered with the fragment ID in every pixel so that pixels
+     * can be tested to discover which fragment is closest to the camera for every
+     * pixel.
+     */
+    public.beginFragment =  function(fragment) {
+        const shader = private.activeShader;
 
-        if (shader.uniforms.modelMatrix !== undefined) {
-            frag.Transform(engine, public.state.modelToWorldMatrix)
-                .apply(shader.uniforms.modelMatrix);
-        }
+        if (fragment && shader.uniforms.color !== undefined && public.isHitTest) {
+            public.fragments.push(fragment);
 
-        if (shader.uniforms.color !== undefined && public.isHitTest) {
             const sceneObjectId = public.sceneObjects.length - 1;
-            const modelId = public.models.length;
-            public.models.push(model);
+            const modelId = public.fragments.length - 1;
 
             const red = sceneObjectId >> 4;
             const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
@@ -6597,6 +6673,25 @@ window.frag.DrawContext = function (engine) {
             const alpha = modelId & 0xff;
             engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
         }
+
+        if (private.matriciesChanged) {
+            if (shader.uniforms.clipMatrix !== undefined) {
+                window.frag.Transform(engine, public.state.modelToClipMatrix)
+                    .apply(shader.uniforms.clipMatrix);
+            }
+
+            if (shader.uniforms.modelMatrix !== undefined) {
+                frag.Transform(engine, public.state.modelToWorldMatrix)
+                    .apply(shader.uniforms.modelMatrix);
+            }
+
+            private.matriciesChanged = false;
+        }
+        return public;
+    }
+
+    public.endFragment = function() {
+        return public;
     }
 
     return public;
@@ -6985,20 +7080,27 @@ window.frag.Mesh = function (engine) {
         for (let i = 0; i < unbindFuncs.length; i++) unbindFuncs[i]();
     }
 
-    public.draw = function (shader) {
+    public.draw = function (drawContext, getComponent) {
+        const shader = drawContext.getShader();
+        if (!shader) return public;
+        
         if (!private.finalized && !private.fromBuffer) private.finalize();
 
         const gl = engine.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
-
+        
         for (let i = 0; i < private.meshFragments.length; i++) {
             const fragment = private.meshFragments[i];
+            drawContext.beginFragment(getComponent(fragment, i));
             private.drawFragment(shader, fragment);
+            drawContext.endFragment();
         }
 
-        for (let i = 0; i < private.debugFragments.length; i++) {
-            const fragment = private.debugFragments[i];
-            private.drawFragment(shader, fragment);
+        if (!drawContext.isHitTest) {
+            for (let i = 0; i < private.debugFragments.length; i++) {
+                const fragment = private.debugFragments[i];
+                private.drawFragment(shader, fragment);
+            }
         }
 
         return public;
@@ -7444,6 +7546,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     const public = {
         __private: private,
+        isModel: true,
         location: frag.Location(engine, is3d),
         animations: []
     };
@@ -7457,6 +7560,10 @@ window.frag.Model = function (engine, is3d, parent) {
             if (predicate(child)) flattenedChildren.push(child);
             child.addFlattenedChildren(flattenedChildren, predicate);
         }
+    }
+
+    public.getLocation = function() {
+        return public.location;
     }
 
     public.getPosition = function() {
@@ -7607,21 +7714,17 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.draw = function (drawContext) {
         if (!public.location) return public;
-        drawContext.beginModel(private.name, public.location);
+        drawContext.beginMesh(public);
 
-        const shader = drawContext.shader || public.getShader();
+        const shader = drawContext.getShader();
 
-        if (shader !== undefined && private.mesh && private.enabled) {
-            shader.bind();
-
-            drawContext.setupShader(shader, public);
-
+        if (shader && private.mesh && private.enabled) {
             var material = public.getMaterial();
             if (material) material.apply(shader);
 
-            private.mesh.draw(shader);
-
-            shader.unbind();
+            private.mesh.draw(drawContext, function(fragment, index) {
+                return index === 0 ? public : null;
+            });
         }
 
         for (let i = 0; i < private.children.length; i++)
@@ -7637,7 +7740,7 @@ window.frag.Model = function (engine, is3d, parent) {
                 sceneObjects[i].draw(drawContext);
         }
 
-        drawContext.endModel();
+        drawContext.endMesh();
         return public;
     }
 
@@ -7867,7 +7970,7 @@ window.frag.Scene = function(engine) {
     public.draw = function (drawContext) {
         if (!private.camera || !private.sceneObjects) return public;
 
-        drawContext.beginScene(private.camera);
+        drawContext.beginScene(public);
 
         for (let i = 0; i < private.sceneObjects.length; i++)
             private.sceneObjects[i].draw(drawContext);
@@ -7894,7 +7997,6 @@ window.frag.SceneObject = function (engine, model) {
         model,
         enabled: true,
         location: null,
-        animationLocation: null,
         position: null,
         animationPosition: null,
         animationMap: {},
@@ -7903,6 +8005,7 @@ window.frag.SceneObject = function (engine, model) {
 
     const public = {
         __private: private,
+        isSceneObject: true,
         animations: {},
         parent: null,
     };
@@ -7951,7 +8054,15 @@ window.frag.SceneObject = function (engine, model) {
         return false;
     }
 
-    private.getLocation = function () {
+    public.getChildMap = function() {
+        return private.childMap;
+    }
+
+    public.getAnimationMap = function() {
+        return private.animationMap;
+    }
+
+    public.getLocation = function () {
         if (private.location) return private.location;
         if (private.model) {
             if (!private.model.location) return null;
@@ -7962,23 +8073,12 @@ window.frag.SceneObject = function (engine, model) {
         return private.location;
     };
 
-    private.getAnimationLocation = function () {
-        if (private.animationLocation) return private.animationLocation;
-        if (private.model) {
-            if (!private.model.location) return null;
-            private.animationLocation = frag.Location(engine, private.model.location.is3d);
-        } else {
-            private.animationLocation = frag.Location(engine, true);
-        }
-        return private.animationLocation;
-    };
-
     /**
      * @returns a ScenePosition object that can be used to manipulate the position
      * scale and orientation of this object in the scene
      */
     public.getPosition = function () {
-        const location = private.getLocation();
+        const location = public.getLocation();
         if (!location) return null;
         if (!private.position) 
             private.position = frag.ScenePosition(engine, location);
@@ -7996,15 +8096,6 @@ window.frag.SceneObject = function (engine, model) {
         if (!private.animationPosition) 
             private.animationPosition = frag.ScenePosition(engine, location);
         return private.animationPosition;
-    };
-
-    /**
-     * Clears any animation position that was set. This is more efficient
-     * than setting the animation location to zero
-     */
-    public.clearAnimationPosition = function () {
-        private.animationLocation = null;
-        return public;
     };
 
     /**
@@ -8048,20 +8139,10 @@ window.frag.SceneObject = function (engine, model) {
     public.draw = function (drawContext) {
         if (!private.enabled || !private.model) return public;
 
-        let location = private.getLocation();
-        if (!location) return public;
-
-        if (private.animationLocation) {
-            location = location.clone().add(private.animationLocation);
-        }
-
-        drawContext.beginSceneObject(location, private.animationMap, private.childMap);
-
-        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
-
+        drawContext.beginSceneObject(public);
         private.model.draw(drawContext);
-
         drawContext.endSceneObject();
+
         return public;
     };
 

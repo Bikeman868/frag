@@ -5,7 +5,6 @@ window.frag.SceneObject = function (engine, model) {
         model,
         enabled: true,
         location: null,
-        animationLocation: null,
         position: null,
         animationPosition: null,
         animationMap: {},
@@ -14,6 +13,7 @@ window.frag.SceneObject = function (engine, model) {
 
     const public = {
         __private: private,
+        isSceneObject: true,
         animations: {},
         parent: null,
     };
@@ -62,7 +62,15 @@ window.frag.SceneObject = function (engine, model) {
         return false;
     }
 
-    private.getLocation = function () {
+    public.getChildMap = function() {
+        return private.childMap;
+    }
+
+    public.getAnimationMap = function() {
+        return private.animationMap;
+    }
+
+    public.getLocation = function () {
         if (private.location) return private.location;
         if (private.model) {
             if (!private.model.location) return null;
@@ -73,23 +81,12 @@ window.frag.SceneObject = function (engine, model) {
         return private.location;
     };
 
-    private.getAnimationLocation = function () {
-        if (private.animationLocation) return private.animationLocation;
-        if (private.model) {
-            if (!private.model.location) return null;
-            private.animationLocation = frag.Location(engine, private.model.location.is3d);
-        } else {
-            private.animationLocation = frag.Location(engine, true);
-        }
-        return private.animationLocation;
-    };
-
     /**
      * @returns a ScenePosition object that can be used to manipulate the position
      * scale and orientation of this object in the scene
      */
     public.getPosition = function () {
-        const location = private.getLocation();
+        const location = public.getLocation();
         if (!location) return null;
         if (!private.position) 
             private.position = frag.ScenePosition(engine, location);
@@ -107,15 +104,6 @@ window.frag.SceneObject = function (engine, model) {
         if (!private.animationPosition) 
             private.animationPosition = frag.ScenePosition(engine, location);
         return private.animationPosition;
-    };
-
-    /**
-     * Clears any animation position that was set. This is more efficient
-     * than setting the animation location to zero
-     */
-    public.clearAnimationPosition = function () {
-        private.animationLocation = null;
-        return public;
     };
 
     /**
@@ -159,20 +147,10 @@ window.frag.SceneObject = function (engine, model) {
     public.draw = function (drawContext) {
         if (!private.enabled || !private.model) return public;
 
-        let location = private.getLocation();
-        if (!location) return public;
-
-        if (private.animationLocation) {
-            location = location.clone().add(private.animationLocation);
-        }
-
-        drawContext.beginSceneObject(location, private.animationMap, private.childMap);
-
-        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
-
+        drawContext.beginSceneObject(public);
         private.model.draw(drawContext);
-
         drawContext.endSceneObject();
+
         return public;
     };
 

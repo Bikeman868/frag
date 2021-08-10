@@ -178,8 +178,8 @@
             const wireframeStateChange = function(digitalState, evt) {
                 if (digitalState.isOn) {
                     const hit = engine.hitTest(evt.clientX, evt.clientY);
-                    if (hit) {
-                        wireframeModel = hit.model;
+                    if (hit && hit.fragment.isModel) {
+                        wireframeModel = hit.fragment;
                         wireframeModel.wireframe(true);
                     }
                 } else {
@@ -200,8 +200,8 @@
             const normalsStateChange = function(digitalState, evt) {
                 if (digitalState.isOn) {
                     const hit = engine.hitTest(evt.clientX, evt.clientY);
-                    if (hit) {
-                        normalsModel = hit.model;
+                    if (hit && hit.fragment.isModel) {
+                        normalsModel = hit.fragment;
                         normalsModel.drawNormals(1);
                     }
                 } else {

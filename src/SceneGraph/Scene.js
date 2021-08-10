@@ -59,7 +59,7 @@ window.frag.Scene = function(engine) {
     public.draw = function (drawContext) {
         if (!private.camera || !private.sceneObjects) return public;
 
-        drawContext.beginScene(private.camera);
+        drawContext.beginScene(public);
 
         for (let i = 0; i < private.sceneObjects.length; i++)
             private.sceneObjects[i].draw(drawContext);

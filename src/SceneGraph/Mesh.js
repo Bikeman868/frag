@@ -372,20 +372,27 @@ window.frag.Mesh = function (engine) {
         for (let i = 0; i < unbindFuncs.length; i++) unbindFuncs[i]();
     }
 
-    public.draw = function (shader) {
+    public.draw = function (drawContext, getComponent) {
+        const shader = drawContext.getShader();
+        if (!shader) return public;
+        
         if (!private.finalized && !private.fromBuffer) private.finalize();
 
         const gl = engine.gl;
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
-
+        
         for (let i = 0; i < private.meshFragments.length; i++) {
             const fragment = private.meshFragments[i];
+            drawContext.beginFragment(getComponent(fragment, i));
             private.drawFragment(shader, fragment);
+            drawContext.endFragment();
         }
 
-        for (let i = 0; i < private.debugFragments.length; i++) {
-            const fragment = private.debugFragments[i];
-            private.drawFragment(shader, fragment);
+        if (!drawContext.isHitTest) {
+            for (let i = 0; i < private.debugFragments.length; i++) {
+                const fragment = private.debugFragments[i];
+                private.drawFragment(shader, fragment);
+            }
         }
 
         return public;

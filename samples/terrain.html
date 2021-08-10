@@ -54,6 +54,7 @@
         const redMaterial = singleColorMaterial([200, 50, 50]);
         const greenMaterial = singleColorMaterial([50, 200, 50]);
         const blueMaterial = singleColorMaterial([50, 50, 200]);
+        const greyMaterial = singleColorMaterial([100, 100, 100]);
 
         // Define what size we want to work with. The mesh must be 
         // smaller than the terrain data or there is no point
@@ -69,11 +70,17 @@
         let zh = 0;
         for (let x = 0; x < terrainWidth; x++) {
             for (let z = 0; z < terrainDepth; z++) {
+                const data = terrainData.get(x, z);
+
+                if (x === 0 || z === 0 || x === terrainWidth - 1 || z === terrainDepth - 1)
+                    data.material = greyMaterial;
+                else
+                    data.material = materials[Math.floor(Math.random() * 3)];
+
                 xh += Math.random() * 0.5 - 0.5 - xh * 0.05;
                 zh += Math.random() * 0.5 - 0.5 - zh * 0.05;
-                const data = terrainData.get(x, z);
-                data.material = materials[Math.floor(Math.random() * 3)];
                 data.height = xh + zh;
+                
                 data.state = 0;
             }
         }
@@ -104,13 +111,16 @@
         engine.AnalogInput("left-pointer-vertical", scrollZ, { scale: 0.25 }).enable();
         updateScroll();
 
-        // Toggle wireframe with the right mouse
+        // Toggle wireframe with the w key
         engine.DigitalInput(
-            "right-mouse", 
+            "w-key-toggle", 
             engine.DigitalState(
                 function(state) { surface.getMesh().wireframe(state.isOn); }, 
                 { isOn: false })
             )
             .enable();
+
+        // Right click with mouse to select map tile
+
     </script>
 </body>

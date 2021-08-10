@@ -12,8 +12,10 @@ In the truck on a track sample, the pitch of the truck in not adjusted to the ri
 * Vector fonts as 2D mesh per ASCII character
 * Analog input methods for accelerometer and device orientation
 * Better handling of velocity and acceleration for analog inputs
-* Make the cylinder shape able to make truncated cones with optional end caps
 * Point source lights and shadows
+* Hemispherical lights
+* Place the scene inside a sphere or box with a material painted onto the inside
+* Dynamic surface comprised of hexagons
 
 ## Optional nice to have features
 * Play sounds synced with animations. This is nice to have because there are better libraries for playing sounds. This is a WebGL wrapper and WebGL does not provide any sound playing capabilities.

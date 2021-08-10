@@ -21,6 +21,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
     const public = {
         __private: private,
+        isDynamicSurface: true,
     }
 
     public.dispose = function () {
@@ -28,6 +29,10 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.enabled = function(enabled) {
         private.enabled = enabled;
+    }
+
+    public.getLocation = function() {
+        return private.location;
     }
 
     public.getPosition = function () {
@@ -42,6 +47,10 @@ window.frag.DynamicSurface = function (engine, data) {
         private.shader = shader;
         return public;
     }
+
+    public.getShader = function() {
+        return private.shader;
+    }
     
     public.setOrigin = function(x, z) {
         x = private.sanitizeX(x);
@@ -54,7 +63,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
         private.fragmentsModified = true;
     }
-    
+
     public.createSquares = function(width, depth) {
         private.tiles.length = 0;
         private.meshFragments.length = 0;
@@ -172,25 +181,18 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.draw = function (drawContext) {
         if (!private.enabled || !private.mesh) return public;
-
-        const shader = drawContext.shader || private.shader;
-        if (!shader) return public;
-
+        
         if (private.fragmentsModified) {
             private.updateMeshFragments();
             private.fragmentsModified = false;
         }
 
-        shader.bind();
-        drawContext.beginSceneObject(private.location);
-
-        if (drawContext.isHitTest) drawContext.sceneObjects.push(public);
-
-        drawContext.setupShader(shader, public);
-    
-        private.mesh.draw(shader);
-
+        drawContext.beginSceneObject(public);
+        private.mesh.draw(drawContext, function(_1, index) {
+            return private.tiles[index];
+        });
         drawContext.endSceneObject();
+
         return public;
     };
 

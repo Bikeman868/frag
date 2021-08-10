@@ -34,9 +34,10 @@ Another key component of user interaction is the ability to detect if the player
 clicked or tapped on an object in the scene. This is referred to as hit testing. To
 perform a hit test, call the `hitTest(x, y, w, h, scene)` method of the Frag framework. 
 The hitTest method will return `null` if there was nothing in the scene at that location. If the
-player clicked on something a structure will be returned containing `model` and `sceneModel`
-properties. The `model` property contains the child component within the model that
-was selected.
+player clicked on something a structure will be returned containing `component` and `sceneModel`
+properties. The `sceneObject` property contains the object within the scene that was clicked,
+this could be a `SceneObject` or a `DynamicSurface`. The `component` property contains the 
+part of the scene object that was selected. This can be a `Model` or a `DynamicTile`.
 
 The `hitTest` method takes the following parameters:
 * `x` the horizontal position of the click/tap in pixels relative to the left edge of

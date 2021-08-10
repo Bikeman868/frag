@@ -284,6 +284,10 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
         return private.name;
     }
 
+    public.getLocation = function() {
+        return private.location;
+    }
+
     public.getPosition = function() {
         if (!private.position) 
             private.position = frag.ScenePosition(engine, private.location);
@@ -524,7 +528,7 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
 
         if (!private.enabled) return public;
 
-        drawContext.beginSceneObject(private.location);
+        drawContext.beginSceneObject(public);
         private.draw(drawContext);
         drawContext.endSceneObject();
 

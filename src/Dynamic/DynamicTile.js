@@ -6,24 +6,22 @@
 window.frag.DynamicTile = function (engine) {
 
     const private = {
-        data: null,
+        dynamicData: null,
+        tileData: null,
         x: 0,
         z: 0,
-        height: 0,
-        material: null,
         modified: true,
     };
 
     const public = {
         __private: private,
+        isDynamcTile: true,
         sharedVerticies: [],
     }
 
     private.update = function() {
         if (private.modified) {
-            const data = public.getData();
-            private.height = data.height;
-            private.material = data.material;
+            private.tileData = private.dynamicData.get(private.x, private.z);
             private.modified = false;
         }
     }
@@ -32,7 +30,7 @@ window.frag.DynamicTile = function (engine) {
     }
 
     public.data = function(data) {
-        private.data = data;
+        private.dynamicData = data;
         private.modified = true;
         return public;
     }
@@ -58,22 +56,28 @@ window.frag.DynamicTile = function (engine) {
     }
 
     public.getData = function() {
-        return private.data.get(private.x, private.z);
+        private.update();
+        return private.tileData;
     }
 
     public.getMaterial = function() {
         private.update();
-        return private.material;
+        return private.tileData.material;
     }
 
     public.getHeight = function() {
         private.update();
-        return private.height;
+        return private.tileData.height;
     }
 
-    public.getState = function() {
+    public.getColorMult = function() {
         private.update();
-        return private.height;
+        return private.tileData.colorMult;
+    }
+
+    public.getColor = function() {
+        private.update();
+        return private.tileData.color;
     }
 
     return public;

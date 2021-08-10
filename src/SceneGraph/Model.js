@@ -20,6 +20,7 @@ window.frag.Model = function (engine, is3d, parent) {
 
     const public = {
         __private: private,
+        isModel: true,
         location: frag.Location(engine, is3d),
         animations: []
     };
@@ -33,6 +34,10 @@ window.frag.Model = function (engine, is3d, parent) {
             if (predicate(child)) flattenedChildren.push(child);
             child.addFlattenedChildren(flattenedChildren, predicate);
         }
+    }
+
+    public.getLocation = function() {
+        return public.location;
     }
 
     public.getPosition = function() {
@@ -183,21 +188,17 @@ window.frag.Model = function (engine, is3d, parent) {
 
     public.draw = function (drawContext) {
         if (!public.location) return public;
-        drawContext.beginModel(private.name, public.location);
+        drawContext.beginMesh(public);
 
-        const shader = drawContext.shader || public.getShader();
+        const shader = drawContext.getShader();
 
-        if (shader !== undefined && private.mesh && private.enabled) {
-            shader.bind();
-
-            drawContext.setupShader(shader, public);
-
+        if (shader && private.mesh && private.enabled) {
             var material = public.getMaterial();
             if (material) material.apply(shader);
 
-            private.mesh.draw(shader);
-
-            shader.unbind();
+            private.mesh.draw(drawContext, function(fragment, index) {
+                return index === 0 ? public : null;
+            });
         }
 
         for (let i = 0; i < private.children.length; i++)
@@ -213,7 +214,7 @@ window.frag.Model = function (engine, is3d, parent) {
                 sceneObjects[i].draw(drawContext);
         }
 
-        drawContext.endModel();
+        drawContext.endMesh();
         return public;
     }
 

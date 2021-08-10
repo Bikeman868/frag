@@ -202,13 +202,13 @@ window.frag.Engine = function(config) {
         const blue = pixel[2];
         const alpha = pixel[3];
     
-        const modelId = alpha | (blue << 8) | ((green & 0x0f) << 16);
+        const fragmentId = alpha | (blue << 8) | ((green & 0x0f) << 16);
         const sceneObjectId = ((green & 0xf0) >> 4) | (red << 4);
     
-        if ((modelId < drawContext.models.length) && (sceneObjectId < drawContext.sceneObjects.length))
+        if ((fragmentId < drawContext.fragments.length) && (sceneObjectId < drawContext.sceneObjects.length))
             return {
                 sceneObject: drawContext.sceneObjects[sceneObjectId],
-                model: drawContext.models[modelId]
+                fragment: drawContext.fragments[fragmentId]
             };
     
         return null;
