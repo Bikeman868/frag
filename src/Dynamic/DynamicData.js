@@ -20,7 +20,7 @@ window.frag.DynamicData = function (engine, width, depth) {
         private.data.push({
             height: 0,
             material: null,
-            state: 0,
+            uniforms: null,
         });
 
     const public = {

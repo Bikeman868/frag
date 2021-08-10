@@ -1188,7 +1188,7 @@ window.frag.DynamicData = function (engine, width, depth) {
         private.data.push({
             height: 0,
             material: null,
-            state: 0,
+            uniforms: null,
         });
 
     const public = {
@@ -1289,6 +1289,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.dataModified = function() {
         private.fragmentsModified = true;
+        return public;
     }
 
     public.createSquares = function(width, depth) {
@@ -1326,6 +1327,7 @@ window.frag.DynamicSurface = function (engine, data) {
                 const tile = private.tiles[i];
                 const meshFragment = private.meshFragments[i];
                 meshFragment.material = tile.getMaterial();
+                meshFragment.uniforms = tile.getUniforms();
 
                 const vertexData = meshFragment.vertexData;
                 for (var j = 0; j < 4; j++) {
@@ -1506,15 +1508,11 @@ window.frag.DynamicTile = function (engine) {
         return private.tileData.height;
     }
 
-    public.getColorMult = function() {
+    public.getUniforms = function() {
         private.update();
-        return private.tileData.colorMult;
+        return private.tileData.uniforms;
     }
 
-    public.getColor = function() {
-        private.update();
-        return private.tileData.color;
-    }
 
     return public;
 }
@@ -6796,50 +6794,50 @@ window.frag.Mesh = function (engine) {
         return public;
     }
 
-    private.Fragment = function(vertexData, material) {
+    private.Fragment = function(vertexData, material, uniforms) {
         return {
             vertexData,
             renderData: null,
-            material: null,
+            material,
+            uniforms,
             vertexDataOffset: undefined,
             colorDataOffset: undefined,
             uvDataOffset: undefined,
             normalDataOffset: undefined,
             tangentDataOffset: undefined,
             bitangentDataOffset: undefined,
-            material,
         };
     }
 
-    private.addFragment = function (vertexData, material) {
-        const fragment = private.Fragment(vertexData, material);
+    private.addFragment = function (vertexData, material, uniforms) {
+        const fragment = private.Fragment(vertexData, material, uniforms);
         private.meshFragments.push(fragment);
         private.finalized = false;
         return fragment;
     }
 
-    public.addVertexData = function (vertexData, material) {
-        return private.addFragment(vertexData, material);
+    public.addVertexData = function (vertexData, material, uniforms) {
+        return private.addFragment(vertexData, material, uniforms);
     }
 
     public.addTriangles2D = function (data) {
         const vertexData = frag.VertexData(engine).setTriangles2D(data);
-        return private.addFragment(vertexData);
+        return private.addFragment(vertexData, data.material, data.uniforms);
     }
 
     public.addTriangles = function (data) {
         const vertexData = frag.VertexData(engine).setTriangles(data);
-        return private.addFragment(vertexData);
+        return private.addFragment(vertexData, data.material, data.uniforms);
     }
 
     public.addTriangleStrip = function (data) {
         const vertexData = frag.VertexData(engine).setTriangleStrip(data);
-        return private.addFragment(vertexData);
+        return private.addFragment(vertexData, data.material, data.uniforms);
     }
 
     public.addTriangleFan = function (data) {
         const vertexData = frag.VertexData(engine).setTriangleFan(data);
-        return private.addFragment(vertexData);
+        return private.addFragment(vertexData, data.material, data.uniforms);
     }
 
     public.fromBuffer = function(data)
@@ -6860,6 +6858,7 @@ window.frag.Mesh = function (engine) {
         fragment.tangentDataOffset = data.tangentDataOffset;
         fragment.bitangentDataOffset = data.bitangentDataOffset;
         fragment.material = data.material;
+        fragment.uniforms = data.uniforms;
 
         gl.bindBuffer(gl.ARRAY_BUFFER, private.glBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, data.buffer, gl.STATIC_DRAW);
@@ -7066,11 +7065,20 @@ window.frag.Mesh = function (engine) {
     }
 
     private.drawFragment = function(shader, fragment) {
+        const unbindFuncs = [];
+
         if (fragment.material) {
             fragment.material.apply(shader);
         }
-
-        const unbindFuncs = [];
+        
+        if (fragment.uniforms) {
+            for (let i = 0; i < fragment.uniforms.length; i++) {
+                const uniform = fragment.uniforms[i];
+                if (shader.uniforms[uniform.name] !== undefined) {
+                    gl["uniform" + uniform.type](shader.uniforms[uniform.name], uniform.value);
+                }
+            }
+        }
 
         private.bindFragmentPosition(shader, fragment, unbindFuncs);
         private.bindFragmentColor(shader, fragment, unbindFuncs);

@@ -70,15 +70,11 @@ window.frag.DynamicTile = function (engine) {
         return private.tileData.height;
     }
 
-    public.getColorMult = function() {
+    public.getUniforms = function() {
         private.update();
-        return private.tileData.colorMult;
+        return private.tileData.uniforms;
     }
 
-    public.getColor = function() {
-        private.update();
-        return private.tileData.color;
-    }
 
     return public;
 }

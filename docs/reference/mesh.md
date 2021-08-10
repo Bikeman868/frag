@@ -151,11 +151,29 @@ The optional `color` parameter should be passed as an array of 3 floats for red,
 green and blue components of the color. As usual with WebGL floating point colors
 are always expressed in the range 0 to 1, i.e. [1,0,0] is bright red.
 
-## addVertexData(vertexData: VertexData, material: Material): MeshFragment
+## addVertexData(vertexData: VertexData, material: Material | undefined, uniforms: Array<object> | undefined): MeshFragment
 Adds a fragment of mesh from a pre-prepared `VertexData` object. `VertexData` objects
 allow you to define the data needed to create a mesh. It also allows you to 
 modify individual verticies, colors, UV coordinates etc and then re-create or
 re-populate the mesh.
+
+This method can optionally be passed a material and an array of uniform assgnments.
+These two options allow for some more advanced techniques that are not nromally required.
+A deeper understanding of the rendering pipeline is reuired to use these effectively
+because they values bound to the shader when this fragment is rendered and remain set until
+the shader is re-bound to the GPU.
+
+The safest way to use these options is to set them on every fragment, but this
+carries an overhead of sending values up to the GPU on each fragment render.
+
+The `material` parameter should be an instance of the `Material` class or nothing.
+
+The `uniforms` parameter should be an array of uniform assignments or nothing, where
+each uniform assignment is an object with `name`, `type` and `value` properties. The
+`name` property is the name of the shader uniform to update, the `type` property can
+be `i` for integer, `f` for float, `3fv` for an array of 3 floating point values etc.
+This is mostly useful in tha case where you are using a custom shader with uniforms
+that you defined, and you want to set these uniforms for each fragment in the model.
 
 ## addTriangles2D(data: object): MeshFragment
 Takes data object can have the following properties:
@@ -166,6 +184,7 @@ Takes data object can have the following properties:
 * tangents?: float[]
 * bitangents?: float[]
 * material: Material | undefined
+* uniforms: Array<object> | undefined
 
 Adds a mesh fragment defined by a set of discrete 2-dimensional triangles
 
@@ -178,6 +197,7 @@ Takes data object can have the following properties:
 * tangents: float[] | undefined
 * bitangents: float[] | undefined
 * material: Material | undefined
+* uniforms: Array<object> | undefined
 
 Adds a mesh fragment defined by a set of discrete 3-dimensional triangles
 
@@ -190,6 +210,7 @@ Takes data object can have the following properties:
 * tangents: float[] | undefined
 * bitangents: float[] | undefined
 * material: Material | undefined
+* uniforms: Array<object> | undefined
 
 Adds a mesh fragment defined by a set of 3-dimensional triangles where the
 first 3 vertices define the first triangle, then each subsequent vertex
@@ -204,6 +225,7 @@ Takes data object can have the following properties:
 * tangents: float[] | undefined
 * bitangents: float[] | undefined
 * material: Material | undefined
+* uniforms: Array<object> | undefined
 
 Adds a mesh fragment defined by a set of 3-dimensional triangles where the
 first vertex defined the center of the fan, the next 2 vertices form a triangle, 
@@ -223,6 +245,7 @@ Takes data object can have the following properties:
 * tangentDataOffset: int - offset into the buffer where tangent data starts
 * bitangentDataOffset: int - offset into the buffer where bitangent data starts
 * material: Material | undefined
+* uniforms: Array<object> | undefined
 
 This is a low-level interface that allows you to supply raw data for the mesh.
 This is most suited to loading pre-prepared meshes in binary format and

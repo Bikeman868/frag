@@ -146,8 +146,9 @@ This [sample](terrain.html) illustrates the following features and techniques:
 * Defining a large terrain with different materials and height for each map tile.
 * Creating a small mesh that displays only part of the terrain.
 * Scrolling the mesh accross the terrain to show a different part as the playr moves around.
+* Setting different shader unifrom values for each tile in the terrain data
 * Scroll using the mouse, pen or touch screen. Tap the 'W' key to toggle wireframe
-* Right mouse click to change the material for a map tile.
+* Right mouse click to darken the map tile by changing the `lightDirection` uniform.
 * Middle mouse click to raise the height of a map tile.
 
 Things to mess around with on this sample:

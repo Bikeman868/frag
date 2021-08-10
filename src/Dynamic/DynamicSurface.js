@@ -66,6 +66,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
     public.dataModified = function() {
         private.fragmentsModified = true;
+        return public;
     }
 
     public.createSquares = function(width, depth) {
@@ -103,6 +104,7 @@ window.frag.DynamicSurface = function (engine, data) {
                 const tile = private.tiles[i];
                 const meshFragment = private.meshFragments[i];
                 meshFragment.material = tile.getMaterial();
+                meshFragment.uniforms = tile.getUniforms();
 
                 const vertexData = meshFragment.vertexData;
                 for (var j = 0; j < 4; j++) {

@@ -92,10 +92,15 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`OrthographicCamera`](reference/orthographic-camera.md) draws objects in the scene at their actual size.
 * [`UiCamera`](reference/ui-camera.md) projects a 2D scene onto the front of the viewport.
 
+#### Dynamic
+* [`DynamicData`](reference/dynamic-data.md) defines the data set beneath a `DynamicSurface`.
+* [`DynamicSurface`](reference/dynamic-surface.md) a special scene object that maps a subset of a `DynamicData` structure onto a mesh.
+
 #### Framework
 * [`Engine`](reference/engine.md) renders a WebGL scene onto a canvas element on the page.
-* ~[`Transform`](reference/transform.md)~ builds a 3x3 matrix that defines a sequence of 2D transformations.
-* ~[`Transform2D`](reference/transform-2d.md)~ builds a 4x4 matrix that defines a sequence of 3D transformations.
+* ~[`Transform`](reference/transform.md)~ builds either a `Transform2D` or `Transform3D`.
+* ~[`Transform2D`](reference/transform-2d.md)~ builds a 3x3 matrix that defines a sequence of 2D transformations.
+* ~[`Transform3D`](reference/transform-2d.md)~ builds a 4x4 matrix that defines a sequence of 3D transformations.
 
 #### Input
 * [`AnalogAction`](reference/analog-action.md) applies analog state changes to something in the game.
@@ -163,6 +168,8 @@ for example `const normal = window.frag.Triangle.normal(triangle);`.
 * [`DigitalInput`](reference/digital-action.md) updates a digital state from an input device.
 * [`DigitalState`](reference/digital-action.md) stores an on/off value that can be controlled by the player.
 * [`Disc`](reference/disc.md) You can do this with a `Cylinder` but this is a bit simpler.
+* [`DynamicData`](reference/dynamic-data.md) defines the data set beneath a `DynamicSurface`.
+* [`DynamicSurface`](reference/dynamic-surface.md) a special scene object that maps a subset of a `DynamicData` structure onto a mesh.
 * [`Engine`](reference/engine.md) renders a WebGL scene onto a canvas element on the page.
 * [`Font`](reference/font.md) used to construct models that render text in the scene.
 * [`FrustumCamera`](reference/frustum-camera.md) identical to the perspective camera except for how the viewable area is defined.
