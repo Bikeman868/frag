@@ -24,7 +24,10 @@ you need that functionality.
 The functioanllity that is provided:
 * Drawing stuff to the screen with high refresh rate and minimum load on the hardware
 * Support for old devices that only support OpenGL 1.1
-* Bulk loading of models, fonts and materials designed in tools like Blender and Substance Player
+* Bulk loading of models, fonts and materials designed in tools like Blender and 
+  Substance Player. Includes tools for packaging models, fonts and materials into as
+  many or as few packages as you like. Packages can be downloaded into the game at runtime
+  into asset catalogs to manage lifetime.
 * Separation of models from materials so that the same models can be used with different
   skins in different parts of the game or for different players.
 * Powerful animation engine that can run many animations at the same time on the same model.
@@ -48,6 +51,8 @@ The functioanllity that is provided:
 * Models comprising a heirachy of components where each component has a mesh and material.
 * Parenting scene objects to other scene objects or components of other scene object models.
 * Objects can selectively mimic the actions of other objects in the scene or look at them.
+* Standard geometry meshes (cube, sphere etc) that can be used as basic shapes or as a
+  sky box (with material painted on the inside instead of the outside).
 
 This framework is great is you have an original game idea and want to fast track the
 graphics development. If you want to create a world in which you have a character 
@@ -59,7 +64,9 @@ target the widest possible audience, and your game has some unique gameplay.
 For a list of the things that we want to add take a look at the [to-do list](TODO.md).
 
 # Concepts
-These are the main elements that you will be working with
+These are the main elements that you will be working with. This is not exhastive.
+For a complete list of the classes and the functionallity that they provide, see
+the [reference documentation](docs).
 
 ## Canvas
 You need to add an HTML5 canvas to your web page. If you call your canvas "scene"

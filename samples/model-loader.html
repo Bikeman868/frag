@@ -385,10 +385,16 @@
             const fpsObject = engine.SceneObject(fpsModel);
 
             // Make the fps object stay above the excavator as it moves
-            const fpsLink = engine.PositionLink()
+            engine.PositionLink()
                 .locationOffset([0, 70, 0])
                 .dest(fpsObject)
                 .source(excavator);
+
+            // Make the fps object always look at the camera
+            engine.PositionLink()
+                .rotationOffset([undefined, Math.PI * 2, undefined])
+                .dest(fpsObject)
+                .source(cameraOrigin);
 
             // We can manipulate this scene object just like any other model
             fpsObject.getPosition()
