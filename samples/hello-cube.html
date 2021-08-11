@@ -76,7 +76,7 @@
         const texture = frag.Texture(engine)
             .name('My texture')
             .dataFormat(engine.gl.RGB)
-            .fromUrl(0, 'https://images.pexels.com/photos/122458/pexels-photo-122458.jpeg?auto=compress&cs=tinysrgb&h=512&w=512', '');
+            .fromUrl(0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw81sNFwAguFmVHq-1p8N5U2lpZtbZWVT51A&usqp=CAU', '');
 
         // For this simple example the material only has a diffuse texture. You
         // can add more realism by adding other types of texture but these will
@@ -94,8 +94,7 @@
                 duplicateTexture: true 
             })
             .name('My cube')
-            .shadeSmooth()
-            .textureSmooth();
+            .shadeSmooth();
 
         // A model combines
         // - A mesh defines the shape of the model
