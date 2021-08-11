@@ -4,7 +4,6 @@ window.frag.Texture = function (engine) {
     const private = {
         glTexture: null,
         generated: false,
-        internalFormat: gl.RGBA,
         format: gl.RGBA,
         dataType: gl.UNSIGNED_BYTE,
         valuesPerPixel: 4
@@ -29,7 +28,6 @@ window.frag.Texture = function (engine) {
     }
 
     public.dataFormat = function (format) {
-        private.internalFormat = format;
         private.format = format;
 
         if (format === gl.RGBA) {
@@ -69,13 +67,23 @@ window.frag.Texture = function (engine) {
         }
     }
 
-    public.fromArrayBuffer = function (level, buffer, offset, width, height) {
+    public.fromArrayBuffer = function (level, typedArray, offset, width, height) {
+        const count = width * height * private.valuesPerPixel;
+
         let bufferView;
-        if (private.dataType === gl.UNSIGNED_BYTE)
-            bufferView = new Uint8Array(buffer, offset, width * height * private.valuesPerPixel);
+        if (private.dataType === gl.UNSIGNED_BYTE) {
+            bufferView = new Uint8Array(typedArray.buffer, offset, count);
+        }
+        else {
+            console.error('Unsupported data type for texture buffer');
+            return public;
+        }
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, width, height, 0, private.format, private.dataType, bufferView);
+
+        // https://stackoverflow.com/questions/51582282/error-when-creating-textures-in-webgl-with-the-rgb-format
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, level, private.format, width, height, 0, private.format, private.dataType, bufferView);
 
         return public;
     }
@@ -83,7 +91,7 @@ window.frag.Texture = function (engine) {
     public.fromImage = function (level, image) {
         const load = function() {
             private.setup(image.width, image.height);
-            gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, private.format, private.dataType, image);
+            gl.texImage2D(gl.TEXTURE_2D, level, private.format, private.format, private.dataType, image);
         }
         if (image.onload)
             load();
@@ -123,7 +131,7 @@ window.frag.Texture = function (engine) {
         const level = 0;
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, width, height, 0, private.format, private.dataType, null);
+        gl.texImage2D(gl.TEXTURE_2D, level, private.format, width, height, 0, private.format, private.dataType, null);
 
         private.scene = scene;
         private.frameBuffer = gl.createFramebuffer();

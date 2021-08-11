@@ -38,14 +38,14 @@
         const engine = window.frag.Engine().start();
         const degToRad = Math.PI / 180;
 
-        const camera = frag.FrustumCamera(engine).frustum(80, 50, 2000);
+        const camera = engine.FrustumCamera().frustum(80, 50, 2000);
         camera.getPosition().locationXYZ(0, 100, -250).rotateX(70 * degToRad);
 
-        const scene = frag.Scene(engine)
+        const scene = engine.Scene()
             .camera(camera);
         engine.mainScene(scene);
 
-        const shader = frag.Shader(engine)
+        const shader = engine.Shader()
             .name("Terrain")
             .diffuseTexture()
             .directionalLightGrey()
@@ -108,7 +108,16 @@
         let scrollX;
         let scrollZ;
         const updateScroll = function() {
-            surface.getPosition().location(window.frag.Vector.add(surfaceLocation, [(1 - (scrollX.value % 1)) * tileWidth , 0, (1 - (scrollZ.value % 1)) * tileWidth]));
+            surface.getPosition()
+                .location(
+                    window.frag.Vector.add(
+                        surfaceLocation, [
+                            (1 - (scrollX.value % 1)) * tileWidth , 
+                            0, 
+                            (1 - (scrollZ.value % 1)) * tileWidth
+                        ]
+                    )
+            );
             surface.setOrigin(Math.floor(scrollX.value), Math.floor(scrollZ.value));
         }
         scrollX = engine.AnalogState(

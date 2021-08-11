@@ -3540,19 +3540,19 @@ window.frag.AssetCatalog = function (engine, shader, defaultTextures) {
     if (!defaultTextures.diffuse) defaultTextures.diffuse = frag.Texture(engine)
         .name("default-diffuse-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 0, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 0, 1, 1);
     if (!defaultTextures.surface) defaultTextures.surface = frag.Texture(engine)
         .name("default-surface-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 4, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 4, 1, 1);
     if (!defaultTextures.emmissive) defaultTextures.emmissive = frag.Texture(engine)
         .name("default-emmissive-texture")
         .dataFormat(gl.RGB)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 8, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 8, 1, 1);
     if (!defaultTextures.normal) defaultTextures.normal = frag.Texture(engine)
         .name("default-normal-map-texture")
         .dataFormat(gl.RGB)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 11, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 11, 1, 1);
 
     if (!shader) {
         shader = frag.Shader(engine)
@@ -3719,7 +3719,7 @@ window.frag.PackageLoader = function (engine) {
             console.error("Font " + name + " height does not match image height");
 
         const dataArray = new Uint8Array(context.data, dataOffset);
-        font.fromArrayBuffer(dataArray, 0, width, height);
+        font.fromArrayBuffer(dataArray, dataOffset, width, height);
         return font;
     }
 
@@ -4254,7 +4254,6 @@ window.frag.Font = function (engine, _private, _instance) {
     const private = _private || {
         glTexture: null,
         generated: false,
-        internalFormat: gl.RGBA,
         format: gl.RGBA,
         dataType: gl.UNSIGNED_BYTE,
         valuesPerPixel: 4,
@@ -4319,7 +4318,6 @@ window.frag.Font = function (engine, _private, _instance) {
     }
 
     public.dataFormat = function (format) {
-        private.internalFormat = format;
         private.format = format;
 
         if (format === gl.RGBA) {
@@ -4369,13 +4367,22 @@ window.frag.Font = function (engine, _private, _instance) {
         return public;
     }
 
-    public.fromArrayBuffer = function (buffer, offset, width, height) {
+    public.fromArrayBuffer = function (typedArray, offset, width, height) {
+        const count = width * height * private.valuesPerPixel;
+
         let bufferView;
         if (private.dataType === gl.UNSIGNED_BYTE)
-            bufferView = new Uint8Array(buffer, offset, width * height * private.valuesPerPixel);
+            bufferView = new Uint8Array(typedArray.buffer, offset, count);
+        else {
+            console.error('Unsupported data type for font texture buffer');
+            return public;
+        }
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, 0, private.internalFormat, width, height, 0, private.format, private.dataType, bufferView);
+
+        // https://stackoverflow.com/questions/51582282/error-when-creating-textures-in-webgl-with-the-rgb-format
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, private.format, width, height, 0, private.format, private.dataType, bufferView);
 
         return public;
     }
@@ -4383,7 +4390,7 @@ window.frag.Font = function (engine, _private, _instance) {
     public.fromImage = function (image) {
         const load = function() {
             private.setup(image.width, image.height);
-            gl.texImage2D(gl.TEXTURE_2D, 0, private.internalFormat, private.format, private.dataType, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, private.format, private.format, private.dataType, image);
         }
         if (image.onload)
             load();
@@ -4616,7 +4623,6 @@ window.frag.Texture = function (engine) {
     const private = {
         glTexture: null,
         generated: false,
-        internalFormat: gl.RGBA,
         format: gl.RGBA,
         dataType: gl.UNSIGNED_BYTE,
         valuesPerPixel: 4
@@ -4641,7 +4647,6 @@ window.frag.Texture = function (engine) {
     }
 
     public.dataFormat = function (format) {
-        private.internalFormat = format;
         private.format = format;
 
         if (format === gl.RGBA) {
@@ -4681,13 +4686,23 @@ window.frag.Texture = function (engine) {
         }
     }
 
-    public.fromArrayBuffer = function (level, buffer, offset, width, height) {
+    public.fromArrayBuffer = function (level, typedArray, offset, width, height) {
+        const count = width * height * private.valuesPerPixel;
+
         let bufferView;
-        if (private.dataType === gl.UNSIGNED_BYTE)
-            bufferView = new Uint8Array(buffer, offset, width * height * private.valuesPerPixel);
+        if (private.dataType === gl.UNSIGNED_BYTE) {
+            bufferView = new Uint8Array(typedArray.buffer, offset, count);
+        }
+        else {
+            console.error('Unsupported data type for texture buffer');
+            return public;
+        }
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, width, height, 0, private.format, private.dataType, bufferView);
+
+        // https://stackoverflow.com/questions/51582282/error-when-creating-textures-in-webgl-with-the-rgb-format
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, level, private.format, width, height, 0, private.format, private.dataType, bufferView);
 
         return public;
     }
@@ -4695,7 +4710,7 @@ window.frag.Texture = function (engine) {
     public.fromImage = function (level, image) {
         const load = function() {
             private.setup(image.width, image.height);
-            gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, private.format, private.dataType, image);
+            gl.texImage2D(gl.TEXTURE_2D, level, private.format, private.format, private.dataType, image);
         }
         if (image.onload)
             load();
@@ -4735,7 +4750,7 @@ window.frag.Texture = function (engine) {
         const level = 0;
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, level, private.internalFormat, width, height, 0, private.format, private.dataType, null);
+        gl.texImage2D(gl.TEXTURE_2D, level, private.format, width, height, 0, private.format, private.dataType, null);
 
         private.scene = scene;
         private.frameBuffer = gl.createFramebuffer();
@@ -9722,6 +9737,7 @@ window.frag.Cube = function (engine, frontFacets, options) {
 
     let color;
     let duplicateTexture = false;
+    let skyBox = false;
 
     if (options) {
         if (options.frontFacets !== undefined) frontFacets = options.frontFacets;
@@ -9733,6 +9749,7 @@ window.frag.Cube = function (engine, frontFacets, options) {
 
         if (options.color !== undefined) color = options.color;
         if (options.duplicateTexture !== undefined) duplicateTexture = options.duplicateTexture;
+        if (options.skyBox !== undefined) skyBox = options.skyBox;
     }
 
     let u0 = 0;
@@ -9746,15 +9763,38 @@ window.frag.Cube = function (engine, frontFacets, options) {
     let v2 = 2 / 3;
     let v3 = 1;
 
-    const corners = [
-        [-1, -1, -1],
-        [+1, -1, -1],
-        [+1, +1, -1],
-        [-1, +1, -1],
-        [+1, -1, +1],
-        [-1, -1, +1],
-        [-1, +1, +1],
-        [+1, +1, +1],
+    const cornerVerticies = [
+        [-1, -1, -1], //  0 - Front bottom left
+        [+1, -1, -1], //  1 - Front bottom right
+        [+1, +1, -1], //  2 - Front top right
+        [-1, +1, -1], //  3 - Front top left
+        [+1, -1, +1], //  4 - Back bottom right
+        [-1, -1, +1], //  5 - Back bottom left
+        [-1, +1, +1], //  6 - Back top left
+        [+1, +1, +1], //  7 - Back top right
+        [-1, +1, -1], //  8 - Top front left
+        [+1, +1, -1], //  9 - Top front right
+        [-1, +1, -1], // 10 - Left top front
+        [-1, +1, +1], // 11 - Left top back
+        [+1, +1, -1], // 12 - Right top front
+        [+1, +1, +1], // 13 - Right top back
+    ];
+
+    const cornerUvs = [
+        [u1, v2], //  0 - Front bottom left
+        [u1, v1], //  1 - Front bottom right
+        [u0, v1], //  2 - Front top right
+        [u0, v2], //  3 - Front top left
+        [u2, v1], //  4 - Back bottom right
+        [u2, v2], //  5 - Back bottom left
+        [u3, v2], //  6 - Back top left
+        [u3, v1], //  7 - Back top right
+        [u4, v2], //  8 - Top front left
+        [u4, v1], //  9 - Top front right
+        [u1, v3], // 10 - Left top front
+        [u2, v3], // 11 - Left top back
+        [u1, v0], // 12 - Right top front
+        [u2, v0], // 13 - Right top back
     ];
 
     const verticies = [];
@@ -9765,83 +9805,97 @@ window.frag.Cube = function (engine, frontFacets, options) {
         verticies.push(v[0]);
         verticies.push(v[1]);
         verticies.push(v[2]);
-        if (color) {
-            color.forEach(c => { colors.push(c); });
-        }
+        if (color) color.forEach(c => { colors.push(c); });
     }
 
-    const addUv = function (u, v) {
-        uvs.push(u);
-        uvs.push(v);
+    const addUv = function (uv) {
+        uvs.push(uv[0]);
+        uvs.push(uv[1]);
     }
 
     const addFacetVerticies = function (bottomRight, topRight, bottomLeft, topLeft){
-        addVertex(bottomRight);
-        addVertex(topRight);
-        addVertex(bottomLeft);
-        addVertex(topLeft);
-        addVertex(bottomLeft);
-        addVertex(topRight);
+        if (skyBox) {
+            addVertex(topRight);
+            addVertex(bottomLeft);
+            addVertex(topLeft);
+            addVertex(bottomLeft);
+            addVertex(topRight);
+            addVertex(bottomRight);
+        } else {
+            addVertex(bottomRight);
+            addVertex(topRight);
+            addVertex(bottomLeft);
+            addVertex(topLeft);
+            addVertex(bottomLeft);
+            addVertex(topRight);
+        }
     }
 
-    const addFacetUvs = function (uLeft, vBottom, uRight, vTop) {
-        addUv(uRight, vBottom);
-        addUv(uRight, vTop);
-        addUv(uLeft, vBottom);
-        addUv(uLeft, vTop);
-        addUv(uLeft, vBottom);
-        addUv(uRight, vTop);
+    const addFacetUvs = function (bottomRight, topRight, bottomLeft, topLeft) {
+        if (skyBox) {
+            addUv(topRight);
+            addUv(bottomLeft);
+            addUv(topLeft);
+            addUv(bottomLeft);
+            addUv(topRight);
+            addUv(bottomRight);
+        } else {
+            addUv(bottomRight);
+            addUv(topRight);
+            addUv(bottomLeft);
+            addUv(topLeft);
+            addUv(bottomLeft);
+            addUv(topRight);
+        }
     }
 
-    const addFace = function (facets, bottomRight, bottomLeft, topLeft, uLeft, vBottom, uRight, vTop) {
+    const addFace = function (facets, bottomRight, bottomLeft, topLeft,) {
+        const Vector = window.frag.Vector;
+
+        vOrigin = cornerVerticies[bottomLeft];
+        tOrigin = duplicateTexture ? [0, 0] : cornerUvs[bottomLeft];
+
+        const vU = Vector.sub(cornerVerticies[topLeft], cornerVerticies[bottomLeft]);
+        const vR = Vector.sub(cornerVerticies[bottomRight], cornerVerticies[bottomLeft]);
+
+        const tU = duplicateTexture ? [0, 1] : Vector.sub(cornerUvs[topLeft], cornerUvs[bottomLeft]);
+        const tR = duplicateTexture ? [1, 0] : Vector.sub(cornerUvs[bottomRight], cornerUvs[bottomLeft]);
+
         for (var vFacet = 0; vFacet < facets; vFacet++) {
-            const vFracLow = vFacet / facets;
-            const vFracHigh = (vFacet + 1) / facets;
-
-            const vFacetBottom = (vTop - vBottom) * vFracLow + vBottom;
-            const vFacetTop = (vTop - vBottom) * vFracHigh + vBottom;
+            const vFracLo = vFacet / facets;
+            const vFracHi = (vFacet + 1) / facets;
 
             for (hFacet = 0; hFacet < facets; hFacet++) {
-                const hFracLow = hFacet / facets;
-                const hFracHigh = (hFacet + 1) / facets;
+                const hFracLo = hFacet / facets;
+                const hFracHi = (hFacet + 1) / facets;
 
-                const Vector = window.frag.Vector;
-                const up = Vector.sub(corners[topLeft], corners[bottomLeft]);
-                const right = Vector.sub(corners[bottomRight], corners[bottomLeft]);
+                const vBL = Vector.add(Vector.add(vOrigin, Vector.mult(vR, hFracLo)), Vector.mult(vU, vFracLo));
+                const vBR = Vector.add(Vector.add(vOrigin, Vector.mult(vR, hFracHi)), Vector.mult(vU, vFracLo));
+                const vTL = Vector.add(Vector.add(vOrigin, Vector.mult(vR, hFracLo)), Vector.mult(vU, vFracHi));
+                const vTR = Vector.add(Vector.add(vOrigin, Vector.mult(vR, hFracHi)), Vector.mult(vU, vFracHi));
 
-                const facetBottomLeft = Vector.add(Vector.add(corners[bottomLeft], Vector.mult(right, hFracLow)), Vector.mult(up, vFracLow));
-                const facetBottomRight = Vector.add(Vector.add(corners[bottomLeft], Vector.mult(right, hFracHigh)), Vector.mult(up, vFracLow));
-                const facetTopLeft = Vector.add(Vector.add(corners[bottomLeft], Vector.mult(right, hFracLow)), Vector.mult(up, vFracHigh));
-                const facetTopRight = Vector.add(Vector.add(corners[bottomLeft], Vector.mult(right, hFracHigh)), Vector.mult(up, vFracHigh));
+                addFacetVerticies(vBR, vTR, vBL, vTL);
 
-                addFacetVerticies(facetBottomRight, facetTopRight, facetBottomLeft, facetTopLeft);
+                const tBL = Vector.add(Vector.add(tOrigin, Vector.mult(tR, hFracLo)), Vector.mult(tU, vFracLo));
+                const tBR = Vector.add(Vector.add(tOrigin, Vector.mult(tR, hFracHi)), Vector.mult(tU, vFracLo));
+                const tTL = Vector.add(Vector.add(tOrigin, Vector.mult(tR, hFracLo)), Vector.mult(tU, vFracHi));
+                const tTR = Vector.add(Vector.add(tOrigin, Vector.mult(tR, hFracHi)), Vector.mult(tU, vFracHi));
 
-                const uFacetLeft = (uRight - uLeft) * hFracLow + uLeft;
-                const uFacetRight = (uRight - uLeft) * hFracHigh + uLeft;
-
-                addFacetUvs(uFacetLeft, vFacetBottom, uFacetRight, vFacetTop);
+                addFacetUvs(tBR, tTR, tBL, tTL);
             }
         }
     }
 
-    if (duplicateTexture) {
-        if (frontFacets) addFace(frontFacets, 1, 0, 3, u4, v3, u0, v0); // front
-        if (bottomFacets) addFace(bottomFacets, 4, 5, 0, u4, v3, u0, v0); // bottom
-        if (leftFacets) addFace(leftFacets, 0, 5, 6, u4, v3, u0, v0); // left
-        if (rightFacets) addFace(rightFacets, 4, 1, 2, u4, v3, u0, v0); // right
-        if (backFacets) addFace(backFacets, 5, 4, 7, u4, v3, u0, v0); // back
-        if (topFacets) addFace(topFacets, 6, 7, 2, u4, v3, u0, v0); // top
-    } else {
-        if (frontFacets) addFace(frontFacets, 1, 0, 3, u1, v2, u0, v1); // front
-        if (bottomFacets) addFace(bottomFacets, 4, 5, 0, u2, v2, u1, v1); // bottom
-        if (leftFacets) addFace(leftFacets, 0, 5, 6, u2, v2, u1, v3); // left
-        if (rightFacets) addFace(rightFacets, 4, 1, 2, u1, v1, u2, v0); // right
-        if (backFacets) addFace(backFacets, 5, 4, 7, u2, v1, u3, v2); // back
-        if (topFacets) addFace(topFacets, 6, 7, 2, u3, v1, u4, v2); // top
-    }
+    if (frontFacets)  addFace(frontFacets,  1, 0, 3);  // front
+    if (bottomFacets) addFace(bottomFacets, 4, 5, 0);  // bottom
+    if (leftFacets)   addFace(leftFacets,   0, 5, 11); // left
+    if (rightFacets)  addFace(rightFacets,  4, 1, 12); // right
+    if (backFacets)   addFace(backFacets,   5, 4, 7);  // back
+    if (topFacets)    addFace(topFacets,    6, 7, 9);  // top
 
     const mesh = window.frag.Mesh(engine);
     mesh.addTriangles({ verticies, colors, uvs });
+    if (skyBox) mesh.shadeSmooth();
     return mesh;
 };
 
@@ -10118,6 +10172,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
     let longitudeLength = 2 * Math.PI;
 
     let color;
+    let skyBox = false;
 
     if (options) {
         if (options.latitudeStart !== undefined) latitudeStart = options.latitudeStart;
@@ -10129,6 +10184,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
         if (options.longitudeFacets !== undefined) longitudeFacets = options.longitudeFacets;
 
         if (options.color !== undefined) color = options.color;
+        if (options.skyBox !== undefined) skyBox = options.skyBox;
     }
 
     if (latitudeFacets < 2) latitudeFacets = 2;
@@ -10142,12 +10198,6 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
 
     for (let iy = 0; iy <= latitudeFacets; iy++) {
         const v = iy / latitudeFacets;
-        let uOffset = 0;
-        if (iy === 0 && latitudeStart === 0)
-            uOffset = 0.5 / longitudeFacets;
-        else if (iy === latitudeFacets && (latitudeStart + latitudeLength) === Math.PI)
-            uOffset = -0.5 / longitudeFacets;
-
         for (ix = 0; ix <= longitudeFacets; ix++) {
             const u = ix / longitudeFacets;
             vertex = {

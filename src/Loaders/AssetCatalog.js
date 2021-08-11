@@ -12,19 +12,19 @@ window.frag.AssetCatalog = function (engine, shader, defaultTextures) {
     if (!defaultTextures.diffuse) defaultTextures.diffuse = frag.Texture(engine)
         .name("default-diffuse-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 0, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 0, 1, 1);
     if (!defaultTextures.surface) defaultTextures.surface = frag.Texture(engine)
         .name("default-surface-texture")
         .dataFormat(gl.RGBA)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 4, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 4, 1, 1);
     if (!defaultTextures.emmissive) defaultTextures.emmissive = frag.Texture(engine)
         .name("default-emmissive-texture")
         .dataFormat(gl.RGB)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 8, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 8, 1, 1);
     if (!defaultTextures.normal) defaultTextures.normal = frag.Texture(engine)
         .name("default-normal-map-texture")
         .dataFormat(gl.RGB)
-        .fromArrayBuffer(0, defaultTexturePixels.buffer, 11, 1, 1);
+        .fromArrayBuffer(0, defaultTexturePixels, 11, 1, 1);
 
     if (!shader) {
         shader = frag.Shader(engine)

@@ -10,6 +10,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
     let longitudeLength = 2 * Math.PI;
 
     let color;
+    let skyBox = false;
 
     if (options) {
         if (options.latitudeStart !== undefined) latitudeStart = options.latitudeStart;
@@ -21,6 +22,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
         if (options.longitudeFacets !== undefined) longitudeFacets = options.longitudeFacets;
 
         if (options.color !== undefined) color = options.color;
+        if (options.skyBox !== undefined) skyBox = options.skyBox;
     }
 
     if (latitudeFacets < 2) latitudeFacets = 2;
@@ -34,12 +36,6 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
 
     for (let iy = 0; iy <= latitudeFacets; iy++) {
         const v = iy / latitudeFacets;
-        let uOffset = 0;
-        if (iy === 0 && latitudeStart === 0)
-            uOffset = 0.5 / longitudeFacets;
-        else if (iy === latitudeFacets && (latitudeStart + latitudeLength) === Math.PI)
-            uOffset = -0.5 / longitudeFacets;
-
         for (ix = 0; ix <= longitudeFacets; ix++) {
             const u = ix / longitudeFacets;
             vertex = {

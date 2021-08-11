@@ -5,7 +5,6 @@ window.frag.Font = function (engine, _private, _instance) {
     const private = _private || {
         glTexture: null,
         generated: false,
-        internalFormat: gl.RGBA,
         format: gl.RGBA,
         dataType: gl.UNSIGNED_BYTE,
         valuesPerPixel: 4,
@@ -70,7 +69,6 @@ window.frag.Font = function (engine, _private, _instance) {
     }
 
     public.dataFormat = function (format) {
-        private.internalFormat = format;
         private.format = format;
 
         if (format === gl.RGBA) {
@@ -120,13 +118,22 @@ window.frag.Font = function (engine, _private, _instance) {
         return public;
     }
 
-    public.fromArrayBuffer = function (buffer, offset, width, height) {
+    public.fromArrayBuffer = function (typedArray, offset, width, height) {
+        const count = width * height * private.valuesPerPixel;
+
         let bufferView;
         if (private.dataType === gl.UNSIGNED_BYTE)
-            bufferView = new Uint8Array(buffer, offset, width * height * private.valuesPerPixel);
+            bufferView = new Uint8Array(typedArray.buffer, offset, count);
+        else {
+            console.error('Unsupported data type for font texture buffer');
+            return public;
+        }
 
         private.setup(width, height);
-        gl.texImage2D(gl.TEXTURE_2D, 0, private.internalFormat, width, height, 0, private.format, private.dataType, bufferView);
+
+        // https://stackoverflow.com/questions/51582282/error-when-creating-textures-in-webgl-with-the-rgb-format
+        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+        gl.texImage2D(gl.TEXTURE_2D, 0, private.format, width, height, 0, private.format, private.dataType, bufferView);
 
         return public;
     }
@@ -134,7 +141,7 @@ window.frag.Font = function (engine, _private, _instance) {
     public.fromImage = function (image) {
         const load = function() {
             private.setup(image.width, image.height);
-            gl.texImage2D(gl.TEXTURE_2D, 0, private.internalFormat, private.format, private.dataType, image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, private.format, private.format, private.dataType, image);
         }
         if (image.onload)
             load();

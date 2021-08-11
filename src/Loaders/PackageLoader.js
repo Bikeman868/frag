@@ -90,7 +90,7 @@ window.frag.PackageLoader = function (engine) {
             console.error("Font " + name + " height does not match image height");
 
         const dataArray = new Uint8Array(context.data, dataOffset);
-        font.fromArrayBuffer(dataArray, 0, width, height);
+        font.fromArrayBuffer(dataArray, dataOffset, width, height);
         return font;
     }
 

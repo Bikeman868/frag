@@ -76,6 +76,41 @@
         engine.mainScene(scene);
 
         // **********************************************************************
+        // Next we will add a sky box. This is a cube with the material painted
+        // on the inside of the cube. The cube is scaled to enclose the whole scene.
+        // With the whole scene inside the cube, the camera can see the inside of 
+        // the cube in every direction creating a 'background' for the scene. In this
+        // sample I am creating the sky box texture manually. For more complex
+        // sky boxes download the material in a package or use `texture.fromImage()`
+        // **********************************************************************
+
+        const skyShader = engine.Shader()
+                .name("Sky")
+                .diffuseTexture()
+                .ambientLightFixed()
+                .compile();
+        skyShader.ambientLight(0.8);
+        const skyTexture = engine.Texture()
+            .dataFormat(engine.gl.RGB)
+            .fromArrayBuffer(0, new Uint8Array([
+                120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+                120, 120, 255,  160, 160, 160,  160, 160, 160,  160, 160, 160,  160, 160, 160,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+                120, 120, 255,  160, 160, 160,  160, 160, 160,  160, 160, 160,  160, 160, 160,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+                120, 120, 255,  160, 160, 160,  160, 160, 160,  160, 160, 160,  160, 160, 160,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+                120, 120, 255,  160, 160, 160,  160, 160, 160,  160, 160, 160,  160, 160, 160,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+                120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,  120, 120, 255,
+            ]), 0, 8, 6);
+        const skyMaterial = engine.Material().setTexture('diffuse', skyTexture);
+        const skyMesh = engine.Cube(1, { skyBox: true }).shadeSmooth();
+        const skyModel = engine.Model()
+            .mesh(skyMesh)
+            .material(skyMaterial)
+            .shader(skyShader);
+        const sky = engine.SceneObject(skyModel);
+        sky.getPosition().scale(400).locationXYZ(0, 0, 100).rotateXYZ(10 * degToRad, 0, 0);
+        scene.addObject(sky);
+
+        // **********************************************************************
         // Define a function that will get called after the models have finished 
         // loading into an asset catalog. The asset catalog that the models were 
         // loaded into is passed as a parameter.
