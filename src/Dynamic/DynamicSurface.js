@@ -15,6 +15,8 @@ window.frag.DynamicSurface = function (engine, data) {
         enabled: true,
         shader: null,
         fragmentsModified: true,
+        width: 0,
+        depth: 0,
     };
 
     private.position = window.frag.ScenePosition(engine, private.location)
@@ -22,6 +24,48 @@ window.frag.DynamicSurface = function (engine, data) {
     const public = {
         __private: private,
         isDynamicSurface: true,
+    }
+
+    private.tileAt = function(x, z) {
+        return private.tiles[x * private.depth + z];
+    }
+
+    private.getOffset = function(i) {
+        return {
+            x: Math.floor(i / private.depth),
+            z: i % private.depth
+        }
+    }
+
+    private.sanitizeX = function(x) {
+        if (x < 0) return 0;
+        const max = data.getWidth() - private.width;
+        if (x >= max) return max;
+        return Math.floor(x);
+    }
+
+    private.sanitizeZ = function(z) {
+        if (z < 0) return 0;
+        const max = data.getDepth() - private.depth;
+        if (z >= max) return max;
+        return Math.floor(z);
+    }
+
+    private.updateMeshFragments = function() {
+        for (let i = 0; i < private.tiles.length; i++) {
+            const tile = private.tiles[i];
+            const meshFragment = private.meshFragments[i];
+            meshFragment.material = tile.getMaterial();
+            meshFragment.uniforms = tile.getUniforms();
+
+            const vertexData = meshFragment.vertexData;
+            for (var j = 0; j < tile.sharedVerticies.length; j++) {
+                const vertex = vertexData.getVertexVector(j);
+                vertex[1] = tile.sharedVerticies[j].getHeight();
+                vertexData.setVertexVector(j, vertex);
+            }
+        }
+        private.mesh.fragmentsUpdated();
     }
 
     public.dispose = function () {
@@ -73,51 +117,16 @@ window.frag.DynamicSurface = function (engine, data) {
         private.tiles.length = 0;
         private.meshFragments.length = 0;
         private.mesh = window.frag.Mesh(engine);
+        private.width = width;
+        private.depth = depth;
 
-        private.tileAt = function(x, z) {
-            return private.tiles[x * depth + z];
-        }
+        const x0 = -width;
+        const z0 = -depth;
+        const w = 2;
+        const h = 2;
 
-        private.getOffset = function(i) {
-            return {
-                x: Math.floor(i / depth),
-                z: i % depth
-            }
-        }
-
-        private.sanitizeX = function(x) {
-            if (x < 0) return 0;
-            const max = data.getWidth() - width;
-            if (x >= max) return max;
-            return Math.floor(x);
-        }
-
-        private.sanitizeZ = function(z) {
-            if (z < 0) return 0;
-            const max = data.getDepth() - depth;
-            if (z >= max) return max;
-            return Math.floor(z);
-        }
-
-        private.updateMeshFragments = function() {
-            for (let i = 0; i < private.tiles.length; i++) {
-                const tile = private.tiles[i];
-                const meshFragment = private.meshFragments[i];
-                meshFragment.material = tile.getMaterial();
-                meshFragment.uniforms = tile.getUniforms();
-
-                const vertexData = meshFragment.vertexData;
-                for (var j = 0; j < 4; j++) {
-                    const vertex = vertexData.getVertexVector(j);
-                    vertex[1] = tile.sharedVerticies[j].getHeight();
-                    vertexData.setVertexVector(j, vertex);
-                }
-            }
-            private.mesh.fragmentsUpdated();
-        }
-
-        const x0 = width * -0.5;
-        const z0 = depth * -0.5;
+        const uvs = [1, 0, 1, 1, 0, 0, 0, 1];
+        const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
         for (let x = 0; x < width; x++) {
             for (let z = 0; z < depth; z++) {
                 const tile = window.frag.DynamicTile(engine)
@@ -126,10 +135,9 @@ window.frag.DynamicSurface = function (engine, data) {
                     .z(z);
                 private.tiles.push(tile);
 
-                const verticies = [x0+x+1, 0, z0+z, x0+x+1, 0, z0+z+1, x0+x, 0, z0+z, x0+x, 0, z0+z+1];
-                const uvs = [1, 0, 1, 1, 0, 0, 0, 1];
-                const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
-
+                const xc = x0 + x * w;
+                const zc = z0 + z * h;
+                const verticies = [xc+1, 0, zc-1, xc+1, 0, zc+1, xc-1, 0, zc-1, xc-1, 0, zc+1];
                 const meshFragment = private.mesh.addTriangleStrip({ verticies, uvs, normals });
                 private.meshFragments.push(meshFragment);
             }
@@ -144,46 +152,153 @@ window.frag.DynamicSurface = function (engine, data) {
                     window.frag.SharedVertex(engine).addTile(tile),
                     window.frag.SharedVertex(engine).addTile(tile),
                 ];
+
                 if (x !== 0) {
-                    tile.sharedVerticies[2].addTile(private.tileAt(x-1, z));
-                    tile.sharedVerticies[3].addTile(private.tileAt(x-1, z));
+                    let t = private.tileAt(x-1, z);
+                    tile.sharedVerticies[2].addTile(t);
+                    tile.sharedVerticies[3].addTile(t);
                     if (z !== 0) {
-                        tile.sharedVerticies[2].addTile(private.tileAt(x-1, z-1));
+                        t = private.tileAt(x-1, z-1);
+                        tile.sharedVerticies[2].addTile(t);
                     }
                     if (z !== depth-1) {
-                        tile.sharedVerticies[3].addTile(private.tileAt(x-1, z+1));
+                        t = private.tileAt(x-1, z+1);
+                        tile.sharedVerticies[3].addTile(t);
                     }
                 }
+
                 if (x !== width-1) {
-                    tile.sharedVerticies[0].addTile(private.tileAt(x+1, z));
-                    tile.sharedVerticies[1].addTile(private.tileAt(x+1, z));
+                    let t = private.tileAt(x+1, z);
+                    tile.sharedVerticies[0].addTile(t);
+                    tile.sharedVerticies[1].addTile(t);
+                    if (z !== 0) {
+                        t = private.tileAt(x+1, z-1);
+                        tile.sharedVerticies[0].addTile(t);
+                    }
+                    if (z !== depth-1) {
+                        t = private.tileAt(x+1, z+1);
+                        tile.sharedVerticies[1].addTile(t);
+                    }
                 }
+
                 if (z !== 0) {
-                    tile.sharedVerticies[0].addTile(private.tileAt(x, z-1));
-                    tile.sharedVerticies[2].addTile(private.tileAt(x, z-1));
-                    if (x !== width-1) {
-                        tile.sharedVerticies[0].addTile(private.tileAt(x+1, z-1));
-                    }
+                    let t = private.tileAt(x, z-1);
+                    tile.sharedVerticies[0].addTile(t);
+                    tile.sharedVerticies[2].addTile(t);
                 }
+
                 if (z !== depth-1) {
-                    tile.sharedVerticies[1].addTile(private.tileAt(x, z+1));
-                    tile.sharedVerticies[3].addTile(private.tileAt(x, z+1));
-                    if (x !== width-1) {
-                        tile.sharedVerticies[1].addTile(private.tileAt(x+1, z+1));
-                    }
+                    let t = private.tileAt(x, z+1);
+                    tile.sharedVerticies[1].addTile(t);
+                    tile.sharedVerticies[3].addTile(t);
                 }
             }
         }
+
         return public;
     }
 
-    public.createHorizontalHexagons = function(width, depth) {
-        console.error('Dynamic surface of hexagons is not yet implementted');
-        return public;
-    }
+    public.createHexagons = function(width, depth, vertical) {
+        private.tiles.length = 0;
+        private.meshFragments.length = 0;
+        private.mesh = window.frag.Mesh(engine);
+        private.width = width;
+        private.depth = depth;
 
-    public.createVerticalHexagons = function(width, depth) {
-        console.error('Dynamic surface of hexagons is not yet implementted');
+        const r = 1;
+        const w = r * 2;
+        const h = Math.sqrt(3) * r;
+        const xDist = w * 0.75;
+        const zDist = h;
+        const x0 = width * -0.5 * xDist;
+        const z0 = depth * -0.5 * zDist;
+        const uvs = [0.5, 0.5, 0, 0.5, 0.25, 0, 0.75, 0, 1, 0.5, 0.75, 1, 0.25, 1, 0, 0.5];
+        const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
+        for (let x = 0; x < width; x++) {
+            const odd = x % 2;
+            for (let z = 0; z < depth; z++) {
+                const tile = window.frag.DynamicTile(engine)
+                    .dynamicData(private.data)
+                    .x(x)
+                    .z(z);
+                private.tiles.push(tile);
+
+                const xc = x0 + x * xDist;
+                const zc = z0 + z * zDist - odd * zDist * 0.5;
+                const verticies = [
+                    xc, 0, zc, 
+                    xc-r, 0, zc, 
+                    xc-(r*0.5), 0, zc-(h*0.5),
+                    xc+(r*0.5), 0, zc-(h*0.5),
+                    xc+r, 0, zc,
+                    xc+(r*0.5), 0, zc+(h*0.5),
+                    xc-(r*0.5), 0, zc+(h*0.5),
+                    xc-r, 0, zc
+                ];
+
+                const meshFragment = private.mesh.addTriangleFan({ verticies, uvs, normals });
+                private.meshFragments.push(meshFragment);
+            }
+        }
+
+        for (let x = 0; x < width; x++) {
+            const odd = x % 2;
+            const even = (x + 1) % 2;
+            for (let z = 0; z < depth; z++) {
+                const tile = private.tileAt(x, z);
+                tile.sharedVerticies = [
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                    window.frag.SharedVertex(engine).addTile(tile),
+                ];
+
+                if (x > 0) {
+                    if (z >= even) {
+                        const t = private.tileAt(x-1, z-even);
+                        tile.sharedVerticies[1].addTile(t);
+                        tile.sharedVerticies[2].addTile(t);
+                        tile.sharedVerticies[7].addTile(t);
+                    }
+                    if (z < depth-odd) {
+                        const t = private.tileAt(x-1, z+odd);
+                        tile.sharedVerticies[1].addTile(t);
+                        tile.sharedVerticies[6].addTile(t);
+                        tile.sharedVerticies[7].addTile(t);
+                    }
+                }
+
+                if (x < width - 1) {
+                    if (z >= even) {
+                        const t = private.tileAt(x+1, z-even);
+                        tile.sharedVerticies[3].addTile(t);
+                        tile.sharedVerticies[4].addTile(t);
+                    }
+                    if (z < depth-odd) {
+                        const t = private.tileAt(x+1, z+odd);
+                        tile.sharedVerticies[4].addTile(t);
+                        tile.sharedVerticies[5].addTile(t);
+                    }
+                }
+
+                if (z > 0) {
+                    const t = private.tileAt(x, z-1);
+                    tile.sharedVerticies[2].addTile(t);
+                    tile.sharedVerticies[3].addTile(t);
+                }
+
+                if (z < depth-1) {
+                    const t = private.tileAt(x, z+1);
+                    tile.sharedVerticies[5].addTile(t);
+                    tile.sharedVerticies[6].addTile(t);
+                }
+            }
+        }
+
         return public;
     }
 

@@ -29,9 +29,11 @@
 </head>
 <body>
     <canvas id='scene'></canvas>
-    <div>Press 'W' to toggle wireframe mode. Drag with system poointer to scroll the terrain.</div>
-    <div>Right click with the mouse to change the state of a map tile.</div>
-    <div>Middle click with the mouse to increase the height of a map tile.</div>
+    <div>
+        Press 'W' to toggle wireframe mode. Drag with system poointer to scroll the terrain.
+        Right click with the mouse to change the state of a map tile.
+        Middle click with the mouse to increase the height of a map tile.
+    </div>
     <script src='frag.js'></script>
     <script>
         // Setup the basics
@@ -39,7 +41,7 @@
         const degToRad = Math.PI / 180;
 
         const camera = engine.FrustumCamera().frustum(80, 50, 2000);
-        camera.getPosition().locationXYZ(0, 100, -250).rotateX(70 * degToRad);
+        camera.getPosition().locationXYZ(0, 180, -150).rotateX(68 * degToRad);
 
         const scene = engine.Scene()
             .camera(camera);
@@ -87,18 +89,19 @@
                 else
                     data.material = materials[Math.floor(Math.random() * 3)];
 
-                xh += Math.random() * 0.5 - 0.5 - xh * 0.05;
-                zh += Math.random() * 0.5 - 0.5 - zh * 0.05;
+                xh += Math.random() * 0.5 - 0.25 - xh * 0.05;
+                zh += Math.random() * 0.5 - 0.25 - zh * 0.05;
                 data.height = xh + zh;
             }
         }
 
         // Create a mesh to display part of the terrain and add it to the scene
         const surfaceLocation = [0, -50, 0];
-        const tileWidth = 40;
+        const tileWidth = 10;
         const surface = engine.DynamicSurface(terrainData)
             .shader(shader)
             .createSquares(meshWidth, meshDepth);
+            //.createHexagons(meshWidth, meshDepth);
         surface.getPosition().location(surfaceLocation).scale(tileWidth);
         scene.addObject(surface);
 
@@ -112,13 +115,16 @@
                 .location(
                     window.frag.Vector.add(
                         surfaceLocation, [
-                            (1 - (scrollX.value % 1)) * tileWidth , 
+                            (1 - (scrollX.value % 2)) * tileWidth , 
                             0, 
-                            (1 - (scrollZ.value % 1)) * tileWidth
+                            (1 - (scrollZ.value % 2)) * tileWidth
                         ]
                     )
             );
-            surface.setOrigin(Math.floor(scrollX.value), Math.floor(scrollZ.value));
+            surface.setOrigin(
+                Math.floor(Math.floor(scrollX.value * 0.5) * 2), 
+                Math.floor(Math.floor(scrollZ.value * 0.5) * 2)
+            );
         }
         scrollX = engine.AnalogState(
             updateScroll,
@@ -165,7 +171,7 @@
                     const dynamicSurface = hit.sceneObject;
                     const dynamicTile = hit.fragment;
                     
-                    dynamicTile.getData().height += 2;
+                    dynamicTile.getData().height += 0.5;
                     dynamicSurface.dataModified();
                 }
             }
