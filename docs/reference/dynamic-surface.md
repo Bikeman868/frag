@@ -60,7 +60,8 @@ however create a 1000x1000 `DynamicData` instance and display a small portion of
 on a `DynamicSurface`. Use the `setOrigin()` method to choose which part of the data is displayed.
 
 Note that squares can also be rectangles, you just need to scale the surface by different scaling
-factors in the X and Z directions.
+factors in the X and Z directions. The squares extend +/-1 from the center and are therefore width
+2 and height 2 before scaling.
 
 ## createHexagons(width: int, depth: int, vertical: bool): DynamicSurface
 This is similar to the `createSquares` method except that the grid is of hexagons. The `vertical`
@@ -70,3 +71,7 @@ offset by half a column. Try both options until you get the kind of hexagons you
 You cannot create a mesh of 1000x1000 hexagons, because that would be 1,000,000 hexagons, or 6,000,000 triangles to render on each screen refresh. You can however create a 1000x1000 `DynamicData` instance
 and display a small portion of the data at a time on a `DynamicSurface`. Use the `setOrigin()` method
 to choose which part of the data is displayed.
+
+The hexagons have a radius of 1. This means that horizontally oriented hexagons have a width of 2 and
+a height of the square root of 3. For vertically oriented hexagone the width and height are the
+other way around.
