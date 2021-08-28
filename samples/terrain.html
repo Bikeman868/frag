@@ -30,14 +30,14 @@
 <body>
     <canvas id='scene'></canvas>
     <div>
-        Press 'W' to toggle wireframe mode. Drag with system poointer to scroll the terrain.
+        Press 'W' to toggle wireframe mode. Drag with system pointer to scroll the terrain.
         Right click with the mouse to change the state of a map tile.
         Middle click with the mouse to increase the height of a map tile.
     </div>
     <script src='frag.js'></script>
     <script>
         // Setup the basics
-        const engine = window.frag.Engine().start();
+        const engine = window.frag.Engine({ debugDynamicSurface: false }).start();
         const degToRad = Math.PI / 180;
 
         const camera = engine.FrustumCamera().frustum(80, 50, 2000);
@@ -72,8 +72,8 @@
         // smaller than the terrain data or there is no point
         const terrainWidth = 100;
         const terrainDepth = 100;
-        const meshWidth = 20;
-        const meshDepth = 20;
+        const meshWidth = 25;
+        const meshDepth = 15;
 
         // Create a random landscape
         const materials = [redMaterial, greenMaterial, blueMaterial];
@@ -97,11 +97,11 @@
 
         // Create a mesh to display part of the terrain and add it to the scene
         const surfaceLocation = [0, -50, 0];
-        const tileWidth = 10;
+        const tileWidth = 25;
         const surface = engine.DynamicSurface(terrainData)
             .shader(shader)
-            //.createSquares(meshWidth, meshDepth);
-            .createHexagons(meshWidth, meshDepth);
+            .createSquares(meshWidth, meshDepth);
+            //.createHexagons(meshWidth, meshDepth, true);
         surface.getPosition().location(surfaceLocation).scale(tileWidth);
         scene.addObject(surface);
 
@@ -115,16 +115,13 @@
                 .location(
                     window.frag.Vector.add(
                         surfaceLocation, [
-                            (1 - (scrollX.value % 2)) * tileWidth , 
+                            (scrollX.value % 1) * -tileWidth, 
                             0, 
-                            (1 - (scrollZ.value % 2)) * tileWidth
+                            (scrollZ.value % 1) * -tileWidth
                         ]
                     )
             );
-            surface.setOrigin(
-                Math.floor(Math.floor(scrollX.value * 0.5) * 2), 
-                Math.floor(Math.floor(scrollZ.value * 0.5) * 2)
-            );
+            surface.setOrigin(scrollX.value, scrollZ.value);
         }
         scrollX = engine.AnalogState(
             updateScroll,

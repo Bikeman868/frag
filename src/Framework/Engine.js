@@ -35,6 +35,7 @@ window.frag.Engine = function(config) {
         debugInputs: config.debugInputs === undefined ? false : config.debugInputs,
         debugParticles: config.debugParticles === undefined ? false : config.debugParticles,
         debugConstructors: config.debugConstructors === undefined ? false : config.debugConstructors,
+        debugDynamicSurface: config.debugDynamicSurface === undefined ? false : config.debugDynamicSurface,
         transparency: config.transparency === undefined ? false : config.transparency,
         fps: 0,
     }
