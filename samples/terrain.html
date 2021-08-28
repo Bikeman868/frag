@@ -100,8 +100,8 @@
         const tileWidth = 10;
         const surface = engine.DynamicSurface(terrainData)
             .shader(shader)
-            .createSquares(meshWidth, meshDepth);
-            //.createHexagons(meshWidth, meshDepth);
+            //.createSquares(meshWidth, meshDepth);
+            .createHexagons(meshWidth, meshDepth);
         surface.getPosition().location(surfaceLocation).scale(tileWidth);
         scene.addObject(surface);
 

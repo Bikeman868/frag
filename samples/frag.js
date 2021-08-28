@@ -1428,11 +1428,8 @@ window.frag.DynamicSurface = function (engine, data) {
         private.width = width;
         private.depth = depth;
 
-        const r = 1;
-        const w = r * 2;
-        const h = Math.sqrt(3) * r;
-        const xDist = w * 0.75;
-        const zDist = h;
+        const xDist = 1.5;
+        const zDist = Math.sqrt(3);
         const x0 = width * -0.5 * xDist;
         const z0 = depth * -0.5 * zDist;
         const uvs = [0.5, 0.5, 0, 0.5, 0.25, 0, 0.75, 0, 1, 0.5, 0.75, 1, 0.25, 1, 0, 0.5];
@@ -1450,13 +1447,13 @@ window.frag.DynamicSurface = function (engine, data) {
                 const zc = z0 + z * zDist - odd * zDist * 0.5;
                 const verticies = [
                     xc, 0, zc, 
-                    xc-r, 0, zc, 
-                    xc-(r*0.5), 0, zc-(h*0.5),
-                    xc+(r*0.5), 0, zc-(h*0.5),
-                    xc+r, 0, zc,
-                    xc+(r*0.5), 0, zc+(h*0.5),
-                    xc-(r*0.5), 0, zc+(h*0.5),
-                    xc-r, 0, zc
+                    xc-1, 0, zc, 
+                    xc-0.5, 0, zc-zDist*0.5,
+                    xc+0.5, 0, zc-zDist*0.5,
+                    xc+1, 0, zc,
+                    xc+0.5, 0, zc+zDist*0.5,
+                    xc-0.5, 0, zc+zDist*0.5,
+                    xc-1, 0, zc
                 ];
 
                 const meshFragment = private.mesh.addTriangleFan({ verticies, uvs, normals });
@@ -1518,6 +1515,22 @@ window.frag.DynamicSurface = function (engine, data) {
                     const t = private.tileAt(x, z+1);
                     tile.sharedVerticies[5].addTile(t);
                     tile.sharedVerticies[6].addTile(t);
+                }
+            }
+        }
+
+        for (let x = 0; x < width; x++) {
+            for (let z = 0; z < depth; z++) {
+                const tile = private.tileAt(x, z);
+                console.log('Tile', x, z);
+                for (let i = 0; i < tile.sharedVerticies.length; i++) {
+                    const vertex = tile.sharedVerticies[i];
+                    const vertexTiles = vertex.__private.tiles;
+                    console.log('  V' + i, vertex.getHeight());
+                    for (let j = 1; j < vertexTiles.length; j++) {
+                        const t = vertex.__private.tiles[j];
+                        console.log('    T', t.getX(), t.getZ(), t.getHeight());
+                    }
                 }
             }
         }

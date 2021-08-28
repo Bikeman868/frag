@@ -45,16 +45,16 @@ will not be apparent until you set the origin.
 
 ## createSquares(width: int, depth: int): DynamicSurface
 Creates a mesh of squares with the specified width and depth. This would typically be smaller
-than the size of the `DynamicData`. You cannot create a mesh of 1000x1000 map tiles, because
-that would be 1,000,000 tiles, or 2,000,000 triangles to render on each screen refresh. You can
-however create a 1000x1000 `DynamicData` instance and display a small portion of it at a time
-on a `DynamicSurface`.
+than the size of the `DynamicData`. You cannot create a mesh of 1000x1000 squares, because
+that would be 1,000,000 squares, or 2,000,000 triangles to render on each screen refresh. You can
+however create a 1000x1000 `DynamicData` instance and display a small portion of the data at a time
+on a `DynamicSurface`. Use the `setOrigin()` method to choose which part of the data is displayed.
 
-## createHorizontalHexagons(width: int, depth: int): DynamicSurface
-This is similar to the createSquares method except that the grid is of hexagons with their
-pointy ends oriented left and right.
+## createHexagons(width: int, depth: int, vertical: bool): DynamicSurface
+This is similar to the `createSquares` method except that the grid is of hexagons. The `vertical`
+parameter switches between alternate columns being offset by half a row, or alternate rows being
+offset by half a column. Try both options until you get the kind of hexagons you want.
 
-## createVerticalHexagons(width: int, depth: int): DynamicSurface
-This is similar to the createSquares method except that the grid is of hexagons with their
-pointy ends oriented up and down.
-
+You cannot create a mesh of 1000x1000 hexagons, because that would be 1,000,000 hexagons, or 6,000,000 triangles to render on each screen refresh. You can however create a 1000x1000 `DynamicData` instance
+and display a small portion of the data at a time on a `DynamicSurface`. Use the `setOrigin()` method
+to choose which part of the data is displayed.
