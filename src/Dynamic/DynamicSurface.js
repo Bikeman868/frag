@@ -116,7 +116,7 @@ window.frag.DynamicSurface = function (engine, data) {
                 private.tiles.push(tile);
 
                 const xc = x0 + x * xDist;
-                const zc = z0 + z * zDist - odd * zDist * 0.5;
+                const zc = z0 + z * zDist + odd * zDist * 0.5;
                 const verticies = [
                     xc, 0, zc, 
                     xc-1, 0, zc, 
@@ -193,32 +193,32 @@ window.frag.DynamicSurface = function (engine, data) {
     }
 
     private.createVerticalHexagons = function() {
-        const xDist = 1.5;
-        const zDist = Math.sqrt(3);
+        const xDist = Math.sqrt(3);
+        const zDist = 1.5;
         const x0 = private.width * -0.5 * xDist;
         const z0 = private.depth * -0.5 * zDist;
-        const uvs = [0.5, 0.5, 0, 0.5, 0.25, 0, 0.75, 0, 1, 0.5, 0.75, 1, 0.25, 1, 0, 0.5];
+        const uvs = [0.5, 0.5, 0.5, 0, 1, 0.25, 1, 0.75, 0.5, 1, 0, 0.75, 0, 0.25, 0.5, 0];
         const normals = [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
         for (let x = 0; x < private.width; x++) {
-            const odd = x % 2;
             for (let z = 0; z < private.depth; z++) {
+                const odd = z % 2;
                 const tile = window.frag.DynamicTile(engine)
                     .dynamicData(private.data)
                     .x(x)
                     .z(z);
                 private.tiles.push(tile);
 
-                const xc = x0 + x * xDist;
-                const zc = z0 + z * zDist - odd * zDist * 0.5;
+                const xc = x0 + x * xDist + odd * xDist * 0.5;
+                const zc = z0 + z * zDist;
                 const verticies = [
-                    xc, 0, zc, 
-                    xc-1, 0, zc, 
-                    xc-0.5, 0, zc-zDist*0.5,
-                    xc+0.5, 0, zc-zDist*0.5,
-                    xc+1, 0, zc,
-                    xc+0.5, 0, zc+zDist*0.5,
-                    xc-0.5, 0, zc+zDist*0.5,
-                    xc-1, 0, zc
+                    xc, 0, zc,
+                    xc, 0, zc-1,
+                    xc+xDist*0.5, 0, zc-0.5,
+                    xc+xDist*0.5, 0, zc+0.5,
+                    xc, 0, zc+1,
+                    xc-xDist*0.5, 0, zc+0.5,
+                    xc-xDist*0.5, 0, zc-0.5,
+                    xc, 0, zc-1,
                 ];
 
                 const meshFragment = private.mesh.addTriangleFan({ verticies, uvs, normals });
@@ -227,9 +227,9 @@ window.frag.DynamicSurface = function (engine, data) {
         }
 
         for (let x = 0; x < private.width; x++) {
-            const odd = x % 2;
-            const even = (x + 1) % 2;
             for (let z = 0; z < private.depth; z++) {
+                const odd = z % 2;
+                const even = (z + 1) % 2;
                 const tile = private.tileAt(x, z);
                 tile.sharedVerticies = [
                     window.frag.SharedVertex(engine).addTile(tile),
@@ -242,44 +242,44 @@ window.frag.DynamicSurface = function (engine, data) {
                     window.frag.SharedVertex(engine).addTile(tile),
                 ];
 
-                if (x > 0) {
-                    if (z >= even) {
-                        const t = private.tileAt(x-1, z-even);
-                        tile.sharedVerticies[1].addTile(t);
-                        tile.sharedVerticies[2].addTile(t);
-                        tile.sharedVerticies[7].addTile(t);
-                    }
-                    if (z < private.depth-odd) {
-                        const t = private.tileAt(x-1, z+odd);
+                if (z > 0) {
+                    if (x >= even) {
+                        const t = private.tileAt(x-even, z-1);
                         tile.sharedVerticies[1].addTile(t);
                         tile.sharedVerticies[6].addTile(t);
                         tile.sharedVerticies[7].addTile(t);
                     }
+                    if (x < private.depth-odd) {
+                        const t = private.tileAt(x+odd, z-1);
+                        tile.sharedVerticies[1].addTile(t);
+                        tile.sharedVerticies[2].addTile(t);
+                        tile.sharedVerticies[7].addTile(t);
+                    }
                 }
 
-                if (x < private.width - 1) {
-                    if (z >= even) {
-                        const t = private.tileAt(x+1, z-even);
-                        tile.sharedVerticies[3].addTile(t);
-                        tile.sharedVerticies[4].addTile(t);
-                    }
-                    if (z < private.depth-odd) {
-                        const t = private.tileAt(x+1, z+odd);
+                if (z < private.depth - 1) {
+                    if (x >= even) {
+                        const t = private.tileAt(x-even, z+1);
                         tile.sharedVerticies[4].addTile(t);
                         tile.sharedVerticies[5].addTile(t);
                     }
+                    if (x < private.depth-odd) {
+                        const t = private.tileAt(x+odd, z+1);
+                        tile.sharedVerticies[3].addTile(t);
+                        tile.sharedVerticies[4].addTile(t);
+                    }
                 }
 
-                if (z > 0) {
-                    const t = private.tileAt(x, z-1);
-                    tile.sharedVerticies[2].addTile(t);
-                    tile.sharedVerticies[3].addTile(t);
-                }
-
-                if (z < private.depth-1) {
-                    const t = private.tileAt(x, z+1);
+                if (x > 0) {
+                    const t = private.tileAt(x-1, z);
                     tile.sharedVerticies[5].addTile(t);
                     tile.sharedVerticies[6].addTile(t);
+                }
+
+                if (x < private.width-1) {
+                    const t = private.tileAt(x+1, z);
+                    tile.sharedVerticies[2].addTile(t);
+                    tile.sharedVerticies[3].addTile(t);
                 }
             }
         }
