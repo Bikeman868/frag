@@ -96,14 +96,26 @@ layer on top of the main game action, where rotating the camera in the main scen
 should not also rotate the user experience.
 
 ## hitTest(x: int, y: int, width: int | undefined, height: int | undefined, scene: Scene | Scene[] | undefined): Object | null
-Draws a scene or list of scenes and notices which `SceneObject` was closest to the 
-camera for a specific screen location. It also notices which child model within
-the scene object's model was hit.
+Draws a scene or list of scenes and notices which object in the scene was closest
+to the camera for a specific screen location. It also notices which mesh fragment
+within the object was hit.
+
+If there was nothing at the screen location then `hitTest()` returns `null`. If
+something was hit then an object is returned with a `sceneObject` and `fragment`
+property. Note that the `sceneObject` property is most often a 
+[`SceneObject`](scene-object.md), but can be anything in the scene including 
+a [`DynamicSurface`](dynamic-surface.md). Scene objects have an `isSceneObject`
+property that is always true, and dynamic surfaces have an `isDynamicSurface`
+property that is always true. You can use these properties to determine what ws hit.
 
 This method is used to figure out what the user clicked/tapped on. Mouse events
 and touch screen events have `clientX` and `clientY` properties that are pixel
 coordinates relative to the control that was clicked. Passing these values to the
 `x` and `y` parameters you can discover what the user clicked on.
+
+Note that if your canvas is not filling the browser window, then you might have to 
+offset the `clientX` and `clientY` properties of the mouse/touch event. Since most
+games fill the whole browser window, this is not normally required.
 
 The `width` and `height` parameters define the size of the canvas that was clicked.
 This defaults to the size of the canvas that the engine is rendering to. The only
@@ -123,7 +135,7 @@ Call this once before calling `render()` for the first time.
 
 Note that this is called automatically by the `start()` method, so if you start
 the engine running like this then you do not need to call the `initialize()`
-method.
+method in your code.
 
 ## onStart(f: Function(engine: Engine))
 Registers a function that will be called after the engine has configured WebGL

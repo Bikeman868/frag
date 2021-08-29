@@ -15,7 +15,6 @@ In the truck on a track sample, the pitch of the truck in not adjusted to the ri
 * Point source lights and shadows
 * Hemispherical lights
 * Place the scene inside a sphere or box with a material painted onto the inside
-* Dynamic surface comprised of hexagons
 * Frustum culling
 
 ## Optional nice to have features

@@ -31,6 +31,17 @@ engine.DynamicSurface(data: DynamicData): DynamicSurface
 ## Example
 See the [terrain sample](../../samples/terrain.html) for an example of how to make dynamic terrain.
 
+## Hit testing
+To perform a hit test on your scene, you can call the `hitTest()` method of the [`Engine`](engine.md) 
+class. If an object is returned by `hitTest`, it has two properties `sceneObject` and `fragment`. When
+scene objects are hit, the `sceneObject` property contains the `SceneObject` that was hit, and
+`fragment` contains the child object within the model indicating which part of the model was hit.
+
+In the case of `DynamicSurface`, the `sceneObject` property contains the `DynamicSurface` and 
+the `fragment` property contains the `DynamicTile` within the surface that was hit. You can tell
+what kind of object was hit because dynamic surfaces have a `isDynamicSurface` property that is
+always `true`, and dynamic tiles have an `isDynamicTile` property that is always `true`.
+
 ## shader(shader: Shader): DynamicSurface
 You must call this method to define the shader to use to draw this surface.
 
@@ -46,6 +57,22 @@ want to do this to alter the mesh characteristics such as smoothing options.
 Specifies which map tile from the `DynamicData` will be drawn in the bottom left hand corner
 of the surface. Defaults to (0, 0) which means that the bottom left corner of the dynamic data
 will be drawn at the bottom left corner of the dynamic surface.
+
+## tileAt(x: int, z: int): DynamicTile
+You can call this method to access the tiles within the surface. It is very rare that you will want
+to do this, because your game should work with the underlying `DynamicData`, and the `DyanmicSurface`
+just provides a scrollable view onto this data.
+
+The returned `DynamicTile` has these methods:
+* `dynamicData(data: DynamicData)` - change the source of data.
+* `x(x: int)` - change the x-coordinate in the underlying data.
+* `z(z: int)` - change the z-coordinate in the underlying data.
+* `getX(): int` - get the x-coordinate
+* `getZ(): int` - get the z-coordinate
+* `getData(): object` - returns an element from the  underlying data.
+* `getMaterial(): Material` - returns the material used to render this tile.
+* `getHeight(): float` - returns the height of this tile.
+* `getUniforms()` - returns the custom uniforms for this tile.
 
 ## dataModified(): DynamicSurface
 Call this method after you make changes in the attached `DynamicData` to have these changes 

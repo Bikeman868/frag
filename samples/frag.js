@@ -1251,7 +1251,7 @@ window.frag.DynamicSurface = function (engine, data) {
         isDynamicSurface: true,
     }
 
-    private.tileAt = function(x, z) {
+    public.tileAt = function(x, z) {
         return private.tiles[x * private.depth + z];
     }
 
@@ -1297,7 +1297,7 @@ window.frag.DynamicSurface = function (engine, data) {
         const r = function(v) { return Math.floor(v * 1000) / 1000; }
         for (let x = 0; x < private.width; x++) {
             for (let z = 0; z < private.depth; z++) {
-                const tile = private.tileAt(x, z);
+                const tile = public.tileAt(x, z);
                 console.log('Tile [' + x + ',' + z + ']', 'x=' + tile.getX(), 'z=' + tile.getZ(), 'h=' + r(tile.getHeight()));
                 for (let i = 0; i < tile.sharedVerticies.length; i++) {
                     const vertex = tile.sharedVerticies[i];
@@ -1360,7 +1360,7 @@ window.frag.DynamicSurface = function (engine, data) {
             const odd = x % 2;
             const even = (x + 1) % 2;
             for (let z = 0; z < private.depth; z++) {
-                const tile = private.tileAt(x, z);
+                const tile = public.tileAt(x, z);
                 tile.sharedVerticies = [
                     window.frag.SharedVertex(engine).addTile(tile),
                     window.frag.SharedVertex(engine).addTile(tile),
@@ -1374,13 +1374,13 @@ window.frag.DynamicSurface = function (engine, data) {
 
                 if (x > 0) {
                     if (z >= even) {
-                        const t = private.tileAt(x-1, z-even);
+                        const t = public.tileAt(x-1, z-even);
                         tile.sharedVerticies[1].addTile(t);
                         tile.sharedVerticies[2].addTile(t);
                         tile.sharedVerticies[7].addTile(t);
                     }
                     if (z < private.depth-odd) {
-                        const t = private.tileAt(x-1, z+odd);
+                        const t = public.tileAt(x-1, z+odd);
                         tile.sharedVerticies[1].addTile(t);
                         tile.sharedVerticies[6].addTile(t);
                         tile.sharedVerticies[7].addTile(t);
@@ -1389,25 +1389,25 @@ window.frag.DynamicSurface = function (engine, data) {
 
                 if (x < private.width - 1) {
                     if (z >= even) {
-                        const t = private.tileAt(x+1, z-even);
+                        const t = public.tileAt(x+1, z-even);
                         tile.sharedVerticies[3].addTile(t);
                         tile.sharedVerticies[4].addTile(t);
                     }
                     if (z < private.depth-odd) {
-                        const t = private.tileAt(x+1, z+odd);
+                        const t = public.tileAt(x+1, z+odd);
                         tile.sharedVerticies[4].addTile(t);
                         tile.sharedVerticies[5].addTile(t);
                     }
                 }
 
                 if (z > 0) {
-                    const t = private.tileAt(x, z-1);
+                    const t = public.tileAt(x, z-1);
                     tile.sharedVerticies[2].addTile(t);
                     tile.sharedVerticies[3].addTile(t);
                 }
 
                 if (z < private.depth-1) {
-                    const t = private.tileAt(x, z+1);
+                    const t = public.tileAt(x, z+1);
                     tile.sharedVerticies[5].addTile(t);
                     tile.sharedVerticies[6].addTile(t);
                 }
@@ -1453,7 +1453,7 @@ window.frag.DynamicSurface = function (engine, data) {
             for (let z = 0; z < private.depth; z++) {
                 const odd = z % 2;
                 const even = (z + 1) % 2;
-                const tile = private.tileAt(x, z);
+                const tile = public.tileAt(x, z);
                 tile.sharedVerticies = [
                     window.frag.SharedVertex(engine).addTile(tile),
                     window.frag.SharedVertex(engine).addTile(tile),
@@ -1467,13 +1467,13 @@ window.frag.DynamicSurface = function (engine, data) {
 
                 if (z > 0) {
                     if (x >= even) {
-                        const t = private.tileAt(x-even, z-1);
+                        const t = public.tileAt(x-even, z-1);
                         tile.sharedVerticies[1].addTile(t);
                         tile.sharedVerticies[6].addTile(t);
                         tile.sharedVerticies[7].addTile(t);
                     }
-                    if (x < private.depth-odd) {
-                        const t = private.tileAt(x+odd, z-1);
+                    if (x < private.width-odd) {
+                        const t = public.tileAt(x+odd, z-1);
                         tile.sharedVerticies[1].addTile(t);
                         tile.sharedVerticies[2].addTile(t);
                         tile.sharedVerticies[7].addTile(t);
@@ -1482,25 +1482,25 @@ window.frag.DynamicSurface = function (engine, data) {
 
                 if (z < private.depth - 1) {
                     if (x >= even) {
-                        const t = private.tileAt(x-even, z+1);
+                        const t = public.tileAt(x-even, z+1);
                         tile.sharedVerticies[4].addTile(t);
                         tile.sharedVerticies[5].addTile(t);
                     }
-                    if (x < private.depth-odd) {
-                        const t = private.tileAt(x+odd, z+1);
+                    if (x < private.width-odd) {
+                        const t = public.tileAt(x+odd, z+1);
                         tile.sharedVerticies[3].addTile(t);
                         tile.sharedVerticies[4].addTile(t);
                     }
                 }
 
                 if (x > 0) {
-                    const t = private.tileAt(x-1, z);
+                    const t = public.tileAt(x-1, z);
                     tile.sharedVerticies[5].addTile(t);
                     tile.sharedVerticies[6].addTile(t);
                 }
 
                 if (x < private.width-1) {
-                    const t = private.tileAt(x+1, z);
+                    const t = public.tileAt(x+1, z);
                     tile.sharedVerticies[2].addTile(t);
                     tile.sharedVerticies[3].addTile(t);
                 }
@@ -1591,7 +1591,7 @@ window.frag.DynamicSurface = function (engine, data) {
 
         for (let x = 0; x < width; x++) {
             for (let z = 0; z < depth; z++) {
-                const tile = private.tileAt(x, z);
+                const tile = public.tileAt(x, z);
                 tile.sharedVerticies = [
                     window.frag.SharedVertex(engine).addTile(tile),
                     window.frag.SharedVertex(engine).addTile(tile),
@@ -1600,41 +1600,41 @@ window.frag.DynamicSurface = function (engine, data) {
                 ];
 
                 if (x !== 0) {
-                    let t = private.tileAt(x-1, z);
+                    let t = public.tileAt(x-1, z);
                     tile.sharedVerticies[2].addTile(t);
                     tile.sharedVerticies[3].addTile(t);
                     if (z !== 0) {
-                        t = private.tileAt(x-1, z-1);
+                        t = public.tileAt(x-1, z-1);
                         tile.sharedVerticies[2].addTile(t);
                     }
                     if (z !== depth-1) {
-                        t = private.tileAt(x-1, z+1);
+                        t = public.tileAt(x-1, z+1);
                         tile.sharedVerticies[3].addTile(t);
                     }
                 }
 
                 if (x !== width-1) {
-                    let t = private.tileAt(x+1, z);
+                    let t = public.tileAt(x+1, z);
                     tile.sharedVerticies[0].addTile(t);
                     tile.sharedVerticies[1].addTile(t);
                     if (z !== 0) {
-                        t = private.tileAt(x+1, z-1);
+                        t = public.tileAt(x+1, z-1);
                         tile.sharedVerticies[0].addTile(t);
                     }
                     if (z !== depth-1) {
-                        t = private.tileAt(x+1, z+1);
+                        t = public.tileAt(x+1, z+1);
                         tile.sharedVerticies[1].addTile(t);
                     }
                 }
 
                 if (z !== 0) {
-                    let t = private.tileAt(x, z-1);
+                    let t = public.tileAt(x, z-1);
                     tile.sharedVerticies[0].addTile(t);
                     tile.sharedVerticies[2].addTile(t);
                 }
 
                 if (z !== depth-1) {
-                    let t = private.tileAt(x, z+1);
+                    let t = public.tileAt(x, z+1);
                     tile.sharedVerticies[1].addTile(t);
                     tile.sharedVerticies[3].addTile(t);
                 }
