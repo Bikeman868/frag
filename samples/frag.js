@@ -2250,7 +2250,7 @@ window.frag.Observable = function (engine, notify) {
 
     public.subscribe = function (observer) {
         private.observers.push(observer);
-        private.notify(observer);
+        if (private.notify) private.notify(observer);
     };
 
     public.unsubscribe = function (observer) {
@@ -2284,7 +2284,7 @@ window.frag.Observable = function (engine, notify) {
 
 window.frag.ObservableValue = function (engine) {
     let value = null;
-    const observable = frag.Observable(engine, (fn) => { fn(value); });
+    const observable = window.frag.Observable(engine, (fn) => { fn(value); });
 
     const public = {};
 

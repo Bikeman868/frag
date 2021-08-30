@@ -13,7 +13,7 @@ window.frag.Observable = function (engine, notify) {
 
     public.subscribe = function (observer) {
         private.observers.push(observer);
-        private.notify(observer);
+        if (private.notify) private.notify(observer);
     };
 
     public.unsubscribe = function (observer) {

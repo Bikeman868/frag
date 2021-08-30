@@ -1,6 +1,6 @@
 window.frag.ObservableValue = function (engine) {
     let value = null;
-    const observable = frag.Observable(engine, (fn) => { fn(value); });
+    const observable = window.frag.Observable(engine, (fn) => { fn(value); });
 
     const public = {};
 
