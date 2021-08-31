@@ -2,7 +2,7 @@ window.frag.SceneObject = function (engine, model) {
     const frag = window.frag;
 
     const private = {
-        model,
+        model: model || engine.Model(),
         enabled: true,
         location: null,
         position: null,
@@ -18,24 +18,22 @@ window.frag.SceneObject = function (engine, model) {
         parent: null,
     };
 
-    if (model) {
-        for (let i = 0; i < model.animations.length; i++) {
-            const animation = model.animations[i];
-            for (let j = 0; j < animation.childAnimations.length; j++) {
-                const childModelName = animation.childAnimations[j].model.getName();
-                if (!private.animationMap[childModelName]) {
-                    const animationState = window.frag.ObjectAnimationState(engine);
-                    if (engine.debugAnimations) {
-                        animationState.__private.modelName = model.getName();
-                        animationState.__private.childModelName = childModelName;
-                    }
-                    private.animationMap[childModelName] = animationState;
+    for (let i = 0; i < model.animations.length; i++) {
+        const animation = model.animations[i];
+        for (let j = 0; j < animation.childAnimations.length; j++) {
+            const childModelName = animation.childAnimations[j].model.getName();
+            if (!private.animationMap[childModelName]) {
+                const animationState = window.frag.ObjectAnimationState(engine);
+                if (engine.debugAnimations) {
+                    animationState.__private.modelName = model.getName();
+                    animationState.__private.childModelName = childModelName;
                 }
+                private.animationMap[childModelName] = animationState;
             }
-            const objectAnimation = window.frag.SceneObjectAnimation(engine, animation, private.animationMap);
-            public.animations[animation.modelAnimation.getName()] = objectAnimation;
-        };
-    }
+        }
+        const objectAnimation = window.frag.SceneObjectAnimation(engine, animation, private.animationMap);
+        public.animations[animation.modelAnimation.getName()] = objectAnimation;
+    };
 
     public.addObject = function(sceneObject, childName) {
         if (sceneObject.parent) 
