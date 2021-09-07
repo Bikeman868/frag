@@ -92,6 +92,7 @@ Once you have a Python http server running you can see this sample running at th
 * Draws the frames per second using a font downloaded in the asset package
 * Uses a `PositionLink` to keep the fps label floating over the excavator
 * Parents the camera to an empty and rotates the empty to make the camera orbit around the scene
+* Has world matrix support enabled and uses it to scale the whole world
 
 Things to mess around with on this sample:
 * Modify the animation sequence to create a different behavior for the excavator
@@ -101,6 +102,7 @@ Things to mess around with on this sample:
 * Instead of one big ground tile, break the ground into multiple tiles. Which one is more performant, one large rectangle with many facets or many smaller rectangles with fewer facets? Where the sweet spot between performance and appearence?
 * Update the model in Blender. Export a Frag model from Blender and rebuild the model package
 * Generate some other fonts, package them and draw some text in different styles and colors
+* Write a custom shader that transforms the world coordinates onto the surface of a sphere
 
 ## Truck on a Track
 This [sample](truck-on-track.html) illustrates the following features and techniques:

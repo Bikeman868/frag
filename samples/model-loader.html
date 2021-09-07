@@ -32,9 +32,9 @@
         const frag = window.frag;
         const engine = frag.Engine({
             // There are a number of debug console outputs that you can enable
-            debugPackageLoader: true,
+            debugPackageLoader: false,
             debugAnimations: false,
-            debugShaderBuilder: false,
+            debugShaderBuilder: true,
             debugInputs: false,
 
             // Higher renderInterval will give you lower power consumption
@@ -56,7 +56,11 @@
             // your text is always drawn against its background color. Transparency
             // hovever has a big performance impact.
             // See http://learnwebgl.brown37.net/11_advanced_rendering/alpha_blending.html
-            transparency: true
+            transparency: true,
+
+            // Enabling world matrix support adds GPU cycles but allows us to transform
+            // the world coordinate space.
+            worldMatrix: true,
         });
         engine.start();
 
@@ -71,7 +75,8 @@
         camera.getPosition().locationXYZ(0, 20, -150).rotateX(6 * degToRad);
 
         const scene = engine.Scene()
-            .camera(camera);
+            .camera(camera)
+            .worldMatrix(frag.Transform(engine).scale(0.9).getMatrix());
 
         engine.mainScene(scene);
 

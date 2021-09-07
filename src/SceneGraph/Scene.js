@@ -16,6 +16,19 @@ window.frag.Scene = function(engine) {
     public.dispose = function() {
     }
 
+    if (engine.worldMatrix) {
+        private.worldMatrix = window.frag.Matrix.m4Identity();
+
+        public.worldMatrix = function(m) {
+            private.worldMatrix = m;
+            return public;
+        }
+
+        public.getWorldMatrix = function() {
+            return private.worldMatrix;
+        }
+    }
+
     public.addObject = function(sceneObject) {
         if (sceneObject.parent) 
             sceneObject.parent.removeObject(sceneObject);

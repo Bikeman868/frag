@@ -37,6 +37,7 @@ window.frag.Engine = function(config) {
         debugConstructors: config.debugConstructors === undefined ? false : config.debugConstructors,
         debugDynamicSurface: config.debugDynamicSurface === undefined ? false : config.debugDynamicSurface,
         transparency: config.transparency === undefined ? false : config.transparency,
+        worldMatrix: config.worldMatrix === undefined ? false : config.worldMatrix,
         fps: 0,
     }
     public.gl = public.canvas.getContext('webgl');
@@ -133,18 +134,31 @@ window.frag.Engine = function(config) {
         }
     };
 
-    public.hitTest = function (x, y, width, height, scene) {
+    public.hitTest = function (x, y, width, height, scene, shader) {
         width = width || public.canvas.clientWidth;
         height = height || public.canvas.clientHeight;
         scene = scene || public.getMainScene();
     
-        if (!private.hitTestShader) {
-            const vertexShader =
-                'attribute vec4 a_position;\n' +
-                'uniform mat4 u_clipMatrix;\n' +
-                'void main() {;\n' +
-                '  gl_Position = u_clipMatrix * a_position;\n' +
-                '}';
+        if (!shader && !private.hitTestShader) {
+            let vertexShader;
+
+            if (public.worldMatrix) {
+                vertexShader =
+                    'attribute vec4 a_position;\n' +
+                    'uniform mat4 u_clipMatrix;\n' +
+                    'uniform mat4 u_worldMatrix;\n' +
+                    'uniform mat4 u_modelMatrix;\n' +
+                    'void main() {;\n' +
+                    '  gl_Position = u_clipMatrix * u_worldMatrix * u_modelMatrix * a_position;\n' +
+                    '}';
+            } else {
+                vertexShader =
+                    'attribute vec4 a_position;\n' +
+                    'uniform mat4 u_clipMatrix;\n' +
+                    'void main() {;\n' +
+                    '  gl_Position = u_clipMatrix * a_position;\n' +
+                    '}';
+            }
     
             const fragmentShader =
                 'precision mediump float;\n' +
@@ -159,7 +173,14 @@ window.frag.Engine = function(config) {
                 .attribute('position')
                 .uniform('clipMatrix')
                 .uniform('color');
+
+            if (public.worldMatrix) {
+                private.hitTestShader
+                    .uniform('worldMatrix')
+                    .uniform('modelMatrix');
+            }
         }
+        if (!shader) shader = private.hitTestShader;
     
         const gl = public.gl;
         const texture = gl.createTexture();
@@ -178,7 +199,7 @@ window.frag.Engine = function(config) {
         gl.viewport(0, 0, width, height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-        const drawContext = frag.DrawContext(public).forHitTest(private.hitTestShader);
+        const drawContext = frag.DrawContext(public).forHitTest(shader);
     
         gl.disable(gl.BLEND);
     

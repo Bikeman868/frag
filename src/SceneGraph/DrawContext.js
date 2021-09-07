@@ -4,7 +4,7 @@ window.frag.DrawContext = function (engine) {
         matriciesChanged: false,
         activeShader: null,
         overrideShader: null,
-    }
+    };
 
     const public = {
         __private: private,
@@ -17,10 +17,12 @@ window.frag.DrawContext = function (engine) {
             animationMap: null,
             childMap: null,
             modelToWorldMatrix: null,
-            modelToClipMatrix: null,
             shader: null,
         }
-    }
+    };
+
+    if (engine.worldMatrix) public.worldTransform = null;
+    else public.state.modelToClipMatrix = null;
 
     private.setShader = function(shader) {
         if (shader === private.activeShader) return;
@@ -79,6 +81,9 @@ window.frag.DrawContext = function (engine) {
     public.beginScene = function(scene) {
         private.setShader(private.overrideShader);
         public.worldToClipTransform = scene.getCamera().worldToClipTransform;
+        if (engine.worldMatrix) {
+            public.worldTransform = window.frag.Transform(engine, scene.getWorldMatrix());
+        }
         return public;
     }
 
@@ -114,18 +119,22 @@ window.frag.DrawContext = function (engine) {
                 const Matrix = frag.Matrix;
                 if (public.worldToClipTransform.is3d) {
                     public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
-                    public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+                    if (!engine.worldMatrix)
+                        public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
                 } else {
                     public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
-                    public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+                    if (!engine.worldMatrix)
+                        public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
                 }    
             } else {
                 // This is the case where this SceneObject is parented to the scene
                 const worldToClipMatrix = public.worldToClipTransform.getMatrix();
                 public.state.modelToWorldMatrix = localMatrix;
-                public.state.modelToClipMatrix = public.worldToClipTransform.is3d
-                    ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
-                    : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+                if (!engine.worldMatrix) {
+                    public.state.modelToClipMatrix = public.worldToClipTransform.is3d
+                        ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
+                        : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+                }
             }
             private.matriciesChanged = true;
         }
@@ -161,10 +170,14 @@ window.frag.DrawContext = function (engine) {
         const Matrix = frag.Matrix;
         if (public.worldToClipTransform.is3d) {
             public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
-            public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            if (!engine.worldMatrix) {
+                public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            }
         } else {
             public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
-            public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+            if (!engine.worldMatrix) {
+                public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+            }
         }
         private.matriciesChanged = true;
     }
@@ -185,23 +198,32 @@ window.frag.DrawContext = function (engine) {
     public.beginFragment =  function(fragment) {
         const shader = private.activeShader;
 
-        if (fragment && shader.uniforms.color !== undefined && public.isHitTest) {
+        if (public.isHitTest && fragment && shader.uniforms.color !== undefined) {
             public.fragments.push(fragment);
 
             const sceneObjectId = public.sceneObjects.length - 1;
-            const modelId = public.fragments.length - 1;
+            const fragmentId = public.fragments.length - 1;
 
             const red = sceneObjectId >> 4;
-            const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
-            const blue = (modelId & 0xff00) >> 8;
-            const alpha = modelId & 0xff;
+            const green = ((sceneObjectId & 0x0f) << 4) | ((fragmentId & 0xf0000) >> 16);
+            const blue = (fragmentId & 0xff00) >> 8;
+            const alpha = fragmentId & 0xff;
             engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
         }
 
         if (private.matriciesChanged) {
-            if (shader.uniforms.clipMatrix !== undefined) {
-                window.frag.Transform(engine, public.state.modelToClipMatrix)
-                    .apply(shader.uniforms.clipMatrix);
+            if (engine.worldMatrix) {
+                if (shader.uniforms.clipMatrix !== undefined) {
+                    public.worldToClipTransform.apply(shader.uniforms.clipMatrix);
+                }
+                if (shader.uniforms.worldMatrix !== undefined) {
+                    public.worldTransform.apply(shader.uniforms.worldMatrix);
+                }
+            } else {
+                if (shader.uniforms.clipMatrix !== undefined) {
+                    window.frag.Transform(engine, public.state.modelToClipMatrix)
+                        .apply(shader.uniforms.clipMatrix);
+                }
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {

@@ -173,9 +173,11 @@ window.frag.Shader = function (engine) {
 
     private.addUniformDeclarations = function (shader) {
         if (private.matrix !== none) {
-            if (private.directionalLight !== none)
+            if (engine.worldMatrix || private.directionalLight !== none)
                 shader.vectorShader += "uniform " + private.matrix + " u_modelMatrix;\n";
             shader.vectorShader += "uniform " + private.matrix + " u_clipMatrix;\n";
+            if (engine.worldMatrix)
+                shader.vectorShader += "uniform " + private.matrix + " u_worldMatrix;\n";
         }
         if (private.directionalLight !== none) shader.vectorShader += "uniform vec3 u_lightDirection;\n";
         if (private.directionalLight === "Color") shader.vectorShader += "uniform vec3 u_lightColor;\n";
@@ -230,8 +232,13 @@ window.frag.Shader = function (engine) {
             }
         }
 
-        if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * position;\n";
-        else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
+        if (engine.worldMatrix) {
+            if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * u_worldMatrix * u_modelMatrix * position;\n";
+            else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * u_worldMatrix * u_modelMatrix * vec3(position, 1)).xy;\n";
+        } else {
+            if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * position;\n";
+            else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
+        }
 
         if (private.verticies === "XYZ") shader.vectorShader += "  gl_Position = position;\n";
         else if (private.verticies === "XY") shader.vectorShader += "  gl_Position = vec4(position, " + private.z + ", 1);\n";
@@ -352,9 +359,11 @@ window.frag.Shader = function (engine) {
         }
     
         if (private.matrix !== none) {
-            if (private.directionalLight !== none)
-                shader.uniform("modelMatrix");
             shader.uniform("clipMatrix");
+            if (engine.worldMatrix)
+                shader.uniform("worldMatrix");
+            if (engine.worldMatrix || private.directionalLight !== none)
+                shader.uniform("modelMatrix");
         }
 
         if (private.directionalLight !== none) {

@@ -28,8 +28,7 @@ html, and performing some custom initialization od WebGL during engine initializ
         const engine = window.frag.Engine({
             canvas: document.getElementById("my-canvas")
         })
-        .onStart((engine) =>
-        {
+        .onStart((engine) => {
             engine.gl.clearColor(1, 1, 1, 1);
         })
         .start();
@@ -40,32 +39,55 @@ html, and performing some custom initialization od WebGL during engine initializ
 ## Configuration
 When constructing the engine you can pass an object as the `config` parameter to
 change the engine defaults. The properties that this `config` can have are below.
-All of these properties are optional.
+All of these properties are optional. These properties become properties of the engine
+after initialization, but modifying them after initialization may not have any effect.
 * `canvas` the html canvas object to render to. Defaults to `document.getElementById("scene")`
 * `renderInterval` the number of millisecornds to pause between screen refreshes. Defaults to 15ms.
 * `gameTickMs` the duration of one game tick in milliseconds. Defaults to 10ms.
 * `transparency` set to `true` to enable transparency in the scene. Mostly only needed for `Font` drawing.
+* `worldMatrix` set to `true` to enable the world matrix. See below.
 * `debugPackageLoader` set to `true` to debug issues with loading asset packages.
 * `debugShaderBuilder` set to `true` to debug issues with shaders.
 * `debugAnimations` set to `true` to debug issues with animations.
 * `debugMeshes` set to `true` to debug issues with meshes.
 * `debugInputs` set to `true` to debug issues with player inputs.
 * `debugParticles` set to `true` to debug issues with particle systems.
+* `debugConstructors` set to true to output console log messages when objects are constructed.
+* `debugDynamicSurface` set to true to debug issues with dynamic surfaces.
 
 ## Properties
-The `Engine` instance has the following properties that you can access
-* `canvas` the html canvas object to render to.
-* `renderInterval` the number of millisecornds to pause between screen refreshes.
+The `Engine` instance has the following properties that you can read from:
+* `canvas` the html canvas object that is being rendered to.
+* `renderInterval` the number of millisecornds pause between screen refreshes.
 * `gameTickMs` the duration of one game tick in milliseconds.
-* `debugPackageLoader` set to `true` to debug issues with loading asset packages.
-* `debugShaderBuilder` set to `true` to debug issues with shaders.
-* `debugAnimations` set to `true` to debug issues with animations.
-* `debugMeshes` set to `true` to debug issues with meshes.
-* `debugInputs` set to `true` to debug issues with player inputs.
-* `transparency` set to `true` to enable transparency in the scene. Mostly only needed for `Font` drawing.
 * `fps` the average number of frame redraws per second over the last few seconds.
 * `maxTextureUnits` the maximum number of textures that can be simultaneously loaded into the graphics card. Do not modify this property.
 * `gl` contains a reference to the WebGL context that for this engine/canvas.
+
+## World matrix
+By default Frag will combine the model and camera transforms into one matrix and pass this
+to the fragment shader as a `clipMatrix` uniform. This is very efficient because the GPU only
+has to multiply each vertex by this matrix to perform the entire transoftmation from vertex
+coordinates to screen coordinates, but it lacks flexibility.
+
+If you want to be able to apply a world transformartion to your scene, then you need to 
+turn on the `worldMatrix` configuration option when constructing the engine. This changes
+a number of things within the framework, in particular the shaders will multiply each vertex
+by the model matrix, world matrix and clip matrix adding a lot of extra load on the GPU. For
+this extra load, you get the flexibility of being able to define a linear transformation of your
+entire world for each scene using built-in shaders, and you can write custom shaders to perform
+non-linear transformations (for example rendering your world onto the surface of a sphere).
+
+When this option is enabled, all shaders have an addtional uniform called `worldMatrix`, the scene
+object has a `worldMatrix` method that sets the world matrix for the scene, and if you add a
+`worldMatrix` uniform to your custom shaders the world matrix for the scene will be passed to
+your shader. The `clipMatrix` passed to your custom shader will be just the transform from world
+space to screen space, and the `modelMatrix` uniform will be passed the matrix that transforms
+from model space to world space.
+
+Note that if you write a custom shader that performs a non-linear transformation on world space,
+the built-in hit test shader will no longer work, and you will need to make a copy of the
+hit test shader and add your non-linear transformation to it.
 
 ## Methods
 
@@ -95,9 +117,9 @@ scenes scaling and aspect ratio. This is most often used to draw a user experien
 layer on top of the main game action, where rotating the camera in the main scene
 should not also rotate the user experience.
 
-## hitTest(x: int, y: int, width: int | undefined, height: int | undefined, scene: Scene | Scene[] | undefined): Object | null
+## hitTest(x: int, y: int, width: int | undefined, height: int | undefined, scene: Scene | Scene[] | undefined, shader: Shader | undefined): Object | null
 Draws a scene or list of scenes and notices which object in the scene was closest
-to the camera for a specific screen location. It also notices which mesh fragment
+to the camera for a specific screen pixel. It also notices which mesh fragment
 within the object was hit.
 
 If there was nothing at the screen location then `hitTest()` returns `null`. If
@@ -124,6 +146,12 @@ or zoomed out view of the canvas and allowed the user to click here. You can als
 make the hit test faster and less accurate by scaling the `x` and `y` parameters
 and providing correspondingly scaled `width` and `height`. This will cause the
 engine to render the scene at a smaller size for the hit test.
+
+You can optionally pass a shader to this method. The only reason to do this is
+if your game shader performs some non-linear transformation in the world
+coordinate space, for example to wrap your world around a sphere. In these
+cases you need to copy the hit test shader and implement the same non-linear
+transformation in your copy then pass it to the `hitTest` method.
 
 ## render()
 Renders the scene once to the canvas and stops. This is not useful for most

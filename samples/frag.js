@@ -1862,6 +1862,7 @@ window.frag.Engine = function(config) {
         debugConstructors: config.debugConstructors === undefined ? false : config.debugConstructors,
         debugDynamicSurface: config.debugDynamicSurface === undefined ? false : config.debugDynamicSurface,
         transparency: config.transparency === undefined ? false : config.transparency,
+        worldMatrix: config.worldMatrix === undefined ? false : config.worldMatrix,
         fps: 0,
     }
     public.gl = public.canvas.getContext('webgl');
@@ -1958,18 +1959,31 @@ window.frag.Engine = function(config) {
         }
     };
 
-    public.hitTest = function (x, y, width, height, scene) {
+    public.hitTest = function (x, y, width, height, scene, shader) {
         width = width || public.canvas.clientWidth;
         height = height || public.canvas.clientHeight;
         scene = scene || public.getMainScene();
     
-        if (!private.hitTestShader) {
-            const vertexShader =
-                'attribute vec4 a_position;\n' +
-                'uniform mat4 u_clipMatrix;\n' +
-                'void main() {;\n' +
-                '  gl_Position = u_clipMatrix * a_position;\n' +
-                '}';
+        if (!shader && !private.hitTestShader) {
+            let vertexShader;
+
+            if (public.worldMatrix) {
+                vertexShader =
+                    'attribute vec4 a_position;\n' +
+                    'uniform mat4 u_clipMatrix;\n' +
+                    'uniform mat4 u_worldMatrix;\n' +
+                    'uniform mat4 u_modelMatrix;\n' +
+                    'void main() {;\n' +
+                    '  gl_Position = u_clipMatrix * u_worldMatrix * u_modelMatrix * a_position;\n' +
+                    '}';
+            } else {
+                vertexShader =
+                    'attribute vec4 a_position;\n' +
+                    'uniform mat4 u_clipMatrix;\n' +
+                    'void main() {;\n' +
+                    '  gl_Position = u_clipMatrix * a_position;\n' +
+                    '}';
+            }
     
             const fragmentShader =
                 'precision mediump float;\n' +
@@ -1984,7 +1998,14 @@ window.frag.Engine = function(config) {
                 .attribute('position')
                 .uniform('clipMatrix')
                 .uniform('color');
+
+            if (public.worldMatrix) {
+                private.hitTestShader
+                    .uniform('worldMatrix')
+                    .uniform('modelMatrix');
+            }
         }
+        if (!shader) shader = private.hitTestShader;
     
         const gl = public.gl;
         const texture = gl.createTexture();
@@ -2003,7 +2024,7 @@ window.frag.Engine = function(config) {
         gl.viewport(0, 0, width, height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-        const drawContext = frag.DrawContext(public).forHitTest(private.hitTestShader);
+        const drawContext = frag.DrawContext(public).forHitTest(shader);
     
         gl.disable(gl.BLEND);
     
@@ -6749,7 +6770,7 @@ window.frag.DrawContext = function (engine) {
         matriciesChanged: false,
         activeShader: null,
         overrideShader: null,
-    }
+    };
 
     const public = {
         __private: private,
@@ -6762,10 +6783,12 @@ window.frag.DrawContext = function (engine) {
             animationMap: null,
             childMap: null,
             modelToWorldMatrix: null,
-            modelToClipMatrix: null,
             shader: null,
         }
-    }
+    };
+
+    if (engine.worldMatrix) public.worldTransform = null;
+    else public.state.modelToClipMatrix = null;
 
     private.setShader = function(shader) {
         if (shader === private.activeShader) return;
@@ -6824,6 +6847,9 @@ window.frag.DrawContext = function (engine) {
     public.beginScene = function(scene) {
         private.setShader(private.overrideShader);
         public.worldToClipTransform = scene.getCamera().worldToClipTransform;
+        if (engine.worldMatrix) {
+            public.worldTransform = window.frag.Transform(engine, scene.getWorldMatrix());
+        }
         return public;
     }
 
@@ -6859,18 +6885,22 @@ window.frag.DrawContext = function (engine) {
                 const Matrix = frag.Matrix;
                 if (public.worldToClipTransform.is3d) {
                     public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
-                    public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+                    if (!engine.worldMatrix)
+                        public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
                 } else {
                     public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
-                    public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+                    if (!engine.worldMatrix)
+                        public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
                 }    
             } else {
                 // This is the case where this SceneObject is parented to the scene
                 const worldToClipMatrix = public.worldToClipTransform.getMatrix();
                 public.state.modelToWorldMatrix = localMatrix;
-                public.state.modelToClipMatrix = public.worldToClipTransform.is3d
-                    ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
-                    : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+                if (!engine.worldMatrix) {
+                    public.state.modelToClipMatrix = public.worldToClipTransform.is3d
+                        ? frag.Matrix.m4Xm4(worldToClipMatrix, localMatrix)
+                        : frag.Matrix.m3Xm3(worldToClipMatrix, localMatrix);
+                }
             }
             private.matriciesChanged = true;
         }
@@ -6906,10 +6936,14 @@ window.frag.DrawContext = function (engine) {
         const Matrix = frag.Matrix;
         if (public.worldToClipTransform.is3d) {
             public.state.modelToWorldMatrix = Matrix.m4Xm4(public.state.modelToWorldMatrix, localMatrix);
-            public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            if (!engine.worldMatrix) {
+                public.state.modelToClipMatrix = Matrix.m4Xm4(public.state.modelToClipMatrix, localMatrix);
+            }
         } else {
             public.state.modelToWorldMatrix = Matrix.m3Xm3(public.state.modelToWorldMatrix, localMatrix);
-            public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+            if (!engine.worldMatrix) {
+                public.state.modelToClipMatrix = Matrix.m3Xm3(public.state.modelToClipMatrix, localMatrix);
+            }
         }
         private.matriciesChanged = true;
     }
@@ -6930,23 +6964,32 @@ window.frag.DrawContext = function (engine) {
     public.beginFragment =  function(fragment) {
         const shader = private.activeShader;
 
-        if (fragment && shader.uniforms.color !== undefined && public.isHitTest) {
+        if (public.isHitTest && fragment && shader.uniforms.color !== undefined) {
             public.fragments.push(fragment);
 
             const sceneObjectId = public.sceneObjects.length - 1;
-            const modelId = public.fragments.length - 1;
+            const fragmentId = public.fragments.length - 1;
 
             const red = sceneObjectId >> 4;
-            const green = ((sceneObjectId & 0x0f) << 4) | ((modelId & 0xf0000) >> 16);
-            const blue = (modelId & 0xff00) >> 8;
-            const alpha = modelId & 0xff;
+            const green = ((sceneObjectId & 0x0f) << 4) | ((fragmentId & 0xf0000) >> 16);
+            const blue = (fragmentId & 0xff00) >> 8;
+            const alpha = fragmentId & 0xff;
             engine.gl.uniform4f(shader.uniforms.color, red / 255, green / 255, blue / 255, alpha / 255);
         }
 
         if (private.matriciesChanged) {
-            if (shader.uniforms.clipMatrix !== undefined) {
-                window.frag.Transform(engine, public.state.modelToClipMatrix)
-                    .apply(shader.uniforms.clipMatrix);
+            if (engine.worldMatrix) {
+                if (shader.uniforms.clipMatrix !== undefined) {
+                    public.worldToClipTransform.apply(shader.uniforms.clipMatrix);
+                }
+                if (shader.uniforms.worldMatrix !== undefined) {
+                    public.worldTransform.apply(shader.uniforms.worldMatrix);
+                }
+            } else {
+                if (shader.uniforms.clipMatrix !== undefined) {
+                    window.frag.Transform(engine, public.state.modelToClipMatrix)
+                        .apply(shader.uniforms.clipMatrix);
+                }
             }
 
             if (shader.uniforms.modelMatrix !== undefined) {
@@ -8218,6 +8261,19 @@ window.frag.Scene = function(engine) {
     public.dispose = function() {
     }
 
+    if (engine.worldMatrix) {
+        private.worldMatrix = window.frag.Matrix.m4Identity();
+
+        public.worldMatrix = function(m) {
+            private.worldMatrix = m;
+            return public;
+        }
+
+        public.getWorldMatrix = function() {
+            return private.worldMatrix;
+        }
+    }
+
     public.addObject = function(sceneObject) {
         if (sceneObject.parent) 
             sceneObject.parent.removeObject(sceneObject);
@@ -9184,15 +9240,30 @@ window.frag.CustomShader = function (engine, is3d) {
 window.frag.FontShader = function(engine) {
     if (engine.fontShader) return engine.fontShader;
     
-    const vertexShader = 
-        "attribute vec4 a_position;\n" +
-        "attribute vec2 a_texcoord;\n" +
-        "uniform mat4 u_clipMatrix;\n" +
-        "varying vec2 v_texcoord;\n" +
-        "void main() {\n" +
-        "  gl_Position = u_clipMatrix * a_position;\n" +
-        "  v_texcoord = a_texcoord;\n" +
-        "}";
+    let vertexShader;
+    if (engine.worldMatrix) {
+        vertexShader = 
+            "attribute vec4 a_position;\n" +
+            "attribute vec2 a_texcoord;\n" +
+            "uniform mat4 u_clipMatrix;\n" +
+            "uniform mat4 u_worldMatrix;\n" +
+            "uniform mat4 u_modelMatrix;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "void main() {\n" +
+            "  gl_Position = u_clipMatrix * u_worldMatrix * u_modelMatrix * a_position;\n" +
+            "  v_texcoord = a_texcoord;\n" +
+            "}";
+    } else {
+        vertexShader = 
+            "attribute vec4 a_position;\n" +
+            "attribute vec2 a_texcoord;\n" +
+            "uniform mat4 u_clipMatrix;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "void main() {\n" +
+            "  gl_Position = u_clipMatrix * a_position;\n" +
+            "  v_texcoord = a_texcoord;\n" +
+            "}";
+    }
 
     const fragmentShader = 
         "precision mediump float;\n" +
@@ -9214,6 +9285,11 @@ window.frag.FontShader = function(engine) {
         .uniform("bgcolor", "4fv", [1, 1, 1, 1])
         .uniform("fgcolor", "4fv", [0, 0, 0, 1])
         .uniform("diffuse");
+
+    if (engine.worldMatrix) {
+        engine.fontShader.uniform("worldMatrix");
+        engine.fontShader.uniform("modelMatrix");
+    }
         
     return engine.fontShader;
 }
@@ -9732,9 +9808,11 @@ window.frag.Shader = function (engine) {
 
     private.addUniformDeclarations = function (shader) {
         if (private.matrix !== none) {
-            if (private.directionalLight !== none)
+            if (engine.worldMatrix || private.directionalLight !== none)
                 shader.vectorShader += "uniform " + private.matrix + " u_modelMatrix;\n";
             shader.vectorShader += "uniform " + private.matrix + " u_clipMatrix;\n";
+            if (engine.worldMatrix)
+                shader.vectorShader += "uniform " + private.matrix + " u_worldMatrix;\n";
         }
         if (private.directionalLight !== none) shader.vectorShader += "uniform vec3 u_lightDirection;\n";
         if (private.directionalLight === "Color") shader.vectorShader += "uniform vec3 u_lightColor;\n";
@@ -9789,8 +9867,13 @@ window.frag.Shader = function (engine) {
             }
         }
 
-        if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * position;\n";
-        else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
+        if (engine.worldMatrix) {
+            if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * u_worldMatrix * u_modelMatrix * position;\n";
+            else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * u_worldMatrix * u_modelMatrix * vec3(position, 1)).xy;\n";
+        } else {
+            if (private.verticies === "XYZ") shader.vectorShader += "  position = u_clipMatrix * position;\n";
+            else if (private.verticies !== none) shader.vectorShader += "  position = (u_clipMatrix * vec3(position, 1)).xy;\n";
+        }
 
         if (private.verticies === "XYZ") shader.vectorShader += "  gl_Position = position;\n";
         else if (private.verticies === "XY") shader.vectorShader += "  gl_Position = vec4(position, " + private.z + ", 1);\n";
@@ -9911,9 +9994,11 @@ window.frag.Shader = function (engine) {
         }
     
         if (private.matrix !== none) {
-            if (private.directionalLight !== none)
-                shader.uniform("modelMatrix");
             shader.uniform("clipMatrix");
+            if (engine.worldMatrix)
+                shader.uniform("worldMatrix");
+            if (engine.worldMatrix || private.directionalLight !== none)
+                shader.uniform("modelMatrix");
         }
 
         if (private.directionalLight !== none) {

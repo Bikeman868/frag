@@ -1,15 +1,30 @@
 window.frag.FontShader = function(engine) {
     if (engine.fontShader) return engine.fontShader;
     
-    const vertexShader = 
-        "attribute vec4 a_position;\n" +
-        "attribute vec2 a_texcoord;\n" +
-        "uniform mat4 u_clipMatrix;\n" +
-        "varying vec2 v_texcoord;\n" +
-        "void main() {\n" +
-        "  gl_Position = u_clipMatrix * a_position;\n" +
-        "  v_texcoord = a_texcoord;\n" +
-        "}";
+    let vertexShader;
+    if (engine.worldMatrix) {
+        vertexShader = 
+            "attribute vec4 a_position;\n" +
+            "attribute vec2 a_texcoord;\n" +
+            "uniform mat4 u_clipMatrix;\n" +
+            "uniform mat4 u_worldMatrix;\n" +
+            "uniform mat4 u_modelMatrix;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "void main() {\n" +
+            "  gl_Position = u_clipMatrix * u_worldMatrix * u_modelMatrix * a_position;\n" +
+            "  v_texcoord = a_texcoord;\n" +
+            "}";
+    } else {
+        vertexShader = 
+            "attribute vec4 a_position;\n" +
+            "attribute vec2 a_texcoord;\n" +
+            "uniform mat4 u_clipMatrix;\n" +
+            "varying vec2 v_texcoord;\n" +
+            "void main() {\n" +
+            "  gl_Position = u_clipMatrix * a_position;\n" +
+            "  v_texcoord = a_texcoord;\n" +
+            "}";
+    }
 
     const fragmentShader = 
         "precision mediump float;\n" +
@@ -31,6 +46,11 @@ window.frag.FontShader = function(engine) {
         .uniform("bgcolor", "4fv", [1, 1, 1, 1])
         .uniform("fgcolor", "4fv", [0, 0, 0, 1])
         .uniform("diffuse");
+
+    if (engine.worldMatrix) {
+        engine.fontShader.uniform("worldMatrix");
+        engine.fontShader.uniform("modelMatrix");
+    }
         
     return engine.fontShader;
 }
