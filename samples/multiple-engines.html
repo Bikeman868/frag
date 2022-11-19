@@ -142,23 +142,12 @@
             }
         }
 
-        Vue.component('game', {
-            props: ['color', 'spinTime'],
-            mounted() {
-                this.game = new MyGame(this.$el, this.color, this.spinTime);
-            },
-            beforeDestroy() {
-                this.game.dispose();
-            },
-            template: '<canvas />'
-        });
-
-        new Vue({
-            el: "#app",
-            data: {
-                nextId: 1,
-                games: []
-            },
+        const app = Vue.createApp({
+            data: function(){
+                return {
+                    nextId: 1,
+                    games: []
+                }},
             mounted() {
                 this.addGame();
                 this.addGame();
@@ -187,6 +176,19 @@
                 }
             }
         });
+
+        app.component('game', {
+            props: ['color', 'spinTime'],
+            mounted() {
+                this.game = new MyGame(this.$el, this.color, this.spinTime);
+            },
+            beforeDestroy() {
+                this.game.dispose();
+            },
+            template: '<canvas />'
+        });
+
+        app.mount("#app")
 
     </script>
 </body>
