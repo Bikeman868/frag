@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+  <head>
+    <title>Spring Spheres</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #scene {
+        width: 100vw;
+        height: 100vh;
+        touch-action: none;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <script src="frag.js"></script>
+    <script>
+      const frag = window.frag;
+      const engine = frag
+        .Engine({
+          canvas: document.getElementById("scene"),
+        })
+        .onStart((engine) => {
+          engine.gl.clearColor(0.1, 0.1, 0.15, 1);
+        });
+      engine.start();
+
+      const degToRad = Math.PI / 180;
+
+      // Set up the camera to view the scene
+      const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
+      camera.getPosition().locationZ(-150);
+
+      // Create the scene
+      const scene = frag.Scene(engine).camera(camera);
+      engine.mainScene(scene);
+
+      // Create a shader for rendering the spheres
+      const shader = frag
+        .Shader(engine)
+        .name("Sphere shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      shader.lightDirection([-0.2, -0.6, 0.1]);
+
+      // Create a shader for rendering the springs (same as spheres)
+      const springShader = frag
+        .Shader(engine)
+        .name("Spring shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      springShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      // Create a sphere mesh that will be shared by all spheres
+      const sphereMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] });
+      sphereMesh.shadeSmooth();
+
+      // Create a model template for the spheres
+      const sphereModel = frag
+        .Model(engine)
+        .name("Sphere model")
+        .mesh(sphereMesh)
+        .shader(shader);
+
+      // Create a thin cylinder mesh for the springs
+      const springRadius = 0.3; // Thin spring radius
+      const springMesh = frag.Cylinder(engine, 8, {
+        color: [0.7, 0.7, 0.7], // Gray color for springs
+        drawTop: false,
+        drawBottom: false,
+      });
+      springMesh.shadeSmooth();
+
+      // Physics simulation parameters
+      const numSpheres = 8;
+      const sphereRadius = 5;
+      const repulsionStrength = 2000; // Strength of repulsion force
+      const repulsionDecay = 0.1; // Exponential decay factor for repulsion
+      const springStrength = 150; // Spring constant (force proportional to distance)
+      const damping = 0.98; // Velocity damping to prevent oscillation (0.98 = 2% damping per step)
+      const timeStep = 0.05; // Simulation time step (larger = more dramatic movement)
+
+      // Define spring connections between sphere pairs
+      // Each entry is [index1, index2, restLength]
+      // restLength is the natural length of the spring (0 means use current distance)
+      const springConnections = [
+        [0, 1, 0], // Sphere 0 connected to sphere 1
+        [1, 2, 0], // Sphere 1 connected to sphere 2
+        [2, 3, 0], // Sphere 2 connected to sphere 3
+        [3, 0, 0], // Sphere 3 connected to sphere 0 (forms a square)
+        [0, 2, 0], // Diagonal connection
+        [1, 3, 0], // Diagonal connection
+        [4, 5, 0], // Another pair
+        [5, 6, 0],
+        [6, 7, 0],
+        [7, 4, 0],
+        [0, 4, 0], // Connect the two groups
+        [2, 6, 0],
+      ];
+
+      // Sphere class to hold position, velocity, and scene object
+      class Sphere {
+        constructor(index, initialPosition, color) {
+          this.index = index;
+          this.position = [...initialPosition];
+          this.velocity = [0, 0, 0];
+          this.color = color;
+
+          // Create a unique material for this sphere's color
+          const texture = frag
+            .Texture(engine)
+            .name("Sphere texture " + index)
+            .dataFormat(engine.gl.RGB)
+            .fromArrayBuffer(
+              0,
+              new Uint8Array([
+                Math.floor(color[0] * 255),
+                Math.floor(color[1] * 255),
+                Math.floor(color[2] * 255),
+              ]),
+              0,
+              1,
+              1
+            );
+
+          const material = frag
+            .Material(engine)
+            .name("Sphere material " + index)
+            .setTexture("diffuse", texture)
+            .disposeTextures(true);
+
+          // Create a model with this material
+          const model = frag
+            .Model(engine)
+            .name("Sphere " + index)
+            .mesh(sphereMesh)
+            .material(material)
+            .shader(shader);
+
+          // Create the scene object
+          this.sceneObject = frag.SceneObject(engine, model);
+          this.sceneObject
+            .getPosition()
+            .scale(sphereRadius)
+            .location(initialPosition);
+
+          scene.addObject(this.sceneObject);
+        }
+
+        // Update the visual position from the physics position
+        updateVisual() {
+          this.sceneObject.getPosition().location(this.position);
+        }
+
+        dispose() {
+          this.sceneObject.dispose();
+        }
+      }
+
+      // Create spheres with random initial positions and colors
+      const spheres = [];
+      const colors = [
+        [1, 0.4, 0.4], // Red
+        [0.4, 1, 0.4], // Green
+        [0.4, 0.4, 1], // Blue
+        [1, 1, 0.4], // Yellow
+        [1, 0.4, 1], // Magenta
+        [0.4, 1, 1], // Cyan
+        [1, 0.8, 0.4], // Orange
+        [0.8, 0.4, 1], // Purple
+      ];
+
+      for (let i = 0; i < numSpheres; i++) {
+        // Random initial position within a smaller cube to start closer together
+        // This creates stronger initial forces and more visible movement
+        const initialPos = [
+          (Math.random() - 0.5) * 50,
+          (Math.random() - 0.5) * 50,
+          (Math.random() - 0.5) * 50,
+        ];
+        const sphere = new Sphere(i, initialPos, colors[i % colors.length]);
+        // Add small random initial velocities to get things moving immediately
+        sphere.velocity = [
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2,
+          (Math.random() - 0.5) * 2,
+        ];
+        spheres.push(sphere);
+      }
+
+      // Spring class to hold spring visual representation
+      class Spring {
+        constructor(index, sphere1, sphere2, restLength) {
+          this.index = index;
+          this.sphere1 = sphere1;
+          this.sphere2 = sphere2;
+          this.restLength = restLength;
+
+          // Create a model for this spring
+          const springModel = frag
+            .Model(engine)
+            .name("Spring " + index)
+            .mesh(springMesh)
+            .shader(springShader);
+
+          // Create the scene object
+          this.sceneObject = frag.SceneObject(engine, springModel);
+          scene.addObject(this.sceneObject);
+
+          // Initial update
+          this.updateVisual();
+        }
+
+        // Update the spring visual to connect the two spheres
+        updateVisual() {
+          const pos1 = this.sphere1.position;
+          const pos2 = this.sphere2.position;
+          const diff = frag.Vector.sub(pos2, pos1);
+          const distance = frag.Vector.length(diff);
+
+          if (distance < 0.001) {
+            // Spheres are too close, hide the spring
+            this.sceneObject.getPosition().scale(0);
+            return;
+          }
+
+          // Calculate direction vector (normalized)
+          const direction = frag.Vector.normalize(diff);
+
+          // Calculate the points on the surfaces of the spheres where the spring connects
+          // Spring connects from surface of sphere1 to surface of sphere2
+          const surface1 = frag.Vector.add(
+            pos1,
+            frag.Vector.mult(direction, sphereRadius)
+          );
+          const surface2 = frag.Vector.sub(
+            pos2,
+            frag.Vector.mult(direction, sphereRadius)
+          );
+
+          // Calculate spring length (distance between surface points)
+          const springLength = Math.max(
+            frag.Vector.length(frag.Vector.sub(surface2, surface1)),
+            0.1
+          );
+
+          // Calculate midpoint between the surface points (this is where the cylinder center should be)
+          const midpoint = frag.Vector.average(surface1, surface2);
+
+          // Calculate rotation to align cylinder with direction
+          // Cylinder default axis is Z (from -1 to +1), so we need to rotate it to point along direction
+          // The heading function calculates rotation assuming forward is +Z
+          const heading = frag.Vector.heading(direction, [0, 1, 0]);
+
+          // Update spring position and orientation
+          // Cylinder default length is 2 (from -1 to +1), so scale Z by springLength/2
+          // The cylinder extends from -springLength/2 to +springLength/2 along its local Z axis
+          // After rotation, it extends springLength/2 in each direction from the center
+          // Position it at the midpoint so it extends from surface1 to surface2
+          const position = this.sceneObject.getPosition();
+
+          // Set all transformations explicitly
+          // Order: scale, rotate, translate (as applied by Location.getMatrix)
+          position
+            .scaleXYZ(springRadius, springRadius, springLength / 2)
+            .rotateXYZ(heading[0], heading[1], heading[2])
+            .locationXYZ(midpoint[0], midpoint[1], midpoint[2]);
+        }
+
+        dispose() {
+          this.sceneObject.dispose();
+        }
+      }
+
+      // Create spring visual representations
+      const springs = [];
+
+      // Initialize spring rest lengths to current distances and create spring visuals
+      for (let i = 0; i < springConnections.length; i++) {
+        const [idx1, idx2, restLength] = springConnections[i];
+        let actualRestLength = restLength;
+        if (restLength === 0) {
+          const pos1 = spheres[idx1].position;
+          const pos2 = spheres[idx2].position;
+          const diff = frag.Vector.sub(pos2, pos1);
+          actualRestLength = frag.Vector.length(diff);
+          springConnections[i][2] = actualRestLength;
+        }
+        // Create visual spring
+        springs.push(
+          new Spring(i, spheres[idx1], spheres[idx2], actualRestLength)
+        );
+      }
+
+      // Calculate repulsion force between two spheres
+      function calculateRepulsion(sphere1, sphere2) {
+        const pos1 = sphere1.position;
+        const pos2 = sphere2.position;
+        const diff = frag.Vector.sub(pos2, pos1);
+        const distance = frag.Vector.length(diff);
+
+        // Avoid division by zero
+        if (distance < 0.001) {
+          return [0, 0, 0];
+        }
+
+        // Exponential decay: force = strength * exp(-decay * distance) / distance^2
+        // The division by distance^2 makes the force stronger at close range
+        // Direction is normalized difference vector
+        const direction = frag.Vector.normalize(diff);
+        const forceMagnitude =
+          (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
+          (distance * distance);
+
+        return frag.Vector.mult(direction, forceMagnitude);
+      }
+
+      // Calculate spring force between two connected spheres
+      function calculateSpring(sphere1, sphere2, restLength) {
+        const pos1 = sphere1.position;
+        const pos2 = sphere2.position;
+        const diff = frag.Vector.sub(pos2, pos1);
+        const distance = frag.Vector.length(diff);
+
+        // Avoid division by zero
+        if (distance < 0.001) {
+          return [0, 0, 0];
+        }
+
+        // Spring force: F = -k * (distance - restLength)
+        // Direction is normalized difference vector
+        const direction = frag.Vector.normalize(diff);
+        const displacement = distance - restLength;
+        const forceMagnitude = -springStrength * displacement;
+
+        return frag.Vector.mult(direction, forceMagnitude);
+      }
+
+      // Physics simulation step
+      function simulatePhysics() {
+        // Calculate forces for each sphere
+        const forces = [];
+        for (let i = 0; i < spheres.length; i++) {
+          forces[i] = [0, 0, 0];
+        }
+
+        // Apply repulsion forces between all pairs of spheres
+        for (let i = 0; i < spheres.length; i++) {
+          for (let j = i + 1; j < spheres.length; j++) {
+            const repulsion = calculateRepulsion(spheres[i], spheres[j]);
+            forces[i] = frag.Vector.sub(forces[i], repulsion); // Force on sphere i
+            forces[j] = frag.Vector.add(forces[j], repulsion); // Force on sphere j
+          }
+        }
+
+        // Apply spring forces between connected pairs
+        for (let i = 0; i < springConnections.length; i++) {
+          const [idx1, idx2, restLength] = springConnections[i];
+          const spring = calculateSpring(
+            spheres[idx1],
+            spheres[idx2],
+            restLength
+          );
+          forces[idx1] = frag.Vector.sub(forces[idx1], spring); // Force on sphere idx1
+          forces[idx2] = frag.Vector.add(forces[idx2], spring); // Force on sphere idx2
+        }
+
+        // Update velocities and positions
+        for (let i = 0; i < spheres.length; i++) {
+          const sphere = spheres[i];
+          const force = forces[i];
+
+          // Update velocity: v = v + (F/m) * dt
+          // Assuming mass = 1 for simplicity
+          sphere.velocity = frag.Vector.add(
+            sphere.velocity,
+            frag.Vector.mult(force, timeStep)
+          );
+
+          // Apply damping to prevent infinite oscillation
+          sphere.velocity = frag.Vector.mult(sphere.velocity, damping);
+
+          // Update position: x = x + v * dt
+          sphere.position = frag.Vector.add(
+            sphere.position,
+            frag.Vector.mult(sphere.velocity, timeStep)
+          );
+
+          // Update visual position
+          sphere.updateVisual();
+        }
+
+        // Update spring visuals
+        for (let i = 0; i < springs.length; i++) {
+          springs[i].updateVisual();
+        }
+      }
+
+      // Run the physics simulation in an animation loop
+      // Run multiple physics steps per frame for smoother, more visible movement
+      const physicsAnimation = frag
+        .Animation(engine)
+        .repeatTicks(() => {
+          // Run multiple simulation steps per tick for smoother physics
+          for (let step = 0; step < 3; step++) {
+            simulatePhysics();
+          }
+        }, 1) // Run every game tick for smooth simulation
+        .start();
+    </script>
+  </body>
+</html>
