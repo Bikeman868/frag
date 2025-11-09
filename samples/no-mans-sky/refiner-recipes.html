@@ -84,9 +84,10 @@
 
       const pipeRadius = 0.3;
       const ingredientRadius = 5;
+      const recipeRadius = 1;
       const repulsionStrength = 50000;
       const repulsionDecay = 0.1;
-      const recipeAttractionStrength = 4;
+      const recipeAttractionStrength = 2;
       const originAttractionStrength = 0.1;
       const velocityDamping = 0.995; // Damping factor to prevent oscillations (0.95 = 5% velocity loss per frame)
 
@@ -159,7 +160,14 @@
         updateIngredientVisual(ingredient);
       }
 
-      // Define shared pipe shader and meshes
+      // Define shared pipe and recipe shader and meshes
+
+      const recipeShader = frag.Shader(engine)
+        .name("Recipe shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+        recipeShader.lightDirection([-0.2, -0.6, 0.1]);
 
       const pipeShader = frag.Shader(engine)
         .name("Pipe shader")
@@ -168,19 +176,22 @@
         .compile();
       pipeShader.lightDirection([-0.2, -0.6, 0.1]);
 
-      const inputMesh = frag.Cylinder(engine, 8, {
+      const recipeMesh = frag.Sphere(engine, 16, { color: [0.5, 0.5, 0.5], })
+      recipeMesh.shadeSmooth();
+
+      const inputPipeMesh = frag.Cylinder(engine, 8, {
         color: [0.7, 0.7, 1],
         drawTop: false,
         drawBottom: false,
       });
-      inputMesh.shadeSmooth();
+      inputPipeMesh.shadeSmooth();
 
-      const outputMesh = frag.Cylinder(engine, 8, {
+      const outputPipeMesh = frag.Cylinder(engine, 8, {
         color: [0.7, 1, 0.7],
         drawTop: false,
         drawBottom: false,
       });
-      outputMesh.shadeSmooth();
+      outputPipeMesh.shadeSmooth();
 
       // Augment each recipe with it's specific characteristics
 
@@ -195,38 +206,18 @@
 
         recipe.model = frag.Model(engine)
           .name("Recipe model " + i)
-          .mesh(inputMesh)
-          .shader(pipeShader);
+          .mesh(recipeMesh)
+          .shader(recipeShader);
 
         recipe.sceneObject = frag.SceneObject(engine, recipe.model);
 
         recipe.sceneObject.getPosition()
-          .scale(pipeRadius)
+          .scale(recipeRadius)
           .location(recipe.position);
 
         scene.addObject(recipe.sceneObject);
 
         updateRecipeVisual(recipe);
-      }
-
-      function netForceOnA(a, b) {
-        const posA = a.position;
-        const posB = b.position;
-        const aMinusB = frag.Vector.sub(posA, posB);
-        const distance = frag.Vector.length(aMinusB);
-
-        // Avoid division by zero
-        if (distance < 0.001) return [0, 0, 0];
-
-        const direction = frag.Vector.normalize(aMinusB);
-        const attractionMagnitude = -recipeAttractionStrength * distance;
-        const repulsionMagnitude =
-          (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
-          (distance * distance);
-        return frag.Vector.add(
-          frag.Vector.mult(direction, attractionMagnitude),
-          frag.Vector.mult(direction, repulsionMagnitude)
-        );
       }
 
       function simulatePhysics() {
@@ -302,9 +293,14 @@
           updateIngredientVisual(ingredient);
         }
 
-        // Update recipe visuals
+        // Update recipe to be at the centroid of its ingredients
         for (let i = 0; i < recipies.length; i++) {
-          updateRecipeVisual(recipies[i]);
+          const recipe = recipies[i];
+          let sum = ingredients[recipe[0]].position;
+          for (let j = 0; j < recipe[1].length; j++) 
+            sum = frag.Vector.add(sum, ingredients[recipe[1][j]].position);
+          recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
+          updateRecipeVisual(recipe);
         }
       }
 
