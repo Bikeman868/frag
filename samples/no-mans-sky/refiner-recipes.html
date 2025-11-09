@@ -46,7 +46,7 @@
         {
           index: 2,
           name: "Condensed Carbon",
-          color: [1, 0.6, 0.4],
+          color: [0.4, 0.6, 1],
           symbol: "C+",
           pricePerUnit: 1,
           mass: 2000,
@@ -54,7 +54,7 @@
         {
           index: 3,
           name: "Cobalt",
-          color: [1, 0.6, 0.4],
+          color: [0.4, 1, 0.6],
           symbol: "Co",
           pricePerUnit: 1,
           mass: 2000,
@@ -62,7 +62,7 @@
         {
           index: 4,
           name: "Ionized Cobalt",
-          color: [1, 0.6, 0.4],
+          color: [0.6, 0.6, 0.4],
           symbol: "Co+",
           pricePerUnit: 1,
           mass: 5000,
@@ -77,6 +77,7 @@
         [3, [4], [200]], // Cobalt can be made from Ionized Cobalt at a ratio of 1:2
         [4, [3], [50]], // Ionized Cobalt can be made from carbon at a ratio of 2:1
         [2, [0, 1], [20, 20]], // Condensed carbon can be made from oxygen and carbon at a ratio of 1:5
+        [0, [4], [1000]], // Oxygen can be made from Ionsized Cobalt at a ratio of 10:1
       ];
 
       // Constants
@@ -111,47 +112,14 @@
       const scene = frag.Scene(engine).camera(camera);
       engine.mainScene(scene);
 
-      // Define shared shaders meshes and models
+      // Define shared ingredient shader
 
-      const ingredientShader = frag
-        .Shader(engine)
+      const ingredientShader = frag.Shader(engine)
         .name("Ingredient shader")
         .colorsRGB()
         .directionalLightGrey()
         .compile();
       ingredientShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const ingredientMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] });
-      ingredientMesh.shadeSmooth();
-
-      const ingredientModel = frag
-        .Model(engine)
-        .name("Sphere model")
-        .mesh(ingredientMesh)
-        .shader(ingredientShader);
-
-      const inputPipeShader = frag
-        .Shader(engine)
-        .name("Input shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      inputPipeShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const outputPipeShader = frag
-        .Shader(engine)
-        .name("Output shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      outputPipeShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const pipeMesh = frag.Cylinder(engine, 8, {
-        color: [0.7, 0.7, 1],
-        drawTop: false,
-        drawBottom: false,
-      });
-      pipeMesh.shadeSmooth();
 
       // Augment each ingredient with it's specific characteristics
 
@@ -174,39 +142,15 @@
 
         ingredient.velocity = [0, 0, 0];
 
-        ingredient.texture = frag
-          .Texture(engine)
-          .name("Ingredient texture " + i)
-          .dataFormat(engine.gl.RGB)
-          .fromArrayBuffer(
-            0,
-            new Uint8Array([
-              Math.floor(ingredient.color[0] * 255),
-              Math.floor(ingredient.color[1] * 255),
-              Math.floor(ingredient.color[2] * 255),
-            ]),
-            0,
-            1,
-            1
-          );
-
-        ingredient.material = frag
-          .Material(engine)
-          .name("Ingredient material " + i)
-          .setTexture("diffuse", ingredient.texture)
-          .disposeTextures(true);
-
-        ingredient.model = frag
-          .Model(engine)
+        ingredient.model = frag.Model(engine)
           .name("Ingredient model " + i)
-          .mesh(ingredientMesh)
-          .material(ingredient.material)
-          .shader(ingredientShader);
+          .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
+          .shader(ingredientShader)
+          .shadeFlat();
 
         ingredient.sceneObject = frag.SceneObject(engine, ingredient.model);
 
-        ingredient.sceneObject
-          .getPosition()
+        ingredient.sceneObject.getPosition()
           .scale(ingredientRadius)
           .location(ingredient.position);
 
@@ -214,6 +158,29 @@
 
         updateIngredientVisual(ingredient);
       }
+
+      // Define shared pipe shader and meshes
+
+      const pipeShader = frag.Shader(engine)
+        .name("Pipe shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      pipeShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      const inputMesh = frag.Cylinder(engine, 8, {
+        color: [0.7, 0.7, 1],
+        drawTop: false,
+        drawBottom: false,
+      });
+      inputMesh.shadeSmooth();
+
+      const outputMesh = frag.Cylinder(engine, 8, {
+        color: [0.7, 1, 0.7],
+        drawTop: false,
+        drawBottom: false,
+      });
+      outputMesh.shadeSmooth();
 
       // Augment each recipe with it's specific characteristics
 
@@ -226,16 +193,14 @@
 
         recipe.position = [0, 0, 0];
 
-        recipe.model = frag
-          .Model(engine)
+        recipe.model = frag.Model(engine)
           .name("Recipe model " + i)
-          .mesh(pipeMesh)
-          .shader(inputPipeShader);
+          .mesh(inputMesh)
+          .shader(pipeShader);
 
         recipe.sceneObject = frag.SceneObject(engine, recipe.model);
 
-        recipe.sceneObject
-          .getPosition()
+        recipe.sceneObject.getPosition()
           .scale(pipeRadius)
           .location(recipe.position);
 
