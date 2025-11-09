@@ -29,41 +29,41 @@
       const ingredients = [
         {
           index: 0,
-          name: 'Oxygen',
+          name: "Oxygen",
           color: [1, 0.4, 0.4],
-          symbol: 'O2',
+          symbol: "O2",
           pricePerUnit: 34,
           mass: 2000,
         },
         {
           index: 1,
-          name: 'Carbon',
+          name: "Carbon",
           color: [1, 0.6, 0.4],
-          symbol: 'C',
+          symbol: "C",
           pricePerUnit: 2,
           mass: 2000,
         },
         {
           index: 2,
-          name: 'Condensed Carbon',
+          name: "Condensed Carbon",
           color: [0.4, 0.6, 1],
-          symbol: 'C+',
+          symbol: "C+",
           pricePerUnit: 1,
           mass: 2000,
         },
         {
           index: 3,
-          name: 'Cobalt',
+          name: "Cobalt",
           color: [0.4, 1, 0.6],
-          symbol: 'Co',
+          symbol: "Co",
           pricePerUnit: 1,
           mass: 2000,
         },
         {
           index: 4,
-          name: 'Ionized Cobalt',
+          name: "Ionized Cobalt",
           color: [0.6, 0.6, 0.4],
-          symbol: 'Co+',
+          symbol: "Co+",
           pricePerUnit: 1,
           mass: 5000,
         },
@@ -95,7 +95,7 @@
 
       const frag = window.frag;
       const engine = frag
-        .Engine({ canvas: document.getElementById('scene') })
+        .Engine({ canvas: document.getElementById("scene") })
         .onStart((engine) => {
           engine.gl.clearColor(0.1, 0.1, 0.15, 1);
           engine.gl.disable(engine.gl.CULL_FACE); // Pipes are open at the ends and we want to see the inside surface
@@ -116,8 +116,9 @@
 
       // Define a shared ingredient shader
 
-      const ingredientShader = frag.Shader(engine)
-        .name('Ingredient shader')
+      const ingredientShader = frag
+        .Shader(engine)
+        .name("Ingredient shader")
         .colorsRGB()
         .directionalLightGrey()
         .compile();
@@ -128,7 +129,9 @@
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
         if (ingredient.index !== i)
-          console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
+          console.error(
+            `Ingredient index mismatch: ${ingredient.index} !== ${i}`
+          );
 
         ingredient.position = [
           (Math.random() - 0.5) * 10,
@@ -138,15 +141,17 @@
 
         ingredient.velocity = [0, 0, 0];
 
-        ingredient.model = frag.Model(engine)
-          .name('Ingredient model ' + i)
+        ingredient.model = frag
+          .Model(engine)
+          .name("Ingredient model " + i)
           .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
           .shader(ingredientShader)
           .shadeFlat();
 
         ingredient.sceneObject = frag.SceneObject(engine, ingredient.model);
 
-        ingredient.sceneObject.getPosition()
+        ingredient.sceneObject
+          .getPosition()
           .scale(ingredientRadius)
           .location(ingredient.position);
 
@@ -155,14 +160,15 @@
 
       // Define a shared recipe shader and mesh
 
-      const recipeShader = frag.Shader(engine)
-        .name('Recipe shader')
+      const recipeShader = frag
+        .Shader(engine)
+        .name("Recipe shader")
         .colorsRGB()
         .directionalLightGrey()
         .compile();
-        recipeShader.lightDirection([-0.2, -0.6, 0.1]);
+      recipeShader.lightDirection([-0.2, -0.6, 0.1]);
 
-      const recipeMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] })
+      const recipeMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] });
       recipeMesh.shadeSmooth();
 
       // Augment each recipe with with additional information needed to animate it
@@ -172,14 +178,16 @@
 
         recipe.position = [0, 0, 0];
 
-        recipe.model = frag.Model(engine)
-          .name('Recipe model ' + i)
+        recipe.model = frag
+          .Model(engine)
+          .name("Recipe model " + i)
           .mesh(recipeMesh)
           .shader(recipeShader);
 
         recipe.sceneObject = frag.SceneObject(engine, recipe.model);
 
-        recipe.sceneObject.getPosition()
+        recipe.sceneObject
+          .getPosition()
           .scale(recipeRadius)
           .location(recipe.position);
 
@@ -188,8 +196,9 @@
 
       // Define a shared pipe shader and mesh
 
-      const pipeShader = frag.Shader(engine)
-        .name('Pipe shader')
+      const pipeShader = frag
+        .Shader(engine)
+        .name("Pipe shader")
         .colorsRGB()
         .directionalLightGrey()
         .compile();
@@ -212,33 +221,35 @@
       // Add pipes to recipe inputs and outputs to connect to the ingredients
       for (let i = 0; i < recipies.length; i++) {
         const recipe = recipies[i];
-        recipe.pipes = []
+        recipe.pipes = [];
 
         recipe.pipes.push({
           ingredient: ingredients[recipe[0]],
-          mesh: outputPipeMesh
-        })
+          mesh: outputPipeMesh,
+        });
 
         for (let j = 0; j < recipe[1].length; j++) {
           recipe.pipes.push({
             ingredient: ingredients[recipe[1][j]],
-            mesh: inputPipeMesh
-          })
+            mesh: inputPipeMesh,
+          });
         }
 
         for (let j = 0; j < recipe.pipes.length; j++) {
-          const pipe = recipe.pipes[j]
+          const pipe = recipe.pipes[j];
 
-          pipe.model = frag.Model(engine)
-            .name('Pipe model ' + i + ',' + j)
+          pipe.model = frag
+            .Model(engine)
+            .name("Pipe model " + i + "," + j)
             .mesh(pipe.mesh)
             .shader(pipeShader)
             .shadeSmooth();
 
           pipe.sceneObject = frag.SceneObject(engine, pipe.model);
-          pipe.sceneObject.getPosition()
+          pipe.sceneObject
+            .getPosition()
             .scale([20, pipeRadius, pipeRadius])
-            .location([0, 0, 0])
+            .location([0, 0, 0]);
 
           scene.addObject(pipe.sceneObject);
         }
@@ -257,8 +268,13 @@
             const aMinusB = frag.Vector.sub(a.position, b.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const repulsionMagnitude = (repulsionStrength * Math.exp(-repulsionDecay * distance)) / (distance * distance);
-            const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
+            const repulsionMagnitude =
+              (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
+              (distance * distance);
+            const repulsionForce = frag.Vector.mult(
+              direction,
+              repulsionMagnitude
+            );
             forces[i] = frag.Vector.add(forces[i], repulsionForce);
             forces[j] = frag.Vector.sub(forces[j], repulsionForce);
           }
@@ -269,8 +285,12 @@
           const ingredient = ingredients[i];
           const distanceFromOrigin = frag.Vector.length(ingredient.position);
           const direction = frag.Vector.normalize(ingredient.position);
-          const attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
-          const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
+          const attractionMagnitude =
+            -originAttractionStrength * distanceFromOrigin;
+          const attractionForce = frag.Vector.mult(
+            direction,
+            attractionMagnitude
+          );
           forces[i] = frag.Vector.add(forces[i], attractionForce);
         }
 
@@ -284,7 +304,10 @@
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const attractionMagnitude = -recipeAttractionStrength * distance;
-            const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
+            const attractionForce = frag.Vector.mult(
+              direction,
+              attractionMagnitude
+            );
             forces[a.index] = frag.Vector.add(forces[a.index], attractionForce);
             forces[b.index] = frag.Vector.sub(forces[b.index], attractionForce);
           }
@@ -297,9 +320,18 @@
           const force = forces[i];
           const acceleration = frag.Vector.div(force, ingredient.mass);
 
-          ingredient.velocity = frag.Vector.add(ingredient.velocity, acceleration);
-          ingredient.velocity = frag.Vector.mult(ingredient.velocity, velocityDamping);
-          ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
+          ingredient.velocity = frag.Vector.add(
+            ingredient.velocity,
+            acceleration
+          );
+          ingredient.velocity = frag.Vector.mult(
+            ingredient.velocity,
+            velocityDamping
+          );
+          ingredient.position = frag.Vector.add(
+            ingredient.position,
+            frag.Vector.mult(ingredient.velocity, elapsedTime)
+          );
 
           ingredient.sceneObject.getPosition().location(ingredient.position);
         }
@@ -309,7 +341,7 @@
           const recipe = recipies[i];
 
           let sum = ingredients[recipe[0]].position;
-          for (let j = 0; j < recipe[1].length; j++) 
+          for (let j = 0; j < recipe[1].length; j++)
             sum = frag.Vector.add(sum, ingredients[recipe[1][j]].position);
 
           recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
@@ -361,8 +393,39 @@
         }
       }
 
+      // Allow the user to rotate the scene by dragging with the mouse
+      let rotationX;
+      let rotationY;
+      const updateRotation = function () {
+        camera
+          .getPosition()
+          .rotateX(rotationX.value * degToRad)
+          .rotateY(rotationY.value * degToRad);
+      };
+      rotationX = engine.AnalogState(updateRotation, {
+        value: 0,
+        minValue: -90,
+        maxValue: 90,
+      });
+      engine
+        .AnalogInput("left-pointer-vertical-inverted", rotationX, {
+          scale: 0.5,
+        })
+        .enable();
+
+      rotationY = engine.AnalogState(updateRotation, {
+        value: 0,
+        minValue: -180,
+        maxValue: 180,
+      });
+      engine
+        .AnalogInput("left-pointer-inverted", rotationY, { scale: 0.5 })
+        .enable();
+      updateRotation();
+
       // Run the physics simulation continuously
-      const physicsAnimation = frag.Animation(engine)
+      const physicsAnimation = frag
+        .Animation(engine)
         .repeatTicks(simulatePhysics, 1)
         .start();
     </script>
