@@ -26,42 +26,48 @@
     <script src="../frag.js"></script>
     <script>
       // Create ingredients with random initial positions
-      const ingredients = [{
-        index: 0,
-        name: 'Oxygen',
-        color: [1, 0.4, 0.4],
-        symbol: 'O2',
-        pricePerUnit: 34,
-        mass: 2000
-      }, {
-        index: 1,
-        name: 'Carbon',
-        color: [1, 0.6, 0.4],
-        symbol: 'C',
-        pricePerUnit: 2,
-        mass: 2000
-      }, {
-        index: 2,
-        name: 'Condensed Carbon',
-        color: [1, 0.6, 0.4],
-        symbol: 'C+',
-        pricePerUnit: 1,
-        mass: 2000
-      }, {
-        index: 3,
-        name: 'Cobalt',
-        color: [1, 0.6, 0.4],
-        symbol: 'Co',
-        pricePerUnit: 1,
-        mass: 2000
-      }, {
-        index: 4,
-        name: 'Ionized Cobalt',
-        color: [1, 0.6, 0.4],
-        symbol: 'Co+',
-        pricePerUnit: 1,
-        mass: 5000
-      }];
+      const ingredients = [
+        {
+          index: 0,
+          name: "Oxygen",
+          color: [1, 0.4, 0.4],
+          symbol: "O2",
+          pricePerUnit: 34,
+          mass: 2000,
+        },
+        {
+          index: 1,
+          name: "Carbon",
+          color: [1, 0.6, 0.4],
+          symbol: "C",
+          pricePerUnit: 2,
+          mass: 2000,
+        },
+        {
+          index: 2,
+          name: "Condensed Carbon",
+          color: [1, 0.6, 0.4],
+          symbol: "C+",
+          pricePerUnit: 1,
+          mass: 2000,
+        },
+        {
+          index: 3,
+          name: "Cobalt",
+          color: [1, 0.6, 0.4],
+          symbol: "Co",
+          pricePerUnit: 1,
+          mass: 2000,
+        },
+        {
+          index: 4,
+          name: "Ionized Cobalt",
+          color: [1, 0.6, 0.4],
+          symbol: "Co+",
+          pricePerUnit: 1,
+          mass: 5000,
+        },
+      ];
 
       // Define recipes for refiner
       // Each entry is [output ingredient index, input ingredient indexes, input quantities needed for 100 output]
@@ -77,15 +83,17 @@
 
       const pipeRadius = 0.3;
       const ingredientRadius = 5;
-      const repulsionStrength = 20000;
-      const repulsionDecay = 0.2;
-      const recipeAttractionStrength = 2;
-      const originAttractionStrength = 1;
+      const repulsionStrength = 50000;
+      const repulsionDecay = 0.1;
+      const recipeAttractionStrength = 4;
+      const originAttractionStrength = 0.1;
+      const velocityDamping = 0.995; // Damping factor to prevent oscillations (0.95 = 5% velocity loss per frame)
 
       // Initialize the Frag engine
 
       const frag = window.frag;
-      const engine = frag.Engine({canvas: document.getElementById("scene")})
+      const engine = frag
+        .Engine({ canvas: document.getElementById("scene") })
         .onStart((engine) => {
           engine.gl.clearColor(0.1, 0.1, 0.15, 1);
         });
@@ -153,7 +161,10 @@
 
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
-        if (ingredient.index !== i) console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
+        if (ingredient.index !== i)
+          console.error(
+            `Ingredient index mismatch: ${ingredient.index} !== ${i}`
+          );
 
         ingredient.position = [
           (Math.random() - 0.5) * 10,
@@ -164,20 +175,20 @@
         ingredient.velocity = [0, 0, 0];
 
         ingredient.texture = frag
-            .Texture(engine)
-            .name("Ingredient texture " + i)
-            .dataFormat(engine.gl.RGB)
-            .fromArrayBuffer(
-              0,
-              new Uint8Array([
-                Math.floor(ingredient.color[0] * 255),
-                Math.floor(ingredient.color[1] * 255),
-                Math.floor(ingredient.color[2] * 255),
-              ]),
-              0,
-              1,
-              1
-            );
+          .Texture(engine)
+          .name("Ingredient texture " + i)
+          .dataFormat(engine.gl.RGB)
+          .fromArrayBuffer(
+            0,
+            new Uint8Array([
+              Math.floor(ingredient.color[0] * 255),
+              Math.floor(ingredient.color[1] * 255),
+              Math.floor(ingredient.color[2] * 255),
+            ]),
+            0,
+            1,
+            1
+          );
 
         ingredient.material = frag
           .Material(engine)
@@ -192,12 +203,12 @@
           .material(ingredient.material)
           .shader(ingredientShader);
 
-        ingredient.sceneObject = frag.SceneObject(engine, ingredient.model)
+        ingredient.sceneObject = frag.SceneObject(engine, ingredient.model);
 
         ingredient.sceneObject
-            .getPosition()
-            .scale(ingredientRadius)
-            .location(ingredient.position);
+          .getPosition()
+          .scale(ingredientRadius)
+          .location(ingredient.position);
 
         scene.addObject(ingredient.sceneObject);
 
@@ -216,18 +227,18 @@
         recipe.position = [0, 0, 0];
 
         recipe.model = frag
-            .Model(engine)
-            .name("Recipe model " + i)
-            .mesh(pipeMesh)
-            .shader(inputPipeShader);
+          .Model(engine)
+          .name("Recipe model " + i)
+          .mesh(pipeMesh)
+          .shader(inputPipeShader);
 
         recipe.sceneObject = frag.SceneObject(engine, recipe.model);
 
         recipe.sceneObject
-            .getPosition()
-            .scale(pipeRadius)
-            .location(recipe.position);
-       
+          .getPosition()
+          .scale(pipeRadius)
+          .location(recipe.position);
+
         scene.addObject(recipe.sceneObject);
 
         updateRecipeVisual(recipe);
@@ -244,8 +255,13 @@
 
         const direction = frag.Vector.normalize(aMinusB);
         const attractionMagnitude = -recipeAttractionStrength * distance;
-        const repulsionMagnitude = (repulsionStrength * Math.exp(-repulsionDecay * distance)) / (distance * distance);
-        return frag.Vector.add(frag.Vector.mult(direction, attractionMagnitude), frag.Vector.mult(direction, repulsionMagnitude));
+        const repulsionMagnitude =
+          (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
+          (distance * distance);
+        return frag.Vector.add(
+          frag.Vector.mult(direction, attractionMagnitude),
+          frag.Vector.mult(direction, repulsionMagnitude)
+        );
       }
 
       function simulatePhysics() {
@@ -279,7 +295,7 @@
           forces[i] = frag.Vector.add(forces[i], attractionForce);
         }
 
-        // Ingredients that are connected by a recipe attract each other
+        // Ingredients that are connected by a recipe are attracted to each other
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
           const a = ingredients[recipe[0]];
@@ -297,14 +313,24 @@
 
         // Update velocities and positions
 
-        elapsedTime = 1 / 100
+        elapsedTime = 1 / 100;
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
           const force = forces[i];
           const acceleration = frag.Vector.div(force, ingredient.mass);
 
-          ingredient.velocity = frag.Vector.add(ingredient.velocity, acceleration);
-          ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
+          ingredient.velocity = frag.Vector.add(
+            ingredient.velocity,
+            acceleration
+          );
+          ingredient.velocity = frag.Vector.mult(
+            ingredient.velocity,
+            velocityDamping
+          );
+          ingredient.position = frag.Vector.add(
+            ingredient.position,
+            frag.Vector.mult(ingredient.velocity, elapsedTime)
+          );
 
           // Update the scene object
 
