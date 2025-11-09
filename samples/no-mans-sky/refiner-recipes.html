@@ -60,24 +60,27 @@
         color: [1, 0.6, 0.4],
         symbol: 'Co+',
         pricePerUnit: 1,
-        mass: 2000
+        mass: 5000
       }];
 
       // Define recipes for refiner
       // Each entry is [output ingredient index, input ingredient indexes, input quantities needed for 100 output]
       const recipies = [
-        [1, [2], [200]], // Carbon is made from condensed carbon at a ratio of 2:1
-        [2, [1], [50]], // Condensed carbon is made from carbon at a ratio of 1:2
+        [1, [2], [200]], // Carbon can be made from condensed carbon at a ratio of 2:1
+        [2, [1], [50]], // Condensed carbon can be made from carbon at a ratio of 1:2
+        [3, [4], [200]], // Cobalt can be made from Ionized Cobalt at a ratio of 1:2
+        [4, [3], [50]], // Ionized Cobalt can be made from carbon at a ratio of 2:1
+        [2, [0, 1], [20, 20]], // Condensed carbon can be made from oxygen and carbon at a ratio of 1:5
       ];
 
       // Constants
 
       const pipeRadius = 0.3;
       const ingredientRadius = 5;
-      const repulsionStrength = 2000;
-      const repulsionDecay = 0.1;
-      const attractionStrength = 150;
-      const damping = 0.98;
+      const repulsionStrength = 20000;
+      const repulsionDecay = 0.2;
+      const recipeAttractionStrength = 2;
+      const originAttractionStrength = 1;
 
       // Initialize the Frag engine
 
@@ -237,10 +240,10 @@
         const distance = frag.Vector.length(aMinusB);
 
         // Avoid division by zero
-        if (distance < 0.001) return [[0, 0, 0], [0, 0, 0]];
+        if (distance < 0.001) return [0, 0, 0];
 
         const direction = frag.Vector.normalize(aMinusB);
-        const attractionMagnitude = -attractionStrength * distance;
+        const attractionMagnitude = -recipeAttractionStrength * distance;
         const repulsionMagnitude = (repulsionStrength * Math.exp(-repulsionDecay * distance)) / (distance * distance);
         return frag.Vector.add(frag.Vector.mult(direction, attractionMagnitude), frag.Vector.mult(direction, repulsionMagnitude));
       }
@@ -251,11 +254,44 @@
         const forces = [];
         for (let i = 0; i < ingredients.length; i++) forces[i] = [0, 0, 0];
 
+        // All ingredients repel each other
         for (let i = 0; i < ingredients.length; i++) {
+          const a = ingredients[i];
           for (let j = i + 1; j < ingredients.length; j++) {
-            const netForce = netForceOnA(ingredients[i], ingredients[j]);
-            forces[i] = frag.Vector.add(forces[i], netForce);
-            forces[j] = frag.Vector.sub(forces[j], netForce);
+            const b = ingredients[j];
+            const aMinusB = frag.Vector.sub(a.position, b.position);
+            const distance = frag.Vector.length(aMinusB);
+            const direction = frag.Vector.normalize(aMinusB);
+            const repulsionMagnitude = (repulsionStrength * Math.exp(-repulsionDecay * distance)) / (distance * distance);
+            const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
+            forces[i] = frag.Vector.add(forces[i], repulsionForce);
+            forces[j] = frag.Vector.sub(forces[j], repulsionForce);
+          }
+        }
+
+        // All Ingredients are attracted to the origin
+        for (let i = 0; i < ingredients.length; i++) {
+          const ingredient = ingredients[i];
+          const distanceFromOrigin = frag.Vector.length(ingredient.position);
+          const direction = frag.Vector.normalize(ingredient.position);
+          const attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
+          const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
+          forces[i] = frag.Vector.add(forces[i], attractionForce);
+        }
+
+        // Ingredients that are connected by a recipe attract each other
+        for (let i = 0; i < recipies.length; i++) {
+          const recipe = recipies[i];
+          const a = ingredients[recipe[0]];
+          for (let j = 0; j < recipe[1].length; j++) {
+            const b = ingredients[recipe[1][j]];
+            const aMinusB = frag.Vector.sub(a.position, b.position);
+            const distance = frag.Vector.length(aMinusB);
+            const direction = frag.Vector.normalize(aMinusB);
+            const attractionMagnitude = -recipeAttractionStrength * distance;
+            const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
+            forces[a.index] = frag.Vector.add(forces[a.index], attractionForce);
+            forces[b.index] = frag.Vector.sub(forces[b.index], attractionForce);
           }
         }
 
