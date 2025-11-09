@@ -114,6 +114,10 @@
       const scene = frag.Scene(engine).camera(camera);
       engine.mainScene(scene);
 
+      // Create a parent SceneObject to rotate all objects together
+      const sceneParent = frag.SceneObject(engine);
+      scene.addObject(sceneParent);
+
       // Define a shared ingredient shader
 
       const ingredientShader = frag
@@ -155,7 +159,7 @@
           .scale(ingredientRadius)
           .location(ingredient.position);
 
-        scene.addObject(ingredient.sceneObject);
+        sceneParent.addObject(ingredient.sceneObject);
       }
 
       // Define a shared recipe shader and mesh
@@ -191,7 +195,7 @@
           .scale(recipeRadius)
           .location(recipe.position);
 
-        scene.addObject(recipe.sceneObject);
+        sceneParent.addObject(recipe.sceneObject);
       }
 
       // Define a shared pipe shader and mesh
@@ -251,7 +255,7 @@
             .scale([20, pipeRadius, pipeRadius])
             .location([0, 0, 0]);
 
-          scene.addObject(pipe.sceneObject);
+          sceneParent.addObject(pipe.sceneObject);
         }
       }
 
@@ -397,10 +401,9 @@
       let rotationX;
       let rotationY;
       const updateRotation = function () {
-        camera
+        sceneParent
           .getPosition()
-          .rotateX(rotationX.value * degToRad)
-          .rotateY(rotationY.value * degToRad);
+          .rotateXYZ(rotationX.value * degToRad, rotationY.value * degToRad, 0);
       };
       rotationX = engine.AnalogState(updateRotation, {
         value: 0,
