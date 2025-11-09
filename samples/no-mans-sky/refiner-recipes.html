@@ -209,14 +209,14 @@
       pipeShader.lightDirection([-0.2, -0.6, 0.1]);
 
       const inputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [0.7, 0.7, 1],
+        color: [0.3, 0.3, 1],
         drawTop: false,
         drawBottom: false,
       });
       inputPipeMesh.shadeSmooth();
 
       const outputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [1, 0.7, 0.7],
+        color: [1, 0.3, 0.3],
         drawTop: false,
         drawBottom: false,
       });
@@ -398,33 +398,19 @@
       }
 
       // Allow the user to rotate the scene by dragging with the mouse
-      let rotationX;
-      let rotationY;
-      const updateRotation = function () {
+      let sceneRotationX
+      let sceneRotationY
+      updateSceneRotation = function () {
         sceneParent
           .getPosition()
-          .rotateXYZ(rotationX.value * degToRad, rotationY.value * degToRad, 0);
+          .rotateXYZ(sceneRotationX.value * degToRad, sceneRotationY.value * degToRad, 0);
       };
-      rotationX = engine.AnalogState(updateRotation, {
-        value: 0,
-        minValue: -90,
-        maxValue: 90,
-      });
-      engine
-        .AnalogInput("left-pointer-vertical-inverted", rotationX, {
-          scale: 0.5,
-        })
-        .enable();
 
-      rotationY = engine.AnalogState(updateRotation, {
-        value: 0,
-        minValue: -180,
-        maxValue: 180,
-      });
-      engine
-        .AnalogInput("left-pointer-inverted", rotationY, { scale: 0.5 })
-        .enable();
-      updateRotation();
+      sceneRotationX = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180, maxValue: 180 });
+      sceneRotationY = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180, maxValue: 180 });
+      
+      engine.AnalogInput("left-pointer-vertical-inverted", sceneRotationX, { scale: 0.5 }).enable();
+      engine.AnalogInput("left-pointer-inverted", sceneRotationY, { scale: 0.5 }).enable();
 
       // Run the physics simulation continuously
       const physicsAnimation = frag
