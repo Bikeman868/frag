@@ -25,51 +25,51 @@
     <canvas id="scene"></canvas>
     <script src="../frag.js"></script>
     <script>
-      // Create ingredients with random initial positions
+      // Define all of the ingredients
       const ingredients = [
         {
           index: 0,
-          name: "Oxygen",
+          name: 'Oxygen',
           color: [1, 0.4, 0.4],
-          symbol: "O2",
+          symbol: 'O2',
           pricePerUnit: 34,
           mass: 2000,
         },
         {
           index: 1,
-          name: "Carbon",
+          name: 'Carbon',
           color: [1, 0.6, 0.4],
-          symbol: "C",
+          symbol: 'C',
           pricePerUnit: 2,
           mass: 2000,
         },
         {
           index: 2,
-          name: "Condensed Carbon",
+          name: 'Condensed Carbon',
           color: [0.4, 0.6, 1],
-          symbol: "C+",
+          symbol: 'C+',
           pricePerUnit: 1,
           mass: 2000,
         },
         {
           index: 3,
-          name: "Cobalt",
+          name: 'Cobalt',
           color: [0.4, 1, 0.6],
-          symbol: "Co",
+          symbol: 'Co',
           pricePerUnit: 1,
           mass: 2000,
         },
         {
           index: 4,
-          name: "Ionized Cobalt",
+          name: 'Ionized Cobalt',
           color: [0.6, 0.6, 0.4],
-          symbol: "Co+",
+          symbol: 'Co+',
           pricePerUnit: 1,
           mass: 5000,
         },
       ];
 
-      // Define recipes for refiner
+      // Define all of the refiner recipes
       // Each entry is [output ingredient index, input ingredient indexes, input quantities needed for 100 output]
       const recipies = [
         [1, [2], [200]], // Carbon can be made from condensed carbon at a ratio of 2:1
@@ -80,22 +80,22 @@
         [0, [4], [1000]], // Oxygen can be made from Ionsized Cobalt at a ratio of 10:1
       ];
 
-      // Constants
+      // You can adjust these to get an animation and final state that you like
 
-      const pipeRadius = 0.3;
+      const pipeRadius = 2;
       const ingredientRadius = 5;
       const recipeRadius = 1;
       const repulsionStrength = 50000;
       const repulsionDecay = 0.1;
       const recipeAttractionStrength = 2;
       const originAttractionStrength = 0.1;
-      const velocityDamping = 0.995; // Damping factor to prevent oscillations (0.95 = 5% velocity loss per frame)
+      const velocityDamping = 0.995;
 
       // Initialize the Frag engine
 
       const frag = window.frag;
       const engine = frag
-        .Engine({ canvas: document.getElementById("scene") })
+        .Engine({ canvas: document.getElementById('scene') })
         .onStart((engine) => {
           engine.gl.clearColor(0.1, 0.1, 0.15, 1);
         });
@@ -113,27 +113,21 @@
       const scene = frag.Scene(engine).camera(camera);
       engine.mainScene(scene);
 
-      // Define shared ingredient shader
+      // Define a shared ingredient shader
 
       const ingredientShader = frag.Shader(engine)
-        .name("Ingredient shader")
+        .name('Ingredient shader')
         .colorsRGB()
         .directionalLightGrey()
         .compile();
       ingredientShader.lightDirection([-0.2, -0.6, 0.1]);
 
-      // Augment each ingredient with it's specific characteristics
-
-      function updateIngredientVisual(ingredient) {
-        ingredient.sceneObject.getPosition().location(ingredient.position);
-      }
+      // Augment each ingredient with additional information needed to animate it
 
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
         if (ingredient.index !== i)
-          console.error(
-            `Ingredient index mismatch: ${ingredient.index} !== ${i}`
-          );
+          console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
 
         ingredient.position = [
           (Math.random() - 0.5) * 10,
@@ -144,7 +138,7 @@
         ingredient.velocity = [0, 0, 0];
 
         ingredient.model = frag.Model(engine)
-          .name("Ingredient model " + i)
+          .name('Ingredient model ' + i)
           .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
           .shader(ingredientShader)
           .shadeFlat();
@@ -156,48 +150,21 @@
           .location(ingredient.position);
 
         scene.addObject(ingredient.sceneObject);
-
-        updateIngredientVisual(ingredient);
       }
 
-      // Define shared pipe and recipe shader and meshes
+      // Define a shared recipe shader and mesh
 
       const recipeShader = frag.Shader(engine)
-        .name("Recipe shader")
+        .name('Recipe shader')
         .colorsRGB()
         .directionalLightGrey()
         .compile();
         recipeShader.lightDirection([-0.2, -0.6, 0.1]);
 
-      const pipeShader = frag.Shader(engine)
-        .name("Pipe shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      pipeShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const recipeMesh = frag.Sphere(engine, 16, { color: [0.5, 0.5, 0.5], })
+      const recipeMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] })
       recipeMesh.shadeSmooth();
 
-      const inputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [0.7, 0.7, 1],
-        drawTop: false,
-        drawBottom: false,
-      });
-      inputPipeMesh.shadeSmooth();
-
-      const outputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [0.7, 1, 0.7],
-        drawTop: false,
-        drawBottom: false,
-      });
-      outputPipeMesh.shadeSmooth();
-
-      // Augment each recipe with it's specific characteristics
-
-      function updateRecipeVisual(recipe) {
-        recipe.sceneObject.getPosition().location(recipe.position);
-      }
+      // Augment each recipe with with additional information needed to animate it
 
       for (let i = 0; i < recipies.length; i++) {
         const recipe = recipies[i];
@@ -205,7 +172,7 @@
         recipe.position = [0, 0, 0];
 
         recipe.model = frag.Model(engine)
-          .name("Recipe model " + i)
+          .name('Recipe model ' + i)
           .mesh(recipeMesh)
           .shader(recipeShader);
 
@@ -216,13 +183,68 @@
           .location(recipe.position);
 
         scene.addObject(recipe.sceneObject);
+      }
 
-        updateRecipeVisual(recipe);
+      // Define a shared pipe shader and mesh
+
+      const pipeShader = frag.Shader(engine)
+        .name('Pipe shader')
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      pipeShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      const inputPipeMesh = frag.Cylinder(engine, 8, {
+        color: [0.7, 0.7, 1],
+        drawTop: false,
+        drawBottom: false,
+      });
+      inputPipeMesh.shadeSmooth();
+
+      const outputPipeMesh = frag.Cylinder(engine, 8, {
+        color: [1, 0.7, 0.7],
+        drawTop: false,
+        drawBottom: false,
+      });
+      outputPipeMesh.shadeSmooth();
+
+      // Add pipes to recipe inputs and outputs to connect to the ingredients
+      for (let i = 0; i < recipies.length; i++) {
+        const recipe = recipies[i];
+        recipe.pipes = []
+
+        recipe.pipes.push({
+          ingredient: ingredients[recipe[0]],
+          mesh: outputPipeMesh
+        })
+
+        for (let j = 0; j < recipe[1].length; j++) {
+          recipe.pipes.push({
+            ingredient: ingredients[recipe[1][j]],
+            mesh: inputPipeMesh
+          })
+        }
+
+        for (let j = 0; j < recipe.pipes.length; j++) {
+          const pipe = recipe.pipes[j]
+
+          pipe.model = frag.Model(engine)
+            .name('Pipe model ' + i + ',' + j)
+            .mesh(pipe.mesh)
+            .shader(pipeShader)
+            .shadeSmooth();
+
+          pipe.sceneObject = frag.SceneObject(engine, pipe.model);
+          pipe.sceneObject.getPosition()
+            .scale([20, pipeRadius, pipeRadius])
+            .location([0, 0, 0])
+
+          scene.addObject(pipe.sceneObject);
+        }
       }
 
       function simulatePhysics() {
-        // Caclulate net force applied to each ingredient
-
+        // Start from all ingredeints having no force applied to them
         const forces = [];
         for (let i = 0; i < ingredients.length; i++) forces[i] = [0, 0, 0];
 
@@ -267,47 +289,47 @@
           }
         }
 
-        // Update velocities and positions
-
+        // Update velocities and positions of ingredients
         elapsedTime = 1 / 100;
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
           const force = forces[i];
           const acceleration = frag.Vector.div(force, ingredient.mass);
 
-          ingredient.velocity = frag.Vector.add(
-            ingredient.velocity,
-            acceleration
-          );
-          ingredient.velocity = frag.Vector.mult(
-            ingredient.velocity,
-            velocityDamping
-          );
-          ingredient.position = frag.Vector.add(
-            ingredient.position,
-            frag.Vector.mult(ingredient.velocity, elapsedTime)
-          );
+          ingredient.velocity = frag.Vector.add(ingredient.velocity, acceleration);
+          ingredient.velocity = frag.Vector.mult(ingredient.velocity, velocityDamping);
+          ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
 
-          // Update the scene object
-
-          updateIngredientVisual(ingredient);
+          ingredient.sceneObject.getPosition().location(ingredient.position);
         }
 
-        // Update recipe to be at the centroid of its ingredients
+        // Position recipes to be at the centroid of their ingredients
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
+
           let sum = ingredients[recipe[0]].position;
           for (let j = 0; j < recipe[1].length; j++) 
             sum = frag.Vector.add(sum, ingredients[recipe[1][j]].position);
+
           recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
-          updateRecipeVisual(recipe);
+          recipe.sceneObject.getPosition().location(recipe.position);
+        }
+
+        // Position pipes to connect recipes to ingredients
+        for (let i = 0; i < recipies.length; i++) {
+          const recipe = recipies[i];
+          const a = ingredients[recipe[0]];
+          for (let j = 0; j < recipe[1].length; j++) {
+            const b = ingredients[recipe[1][j]];
+            const aMinusB = frag.Vector.sub(a.position, b.position);
+            const distance = frag.Vector.length(aMinusB);
+            const direction = frag.Vector.normalize(aMinusB);
+          }
         }
       }
 
-      // Run the physics simulation in an animation loop
-      // Run multiple physics steps per frame for smoother, more visible movement
-      const physicsAnimation = frag
-        .Animation(engine)
+      // Run the physics simulation continuously
+      const physicsAnimation = frag.Animation(engine)
         .repeatTicks(simulatePhysics, 1)
         .start();
     </script>
