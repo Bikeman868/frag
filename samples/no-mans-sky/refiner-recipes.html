@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
+  <head>
+    <title>No Man's Sky Refiner Recipes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #scene {
+        width: 100vw;
+        height: 100vh;
+        touch-action: none;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <script src="../frag.js"></script>
+    <script>
+      // Create ingredients with random initial positions
+      const ingredients = [{
+        index: 0,
+        name: 'Oxygen',
+        color: [1, 0.4, 0.4],
+        symbol: 'O2',
+        pricePerUnit: 34,
+        mass: 2000
+      }, {
+        index: 1,
+        name: 'Carbon',
+        color: [1, 0.6, 0.4],
+        symbol: 'C',
+        pricePerUnit: 2,
+        mass: 2000
+      }, {
+        index: 2,
+        name: 'Condensed Carbon',
+        color: [1, 0.6, 0.4],
+        symbol: 'C+',
+        pricePerUnit: 1,
+        mass: 2000
+      }, {
+        index: 3,
+        name: 'Cobalt',
+        color: [1, 0.6, 0.4],
+        symbol: 'Co',
+        pricePerUnit: 1,
+        mass: 2000
+      }, {
+        index: 4,
+        name: 'Ionized Cobalt',
+        color: [1, 0.6, 0.4],
+        symbol: 'Co+',
+        pricePerUnit: 1,
+        mass: 2000
+      }];
+
+      // Define recipes for refiner
+      // Each entry is [output ingredient index, input ingredient indexes, input quantities needed for 100 output]
+      const recipies = [
+        [1, [2], [200]], // Carbon is made from condensed carbon at a ratio of 2:1
+        [2, [1], [50]], // Condensed carbon is made from carbon at a ratio of 1:2
+      ];
+
+      // Constants
+
+      const pipeRadius = 0.3;
+      const ingredientRadius = 5;
+      const repulsionStrength = 2000;
+      const repulsionDecay = 0.1;
+      const attractionStrength = 150;
+      const damping = 0.98;
+
+      // Initialize the Frag engine
+
+      const frag = window.frag;
+      const engine = frag.Engine({canvas: document.getElementById("scene")})
+        .onStart((engine) => {
+          engine.gl.clearColor(0.1, 0.1, 0.15, 1);
+        });
+      engine.start();
+
+      const degToRad = Math.PI / 180;
+
+      // Set up the camera to view the scene
+
+      const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
+      camera.getPosition().locationZ(-150);
+
+      // Create the scene
+
+      const scene = frag.Scene(engine).camera(camera);
+      engine.mainScene(scene);
+
+      // Define shared shaders meshes and models
+
+      const ingredientShader = frag
+        .Shader(engine)
+        .name("Ingredient shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      ingredientShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      const ingredientMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] });
+      ingredientMesh.shadeSmooth();
+
+      const ingredientModel = frag
+        .Model(engine)
+        .name("Sphere model")
+        .mesh(ingredientMesh)
+        .shader(ingredientShader);
+
+      const inputPipeShader = frag
+        .Shader(engine)
+        .name("Input shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      inputPipeShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      const outputPipeShader = frag
+        .Shader(engine)
+        .name("Output shader")
+        .colorsRGB()
+        .directionalLightGrey()
+        .compile();
+      outputPipeShader.lightDirection([-0.2, -0.6, 0.1]);
+
+      const pipeMesh = frag.Cylinder(engine, 8, {
+        color: [0.7, 0.7, 1],
+        drawTop: false,
+        drawBottom: false,
+      });
+      pipeMesh.shadeSmooth();
+
+      // Augment each ingredient with it's specific characteristics
+
+      function updateIngredientVisual(ingredient) {
+        ingredient.sceneObject.getPosition().location(ingredient.position);
+      }
+
+      for (let i = 0; i < ingredients.length; i++) {
+        const ingredient = ingredients[i];
+        if (ingredient.index !== i) console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
+
+        ingredient.position = [
+          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 10,
+        ];
+
+        ingredient.velocity = [0, 0, 0];
+
+        ingredient.texture = frag
+            .Texture(engine)
+            .name("Ingredient texture " + i)
+            .dataFormat(engine.gl.RGB)
+            .fromArrayBuffer(
+              0,
+              new Uint8Array([
+                Math.floor(ingredient.color[0] * 255),
+                Math.floor(ingredient.color[1] * 255),
+                Math.floor(ingredient.color[2] * 255),
+              ]),
+              0,
+              1,
+              1
+            );
+
+        ingredient.material = frag
+          .Material(engine)
+          .name("Ingredient material " + i)
+          .setTexture("diffuse", ingredient.texture)
+          .disposeTextures(true);
+
+        ingredient.model = frag
+          .Model(engine)
+          .name("Ingredient model " + i)
+          .mesh(ingredientMesh)
+          .material(ingredient.material)
+          .shader(ingredientShader);
+
+        ingredient.sceneObject = frag.SceneObject(engine, ingredient.model)
+
+        ingredient.sceneObject
+            .getPosition()
+            .scale(ingredientRadius)
+            .location(ingredient.position);
+
+        scene.addObject(ingredient.sceneObject);
+
+        updateIngredientVisual(ingredient);
+      }
+
+      // Augment each recipe with it's specific characteristics
+
+      function updateRecipeVisual(recipe) {
+        recipe.sceneObject.getPosition().location(recipe.position);
+      }
+
+      for (let i = 0; i < recipies.length; i++) {
+        const recipe = recipies[i];
+
+        recipe.position = [0, 0, 0];
+
+        recipe.model = frag
+            .Model(engine)
+            .name("Recipe model " + i)
+            .mesh(pipeMesh)
+            .shader(inputPipeShader);
+
+        recipe.sceneObject = frag.SceneObject(engine, recipe.model);
+
+        recipe.sceneObject
+            .getPosition()
+            .scale(pipeRadius)
+            .location(recipe.position);
+       
+        scene.addObject(recipe.sceneObject);
+
+        updateRecipeVisual(recipe);
+      }
+
+      function netForceOnA(a, b) {
+        const posA = a.position;
+        const posB = b.position;
+        const aMinusB = frag.Vector.sub(posA, posB);
+        const distance = frag.Vector.length(aMinusB);
+
+        // Avoid division by zero
+        if (distance < 0.001) return [[0, 0, 0], [0, 0, 0]];
+
+        const direction = frag.Vector.normalize(aMinusB);
+        const attractionMagnitude = -attractionStrength * distance;
+        const repulsionMagnitude = (repulsionStrength * Math.exp(-repulsionDecay * distance)) / (distance * distance);
+        return frag.Vector.add(frag.Vector.mult(direction, attractionMagnitude), frag.Vector.mult(direction, repulsionMagnitude));
+      }
+
+      function simulatePhysics() {
+        // Caclulate net force applied to each ingredient
+
+        const forces = [];
+        for (let i = 0; i < ingredients.length; i++) forces[i] = [0, 0, 0];
+
+        for (let i = 0; i < ingredients.length; i++) {
+          for (let j = i + 1; j < ingredients.length; j++) {
+            const netForce = netForceOnA(ingredients[i], ingredients[j]);
+            forces[i] = frag.Vector.add(forces[i], netForce);
+            forces[j] = frag.Vector.sub(forces[j], netForce);
+          }
+        }
+
+        // Update velocities and positions
+
+        elapsedTime = 1 / 100
+        for (let i = 0; i < ingredients.length; i++) {
+          const ingredient = ingredients[i];
+          const force = forces[i];
+          const acceleration = frag.Vector.div(force, ingredient.mass);
+
+          ingredient.velocity = frag.Vector.add(ingredient.velocity, acceleration);
+          ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
+
+          // Update the scene object
+
+          updateIngredientVisual(ingredient);
+        }
+
+        // Update recipe visuals
+        for (let i = 0; i < recipies.length; i++) {
+          updateRecipeVisual(recipies[i]);
+        }
+      }
+
+      // Run the physics simulation in an animation loop
+      // Run multiple physics steps per frame for smoother, more visible movement
+      const physicsAnimation = frag
+        .Animation(engine)
+        .repeatTicks(simulatePhysics, 1)
+        .start();
+    </script>
+  </body>
+</html>

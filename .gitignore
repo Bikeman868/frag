@@ -8,3 +8,4 @@ dist/*
 *.blend1
 *.log
 .vs/*
+.DS_Store
