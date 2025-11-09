@@ -105,37 +105,25 @@
       const degToRad = Math.PI / 180;
 
       // Set up the camera to view the scene
-
       const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
       camera.getPosition().locationZ(-150);
 
       // Create the scene
-
       const scene = frag.Scene(engine).camera(camera);
       engine.mainScene(scene);
 
-      // Create a parent SceneObject to rotate all objects together
-      const sceneParent = frag.SceneObject(engine);
-      scene.addObject(sceneParent);
+      // Create a parent object representing the recipe graph so that we can rotate it within the scene
+      const recipeGraph = frag.SceneObject(engine);
+      scene.addObject(recipeGraph);
 
-      // Define a shared ingredient shader
-
-      const ingredientShader = frag
-        .Shader(engine)
-        .name("Ingredient shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      ingredientShader.lightDirection([-0.2, -0.6, 0.1]);
+      // Define a shared ingredient elements
+      const ingredientShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
 
       // Augment each ingredient with additional information needed to animate it
-
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
         if (ingredient.index !== i)
-          console.error(
-            `Ingredient index mismatch: ${ingredient.index} !== ${i}`
-          );
+          console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
 
         ingredient.position = [
           (Math.random() - 0.5) * 10,
@@ -145,92 +133,53 @@
 
         ingredient.velocity = [0, 0, 0];
 
-        ingredient.model = frag
-          .Model(engine)
-          .name("Ingredient model " + i)
-          .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
-          .shader(ingredientShader)
-          .shadeFlat();
+        ingredient.sceneObject = frag.SceneObject(engine, 
+          frag.Model(engine)
+            .name('Ingredient model')
+            .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
+            .shader(ingredientShader)
+            .shadeFlat());
 
-        ingredient.sceneObject = frag.SceneObject(engine, ingredient.model);
-
-        ingredient.sceneObject
-          .getPosition()
+        ingredient.sceneObject.getPosition()
           .scale(ingredientRadius)
           .location(ingredient.position);
 
-        sceneParent.addObject(ingredient.sceneObject);
+        recipeGraph.addObject(ingredient.sceneObject);
       }
 
-      // Define a shared recipe shader and mesh
+      // Define a shared recipe elements
 
-      const recipeShader = frag
-        .Shader(engine)
-        .name("Recipe shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      recipeShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const recipeMesh = frag.Sphere(engine, 16, { color: [1, 1, 1] });
-      recipeMesh.shadeSmooth();
+      const recipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const recipeModel = frag.Model(engine).mesh(frag.Sphere(engine, 16, { color: [1, 1, 1] }).shadeSmooth()).shader(recipeShader);
 
       // Augment each recipe with with additional information needed to animate it
 
       for (let i = 0; i < recipies.length; i++) {
         const recipe = recipies[i];
-
         recipe.position = [0, 0, 0];
+        recipe.sceneObject = frag.SceneObject(engine, recipeModel);
 
-        recipe.model = frag
-          .Model(engine)
-          .name("Recipe model " + i)
-          .mesh(recipeMesh)
-          .shader(recipeShader);
-
-        recipe.sceneObject = frag.SceneObject(engine, recipe.model);
-
-        recipe.sceneObject
-          .getPosition()
+        recipe.sceneObject.getPosition()
           .scale(recipeRadius)
           .location(recipe.position);
 
-        sceneParent.addObject(recipe.sceneObject);
+        recipeGraph.addObject(recipe.sceneObject);
       }
 
-      // Define a shared pipe shader and mesh
+      // Define a shared pipe elements
 
-      const pipeShader = frag
-        .Shader(engine)
-        .name("Pipe shader")
-        .colorsRGB()
-        .directionalLightGrey()
-        .compile();
-      pipeShader.lightDirection([-0.2, -0.6, 0.1]);
-
-      const inputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [0.3, 0.3, 1],
-        drawTop: false,
-        drawBottom: false,
-      });
-      inputPipeMesh.shadeSmooth();
-
-      const outputPipeMesh = frag.Cylinder(engine, 8, {
-        color: [1, 0.3, 0.3],
-        drawTop: false,
-        drawBottom: false,
-      });
-      outputPipeMesh.shadeSmooth();
+      const pipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const inputPipeMesh = frag.Cylinder(engine, 8, { color: [0.3, 0.3, 1], drawTop: false, drawBottom: false }).shadeSmooth();
+      const outputPipeMesh = frag.Cylinder(engine, 8, { color: [1, 0.3, 0.3], drawTop: false, drawBottom: false }).shadeSmooth();
 
       // Add pipes to recipe inputs and outputs to connect to the ingredients
       for (let i = 0; i < recipies.length; i++) {
         const recipe = recipies[i];
-        recipe.pipes = [];
 
-        recipe.pipes.push({
+        recipe.pipes = [{
           ingredient: ingredients[recipe[0]],
           mesh: outputPipeMesh,
-        });
+        }];
 
         for (let j = 0; j < recipe[1].length; j++) {
           recipe.pipes.push({
@@ -241,21 +190,8 @@
 
         for (let j = 0; j < recipe.pipes.length; j++) {
           const pipe = recipe.pipes[j];
-
-          pipe.model = frag
-            .Model(engine)
-            .name("Pipe model " + i + "," + j)
-            .mesh(pipe.mesh)
-            .shader(pipeShader)
-            .shadeSmooth();
-
-          pipe.sceneObject = frag.SceneObject(engine, pipe.model);
-          pipe.sceneObject
-            .getPosition()
-            .scale([20, pipeRadius, pipeRadius])
-            .location([0, 0, 0]);
-
-          sceneParent.addObject(pipe.sceneObject);
+          pipe.sceneObject = frag.SceneObject(engine, frag.Model(engine).mesh(pipe.mesh).shader(pipeShader).shadeSmooth());
+          recipeGraph.addObject(pipe.sceneObject);
         }
       }
 
@@ -355,68 +291,44 @@
         // Position pipes to connect recipes to ingredients
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
-
-          // Update each pipe for this recipe
           for (let j = 0; j < recipe.pipes.length; j++) {
             const pipe = recipe.pipes[j];
             const ingredient = pipe.ingredient;
 
-            // Calculate the direction from recipe to ingredient
-            const direction = frag.Vector.sub(
-              ingredient.position,
-              recipe.position
-            );
+            const direction = frag.Vector.sub(ingredient.position, recipe.position);
             const distance = frag.Vector.length(direction);
 
-            // Skip if distance is too small (ingredients are at same position)
             if (distance < 0.01) {
               pipe.sceneObject.getPosition().scaleXYZ(0, 0, 0);
               continue;
             }
 
             const normalizedDirection = frag.Vector.normalize(direction);
-
-            // Position the pipe at the midpoint between recipe and ingredient
-            const midpoint = frag.Vector.add(
-              recipe.position,
-              frag.Vector.mult(normalizedDirection, distance * 0.5)
-            );
-
-            // Calculate rotation to point the pipe from recipe to ingredient
-            // Cylinders are created along the Z-axis, so we need to rotate to point in the direction
+            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(normalizedDirection, distance * 0.5));
             const heading = frag.Vector.heading(normalizedDirection);
 
-            // Update the pipe's position, scale, and rotation
-            // Cylinder is created along Z-axis from -1 to 1 (length 2), so scale Z by distance/2 to get correct length
-            pipe.sceneObject
-              .getPosition()
+            pipe.sceneObject.getPosition()
               .location(midpoint)
               .scaleXYZ(pipeRadius, pipeRadius, distance / 2)
-              .rotateXYZ(heading[0], heading[1], heading[2]);
+              .rotate(heading);
           }
         }
       }
 
       // Allow the user to rotate the scene by dragging with the mouse
-      let sceneRotationX
-      let sceneRotationY
-      updateSceneRotation = function () {
-        sceneParent
-          .getPosition()
-          .rotateXYZ(sceneRotationX.value * degToRad, sceneRotationY.value * degToRad, 0);
+      let sceneRotationX, sceneRotationY
+      function updateSceneRotation() {
+        recipeGraph.getPosition().rotateXYZ(sceneRotationX.value, sceneRotationY.value, 0);
       };
 
-      sceneRotationX = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180, maxValue: 180 });
-      sceneRotationY = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180, maxValue: 180 });
+      sceneRotationX = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180 * degToRad, maxValue: 180 * degToRad });
+      sceneRotationY = engine.AnalogState(updateSceneRotation, { value: 0, minValue: -180 * degToRad, maxValue: 180 * degToRad });
       
       engine.AnalogInput("left-pointer-vertical-inverted", sceneRotationX, { scale: 0.5 }).enable();
       engine.AnalogInput("left-pointer-inverted", sceneRotationY, { scale: 0.5 }).enable();
 
       // Run the physics simulation continuously
-      const physicsAnimation = frag
-        .Animation(engine)
-        .repeatTicks(simulatePhysics, 1)
-        .start();
+      const physicsAnimation = frag.Animation(engine).repeatTicks(simulatePhysics, 1).start();
     </script>
   </body>
 </html>
