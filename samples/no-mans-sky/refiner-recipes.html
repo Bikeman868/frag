@@ -82,7 +82,7 @@
 
       // You can adjust these to get an animation and final state that you like
 
-      const pipeRadius = 2;
+      const pipeRadius = 0.4;
       const ingredientRadius = 5;
       const recipeRadius = 1;
       const repulsionStrength = 50000;
@@ -98,6 +98,7 @@
         .Engine({ canvas: document.getElementById('scene') })
         .onStart((engine) => {
           engine.gl.clearColor(0.1, 0.1, 0.15, 1);
+          engine.gl.disable(engine.gl.CULL_FACE); // Pipes are open at the ends and we want to see the inside surface
         });
       engine.start();
 
@@ -318,12 +319,44 @@
         // Position pipes to connect recipes to ingredients
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
-          const a = ingredients[recipe[0]];
-          for (let j = 0; j < recipe[1].length; j++) {
-            const b = ingredients[recipe[1][j]];
-            const aMinusB = frag.Vector.sub(a.position, b.position);
-            const distance = frag.Vector.length(aMinusB);
-            const direction = frag.Vector.normalize(aMinusB);
+
+          // Update each pipe for this recipe
+          for (let j = 0; j < recipe.pipes.length; j++) {
+            const pipe = recipe.pipes[j];
+            const ingredient = pipe.ingredient;
+
+            // Calculate the direction from recipe to ingredient
+            const direction = frag.Vector.sub(
+              ingredient.position,
+              recipe.position
+            );
+            const distance = frag.Vector.length(direction);
+
+            // Skip if distance is too small (ingredients are at same position)
+            if (distance < 0.01) {
+              pipe.sceneObject.getPosition().scaleXYZ(0, 0, 0);
+              continue;
+            }
+
+            const normalizedDirection = frag.Vector.normalize(direction);
+
+            // Position the pipe at the midpoint between recipe and ingredient
+            const midpoint = frag.Vector.add(
+              recipe.position,
+              frag.Vector.mult(normalizedDirection, distance * 0.5)
+            );
+
+            // Calculate rotation to point the pipe from recipe to ingredient
+            // Cylinders are created along the Z-axis, so we need to rotate to point in the direction
+            const heading = frag.Vector.heading(normalizedDirection);
+
+            // Update the pipe's position, scale, and rotation
+            // Cylinder is created along Z-axis from -1 to 1 (length 2), so scale Z by distance/2 to get correct length
+            pipe.sceneObject
+              .getPosition()
+              .location(midpoint)
+              .scaleXYZ(pipeRadius, pipeRadius, distance / 2)
+              .rotateXYZ(heading[0], heading[1], heading[2]);
           }
         }
       }
