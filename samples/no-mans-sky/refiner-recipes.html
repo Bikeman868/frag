@@ -191,6 +191,7 @@
         for (let j = 0; j < recipe.pipes.length; j++) {
           const pipe = recipe.pipes[j];
           pipe.sceneObject = frag.SceneObject(engine, frag.Model(engine).mesh(pipe.mesh).shader(pipeShader).shadeSmooth());
+          pipe.sceneObject.getPosition().scaleXYZ(pipeRadius, pipeRadius, 1)
           recipeGraph.addObject(pipe.sceneObject);
         }
       }
@@ -288,29 +289,25 @@
           recipe.sceneObject.getPosition().location(recipe.position);
         }
 
-        // Position pipes to connect recipes to ingredients
+        // Position pipes to connect recipes to their ingredients
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
           for (let j = 0; j < recipe.pipes.length; j++) {
             const pipe = recipe.pipes[j];
             const ingredient = pipe.ingredient;
 
-            const direction = frag.Vector.sub(ingredient.position, recipe.position);
-            const distance = frag.Vector.length(direction);
+            const vector = frag.Vector.sub(ingredient.position, recipe.position);
+            const distance = frag.Vector.length(vector);
 
             if (distance < 0.01) {
               pipe.sceneObject.getPosition().scaleXYZ(0, 0, 0);
               continue;
             }
 
-            const normalizedDirection = frag.Vector.normalize(direction);
-            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(normalizedDirection, distance * 0.5));
-            const heading = frag.Vector.heading(normalizedDirection);
+            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(vector, 0.5));
+            const heading = frag.Vector.heading(vector);
 
-            pipe.sceneObject.getPosition()
-              .location(midpoint)
-              .scaleXYZ(pipeRadius, pipeRadius, distance / 2)
-              .rotate(heading);
+            pipe.sceneObject.getPosition().location(midpoint).scaleZ(distance / 2).rotate(heading);//.rotateXYZ(-90 * degToRad, -90 * degToRad, 0);
           }
         }
       }
