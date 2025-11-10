@@ -43,7 +43,7 @@ const ingredients = [
   { name: 'Ionized Cobalt', pricePerUnit: 162, textureUrl: 'ionized-cobalt.png' },
   { name: 'Iridesite', pricePerUnit: 0 },
   { name: 'Kelp Sac', pricePerUnit: 41 },
-  { name: 'Laval Core', pricePerUnit: 0 },
+  { name: 'Larval Core', pricePerUnit: 0 },
   { name: 'Lemmium', pricePerUnit: 25000 },
   { name: 'Life Support Gel', pricePerUnit: 200 },
   { name: 'Living Perl', pricePerUnit: 0 },
