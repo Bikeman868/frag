@@ -24,70 +24,27 @@
   <body>
     <canvas id="scene"></canvas>
     <script src="/frag.js"></script>
+    <script src="ingredients.js"></script>
+    <script src="recipies.js"></script>
+    <script src="constants.js"></script>
     <script>
-      // Define all of the ingredients
-      const ingredients = [
-        {
-          index: 0,
-          name: "Oxygen",
-          color: [1, 0.4, 0.4],
-          symbol: "O2",
-          pricePerUnit: 34,
-        },
-        {
-          index: 1,
-          name: "Carbon",
-          color: [1, 0.6, 0.4],
-          symbol: "C",
-          pricePerUnit: 2,
-        },
-        {
-          index: 2,
-          name: "Condensed Carbon",
-          color: [0.4, 0.6, 1],
-          symbol: "C+",
-          pricePerUnit: 1,
-          textureUrl: "condensed-carbon.png",
-        },
-        {
-          index: 3,
-          name: "Cobalt",
-          color: [0.4, 1, 0.6],
-          symbol: "Co",
-          pricePerUnit: 1,
-        },
-        {
-          index: 4,
-          name: "Ionized Cobalt",
-          color: [0.6, 0.6, 0.4],
-          symbol: "Co+",
-          pricePerUnit: 1,
-        },
-      ];
+      // Lookup the ingredients in each recipe
 
-      // Define all of the refiner recipes
-      // Each entry is [output ingredient index, input ingredient indexes, input quantities needed for 100 output]
-      const recipies = [
-        [1, [2], [200]], // Carbon can be made from condensed carbon at a ratio of 2:1
-        [2, [1], [50]], // Condensed carbon can be made from carbon at a ratio of 1:2
-        [3, [4], [200]], // Cobalt can be made from Ionized Cobalt at a ratio of 1:2
-        [4, [3], [50]], // Ionized Cobalt can be made from carbon at a ratio of 2:1
-        [2, [0, 1], [20, 20]], // Condensed carbon can be made from oxygen and carbon at a ratio of 1:5
-        [0, [4], [1000]], // Oxygen can be made from Ionsized Cobalt at a ratio of 10:1
-      ];
+      function lookupIngredient(name) {
+        for (let i = 0; i < ingredients.length; i++) {
+          const ingredient  = ingredients[i]
+          if (ingredient.name == name) return ingredient
+        }
+        console.error(`Ingredient "` + name + '" is not defined')
+      }
 
-      // You can adjust these to get an animation and final state that you like
-
-      const pipeRadius = 0.4;
-      const ingredientRadius = 5;
-      const recipeRadius = 1.5;
-      const repulsionStrength = 50000;
-      const repulsionDecay = 0.05;
-      const recipeAttractionStrength = 1;
-      const originAttractionStrength = 0.1;
-      const velocityDamping = 0.995;
-      const ingredientMass = 500;
-      const ingredientShape = 'sphere'; // hemisphere, disc or sphere
+      for (let i = 0; i < recipies.length; i++) {
+        const recipe = recipies[i];
+        recipe[0] = lookupIngredient(recipe[0])
+        for (let j = 0; j < recipe[1].length; j++) {
+          recipe[1][j] = lookupIngredient(recipe[1][j])
+        }
+      }
 
       // Initialize the Frag engine
 
@@ -139,8 +96,7 @@
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
-        if (ingredient.index !== i)
-          console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
+        ingredient.index = i;
 
         ingredient.position = [
           (Math.random() - 0.5) * 20,
@@ -153,7 +109,7 @@
         if (ingredient.textureUrl)
           diffuseTexture.fromUrl(0, ingredient.textureUrl);
         else
-          diffuseTexture.fromArrayBuffer(0, new Uint8Array([100,200,100]), 0, 1, 1);
+          diffuseTexture.fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
 
         const material = frag.Material(engine)
           .setTexture('diffuse', diffuseTexture);
@@ -208,13 +164,13 @@
         const recipe = recipies[i];
 
         recipe.pipes = [{
-          ingredient: ingredients[recipe[0]],
+          ingredient: recipe[0],
           mesh: outputPipeMesh,
         }];
 
         for (let j = 0; j < recipe[1].length; j++) {
           recipe.pipes.push({
-            ingredient: ingredients[recipe[1][j]],
+            ingredient: recipe[1][j],
             mesh: inputPipeMesh,
           });
         }
@@ -262,16 +218,16 @@
         // Ingredients that are connected by a recipe are attracted to each other
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
-          const a = ingredients[recipe[0]];
+          const outputIngredient = recipe[0];
           for (let j = 0; j < recipe[1].length; j++) {
-            const b = ingredients[recipe[1][j]];
-            const aMinusB = frag.Vector.sub(a.position, b.position);
+            const inputIngredient = recipe[1][j];
+            const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const attractionMagnitude = -recipeAttractionStrength * distance;
             const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
-            forces[a.index] = frag.Vector.add(forces[a.index], attractionForce);
-            forces[b.index] = frag.Vector.sub(forces[b.index], attractionForce);
+            forces[outputIngredient.index] = frag.Vector.add(forces[outputIngredient.index], attractionForce);
+            forces[inputIngredient.index] = frag.Vector.sub(forces[inputIngredient.index], attractionForce);
           }
         }
 
@@ -292,9 +248,9 @@
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
 
-          let sum = ingredients[recipe[0]].position;
+          let sum = recipe[0].position;
           for (let j = 0; j < recipe[1].length; j++)
-            sum = frag.Vector.add(sum, ingredients[recipe[1][j]].position);
+            sum = frag.Vector.add(sum, recipe[1][j].position);
 
           recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
           recipe.sceneObject.getPosition().location(recipe.position);

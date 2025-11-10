@@ -1,0 +1,10 @@
+const pipeRadius = 0.4;
+const ingredientRadius = 5;
+const recipeRadius = 1.5;
+const repulsionStrength = 50000;
+const repulsionDecay = 0.1;
+const recipeAttractionStrength = 4;
+const originAttractionStrength = 0.1;
+const velocityDamping = 0.995;
+const ingredientMass = 1000;
+const ingredientShape = 'sphere'; // hemisphere, disc or sphere
