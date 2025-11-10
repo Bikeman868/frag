@@ -130,6 +130,20 @@ window.frag.SceneObject = function (engine, model) {
     };
 
     /**
+     * Returns true if this object is rendered in the scene.
+     */
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    /**
+     * Returns true if this object is not rendered in the scene.
+     */
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
+
+    /**
      * Frees any resources consumed by this scene object and removes it from
      * the scene.
      */

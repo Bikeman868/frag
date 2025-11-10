@@ -7973,6 +7973,14 @@ window.frag.Model = function (engine, is3d, parent) {
         private.enabled = false;
     }
 
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
+
     public.getMaterial = function () {
         if (private.material) return private.material;
         if (private.parent) return private.parent.getMaterial();
@@ -8490,6 +8498,20 @@ window.frag.SceneObject = function (engine, model) {
         private.enabled = false;
         return public;
     };
+
+    /**
+     * Returns true if this object is rendered in the scene.
+     */
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    /**
+     * Returns true if this object is not rendered in the scene.
+     */
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
 
     /**
      * Frees any resources consumed by this scene object and removes it from

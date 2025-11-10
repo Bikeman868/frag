@@ -56,8 +56,8 @@
 
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
-        ingredient.enabled = ingredient.recipeCount > 0
-        ingredient.mass = 1000 + ingredient.recipeCount * 500;
+        ingredient.mass = 1000 + ingredient.recipeCount * 100;
+        ingredient.attraction = ingredient.recipeCount ? recipeAttractionStrength / ingredient.recipeCount : 0;
       }
 
       // Initialize the Frag engine
@@ -106,11 +106,9 @@
           break;
       }
 
-
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
-        if (!ingredient.recipeCount) continue
 
         ingredient.position = [
           (Math.random() - 0.5) * 20,
@@ -144,6 +142,7 @@
             ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5)
         }
 
+        if (!ingredient.recipeCount) ingredient.sceneObject.disable();
         recipeGraph.addObject(ingredient.sceneObject);
       }
 
@@ -196,7 +195,7 @@
         }
       }
 
-      function simulatePhysics() {
+      function updateIngredientPositions() {
         // Start from all ingredeints having no force applied to them
         const forces = [];
         for (let i = 0; i < ingredients.length; i++) forces[i] = [0, 0, 0];
@@ -204,10 +203,10 @@
         // All ingredients repel each other
         for (let i = 0; i < ingredients.length; i++) {
           const ingredientA = ingredients[i];
-          if (!ingredientA.recipeCount) continue
+          if (ingredientA.sceneObject.isDisabled()) continue
           for (let j = i + 1; j < ingredients.length; j++) {
             const ingredientB = ingredients[j];
-            if (!ingredientB.recipeCount) continue
+            if (ingredientB.sceneObject.isDisabled()) continue
             const aMinusB = frag.Vector.sub(ingredientA.position, ingredientB.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
@@ -223,7 +222,7 @@
         // All Ingredients are attracted to the origin
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
-          if (!ingredient.recipeCount) continue
+          if (ingredient.sceneObject.isDisabled()) continue
           const distanceFromOrigin = frag.Vector.length(ingredient.position);
           const direction = frag.Vector.normalize(ingredient.position);
           const attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
@@ -235,12 +234,14 @@
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
           const outputIngredient = recipe[0];
+          if (outputIngredient.sceneObject.isDisabled()) continue
           for (let j = 0; j < recipe[1].length; j++) {
             const inputIngredient = recipe[1][j];
+            if (inputIngredient.sceneObject.isDisabled()) continue
             const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const attractionMagnitude = -recipeAttractionStrength * distance / (outputIngredient.mass + inputIngredient.mass);
+            const attractionMagnitude = -recipeAttractionStrength * distance * (outputIngredient.attraction + inputIngredient.attraction);
             const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
             forces[outputIngredient.index] = frag.Vector.add(forces[outputIngredient.index], attractionForce);
             forces[inputIngredient.index] = frag.Vector.sub(forces[inputIngredient.index], attractionForce);
@@ -251,7 +252,7 @@
         elapsedTime = 1 / 100;
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
-          if (!ingredient.recipeCount) continue
+          if (ingredient.sceneObject.isDisabled()) continue
           const force = forces[i];
           const acceleration = frag.Vector.div(force, ingredient.mass);
 
@@ -260,8 +261,9 @@
 
           ingredient.sceneObject.getPosition().location(ingredient.position);
         }
+      }
 
-        // Position recipes to be at the centroid of their ingredients
+      function updateRecipePositions() {
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
 
@@ -272,8 +274,9 @@
           recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
           recipe.sceneObject.getPosition().location(recipe.position);
         }
+      }
 
-        // Position pipes to connect recipes to their ingredients
+      function updatePipePositions() {
         for (let i = 0; i < recipies.length; i++) {
           const recipe = recipies[i];
           for (let j = 0; j < recipe.pipes.length; j++) {
@@ -294,6 +297,12 @@
             pipe.sceneObject.getPosition().location(midpoint).scaleZ(distance / 2).rotate(angle);
           }
         }
+      }
+
+      function simulatePhysics() {
+        updateIngredientPositions();
+        updateRecipePositions();
+        updatePipePositions();
       }
 
       // Allow the user to translate the scene by dragging with the left mouse
