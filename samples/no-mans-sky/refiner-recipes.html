@@ -23,7 +23,7 @@
   </head>
   <body>
     <canvas id="scene"></canvas>
-    <script src="../frag.js"></script>
+    <script src="frag.min.js"></script>
     <script>
       // Define all of the ingredients
       const ingredients = [
@@ -93,9 +93,10 @@
 
       // Initialize the Frag engine
 
+      const sceneCanvas = document.getElementById("scene");
       const frag = window.frag;
       const engine = frag
-        .Engine({ canvas: document.getElementById("scene") })
+        .Engine({ canvas: sceneCanvas })
         .onStart((engine) => {
           engine.gl.clearColor(0, 0, 0, 1);
           engine.gl.disable(engine.gl.CULL_FACE); // Pipes are open at the ends and we want to see the inside surface
@@ -118,7 +119,12 @@
 
       // Define a shared ingredient elements
       const ingredientShader = frag.Shader(engine).diffuseTexture().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
-      const ingredientMesh = frag.Sphere(engine, 16, {})
+      
+      const ingredientMesh = frag.Sphere(engine, 16, {
+        longitudeFacets: 16,
+        longitudeStart: Math.PI * 0.5,
+        longitudeLength: Math.PI
+      })
 
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
@@ -127,15 +133,15 @@
           console.error(`Ingredient index mismatch: ${ingredient.index} !== ${i}`);
 
         ingredient.position = [
-          (Math.random() - 0.5) * 10,
-          (Math.random() - 0.5) * 10,
-          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20,
         ];
         ingredient.velocity = [0, 0, 0];
 
         const diffuseTexture = frag.Texture(engine)
           .dataFormat(engine.gl.RGB)
-          .fromUrl(0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw81sNFwAguFmVHq-1p8N5U2lpZtbZWVT51A&usqp=CAU', '');
+          .fromUrl(0, ingredient.symbol + '.png', '');
 
         const material = frag.Material(engine)
           .setTexture('diffuse', diffuseTexture);
@@ -149,6 +155,7 @@
 
         ingredient.sceneObject.getPosition()
           .scale(ingredientRadius)
+          .rotateY(Math.PI * -0.5)
           .location(ingredient.position);
 
         recipeGraph.addObject(ingredient.sceneObject);
