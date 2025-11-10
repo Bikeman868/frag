@@ -23,7 +23,7 @@
   </head>
   <body>
     <canvas id="scene"></canvas>
-    <script src="frag.min.js"></script>
+    <script src="/frag.js"></script>
     <script>
       // Define all of the ingredients
       const ingredients = [
@@ -33,7 +33,6 @@
           color: [1, 0.4, 0.4],
           symbol: "O2",
           pricePerUnit: 34,
-          mass: 2000,
         },
         {
           index: 1,
@@ -41,7 +40,6 @@
           color: [1, 0.6, 0.4],
           symbol: "C",
           pricePerUnit: 2,
-          mass: 2000,
         },
         {
           index: 2,
@@ -49,7 +47,6 @@
           color: [0.4, 0.6, 1],
           symbol: "C+",
           pricePerUnit: 1,
-          mass: 2000,
         },
         {
           index: 3,
@@ -57,7 +54,6 @@
           color: [0.4, 1, 0.6],
           symbol: "Co",
           pricePerUnit: 1,
-          mass: 2000,
         },
         {
           index: 4,
@@ -65,7 +61,6 @@
           color: [0.6, 0.6, 0.4],
           symbol: "Co+",
           pricePerUnit: 1,
-          mass: 5000,
         },
       ];
 
@@ -86,11 +81,12 @@
       const ingredientRadius = 5;
       const recipeRadius = 1.5;
       const repulsionStrength = 50000;
-      const repulsionDecay = 0.1;
-      const recipeAttractionStrength = 2;
+      const repulsionDecay = 0.05;
+      const recipeAttractionStrength = 1;
       const originAttractionStrength = 0.1;
       const velocityDamping = 0.995;
-      const ingredientShape = 'disc'; // hemisphere disc sphere
+      const ingredientMass = 500;
+      const ingredientShape = 'sphere'; // hemisphere, disc or sphere
 
       // Initialize the Frag engine
 
@@ -244,10 +240,7 @@
             const repulsionMagnitude =
               (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
               (distance * distance);
-            const repulsionForce = frag.Vector.mult(
-              direction,
-              repulsionMagnitude
-            );
+            const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
             forces[i] = frag.Vector.add(forces[i], repulsionForce);
             forces[j] = frag.Vector.sub(forces[j], repulsionForce);
           }
@@ -258,12 +251,8 @@
           const ingredient = ingredients[i];
           const distanceFromOrigin = frag.Vector.length(ingredient.position);
           const direction = frag.Vector.normalize(ingredient.position);
-          const attractionMagnitude =
-            -originAttractionStrength * distanceFromOrigin;
-          const attractionForce = frag.Vector.mult(
-            direction,
-            attractionMagnitude
-          );
+          const attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
+          const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
           forces[i] = frag.Vector.add(forces[i], attractionForce);
         }
 
@@ -277,10 +266,7 @@
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const attractionMagnitude = -recipeAttractionStrength * distance;
-            const attractionForce = frag.Vector.mult(
-              direction,
-              attractionMagnitude
-            );
+            const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
             forces[a.index] = frag.Vector.add(forces[a.index], attractionForce);
             forces[b.index] = frag.Vector.sub(forces[b.index], attractionForce);
           }
@@ -291,20 +277,10 @@
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
           const force = forces[i];
-          const acceleration = frag.Vector.div(force, ingredient.mass);
+          const acceleration = frag.Vector.div(force, ingredientMass);
 
-          ingredient.velocity = frag.Vector.add(
-            ingredient.velocity,
-            acceleration
-          );
-          ingredient.velocity = frag.Vector.mult(
-            ingredient.velocity,
-            velocityDamping
-          );
-          ingredient.position = frag.Vector.add(
-            ingredient.position,
-            frag.Vector.mult(ingredient.velocity, elapsedTime)
-          );
+          ingredient.velocity = frag.Vector.mult(frag.Vector.add(ingredient.velocity, acceleration), velocityDamping);
+          ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
 
           ingredient.sceneObject.getPosition().location(ingredient.position);
         }
@@ -328,18 +304,18 @@
             const pipe = recipe.pipes[j];
             const ingredient = pipe.ingredient;
 
-            const vector = frag.Vector.sub(ingredient.position, recipe.position);
-            const distance = frag.Vector.length(vector);
+            const direction = frag.Vector.sub(ingredient.position, recipe.position);
+            const distance = frag.Vector.length(direction);
 
             if (distance < 0.01) {
               pipe.sceneObject.getPosition().scaleXYZ(0, 0, 0);
               continue;
             }
 
-            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(vector, 0.5));
-            const heading = frag.Vector.heading(vector);
+            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(direction, 0.5));
+            const angle = frag.Vector.angles(direction, [0, 0, 1]);
 
-            pipe.sceneObject.getPosition().location(midpoint).scaleZ(distance / 2).rotate(heading);//.rotateXYZ(-90 * degToRad, -90 * degToRad, 0);
+            pipe.sceneObject.getPosition().location(midpoint).scaleZ(distance / 2).rotate(angle);
           }
         }
       }

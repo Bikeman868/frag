@@ -5579,10 +5579,9 @@ window.frag.Vector = {
     // Roll is a rotation around the z-axis
     heading: function(directionVector, upVector) {
         const Vector = window.frag.Vector;
-        if (!upVector) upVector = [0, 1, 0];
 
         const dir = Vector.normalize(directionVector);
-        const up = Vector.normalize(upVector);
+        const up = upVector ? Vector.normalize(upVector) : [0, 1, 0];
 
         const z = Math.asin(dir[1]);
         const y = Math.atan2(dir[0], dir[2]);
@@ -5592,6 +5591,29 @@ window.frag.Vector = {
         const x = Math.atan2(Vector.dot(wingDir, up), Vector.dot(vertical, up));
 
         return [x, y, z];
+    },
+    // Calculates the angle that a direction vector makes with respect to the axes.
+    // For example if you want to draw a line between two points, subtracting the
+    // location of the line ends gives you the direction of the line. If you pass
+    // that direction to this method, it will calculate the angles that you would
+    // need to rotate a model through to lie along the line.
+    // The upVector is the direction that is considered to be up for the model you 
+    // want to rotate. For example cylinders are rendered with their axis along the 
+    // Z-axis, so you would pass [0, 0, 1] as the upVector.
+    angles: function(directionVector, upVector) {
+        const Vector = window.frag.Vector;
+
+        const dir = Vector.normalize(directionVector);
+        const up = upVector ? Vector.normalize(upVector) : [0, 1, 0];
+
+        const upX = Math.acos(up[0]);
+        const upY = Math.acos(up[1]);
+        const upZ = Math.acos(up[2]);
+
+        const x = Math.acos(dir[0]);
+        const y = Math.acos(dir[1]);
+        const z = Math.acos(dir[2]);
+        return [x - upX, y - upY, z -upZ];
     },
     quaternion: function(euler) {
         return window.frag.Vector.quaternionXYZ(
@@ -6566,7 +6588,8 @@ window.frag.CustomParticleSystem = function (engine, is3d, shader) {
             private.bufferAllParticles();
             if (engine.debugParticles)
                 console.log(private.name, 'copied all', private.aliveCount, 'alive particles to the GPU');
-        } else {}
+        } else // removed by dead control flow
+{}
         private.bufferIndexes();    
         if (engine.debugParticles) console.log('');
     }
@@ -10641,8 +10664,7 @@ window.frag.Sphere = function (engine, latitudeFacets, options) {
 /******/ 	}
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+// This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
 /*!**********************!*\
   !*** ./src/index.js ***!
