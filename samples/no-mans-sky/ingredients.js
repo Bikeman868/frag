@@ -1,5 +1,3 @@
-// Indexes must be monotonically increasing from 0 and are referenced in the recipies.js file
-//You must provide either a color or a textureUrl for each ingredient
 const ingredients = [
   { name: 'Activated Cadmium', pricePerUnit: 0 },
   { name: 'Activated Copper', pricePerUnit: 0 },

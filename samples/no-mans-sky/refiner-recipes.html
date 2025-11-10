@@ -27,61 +27,9 @@
     <script src="ingredients.js"></script>
     <script src="recipies.js"></script>
     <script src="constants.js"></script>
+    <script src="derrived.js"></script>
+    <script src="scene.js"></script>
     <script>
-      // Calculate useful values form the raw data
-
-      function lookupIngredient(name) {
-        for (let i = 0; i < ingredients.length; i++) {
-          const ingredient  = ingredients[i]
-          if (ingredient.name == name) return ingredient
-        }
-        console.error(`Ingredient "` + name + '" is not defined')
-      }
-
-      for (let i = 0; i < ingredients.length; i++) {
-        const ingredient = ingredients[i];
-        ingredient.index = i;
-        ingredient.recipeCount = 0
-      }
-
-      for (let i = 0; i < recipies.length; i++) {
-        const recipe = recipies[i];
-        recipe[0] = lookupIngredient(recipe[0])
-        recipe[0].recipeCount++
-        for (let j = 0; j < recipe[1].length; j++) {
-          recipe[1][j] = lookupIngredient(recipe[1][j])
-          recipe[1][j].recipeCount++
-        }
-      }
-
-      for (let i = 0; i < ingredients.length; i++) {
-        const ingredient = ingredients[i];
-        ingredient.mass = 1000 + ingredient.recipeCount * 100;
-        ingredient.attraction = ingredient.recipeCount ? recipeAttractionStrength / ingredient.recipeCount : 0;
-      }
-
-      // Initialize the Frag engine
-
-      const sceneCanvas = document.getElementById("scene");
-      const frag = window.frag;
-      const engine = frag
-        .Engine({ canvas: sceneCanvas })
-        .onStart((engine) => {
-          engine.gl.clearColor(0, 0, 0, 1);
-          engine.gl.disable(engine.gl.CULL_FACE); // Pipes are open at the ends and we want to see the inside surface
-        });
-      engine.start();
-
-      const degToRad = Math.PI / 180;
-
-      // Set up the camera to view the scene
-      const camera = frag.FrustumCamera(engine).frustum(50, 50, 2000);
-      camera.getPosition().locationZ(-150);
-
-      // Create the scene
-      const scene = frag.Scene(engine).camera(camera);
-      engine.mainScene(scene);
-
       // Create a parent object representing the recipe graph so that we can rotate it within the scene
       const recipeGraph = frag.SceneObject(engine);
       scene.addObject(recipeGraph);
