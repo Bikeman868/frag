@@ -28,7 +28,7 @@
     <script src="recipies.js"></script>
     <script src="constants.js"></script>
     <script>
-      // Lookup the ingredients in each recipe
+      // Calculate useful values form the raw data
 
       function lookupIngredient(name) {
         for (let i = 0; i < ingredients.length; i++) {
@@ -38,12 +38,26 @@
         console.error(`Ingredient "` + name + '" is not defined')
       }
 
+      for (let i = 0; i < ingredients.length; i++) {
+        const ingredient = ingredients[i];
+        ingredient.index = i;
+        ingredient.recipeCount = 0
+      }
+
       for (let i = 0; i < recipies.length; i++) {
         const recipe = recipies[i];
         recipe[0] = lookupIngredient(recipe[0])
+        recipe[0].recipeCount++
         for (let j = 0; j < recipe[1].length; j++) {
           recipe[1][j] = lookupIngredient(recipe[1][j])
+          recipe[1][j].recipeCount++
         }
+      }
+
+      for (let i = 0; i < ingredients.length; i++) {
+        const ingredient = ingredients[i];
+        ingredient.enabled = ingredient.recipeCount > 0
+        ingredient.mass = 1000 + ingredient.recipeCount * 500;
       }
 
       // Initialize the Frag engine
@@ -96,7 +110,7 @@
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
         const ingredient = ingredients[i];
-        ingredient.index = i;
+        if (!ingredient.recipeCount) continue
 
         ingredient.position = [
           (Math.random() - 0.5) * 20,
@@ -189,10 +203,12 @@
 
         // All ingredients repel each other
         for (let i = 0; i < ingredients.length; i++) {
-          const a = ingredients[i];
+          const ingredientA = ingredients[i];
+          if (!ingredientA.recipeCount) continue
           for (let j = i + 1; j < ingredients.length; j++) {
-            const b = ingredients[j];
-            const aMinusB = frag.Vector.sub(a.position, b.position);
+            const ingredientB = ingredients[j];
+            if (!ingredientB.recipeCount) continue
+            const aMinusB = frag.Vector.sub(ingredientA.position, ingredientB.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const repulsionMagnitude =
@@ -207,6 +223,7 @@
         // All Ingredients are attracted to the origin
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
+          if (!ingredient.recipeCount) continue
           const distanceFromOrigin = frag.Vector.length(ingredient.position);
           const direction = frag.Vector.normalize(ingredient.position);
           const attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
@@ -223,7 +240,7 @@
             const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const attractionMagnitude = -recipeAttractionStrength * distance;
+            const attractionMagnitude = -recipeAttractionStrength * distance / (outputIngredient.mass + inputIngredient.mass);
             const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
             forces[outputIngredient.index] = frag.Vector.add(forces[outputIngredient.index], attractionForce);
             forces[inputIngredient.index] = frag.Vector.sub(forces[inputIngredient.index], attractionForce);
@@ -234,8 +251,9 @@
         elapsedTime = 1 / 100;
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
+          if (!ingredient.recipeCount) continue
           const force = forces[i];
-          const acceleration = frag.Vector.div(force, ingredientMass);
+          const acceleration = frag.Vector.div(force, ingredient.mass);
 
           ingredient.velocity = frag.Vector.mult(frag.Vector.add(ingredient.velocity, acceleration), velocityDamping);
           ingredient.position = frag.Vector.add(ingredient.position, frag.Vector.mult(ingredient.velocity, elapsedTime));
