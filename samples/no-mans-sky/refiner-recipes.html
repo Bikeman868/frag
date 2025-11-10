@@ -47,6 +47,7 @@
           color: [0.4, 0.6, 1],
           symbol: "C+",
           pricePerUnit: 1,
+          textureUrl: "condensed-carbon.png",
         },
         {
           index: 3,
@@ -148,9 +149,11 @@
         ];
         ingredient.velocity = [0, 0, 0];
 
-        const diffuseTexture = frag.Texture(engine)
-          .dataFormat(engine.gl.RGB)
-          .fromUrl(0, ingredient.symbol + '.png', '');
+        const diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGB)
+        if (ingredient.textureUrl)
+          diffuseTexture.fromUrl(0, ingredient.textureUrl);
+        else
+          diffuseTexture.fromArrayBuffer(0, new Uint8Array([100,200,100]), 0, 1, 1);
 
         const material = frag.Material(engine)
           .setTexture('diffuse', diffuseTexture);
