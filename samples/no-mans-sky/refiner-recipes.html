@@ -106,10 +106,9 @@
         ingredient.velocity = [0, 0, 0];
 
         const diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGB)
-        if (ingredient.textureUrl)
-          diffuseTexture.fromUrl(0, ingredient.textureUrl);
-        else
-          diffuseTexture.fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
+        if (ingredient.textureUrl) diffuseTexture.fromUrl(0, ingredient.textureUrl);
+        else if (ingredient.color) diffuseTexture.fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
+        else diffuseTexture.fromArrayBuffer(0, new Uint8Array([Math.floor(Math.random() * 128 + 128), Math.floor(Math.random() * 128 + 128), Math.floor(Math.random() * 128 + 128)]), 0, 1, 1);
 
         const material = frag.Material(engine)
           .setTexture('diffuse', diffuseTexture);
