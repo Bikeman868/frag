@@ -84,12 +84,13 @@
 
       const pipeRadius = 0.4;
       const ingredientRadius = 5;
-      const recipeRadius = 1;
+      const recipeRadius = 1.5;
       const repulsionStrength = 50000;
       const repulsionDecay = 0.1;
       const recipeAttractionStrength = 2;
       const originAttractionStrength = 0.1;
       const velocityDamping = 0.995;
+      const ingredientShape = 'disc'; // hemisphere disc sphere
 
       // Initialize the Frag engine
 
@@ -120,11 +121,23 @@
       // Define a shared ingredient elements
       const ingredientShader = frag.Shader(engine).diffuseTexture().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
       
-      const ingredientMesh = frag.Sphere(engine, 16, {
-        longitudeFacets: 16,
-        longitudeStart: Math.PI * 0.5,
-        longitudeLength: Math.PI
-      })
+      let ingredientMesh;
+      switch (ingredientShape) {
+        case 'disc':
+          ingredientMesh = frag.Disc(engine, 16);
+          break;
+        case 'hemisphere':
+          ingredientMesh = frag.Sphere(engine, 16, {
+            longitudeFacets: 16,
+            longitudeStart: Math.PI * 0.5,
+            longitudeLength: Math.PI
+          })
+          break;
+        case 'sphere':
+          ingredientMesh = frag.Sphere(engine, 16)
+          break;
+      }
+
 
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
@@ -155,8 +168,13 @@
 
         ingredient.sceneObject.getPosition()
           .scale(ingredientRadius)
-          .rotateY(Math.PI * -0.5)
           .location(ingredient.position);
+
+        switch (ingredientShape) {
+          case 'hemisphere':
+          case 'sphere':
+            ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5)
+        }
 
         recipeGraph.addObject(ingredient.sceneObject);
       }
@@ -164,7 +182,7 @@
       // Define a shared recipe elements
 
       const recipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
-      const recipeModel = frag.Model(engine).mesh(frag.Sphere(engine, 16, { color: [1, 1, 1] }).shadeSmooth()).shader(recipeShader);
+      const recipeModel = frag.Model(engine).mesh(frag.Sphere(engine, 8, { color: [1, 1, 1] }).shadeSmooth()).shader(recipeShader);
 
       // Augment each recipe with with additional information needed to animate it
 
@@ -183,8 +201,8 @@
       // Define a shared pipe elements
 
       const pipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
-      const inputPipeMesh = frag.Cylinder(engine, 8, { color: [0.3, 0.3, 1], drawTop: false, drawBottom: false }).shadeSmooth();
-      const outputPipeMesh = frag.Cylinder(engine, 8, { color: [1, 0.3, 0.3], drawTop: false, drawBottom: false }).shadeSmooth();
+      const inputPipeMesh = frag.Cylinder(engine, 8, { color: [0.3, 0.3, 1] }).shadeSmooth();
+      const outputPipeMesh = frag.Cylinder(engine, 8, { color: [1, 0.3, 0.3] }).shadeSmooth();
 
       // Add pipes to recipe inputs and outputs to connect to the ingredients
       for (let i = 0; i < recipies.length; i++) {
