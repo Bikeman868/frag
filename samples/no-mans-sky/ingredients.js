@@ -19,6 +19,7 @@ const ingredients = [
   { name: 'Copper', pricePerUnit: 41 },
   { name: 'Crystal Sulphide', pricePerUnit: 0 },
   { name: 'Cyto-Phosphate', pricePerUnit: 0 },
+  { name: 'Deuterium', pricePerUnit: 34 },
   { name: 'Dioxite', pricePerUnit: 62 },
   { name: 'Dirty Bronze', pricePerUnit: 25000 },
   { name: 'Di-hydrogen', pricePerUnit: 34 },
