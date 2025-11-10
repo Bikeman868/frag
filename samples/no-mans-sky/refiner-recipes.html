@@ -97,7 +97,7 @@
       const engine = frag
         .Engine({ canvas: document.getElementById("scene") })
         .onStart((engine) => {
-          engine.gl.clearColor(0.1, 0.1, 0.15, 1);
+          engine.gl.clearColor(0, 0, 0, 1);
           engine.gl.disable(engine.gl.CULL_FACE); // Pipes are open at the ends and we want to see the inside surface
         });
       engine.start();
@@ -117,7 +117,8 @@
       scene.addObject(recipeGraph);
 
       // Define a shared ingredient elements
-      const ingredientShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const ingredientShader = frag.Shader(engine).diffuseTexture().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const ingredientMesh = frag.Sphere(engine, 16, {})
 
       // Augment each ingredient with additional information needed to animate it
       for (let i = 0; i < ingredients.length; i++) {
@@ -130,15 +131,21 @@
           (Math.random() - 0.5) * 10,
           (Math.random() - 0.5) * 10,
         ];
-
         ingredient.velocity = [0, 0, 0];
+
+        const diffuseTexture = frag.Texture(engine)
+          .dataFormat(engine.gl.RGB)
+          .fromUrl(0, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRw81sNFwAguFmVHq-1p8N5U2lpZtbZWVT51A&usqp=CAU', '');
+
+        const material = frag.Material(engine)
+          .setTexture('diffuse', diffuseTexture);
 
         ingredient.sceneObject = frag.SceneObject(engine, 
           frag.Model(engine)
-            .name('Ingredient model')
-            .mesh(frag.Sphere(engine, 16, { color: ingredient.color }))
+            .mesh(ingredientMesh)
+            .material(material)
             .shader(ingredientShader)
-            .shadeFlat());
+        );
 
         ingredient.sceneObject.getPosition()
           .scale(ingredientRadius)
