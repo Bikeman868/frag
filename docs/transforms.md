@@ -105,7 +105,8 @@ The [`Location`](reference/location.md) class always calculates the matrix
 by scaling first, then rotating, and moving last. This is what you want in 
 a game, because you can change the location, rotation or scale any time 
 without getting perculior effects from the combination of these transformations.
-Note that rotations are done around the Z-axis first, then the Y-axis, and finally the X-axis. The order is important because reordering these operations produces a completely different result. You can call methods to set the axis rotations in any order, and they will be consistently applied in th ordet Z, Y, then X.
+
+Note that rotations are done around the Z-axis first, then the Y-axis, and finally the X-axis. The order is important because reordering these operations produces a completely different result. You can call methods to set the axis rotations in any order, and they will be consistently applied in the order Z, Y, then X.
 
 ## ScenePosition
 The [`ScenePosition`](reference/scene-position.md) class is a wrapper 
@@ -190,3 +191,4 @@ Now if I wanted to have small, medium and large tanks, setting a scaling
 factor on the tank would scale all of it's components, and it would also
 
 scale the size of the gun, which in this case is exactly what we want.
+
