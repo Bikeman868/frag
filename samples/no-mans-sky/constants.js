@@ -6,4 +6,4 @@ const repulsionDecay = 0.05;
 const recipeAttractionStrength = 1;
 const originAttractionStrength = 0.001;
 const velocityDamping = 0.995;
-const ingredientShape = 'sphere'; // hemisphere, disc or sphere
+const ingredientShape = 'hemisphere'; // hemisphere, disc or sphere
