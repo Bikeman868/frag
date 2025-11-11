@@ -32,6 +32,13 @@ window.frag.ScenePosition = function (engine, location, is3d) {
         return private.location.getMatrix();
     }
 
+    public.setMatrix = function(matrix) {
+        private.location.matrix = matrix
+        private.location.isModified = false;
+        public.observableLocation.notify();
+        return public;
+    }
+
     public.getScale = function() {
         return [
             private.location.scaleX,

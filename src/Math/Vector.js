@@ -90,10 +90,9 @@ window.frag.Vector = {
     // Roll is a rotation around the z-axis
     heading: function(directionVector, upVector) {
         const Vector = window.frag.Vector;
-        if (!upVector) upVector = [0, 1, 0];
 
         const dir = Vector.normalize(directionVector);
-        const up = Vector.normalize(upVector);
+        const up = upVector ? Vector.normalize(upVector) : [0, 1, 0];
 
         const z = Math.asin(dir[1]);
         const y = Math.atan2(dir[0], dir[2]);

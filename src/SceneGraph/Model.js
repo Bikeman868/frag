@@ -90,6 +90,14 @@ window.frag.Model = function (engine, is3d, parent) {
         private.enabled = false;
     }
 
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
+
     public.getMaterial = function () {
         if (private.material) return private.material;
         if (private.parent) return private.parent.getMaterial();

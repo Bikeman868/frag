@@ -5579,10 +5579,9 @@ window.frag.Vector = {
     // Roll is a rotation around the z-axis
     heading: function(directionVector, upVector) {
         const Vector = window.frag.Vector;
-        if (!upVector) upVector = [0, 1, 0];
 
         const dir = Vector.normalize(directionVector);
-        const up = Vector.normalize(upVector);
+        const up = upVector ? Vector.normalize(upVector) : [0, 1, 0];
 
         const z = Math.asin(dir[1]);
         const y = Math.atan2(dir[0], dir[2]);
@@ -7950,6 +7949,14 @@ window.frag.Model = function (engine, is3d, parent) {
         private.enabled = false;
     }
 
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
+
     public.getMaterial = function () {
         if (private.material) return private.material;
         if (private.parent) return private.parent.getMaterial();
@@ -8469,6 +8476,20 @@ window.frag.SceneObject = function (engine, model) {
     };
 
     /**
+     * Returns true if this object is rendered in the scene.
+     */
+    public.isEnabled = function() {
+        return private.enabled;
+    }
+
+    /**
+     * Returns true if this object is not rendered in the scene.
+     */
+    public.isDisabled = function() {
+        return !private.enabled;
+    }
+
+    /**
      * Frees any resources consumed by this scene object and removes it from
      * the scene.
      */
@@ -8536,6 +8557,13 @@ window.frag.ScenePosition = function (engine, location, is3d) {
 
     public.getMatrix = function () {
         return private.location.getMatrix();
+    }
+
+    public.setMatrix = function(matrix) {
+        private.location.matrix = matrix
+        private.location.isModified = false;
+        public.observableLocation.notify();
+        return public;
     }
 
     public.getScale = function() {
