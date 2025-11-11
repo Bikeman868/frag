@@ -103,29 +103,6 @@ window.frag.Vector = {
 
         return [x, y, z];
     },
-    // Calculates the angle that a direction vector makes with respect to the axes.
-    // For example if you want to draw a line between two points, subtracting the
-    // location of the line ends gives you the direction of the line. If you pass
-    // that direction to this method, it will calculate the angles that you would
-    // need to rotate a model through to lie along the line.
-    // The upVector is the direction that is considered to be up for the model you 
-    // want to rotate. For example cylinders are rendered with their axis along the 
-    // Z-axis, so you would pass [0, 0, 1] as the upVector.
-    angles: function(directionVector, upVector) {
-        const Vector = window.frag.Vector;
-
-        const dir = Vector.normalize(directionVector);
-        const up = upVector ? Vector.normalize(upVector) : [0, 1, 0];
-
-        const upX = Math.acos(up[0]);
-        const upY = Math.acos(up[1]);
-        const upZ = Math.acos(up[2]);
-
-        const x = Math.acos(dir[0]);
-        const y = Math.acos(dir[1]);
-        const z = Math.acos(dir[2]);
-        return [x - upX, y - upY, z -upZ];
-    },
     quaternion: function(euler) {
         return window.frag.Vector.quaternionXYZ(
             euler[0],

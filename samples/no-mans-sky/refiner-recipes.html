@@ -113,7 +113,7 @@
         recipeGraph.addObject(recipe.sceneObject);
       }
 
-      // Define a shared pipe elements
+      // Define shared pipe elements
 
       const pipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
       const inputPipeMesh = frag.Cylinder(engine, 8, { color: [0.3, 0.3, 1] }).shadeSmooth();
@@ -233,16 +233,18 @@
 
             const direction = frag.Vector.sub(ingredient.position, recipe.position);
             const distance = frag.Vector.length(direction);
+            const pipeLength = distance - ingredientRadius - recipeRadius;
 
             if (distance < 0.01) {
-              pipe.sceneObject.getPosition().scaleXYZ(0, 0, 0);
-              continue;
+              pipe.sceneObject.disable();
+            } else {
+              const ratioToMidpoint = (recipeRadius + (pipeLength / 2)) / distance;
+              const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(direction, ratioToMidpoint));
+              const heading = frag.Vector.heading(direction);
+
+              pipe.sceneObject.getPosition().rotate(heading).location(midpoint).scaleZ(pipeLength / 2);
+              pipe.sceneObject.enable();
             }
-
-            const midpoint = frag.Vector.add(recipe.position, frag.Vector.mult(direction, 0.5));
-            const angle = frag.Vector.angles(direction, [0, 0, 1]);
-
-            pipe.sceneObject.getPosition().location(midpoint).scaleZ(distance / 2).rotate(angle);
           }
         }
       }

@@ -11,7 +11,7 @@ If you would like to contribute please contact the authors and discuss your
 proposed change before working on your changes or submitting a pull request.
 
 # Development environment
-You need to have webpack installed. Webpack requires Node.js.
+You need to have webpack installed. Webpack requires NodeJS.
 
 If you are doing development on Windows then I strongly recommend installing
 Windows Subsystem for Linux so that you can run bash scripts.
