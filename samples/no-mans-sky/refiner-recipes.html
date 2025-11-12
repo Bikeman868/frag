@@ -30,12 +30,15 @@
     <script src="derrived.js"></script>
     <script src="scene.js"></script>
     <script>
+      function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min) + min)
+      }
       // Create a parent object representing the recipe graph so that we can rotate it within the scene
       const recipeGraph = frag.SceneObject(engine);
       scene.addObject(recipeGraph);
 
       // Define a shared ingredient elements
-      const ingredientShader = frag.Shader(engine).diffuseTexture().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const ingredientShader = frag.Shader(engine).diffuseTexture().directionalLightGrey().compile().lightDirection(lightDirection);
       
       let ingredientMesh;
       switch (ingredientShape) {
@@ -46,11 +49,19 @@
           ingredientMesh = frag.Sphere(engine, 16, {
             longitudeFacets: 16,
             longitudeStart: Math.PI * 0.5,
-            longitudeLength: Math.PI
+            longitudeLength: Math.PI,
+            longitudeTextureStart: Math.PI * 0.7,
+            longitudeTextureEnd: Math.PI * 1.5,
+            latitudeTextureStart: Math.PI * 0.1,
+            latitudeTextureEnd: Math.PI * 0.9,
           })
           break;
         case 'sphere':
-          ingredientMesh = frag.Sphere(engine, 16)
+          ingredientMesh = frag.Sphere(engine, 16, {
+            latitudeTextureStart: Math.PI * 0.2,
+            latitudeTextureEnd: Math.PI * 0.8,
+            longitudeTextureRepeat: 3,
+          })
           break;
       }
 
@@ -65,10 +76,17 @@
         ];
         ingredient.velocity = [0, 0, 0];
 
-        const diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGB)
-        if (ingredient.textureUrl) diffuseTexture.fromUrl(0, ingredient.textureUrl);
-        else if (ingredient.color) diffuseTexture.fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
-        else diffuseTexture.fromArrayBuffer(0, new Uint8Array([Math.floor(Math.random() * 128 + 128), Math.floor(Math.random() * 128 + 128), Math.floor(Math.random() * 128 + 128)]), 0, 1, 1);
+        let diffuseTexture
+        if (ingredient.textureUrl)
+          diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGBA).fromUrl(0, ingredient.textureUrl, '');
+        else if (ingredient.color) {
+          if (ingredient.color.length == 4)
+            diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGBA).fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
+          else
+            diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGB).fromArrayBuffer(0, new Uint8Array(frag.Vector.mult(ingredient.color, 255)), 0, 1, 1);
+        }
+        else 
+          diffuseTexture = frag.Texture(engine).dataFormat(engine.gl.RGB).fromArrayBuffer(0, new Uint8Array([randomInt(100, 255), randomInt(100, 255), randomInt(100, 255)]), 0, 1, 1);
 
         const material = frag.Material(engine)
           .setTexture('diffuse', diffuseTexture);
@@ -85,8 +103,8 @@
           .location(ingredient.position);
 
         switch (ingredientShape) {
-          case 'hemisphere':
           case 'sphere':
+          case 'hemisphere':
             ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5)
         }
 
@@ -96,7 +114,7 @@
 
       // Define a shared recipe elements
 
-      const recipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const recipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection(lightDirection);
       const recipeModel = frag.Model(engine).mesh(frag.Sphere(engine, 8, { color: [1, 1, 1] }).shadeSmooth()).shader(recipeShader);
 
       // Augment each recipe with with additional information needed to animate it
@@ -115,7 +133,7 @@
 
       // Define shared pipe elements
 
-      const pipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection([-0.2, -0.6, 0.1]);
+      const pipeShader = frag.Shader(engine).colorsRGB().directionalLightGrey().compile().lightDirection(lightDirection);
       const inputPipeMesh = frag.Cylinder(engine, 8, { color: [0.3, 0.3, 1] }).shadeSmooth();
       const outputPipeMesh = frag.Cylinder(engine, 8, { color: [1, 0.3, 0.3] }).shadeSmooth();
 
@@ -159,7 +177,7 @@
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const repulsionMagnitude =
-              (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
+              (ingredientB.repulsion * Math.exp(-repulsionDecay * distance)) /
               (distance * distance);
             const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
             forces[i] = frag.Vector.add(forces[i], repulsionForce);
@@ -189,7 +207,7 @@
             const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const attractionMagnitude = -recipeAttractionStrength * distance * (outputIngredient.attraction + inputIngredient.attraction);
+            const attractionMagnitude = -distance * (outputIngredient.recipeAttraction + inputIngredient.recipeAttraction);
             const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
             forces[outputIngredient.index] = frag.Vector.add(forces[outputIngredient.index], attractionForce);
             forces[inputIngredient.index] = frag.Vector.sub(forces[inputIngredient.index], attractionForce);

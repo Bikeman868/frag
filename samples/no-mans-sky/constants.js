@@ -1,9 +1,10 @@
 const pipeRadius = 0.4;
 const ingredientRadius = 5;
 const recipeRadius = 1.5;
-const repulsionStrength = 10000;
-const repulsionDecay = 0.05;
-const recipeAttractionStrength = 1;
+const repulsionStrength = 20000;
+const repulsionDecay = 0.03;
+const recipeAttractionStrength = 2;
 const originAttractionStrength = 0.001;
 const velocityDamping = 0.995;
-const ingredientShape = 'hemisphere'; // hemisphere, disc or sphere
+const ingredientShape = 'sphere'; // hemisphere, disc or sphere
+const lightDirection = [-0.2, -0.6, 0.4];

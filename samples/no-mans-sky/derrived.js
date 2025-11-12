@@ -26,6 +26,8 @@ for (let i = 0; i < recipies.length; i++) {
 
 for (let i = 0; i < ingredients.length; i++) {
   const ingredient = ingredients[i];
-  ingredient.mass = 1000 + ingredient.recipeCount * 100;
-  ingredient.attraction = ingredient.recipeCount ? recipeAttractionStrength / ingredient.recipeCount : 0;
+  const recipeWeight = ingredient.recipeCount + 1;
+  ingredient.mass = 1000 + ingredient.recipeCount * 500;
+  ingredient.repulsion = repulsionStrength * Math.sqrt(recipeWeight);
+  ingredient.recipeAttraction = recipeAttractionStrength * Math.sqrt(recipeWeight);
 }
