@@ -49,11 +49,19 @@
           ingredientMesh = frag.Sphere(engine, 16, {
             longitudeFacets: 16,
             longitudeStart: Math.PI * 0.5,
-            longitudeLength: Math.PI
+            longitudeLength: Math.PI,
+            longitudeTextureStart: Math.PI * 0.7,
+            longitudeTextureEnd: Math.PI * 1.5,
+            latitudeTextureStart: Math.PI * 0.1,
+            latitudeTextureEnd: Math.PI * 0.9,
           })
           break;
         case 'sphere':
-          ingredientMesh = frag.Sphere(engine, 16)
+          ingredientMesh = frag.Sphere(engine, 16, {
+            latitudeTextureStart: Math.PI * 0.245,
+            latitudeTextureEnd: Math.PI * 0.755,
+            longitudeTextureRepeat: 3,
+          })
           break;
       }
 
@@ -95,8 +103,8 @@
           .location(ingredient.position);
 
         switch (ingredientShape) {
-          case 'hemisphere':
           case 'sphere':
+          case 'hemisphere':
             ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5)
         }
 
