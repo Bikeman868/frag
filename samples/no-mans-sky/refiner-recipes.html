@@ -177,7 +177,7 @@
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
             const repulsionMagnitude =
-              (repulsionStrength * Math.exp(-repulsionDecay * distance)) /
+              (ingredientB.repulsion * Math.exp(-repulsionDecay * distance)) /
               (distance * distance);
             const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
             forces[i] = frag.Vector.add(forces[i], repulsionForce);
@@ -207,7 +207,7 @@
             const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const attractionMagnitude = -recipeAttractionStrength * distance * (outputIngredient.attraction + inputIngredient.attraction);
+            const attractionMagnitude = -distance * (outputIngredient.recipeAttraction + inputIngredient.recipeAttraction);
             const attractionForce = frag.Vector.mult(direction, attractionMagnitude);
             forces[outputIngredient.index] = frag.Vector.add(forces[outputIngredient.index], attractionForce);
             forces[inputIngredient.index] = frag.Vector.sub(forces[inputIngredient.index], attractionForce);
