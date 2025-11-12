@@ -264,15 +264,11 @@
               // pipe.sceneObject.getPosition().rotate(heading).location(midpoint).scaleZ(pipeLength / 2);
 
               const dir = frag.Vector.normalize(direction);
-              const polarAngle = Math.acos(dir[2]);
-              const azimuthalAngle = Math.atan2(dir[1], dir[0]);
-              const transform = frag.Transform3D(engine)
-                .translate(midpoint)
-                .rotateZ(azimuthalAngle)
-                .rotateY(polarAngle)
-                .scaleXYZ(pipeRadius, pipeRadius, pipeLength / 2);
-              pipe.sceneObject.getPosition().setMatrix(transform.getMatrix());
-              transform.dispose();
+              pipe.sceneObject.getPosition()
+                .scaleZ(pipeLength / 2)
+                .location(midpoint)
+                .rotateX(Math.atan2(-dir[1], dir[2]))
+                .rotateY(Math.asin(dir[0]));
 
               pipe.sceneObject.enable();
             }
