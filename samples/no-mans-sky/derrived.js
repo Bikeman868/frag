@@ -29,5 +29,5 @@ for (let i = 0; i < ingredients.length; i++) {
   const recipeWeight = ingredient.recipeCount + 1;
   ingredient.mass = 1000 + ingredient.recipeCount * 500;
   ingredient.repulsion = repulsionStrength * Math.sqrt(recipeWeight);
-  ingredient.recipeAttraction = recipeAttractionStrength * Math.sqrt(recipeWeight);
+  ingredient.recipeAttraction = recipeAttractionStrength / Math.sqrt(recipeWeight);
 }
