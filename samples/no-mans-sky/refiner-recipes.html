@@ -176,9 +176,10 @@
             const aMinusB = frag.Vector.sub(ingredientA.position, ingredientB.position);
             const distance = frag.Vector.length(aMinusB);
             const direction = frag.Vector.normalize(aMinusB);
-            const repulsionMagnitude =
+            let repulsionMagnitude =
               (ingredientB.repulsion * Math.exp(-repulsionDecay * distance)) /
               (distance * distance);
+            if (ingredientA.family == ingredientB.family) repulsionMagnitude *= 0.5
             const repulsionForce = frag.Vector.mult(direction, repulsionMagnitude);
             forces[i] = frag.Vector.add(forces[i], repulsionForce);
             forces[j] = frag.Vector.sub(forces[j], repulsionForce);
