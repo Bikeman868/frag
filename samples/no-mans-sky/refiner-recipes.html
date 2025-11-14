@@ -4,72 +4,55 @@
     <title>No Man's Sky Refiner Recipes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      html,
       body {
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         margin: 0;
         padding: 0;
+        overflow: hidden;
       }
-
-      #scene {
-        width: 80vw;
+      #layout {
+        display: flex;
+        width: 100vw;
         height: 100vh;
-        touch-action: none;
-        display: inline-block;
       }
       #filter {
-        width: 20vw;
+        width: 15vw;
         height: 100vh;
         touch-action: none;
-        display: inline-block;
+        display: flex;
+        flex-direction: column;
+      }
+      #scene {
+        width: 60vw;
+        height: 100vh;
+        touch-action: none;
+        display: flex;
+        flex-direction: column;
       }
       #info {
         width: 20vw;
         height: 100vh;
         touch-action: none;
-        display: inline-block;
+        display: flex;
+        flex-direction: column;
       }
 
     </style>
   </head>
   <body>
-    <script type="importmap">
-      {
-        "imports": {
-          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
-        }
-      }
+    <div id="layout">
+      <div id="filter">{{ filter }}</div>
+      <canvas id="scene"></canvas>
+      <div id="info">{{ info }}</div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+      const { createApp } = Vue;
     </script>
 
-    <div id="filter">{{ filter }}</div>
-    <canvas id="scene"></canvas>
-    <div id="info">{{ info }}</div>
-
-    <script type="module">
-      import { createApp, ref } from 'vue'
-
-      createApp({
-        data() {
-          return {
-            filter: 'Filtering'
-          }
-        }
-      }).mount('#filter')
-    </script>
-
-    <script type="module">
-      import { createApp, ref } from 'vue'
-
-      createApp({
-        data() {
-          return {
-            info: 'Infomation'
-          }
-        }
-      }).mount('#info')
-    </script>
+    <script src="info-app.js"></script>
 
     <script src="../frag.js"></script>
     <script src="ingredients.js"></script>
@@ -78,5 +61,7 @@
     <script src="derrived.js"></script>
     <script src="scene.js"></script>
     <script src="recipe-graph.js"></script>
+    
+    <script src="filter-app.js"></script>
   </body>
 </html>
