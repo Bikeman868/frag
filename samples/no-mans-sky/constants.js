@@ -8,3 +8,4 @@ const originAttractionStrength = 0.001;
 const velocityDamping = 0.995;
 const ingredientShape = 'sphere'; // hemisphere, disc or sphere
 const lightDirection = [-0.2, -0.6, 0.4];
+const tickInterval = 2;

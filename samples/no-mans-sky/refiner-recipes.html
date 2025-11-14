@@ -14,15 +14,63 @@
       }
 
       #scene {
-        width: 100vw;
+        width: 80vw;
         height: 100vh;
         touch-action: none;
-        display: block;
+        display: inline-block;
       }
+      #filter {
+        width: 20vw;
+        height: 100vh;
+        touch-action: none;
+        display: inline-block;
+      }
+      #info {
+        width: 20vw;
+        height: 100vh;
+        touch-action: none;
+        display: inline-block;
+      }
+
     </style>
   </head>
   <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+
+    <div id="filter">{{ filter }}</div>
     <canvas id="scene"></canvas>
+    <div id="info">{{ info }}</div>
+
+    <script type="module">
+      import { createApp, ref } from 'vue'
+
+      createApp({
+        data() {
+          return {
+            filter: 'Filtering'
+          }
+        }
+      }).mount('#filter')
+    </script>
+
+    <script type="module">
+      import { createApp, ref } from 'vue'
+
+      createApp({
+        data() {
+          return {
+            info: 'Infomation'
+          }
+        }
+      }).mount('#info')
+    </script>
+
     <script src="../frag.js"></script>
     <script src="ingredients.js"></script>
     <script src="recipies.js"></script>

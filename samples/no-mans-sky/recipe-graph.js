@@ -185,7 +185,7 @@ function updateIngredientPositions() {
   }
 
   // Update velocities and positions of ingredients
-  elapsedTime = 1 / 100;
+  elapsedTime = tickInterval / 100;
   for (let i = 0; i < ingredients.length; i++) {
     const ingredient = ingredients[i];
     if (ingredient.sceneObject.isDisabled()) continue
@@ -361,4 +361,4 @@ engine.AnalogInput("right-pointer-vertical-inverted", sceneRotationX).enable();
 engine.AnalogInput("right-pointer-inverted", sceneRotationY).enable();
 
 // Run the physics simulation continuously
-const physicsAnimation = frag.Animation(engine).repeatTicks(simulatePhysics, 1).start();
+const physicsAnimation = frag.Animation(engine).repeatTicks(simulatePhysics, tickInterval).start();
