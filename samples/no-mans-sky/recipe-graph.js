@@ -69,6 +69,9 @@ for (let i = 0; i < ingredients.length; i++) {
       .shader(ingredientShader)
   );
 
+  ingredient.sceneObject.objectType = 'ingredient';
+  ingredient.sceneObject.objectIndex = i;
+
   ingredient.sceneObject.getPosition()
     .scale(ingredientRadius)
     .location(ingredient.position);
@@ -76,7 +79,8 @@ for (let i = 0; i < ingredients.length; i++) {
   switch (ingredientShape) {
     case 'sphere':
     case 'hemisphere':
-      ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5)
+      ingredient.sceneObject.getPosition().rotateY(Math.PI * -0.5);
+      break;
   }
   recipeGraph.addObject(ingredient.sceneObject);
 }
@@ -92,6 +96,9 @@ for (let i = 0; i < recipies.length; i++) {
   const recipe = recipies[i];
   recipe.position = [0, 0, 0];
   recipe.sceneObject = frag.SceneObject(engine, recipeModel);
+
+  recipe.sceneObject.objectType = 'recipe';
+  recipe.sceneObject.objectIndex = i;
 
   recipe.sceneObject.getPosition()
     .scale(recipeRadius)

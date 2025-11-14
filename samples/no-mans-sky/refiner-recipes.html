@@ -95,8 +95,21 @@
       </div>
       <canvas id="scene"></canvas>
       <div id="info">
-        <div v-if="recipe">Show a recipe</div>
-        <div v-if="ingredient">Show an ingredient</div>
+        <div v-if="recipe" class="recipe">
+          <h3 class="recipe-output">Refine {{ recipe.output.quantity }} X {{ recipe.output.ingredient.name }} @{{ recipe.output.ingredient.price }}</h3>
+          <div v-for="input of recipe.inputs" class="recipe-input">
+            {{ input.quantity }} X {{ input.ingredient.name }} @{{ input.ingredient.price }}
+          </div>
+          <h3>Accounting</h3>
+          <div>{{ recipe.output.quantity }} X {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>
+          <div v-for="input of recipe.inputs">
+            <div>{{ input.quantity }} X {{ input.ingredient.name }} = {{ input.quantity * input.ingredient.price }}</div>
+          </div>
+          <div class="profit">Profit = {{ recipe.profit }}</div>
+        </div>
+        <div v-if="ingredient" class="ingredient">
+          <h3>{{ ingredient.name }}</h3>
+        </div>
       </div>
     </div>
 

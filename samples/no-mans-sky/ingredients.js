@@ -4,7 +4,7 @@ const ingredients = [
   { name: 'Activated Cadmium', family: 'Metals', price: 111, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/39.png' },
   { name: 'Activated Copper', family: 'Metals', price: 75, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/38.png' },
   { name: 'Activated Emeril', family: 'Metals', price: 134, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/40.png' },
-  { name: 'Activated Indium', family: 'Metals', rice: 165, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/41.png' },
+  { name: 'Activated Indium', family: 'Metals', price: 165, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/41.png' },
   { name: 'Activated Quartzite', family: 'Minerals', price: 165, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/80.png' },
   { name: 'Ancestral Memories', family: 'Misc', price: 62, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/71.png' },
   { name: 'Ammonia', family: 'Sodium', price: 62, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/26.png' },
