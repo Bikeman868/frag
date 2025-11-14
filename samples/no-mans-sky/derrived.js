@@ -1,4 +1,4 @@
-// Add derived properties to raw ingredient and recipe data
+// This source file adds derived properties to raw ingredient and recipe data
 
 function lookupIngredient(name) {
   for (let i = 0; i < ingredients.length; i++) {

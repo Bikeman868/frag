@@ -1,3 +1,5 @@
+// This source file constructs a scene that we can draw 3D models into
+
 const sceneCanvas = document.getElementById("scene");
 const frag = window.frag;
 const engine = frag

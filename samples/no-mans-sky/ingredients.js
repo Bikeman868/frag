@@ -1,3 +1,5 @@
+// Raw ingredient data
+
 const ingredients = [
   { name: 'Activated Cadmium', family: 'Metals', price: 111, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/39.png' },
   { name: 'Activated Copper', family: 'Metals', price: 75, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/38.png' },
