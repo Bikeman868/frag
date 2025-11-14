@@ -55,20 +55,20 @@
         <div>
           <h3>Filter recipes</h3>
           <div>
-            <input type="checkbox" id="one-ingredient-filter" value="on" checked>
+            <input type="checkbox" id="one-ingredient-filter" v-model="oneIngredientEnabled">
             <label for="one-ingredient-filter">1 ingredient</label>
           </div>
           <div>
-            <input type="checkbox" id="two-ingredients-filter" value="on">
+            <input type="checkbox" id="two-ingredients-filter" v-model="twoIngredienstEnabled">
             <label for="two-ingredients-filter">2 ingredients</label>
           </div>
           <div>
-            <input type="checkbox" id="three-ingredients-filter" value="on">
+            <input type="checkbox" id="three-ingredients-filter" v-model="threeIngredientsEnabled">
             <label for="three-ingredients-filter">3 ingredients</label>
           </div>
           <div>
             <input type="checkbox" id="min-profit-filter" v-model="minProfitFilterEnabled">
-            <label for="min-profit-slider">Profit > {{ minProfitFilter }}</label><br>
+            <label for="min-profit-slider">Profit ≥ {{ minProfitFilter }}</label><br>
             <input type="range" id="min-profit-slider" min="0" max="300" v-model="minProfitFilter">
           </div>
         </div>

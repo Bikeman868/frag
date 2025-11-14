@@ -1,6 +1,9 @@
 const filterApp = Vue.createApp({
   data() {
     return {
+      oneIngredientEnabled: true,
+      twoIngredienstEnabled: false,
+      threeIngredientsEnabled: false,
       minProfitFilterEnabled: true,
       minProfitFilter: 0,
       families: [
@@ -17,31 +20,33 @@ const filterApp = Vue.createApp({
       enabledIngredients: ingredients.map((i) => i.name),
     }
   },
-  methods: {
-    onFilterChanged() {
-      window.filter(
-        true,
-        true,
-        true,
-        this.minProfitFilterEnabled ? this.minProfitFilter : undefined,
-        this.enabledFamilies,
-        this.enabledIngredients,
-      );
-    }
+  computed: {
+    filter() {
+      return {
+        oneIngredientEnabled: this.oneIngredientEnabled,
+        twoIngredienstEnabled: this.twoIngredienstEnabled,
+        threeIngredientsEnabled: this.threeIngredientsEnabled,
+        minProfitFilterEnabled: this.minProfitFilterEnabled,
+        minProfitFilter: this.minProfitFilter,
+        enabledFamilies: this.enabledFamilies,
+        enabledIngredients: this.enabledIngredients,
+      }
+    },
   },
   watch: {
-    minProfitFilterEnabled() {
-      this.onFilterChanged();
-    },
-    minProfitFilter() {
-      this.onFilterChanged();
-    },
-    enabledFamilies() {
-      this.onFilterChanged();
-    },
-    enabledIngredients() {
-      this.onFilterChanged();
-    },
+    filter: {
+      handler(f) {
+        window.filter(
+          f.oneIngredientEnabled,
+          f.twoIngredienstEnabled,
+          f.threeIngredientsEnabled,
+          f.minProfitFilterEnabled ? f.minProfitFilter : undefined,
+          f.enabledFamilies,
+          f.enabledIngredients,
+        );
+      },
+      immediate: true,
+    }
   },
 });
 

@@ -248,92 +248,90 @@ function simulatePhysics() {
   updatePipePositions();
 }
 
-function disableRecipe(recipe) {
-  if (recipe.sceneObject.isDisabled()) return
-  recipe.sceneObject.disable();
-
-  for (let j = 0; j < recipe.pipes.length; j++) {
-    const pipe = recipe.pipes[j];
-    pipe.sceneObject.disable();
-  }
-  
-  const output = recipe[0];
-  output.recipeCount--;
-  
-  for (let j = 0; j < recipe[1].length; j++) {
-    const input = recipe[1][j];
-    input.recipeCount--;
-  }
-}
-
-function enableRecipe(recipe) {
-  if (recipe.sceneObject.isEnabled()) return
-
-  recipe.sceneObject.enable();
-
-  for (let j = 0; j < recipe.pipes.length; j++) {
-    const pipe = recipe.pipes[j];
-    pipe.sceneObject.enable();
-  }
-  
-  const output = recipe[0];
-  output.recipeCount++;
-  
-  for (let j = 0; j < recipe[1].length; j++) {
-    const input = recipe[1][j];
-    input.recipeCount++;
-  }
-}
-
 function filter(oneIngredient, twoIngredients, threeIngredients, minProfit, enabledFamilies, enabledIngredients ) {
   if (oneIngredient == undefined) oneIngredient = true
   if (twoIngredients == undefined) twoIngredients = false
   if (threeIngredients == undefined) threeIngredients = false
 
-  for (let i = 0; i < recipies.length; i++) {
-    const recipe = recipies[i];
+  const ingredientEnabled = [];
+  const recipeEnabled = [];
 
-    const ingredientCount = recipe[1].length
-    if (ingredientCount == 1 && !oneIngredient) disableRecipe(recipe);
-    else if (ingredientCount == 2 && !twoIngredients) disableRecipe(recipe);
-    else if (ingredientCount == 3 && !threeIngredients) disableRecipe(recipe);
-    else if (minProfit != undefined && recipe.profit < minProfit) disableRecipe(recipe);
-    else enableRecipe(recipe)
+  for (let i = 0; i < ingredients.length; i++) {
+    ingredientEnabled[i] = true;
+  }
+
+  for (let i = 0; i < recipies.length; i++) {
+    recipeEnabled[i] = true;
   }
 
   for (let i = 0; i < ingredients.length; i++) {
     const ingredient = ingredients[i];
-    if (ingredient.recipeCount < 1) ingredient.sceneObject.disable();
-    else if (enabledIngredients && !enabledIngredients.includes(ingredient.name)) ingredient.sceneObject.disable();
-    else if (enabledFamilies && !enabledFamilies.includes(ingredient.family)) ingredient.sceneObject.disable();
-    else ingredient.sceneObject.enable();
+    if (enabledIngredients && !enabledIngredients.includes(ingredient.name)) ingredientEnabled[i] = false;
+    else if (enabledFamilies && !enabledFamilies.includes(ingredient.family)) ingredientEnabled[i] = false;
   }
 
-  let updated = true;
-  while (updated) {
-    updated = false;
+  let changed = true
+  while (changed) {
+    changed = false;
+
+    const recipeCount = [];
+    for (let i = 0; i < ingredients.length; i++) {
+      recipeCount[i] = 0;
+    }
+
     for (let i = 0; i < recipies.length; i++) {
       const recipe = recipies[i];
-      if (recipe.sceneObject.isDisabled()) continue;
-      if (recipe[0].sceneObject.isDisabled()) {
-        disableRecipe(recipe)
-        updated = true;
-      } else {
-        let allInputsDisabled = true
-        for (let j= 0; j < recipe[1].length; j++) {
-          if (recipe[1][j].sceneObject.isEnabled()) allInputsDisabled = false;
-          else recipe.pipes[j].sceneObject.disable();
+
+      if (recipeEnabled[i]) {
+        if (recipe.inputs.length == 1 && !oneIngredient) recipeEnabled[i] = false;
+        else if (recipe.inputs.length == 2 && !twoIngredients) recipeEnabled[i] = false;
+        else if (recipe.inputs.length == 3 && !threeIngredients) recipeEnabled[i] = false;
+        else if (minProfit != undefined && recipe.profit < minProfit) recipeEnabled[i] = false;
+
+        if (!ingredientEnabled[recipe.output.ingredient.index]) recipeEnabled[i] = false;
+        for (var j = 0; j < recipe.inputs.length; j++) {
+          if (!ingredientEnabled[recipe.inputs[j].ingredient.index]) recipeEnabled[i] = false;
         }
-        if (allInputsDisabled) {
-          disableRecipe(recipe)
-          updated = true;
+
+        if (!recipeEnabled[i]) changed = true;
+      }
+
+      if (recipeEnabled[i]) {
+        recipeCount[recipe.output.ingredient.index]++;
+        for (var j = 0; j < recipe.inputs.length; j++) {
+          recipeCount[recipe.inputs[j].ingredient.index]++;
         }
+      }
+    }
+
+    for (let i = 0; i < ingredients.length; i++) {
+      if (ingredientEnabled[i] && recipeCount[i] == 0) {
+        ingredientEnabled[i] = false;
+        changed = true;
+      }
+    }
+  }
+
+  for (let i = 0; i < ingredients.length; i++) {
+    if (ingredientEnabled[i]) ingredients[i].sceneObject.enable();
+    else ingredients[i].sceneObject.disable();
+  }
+
+  for (let i = 0; i < recipies.length; i++) {
+    const recipe = recipies[i];
+    if (recipeEnabled[i]) {
+      recipe.sceneObject.enable();
+      for (var j = 0; j < recipe.pipes.length; j++) {
+        recipe.pipes[j].sceneObject.enable();
+      }
+    } else {
+      recipe.sceneObject.disable();
+      for (var j = 0; j < recipe.pipes.length; j++) {
+        recipe.pipes[j].sceneObject.disable();
       }
     }
   }
 }
-
-filter(true, false, false)
 
 // Allow the user to translate the scene by dragging with the left mouse
 let sceneLocationX, sceneLocationY
