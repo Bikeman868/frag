@@ -9,3 +9,4 @@ const infoApp = Vue.createApp({
   }
 });
 infoApp.mount('#info')
+

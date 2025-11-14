@@ -44,7 +44,7 @@
       div.scrollable {
         overflow-y: auto;
         flex: 1 1 auto;
-        max-height: calc(100vh - 500px); /* Ensure there's a maximum height to enable scrolling */
+        max-height: calc(100vh - 500px);
         min-height: 0;
       }
     </style>
@@ -94,27 +94,28 @@
         </div>
       </div>
       <canvas id="scene"></canvas>
-      <!-- <div id="info">
+      <div id="info">
         <div v-if="recipe">Show a recipe</div>
         <div v-if="ingredient">Show an ingredient</div>
-      </div> -->
+      </div>
     </div>
 
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
+    <!-- These source files just get the data in the right shape -->
     <script src="ingredients.js"></script>
     <script src="recipies.js"></script>
     <script src="constants.js"></script>
     <script src="derrived.js"></script>
 
-    <script src="info-app.js"></script>
-
+    <!-- These source files create the 3D scene to display the graph -->
     <script src="../frag.js"></script>
     <script src="scene.js"></script>
     <script src="recipe-graph.js"></script>
     <script src="physics.js"></script>
     <script src="user-input.js"></script>
-    
+
+    <!-- These source files are VueJS applications for the side panels -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="info-app.js"></script>
     <script src="filter-app.js"></script>
   </body>
 </html>
