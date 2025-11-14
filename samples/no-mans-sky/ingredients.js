@@ -17,7 +17,6 @@ const ingredients = [
   { name: 'Chromatic Metal', family: 'Metals', price: 88, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/23.png' },
   { name: 'Cobalt', family: 'Minerals', price: 76, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/14.png' },
   { name: 'Condensed Carbon', family: 'Carbon', price: 24, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/2.png' },
-  { name: 'Cadmium', family: 'Metals', price: 83, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/20.png' },
   { name: 'Copper', family: 'Metals', price: 41, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/19.png' },
   { name: 'Crystal Sulphide', family: 'Sodium', price: 0 },
   { name: 'Crystalised Helium', family: 'Carbon', price: 82, textureUrl: 'https://app.nmsassistant.com/assets/images/rawMaterials/78.png' },

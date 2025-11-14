@@ -1,4 +1,4 @@
-const filterApp = createApp({
+const filterApp = Vue.createApp({
   data() {
     return {
       minProfitFilterEnabled: true,
@@ -16,6 +16,33 @@ const filterApp = createApp({
       ingredients: ingredients,
       enabledIngredients: ingredients.map((i) => i.name),
     }
-  }
+  },
+  methods: {
+    onFilterChanged() {
+      window.filter(
+        true,
+        true,
+        true,
+        this.minProfitFilterEnabled ? this.minProfitFilter : undefined,
+        this.enabledFamilies,
+        this.enabledIngredients,
+      );
+    }
+  },
+  watch: {
+    minProfitFilterEnabled() {
+      this.onFilterChanged();
+    },
+    minProfitFilter() {
+      this.onFilterChanged();
+    },
+    enabledFamilies() {
+      this.onFilterChanged();
+    },
+    enabledIngredients() {
+      this.onFilterChanged();
+    },
+  },
 });
+
 filterApp.mount('#filter')

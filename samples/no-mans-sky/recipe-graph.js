@@ -289,7 +289,6 @@ function filter(oneIngredient, twoIngredients, threeIngredients, minProfit, enab
   if (oneIngredient == undefined) oneIngredient = true
   if (twoIngredients == undefined) twoIngredients = false
   if (threeIngredients == undefined) threeIngredients = false
-  if (minProfit == undefined) minProfit = 0.001
 
   for (let i = 0; i < recipies.length; i++) {
     const recipe = recipies[i];
@@ -298,7 +297,7 @@ function filter(oneIngredient, twoIngredients, threeIngredients, minProfit, enab
     if (ingredientCount == 1 && !oneIngredient) disableRecipe(recipe);
     else if (ingredientCount == 2 && !twoIngredients) disableRecipe(recipe);
     else if (ingredientCount == 3 && !threeIngredients) disableRecipe(recipe);
-    else if (recipe.profit < minProfit) disableRecipe(recipe);
+    else if (minProfit != undefined && recipe.profit < minProfit) disableRecipe(recipe);
     else enableRecipe(recipe)
   }
 

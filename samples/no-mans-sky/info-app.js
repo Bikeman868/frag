@@ -1,4 +1,4 @@
-const infoApp = createApp({
+const infoApp = Vue.createApp({
   data() {
     return {
       recipe: {},
