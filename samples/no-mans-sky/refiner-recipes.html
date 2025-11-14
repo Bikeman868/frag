@@ -334,14 +334,39 @@
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
           if (ingredient.recipeCount < 1) ingredient.sceneObject.disable();
+          else if (enabledIngredients && !enabledIngredients.includes(ingredient.name)) ingredient.sceneObject.disable();
+          else if (enabledFamilies && !enabledFamilies.includes(ingredient.family)) ingredient.sceneObject.disable();
           else ingredient.sceneObject.enable();
+        }
+
+        let updated = true;
+        while (updated) {
+          updated = false;
+          for (let i = 0; i < recipies.length; i++) {
+            const recipe = recipies[i];
+            if (recipe.sceneObject.isDisabled()) continue;
+            if (recipe[0].sceneObject.isDisabled()) {
+              disableRecipe(recipe)
+              updated = true;
+            } else {
+              let allInputsDisabled = true
+              for (let j= 0; j < recipe[1].length; j++) {
+                if (recipe[1][j].sceneObject.isEnabled()) allInputsDisabled = false;
+                else recipe.pipes[j].sceneObject.disable();
+              }
+              if (allInputsDisabled) {
+                disableRecipe(recipe)
+                updated = true;
+              }
+            }
+          }
         }
       }
 
-      filter(true, false, false)
-      // setTimeout(() => {filter(true, true, false, 300)}, 5000)
-      // setTimeout(() => {filter(false, true, false, 300)}, 15000)
-      // setTimeout(() => {filter(true, true, false)}, 25000)
+      filter(true, false, false, 0, ['Carbon', 'Ferrite'])
+      setTimeout(() => { filter(true, false, false, 50) }, 10000)
+      setTimeout(() => { filter(true, true, false) }, 20000)
+      setTimeout(() => { filter(true, false, false, 0, ['Carbon', 'Ferrite']) }, 30000)
 
       // Allow the user to translate the scene by dragging with the left mouse
       let sceneLocationX, sceneLocationY
