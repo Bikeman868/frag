@@ -278,6 +278,7 @@
       }
 
       function disableRecipe(recipe) {
+        if (recipe.sceneObject.isDisabled()) return
         recipe.sceneObject.disable();
 
         for (let j = 0; j < recipe.pipes.length; j++) {
@@ -291,6 +292,25 @@
         for (let j = 0; j < recipe[1].length; j++) {
           const input = recipe[1][j];
           input.recipeCount--;
+        }
+      }
+
+      function enableRecipe(recipe) {
+        if (recipe.sceneObject.isEnabled()) return
+
+        recipe.sceneObject.enable();
+
+        for (let j = 0; j < recipe.pipes.length; j++) {
+          const pipe = recipe.pipes[j];
+          pipe.sceneObject.enable();
+        }
+        
+        const output = recipe[0];
+        output.recipeCount++;
+        
+        for (let j = 0; j < recipe[1].length; j++) {
+          const input = recipe[1][j];
+          input.recipeCount++;
         }
       }
 
@@ -308,15 +328,20 @@
           else if (ingredientCount == 2 && !twoIngredients) disableRecipe(recipe);
           else if (ingredientCount == 3 && !threeIngredients) disableRecipe(recipe);
           else if (recipe.profit < minProfit) disableRecipe(recipe);
+          else enableRecipe(recipe)
         }
 
         for (let i = 0; i < ingredients.length; i++) {
           const ingredient = ingredients[i];
           if (ingredient.recipeCount < 1) ingredient.sceneObject.disable();
+          else ingredient.sceneObject.enable();
         }
       }
 
       filter(true, false, false)
+      // setTimeout(() => {filter(true, true, false, 300)}, 5000)
+      // setTimeout(() => {filter(false, true, false, 300)}, 15000)
+      // setTimeout(() => {filter(true, true, false)}, 25000)
 
       // Allow the user to translate the scene by dragging with the left mouse
       let sceneLocationX, sceneLocationY
