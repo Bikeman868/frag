@@ -1,7 +1,8 @@
 createApp({
   data() {
     return {
-      info: 'Information'
+      recipe: {},
+      ingredient: {},
     }
   }
 }).mount('#info')
