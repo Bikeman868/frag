@@ -16,18 +16,37 @@ for (let i = 0; i < ingredients.length; i++) {
 
 for (let i = 0; i < recipies.length; i++) {
   const recipe = recipies[i];
-  recipe[0] = lookupIngredient(recipe[0])
-  recipe[0].recipeCount++
+  recipe.index = i;
+
+  recipe.output = {
+    ingredient: lookupIngredient(recipe[0]),
+    quantity: recipe[2],
+  }
+  recipe.profit = recipe.output.ingredient.price * recipe[2];
+  recipe.output.ingredient.recipeCount++;
+
+  // TODO: Legacy
+  recipe[0] = recipe.output.ingredient;
+
+  recipe.inputs = [];
   for (let j = 0; j < recipe[1].length; j++) {
-    recipe[1][j] = lookupIngredient(recipe[1][j])
-    recipe[1][j].recipeCount++
+    const input = {
+      ingredient: lookupIngredient(recipe[1][j]),
+      quantity: recipe[3][j],
+    }
+    input.ingredient.recipeCount++
+    recipe.inputs[j] = input;
+    recipe.profit -= input.ingredient.price * input.quantity;
+
+    // TODO: Legacy
+    recipe[1][j] = input.ingredient;
   }
 }
 
 for (let i = 0; i < ingredients.length; i++) {
   const ingredient = ingredients[i];
-  const recipeWeight = ingredient.recipeCount + 1;
-  ingredient.mass = 1000 + ingredient.recipeCount * 500;
-  ingredient.repulsion = repulsionStrength * Math.sqrt(recipeWeight);
-  ingredient.recipeAttraction = recipeAttractionStrength * Math.sqrt(recipeWeight);
+  const recipeWeight = Math.sqrt(ingredient.recipeCount + 1);
+  ingredient.mass = 300 + ingredient.recipeCount * 150;
+  ingredient.repulsion = repulsionStrength * recipeWeight;
+  ingredient.recipeAttraction = recipeAttractionStrength / recipeWeight;
 }
