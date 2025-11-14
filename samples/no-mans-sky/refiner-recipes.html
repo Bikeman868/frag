@@ -44,7 +44,7 @@
       div.scrollable {
         overflow-y: auto;
         flex: 1 1 auto;
-        max-height: calc(100vh - 300px); /* Ensure there's a maximum height to enable scrolling */
+        max-height: calc(100vh - 500px); /* Ensure there's a maximum height to enable scrolling */
         min-height: 0;
       }
     </style>
@@ -88,10 +88,10 @@
         </div>
       </div>
       <canvas id="scene"></canvas>
-      <div id="info">
+      <!-- <div id="info">
         <div v-if="recipe">Show a recipe</div>
         <div v-if="ingredient">Show an ingredient</div>
-      </div>
+      </div> -->
     </div>
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
