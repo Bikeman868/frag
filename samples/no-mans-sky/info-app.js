@@ -1,8 +1,9 @@
-createApp({
+const infoApp = createApp({
   data() {
     return {
       recipe: {},
       ingredient: {},
     }
   }
-}).mount('#info')
+});
+infoApp.mount('#info')
