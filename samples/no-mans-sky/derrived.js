@@ -15,31 +15,33 @@ for (let i = 0; i < ingredients.length; i++) {
 }
 
 for (let i = 0; i < recipies.length; i++) {
-  const recipe = recipies[i];
-  recipe.index = i;
-
-  recipe.output = {
-    ingredient: lookupIngredient(recipe[0]),
-    quantity: recipe[2],
+  const outputName = recipies[i][0];
+  const inputNames = recipies[i][1];
+  const outputQuantity = recipies[i][2]
+  const inputQuantities = recipies[i][3]
+  
+  const recipe = {
+    index: i,
+    output: {
+      ingredient: lookupIngredient(outputName),
+      quantity: outputQuantity,
+    },
+    inputs: [],
+    profit: 0,
   }
-  recipe.profit = recipe.output.ingredient.price * recipe[2];
+  recipies[i] = recipe;
+
+  recipe.profit = recipe.output.ingredient.price * recipe.output.quantity;
   recipe.output.ingredient.recipeCount++;
 
-  // TODO: Legacy
-  recipe[0] = recipe.output.ingredient;
-
-  recipe.inputs = [];
-  for (let j = 0; j < recipe[1].length; j++) {
+  for (let j = 0; j < inputNames.length; j++) {
     const input = {
-      ingredient: lookupIngredient(recipe[1][j]),
-      quantity: recipe[3][j],
+      ingredient: lookupIngredient(inputNames[j]),
+      quantity: inputQuantities[j],
     }
     input.ingredient.recipeCount++
     recipe.inputs[j] = input;
     recipe.profit -= input.ingredient.price * input.quantity;
-
-    // TODO: Legacy
-    recipe[1][j] = input.ingredient;
   }
 }
 

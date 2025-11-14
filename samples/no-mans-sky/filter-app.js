@@ -5,6 +5,8 @@ const filterApp = Vue.createApp({
       twoIngredienstEnabled: false,
       threeIngredientsEnabled: false,
       minProfitFilterEnabled: true,
+      enableAllIngredients: true,
+      enableAllFamilies: false,
       minProfitFilter: 0,
       families: [
         { id: 'carbon-family', name:'Carbon' },
@@ -46,7 +48,19 @@ const filterApp = Vue.createApp({
         );
       },
       immediate: true,
-    }
+    },
+    enableAllIngredients: {
+      handler(value) {
+        if (value) this.enabledIngredients = ingredients.map((i) => i.name);
+        else this.enabledIngredients = [];
+      }
+    },
+    enableAllFamilies: {
+      handler(value) {
+        if (value) this.enabledFamilies = this.families.map((i) => i.name);
+        else this.enabledFamilies = [];
+      }
+    },
   },
 });
 

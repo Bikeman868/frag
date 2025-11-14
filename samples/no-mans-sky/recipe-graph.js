@@ -111,13 +111,13 @@ for (let i = 0; i < recipies.length; i++) {
   const recipe = recipies[i];
 
   recipe.pipes = [{
-    ingredient: recipe[0],
+    ingredient: recipe.output.ingredient,
     mesh: outputPipeMesh,
   }];
 
-  for (let j = 0; j < recipe[1].length; j++) {
+  for (let j = 0; j < recipe.inputs.length; j++) {
     recipe.pipes.push({
-      ingredient: recipe[1][j],
+      ingredient: recipe.inputs[j].ingredient,
       mesh: inputPipeMesh,
     });
   }
@@ -169,10 +169,10 @@ function updateIngredientPositions() {
   // Ingredients that are connected by a recipe are attracted to each other
   for (let i = 0; i < recipies.length; i++) {
     const recipe = recipies[i];
-    const outputIngredient = recipe[0];
+    const outputIngredient = recipe.output.ingredient;
     if (outputIngredient.sceneObject.isDisabled()) continue
-    for (let j = 0; j < recipe[1].length; j++) {
-      const inputIngredient = recipe[1][j];
+    for (let j = 0; j < recipe.inputs.length; j++) {
+      const inputIngredient = recipe.inputs[j].ingredient;
       if (inputIngredient.sceneObject.isDisabled()) continue
       const aMinusB = frag.Vector.sub(outputIngredient.position, inputIngredient.position);
       const distance = frag.Vector.length(aMinusB);
@@ -203,11 +203,11 @@ function updateRecipePositions() {
   for (let i = 0; i < recipies.length; i++) {
     const recipe = recipies[i];
 
-    let sum = recipe[0].position;
-    for (let j = 0; j < recipe[1].length; j++)
-      sum = frag.Vector.add(sum, recipe[1][j].position);
+    let sum = recipe.output.ingredient.position;
+    for (let j = 0; j < recipe.inputs.length; j++)
+      sum = frag.Vector.add(sum, recipe.inputs[j].ingredient.position);
 
-    recipe.position = frag.Vector.div(sum, recipe[1].length + 1);
+    recipe.position = frag.Vector.div(sum, recipe.inputs.length + 1);
     recipe.sceneObject.getPosition().location(recipe.position);
   }
 }

@@ -74,11 +74,17 @@
         </div>
         <div>
           <h3>Filter families</h3>
+          <div>
+            <input type="checkbox" id="all-families" v-model="enableAllFamilies">
+          </div>
           <div v-for="family in families" :key="family.id">
             <input type="checkbox" :id="family.id" :value="family.name" v-model="enabledFamilies">
             <label :for="family.id">{{ family.name }}</label>
           </div>
           <h3>Filter ingredients</h3>
+          <div>
+            <input type="checkbox" id="all-ingredients" v-model="enableAllIngredients">
+          </div>
           <div class="scrollable">
             <div v-for="ingredient in ingredients" :key="ingredient.name">
               <input type="checkbox" :id="ingredient.name" :value="ingredient.name" v-model="enabledIngredients">
