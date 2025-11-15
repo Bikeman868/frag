@@ -169,6 +169,12 @@
         max-height: calc(100vh - 500px);
         min-height: 0;
       }
+      div.profit {
+        margin-top: 20px;
+      }
+      img.icon {
+        width: 50px;
+      }
     </style>
   </head>
   <body>
@@ -218,9 +224,11 @@
       <canvas id="scene"></canvas>
       <div id="info">
         <div v-if="recipe" class="recipe">
-          <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} @{{ recipe.output.ingredient.price }}</h3>
+          <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }}</h3>
+          <img :src="recipe.output.ingredient.textureUrl">
           <div v-for="input of recipe.inputs" class="recipe-input">
-            {{ input.quantity }} x {{ input.ingredient.name }} @{{ input.ingredient.price }}
+            <img :src="input.ingredient.textureUrl" class="icon">
+            <span>{{ input.quantity }} x {{ input.ingredient.name }}</span>
           </div>
           <h3>Accounting</h3>
           <div class="output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>

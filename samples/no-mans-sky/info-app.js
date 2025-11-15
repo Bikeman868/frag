@@ -22,17 +22,12 @@ engine.canvas.addEventListener('click', function(event) {
   if (hit) {
     switch (hit.sceneObject.objectType) {
       case 'ingredient':
-        console.log(ingredients[hit.sceneObject.objectIndex]);
         selectedIngredient.value = ingredients[hit.sceneObject.objectIndex];
         selectedRecipe.value = null;
         break;
       case 'recipe':
-        console.log(recipies[hit.sceneObject.objectIndex]);
         selectedRecipe.value = recipies[hit.sceneObject.objectIndex];
         selectedIngredient.value = null;
-        break;
-      default:
-        console.log(hit.sceneObject)
         break;
       }
    }
