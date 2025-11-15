@@ -1,53 +1,134 @@
 <!DOCTYPE html>
+<style>
+  body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1e2737 0%, #123344 100%);
+    color: #e2ecfc;
+    box-sizing: border-box;
+  }
+  #layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(2px);
+  }
+  #filter {
+    width: 220px;
+    height: 100vh;
+    touch-action: none;
+    display: flex;
+    flex-direction: column;
+    margin: 16px 8px 16px 16px;
+    background: rgba(30, 39, 55, 0.92);
+    border-radius: 18px;
+    box-shadow: 0 2px 14px rgba(25, 40, 60, 0.27);
+    border: 1px solid #284163;
+    padding: 14px 16px;
+  }
+  #scene {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+    height: 100vh;
+    touch-action: none;
+    display: flex;
+    flex-direction: column;
+    border-radius: 22px;
+    margin: 16px 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 32px rgba(50,148,243,0.08), 0 0px 1px 0px #232a34;
+    border: 2.5px solid #3fa8e0;
+    background: linear-gradient(120deg, #243548 85%, #354971 100%);
+  }
+  #info {
+    width: 320px;
+    height: 100vh;
+    touch-action: none;
+    display: flex;
+    flex-direction: column;
+    margin: 16px 16px 16px 8px;
+    background: rgba(23,33,49,0.96);
+    border-radius: 18px;
+    box-shadow: 0 2px 17px rgba(16, 32, 54, .17);
+    border: 1px solid #27415f;
+    padding: 14px 18px 10px 18px;
+  }
+  div.scrollable {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    max-height: calc(100vh - 460px);
+    min-height: 0;
+    background: rgba(19,27,51,0.10);
+    border-radius: 12px;
+    padding: 10px 4px;
+    margin-top: 10px;
+    box-shadow: inset 0 1.5px 8px rgba(27, 42, 64, 0.12);
+  }
+  h1, h2, h3 {
+    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #84deff;
+    text-shadow: 0 1px 8px #181b2a99;
+    margin-bottom: 6px;
+  }
+  button, input, select {
+    border-radius: 8px;
+    border: 1px solid #345e91;
+    background: #26394d;
+    color: #e2ecfc;
+    padding: 6px 12px;
+    font-size: 1em;
+    margin-bottom: 9px;
+    transition: border-color 0.18s, background 0.18s;
+  }
+  button:hover, input:focus, select:focus {
+    border-color: #60daf9;
+    background: #20446b;
+    outline: none;
+  }
+  label {
+    font-size: 0.97em;
+    color: #84deff;
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+  /* Scrollbar tweaks for a more modern look */
+  ::-webkit-scrollbar {
+    width: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #283c54;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #345e91;
+  }
+  /* Smooth transitions on cards */
+  #filter, #scene, #info {
+    transition: box-shadow 0.28s, border 0.25s, background 0.22s;
+  }
+  div.recipe-input {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  div.profit {
+    margin-top: 20px;
+  }
+  img.icon {
+    width: 50px;
+  }
+</style>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
   <head>
     <title>No Man's Sky Refiner Recipes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      body {
-        width: 100vw;
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      #layout {
-        display: flex;
-        width: 100vw;
-        height: 100vh;
-      }
-      #filter {
-        width: 200px;
-        height: 100vh;
-        touch-action: none;
-        display: flex;
-        flex-direction: column;
-        margin: 5px;
-      }
-      #scene {
-        flex: 1 1 0;
-        min-width: 0;
-        max-width: 100%;
-        height: 100vh;
-        touch-action: none;
-        display: flex;
-        flex-direction: column;
-      }
-      #info {
-        width: 300px;
-        height: 100vh;
-        touch-action: none;
-        display: flex;
-        flex-direction: column;
-        margin: 5px;
-      }
-      div.scrollable {
-        overflow-y: auto;
-        flex: 1 1 auto;
-        max-height: calc(100vh - 500px); /* Ensure there's a maximum height to enable scrolling */
-        min-height: 0;
-      }
-    </style>
   </head>
   <body>
     <div id="layout">
@@ -94,27 +175,46 @@
         </div>
       </div>
       <canvas id="scene"></canvas>
-      <!-- <div id="info">
-        <div v-if="recipe">Show a recipe</div>
-        <div v-if="ingredient">Show an ingredient</div>
-      </div> -->
+      <div id="info">
+        <div v-if="recipe" class="recipe">
+          <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }}</h3>
+          <img :src="recipe.output.ingredient.textureUrl">
+          <div v-for="input of recipe.inputs" class="recipe-input">
+            <img :src="input.ingredient.textureUrl" class="icon">
+            <span>{{ input.quantity }} x {{ input.ingredient.name }}</span>
+          </div>
+          <h3>Accounting</h3>
+          <div class="output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>
+          <div v-for="input of recipe.inputs">
+            <div class="input">{{ input.quantity }} x {{ input.ingredient.name }} = -{{ input.quantity * input.ingredient.price }}</div>
+          </div>
+          <div class="profit">Profit = {{ recipe.profit }}</div>
+        </div>
+        <div v-if="ingredient" class="ingredient">
+          <h3 class="name">{{ ingredient.name }}</h3>
+          <img :src="ingredient.textureUrl">
+          <div class="price">Price: {{ ingredient.price }}</div>
+          <div class="family">Family: {{ ingredient.family }}</div>
+        </div>
+      </div>
     </div>
 
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
+    <!-- These source files just get the data in the right shape -->
     <script src="ingredients.js"></script>
     <script src="recipies.js"></script>
     <script src="constants.js"></script>
     <script src="derrived.js"></script>
 
-    <script src="info-app.js"></script>
-
+    <!-- These source files create the 3D scene to display the graph -->
     <script src="../frag.js"></script>
     <script src="scene.js"></script>
     <script src="recipe-graph.js"></script>
     <script src="physics.js"></script>
     <script src="user-input.js"></script>
-    
+
+    <!-- These source files are VueJS applications for the side panels -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="info-app.js"></script>
     <script src="filter-app.js"></script>
   </body>
 </html>
