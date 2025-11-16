@@ -19,7 +19,7 @@
   }
   #filter {
     width: 220px;
-    height: 100vh;
+    height: 94vh;
     touch-action: none;
     display: flex;
     flex-direction: column;
@@ -34,7 +34,7 @@
     flex: 1 1 0;
     min-width: 0;
     max-width: 100%;
-    height: 100vh;
+    height: 96vh;
     touch-action: none;
     display: flex;
     flex-direction: column;
@@ -47,7 +47,7 @@
   }
   #info {
     width: 320px;
-    height: 100vh;
+    height: 94vh;
     touch-action: none;
     display: flex;
     flex-direction: column;
@@ -61,7 +61,7 @@
   div.scrollable {
     overflow-y: auto;
     flex: 1 1 auto;
-    max-height: calc(100vh - 460px);
+    max-height: calc(100vh - 580px);
     min-height: 0;
     background: rgba(19,27,51,0.10);
     border-radius: 12px;
@@ -113,10 +113,15 @@
   #filter, #scene, #info {
     transition: box-shadow 0.28s, border 0.25s, background 0.22s;
   }
-  div.recipe-input {
+  div.recipe-inputs {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
+    margin-bottom: 25px;
+  }
+  div.recipe-input {
+    width: 120px;
   }
   div.profit {
     margin-top: 20px;
@@ -163,10 +168,10 @@
             <label :for="family.id">{{ family.name }}</label>
           </div>
           <h3>Filter ingredients</h3>
-          <div>
-            <input type="checkbox" id="all-ingredients" v-model="enableAllIngredients">
-          </div>
           <div class="scrollable">
+            <div>
+              <input type="checkbox" id="all-ingredients" v-model="enableAllIngredients">
+            </div>
             <div v-for="ingredient in ingredients" :key="ingredient.name">
               <input type="checkbox" :id="ingredient.name" :value="ingredient.name" v-model="enabledIngredients">
               <label :for="ingredient.name">{{ ingredient.name }}</label>
@@ -179,9 +184,11 @@
         <div v-if="recipe" class="recipe">
           <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }}</h3>
           <img :src="recipe.output.ingredient.textureUrl">
-          <div v-for="input of recipe.inputs" class="recipe-input">
-            <img :src="input.ingredient.textureUrl" class="icon">
-            <span>{{ input.quantity }} x {{ input.ingredient.name }}</span>
+          <div class="recipe-inputs">
+            <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
+              <img :src="input.ingredient.textureUrl" class="icon">
+              <span>{{ input.quantity }} x</span><br><span>{{ input.ingredient.name }}</span>
+            </div>
           </div>
           <h3>Accounting</h3>
           <div class="output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>
@@ -195,6 +202,17 @@
           <img :src="ingredient.textureUrl">
           <div class="price">Price: {{ ingredient.price }}</div>
           <div class="family">Family: {{ ingredient.family }}</div>
+          <h3>{{ ingredient.name }} recipes</h3>
+          <div class="scrollable">
+            <div v-for="recipe of ingredient.recipes">
+              <div v-if="recipe.output.ingredient.index == ingredient.index" class="recipe-inputs" @click="selectRecipe(recipe)">
+                <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
+                  <img :src="input.ingredient.textureUrl" class="icon">
+                  <span>{{ input.quantity }} x</span><br><span>{{ input.ingredient.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -7,8 +7,9 @@ function updateSceneLocation() {
 sceneLocationX = engine.AnalogState(updateSceneLocation, { value: 0, minValue: -100, maxValue: 100 });
 sceneLocationY = engine.AnalogState(updateSceneLocation, { value: 0, minValue: -100, maxValue: 100 });
 
-engine.AnalogInput("left-pointer", sceneLocationX).enable();
-engine.AnalogInput("left-pointer-vertical-inverted", sceneLocationY).enable();
+// TODO: Figure out the bug with mouse drag
+// engine.AnalogInput("left-pointer", sceneLocationX).enable();
+// engine.AnalogInput("left-pointer-vertical-inverted", sceneLocationY).enable();
 
 // Allow the user to rotate the scene by dragging with the right mouse
 let sceneRotationX, sceneRotationY
