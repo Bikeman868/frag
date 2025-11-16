@@ -113,10 +113,14 @@
   #filter, #scene, #info {
     transition: box-shadow 0.28s, border 0.25s, background 0.22s;
   }
-  div.recipe-input {
+  div.recipe-inputs {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
+  }
+  div.recipe-input {
+    width: 120px;
   }
   div.profit {
     margin-top: 20px;
@@ -179,9 +183,11 @@
         <div v-if="recipe" class="recipe">
           <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }}</h3>
           <img :src="recipe.output.ingredient.textureUrl">
-          <div v-for="input of recipe.inputs" class="recipe-input">
-            <img :src="input.ingredient.textureUrl" class="icon">
-            <span>{{ input.quantity }} x {{ input.ingredient.name }}</span>
+          <div class="recipe-inputs">
+            <div v-for="input of recipe.inputs" class="recipe-input">
+              <img :src="input.ingredient.textureUrl" class="icon">
+              <span>{{ input.quantity }} x {{ input.ingredient.name }}</span>
+            </div>
           </div>
           <h3>Accounting</h3>
           <div class="output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>
