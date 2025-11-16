@@ -20,6 +20,11 @@ for (let i = 0; i < recipies.length; i++) {
   const outputQuantity = recipies[i][2]
   const inputQuantities = recipies[i][3]
   
+  if (!outputName) {
+    recipies.length = i;
+    break;
+  }
+
   const recipe = {
     index: i,
     output: {

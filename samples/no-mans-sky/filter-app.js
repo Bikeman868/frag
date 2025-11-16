@@ -104,7 +104,7 @@ const filterApp = Vue.createApp({
         { id: 'misc-family', name:'Misc' },
         { id: 'sodium-family', name:'Sodium' },
       ],
-      enabledFamilies: ['Carbon', 'Ferrite', 'Gasses', 'Metals','Minerals', 'Sodium'],
+      enabledFamilies: ['Carbon', 'Ferrite', 'Gasses', 'Metals', 'Minerals', 'Misc', 'Sodium'],
       ingredients: ingredients,
       enabledIngredients: ingredients.map((i) => i.name),
     }
