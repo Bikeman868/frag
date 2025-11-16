@@ -7,7 +7,7 @@ const recipeRadius = 1.5;
 const repulsionStrength = 40000;
 const repulsionDecay = 0.03;
 const recipeAttractionStrength = 3;
-const originAttractionStrength = 0.001;
+const originAttractionStrength = 0.005;
 const velocityDamping = 0.995;
 
 const ingredientShape = 'sphere'; // hemisphere, disc or sphere

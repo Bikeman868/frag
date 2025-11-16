@@ -24,11 +24,27 @@ engine.canvas.addEventListener('click', function(event) {
       case 'ingredient':
         selectedIngredient.value = ingredients[hit.sceneObject.objectIndex];
         selectedRecipe.value = null;
-        break;
+        for (var i = 0; i < ingredients.length; i++) {
+          const ingredient = ingredients[i];
+          ingredient.isSelected = ingredient.index == selectedIngredient.value.index;
+        }
+        return;
       case 'recipe':
-        selectedRecipe.value = recipies[hit.sceneObject.objectIndex];
+        const recipe = recipies[hit.sceneObject.objectIndex]
+        selectedRecipe.value = recipe;
         selectedIngredient.value = null;
-        break;
+        for (var i = 0; i < ingredients.length; i++) {
+          ingredients[i].isSelected = false;
+        }
+        recipe.output.ingredient.isSelected = true;
+        for (var i= 0; i < recipe.inputs; i++)
+          recipe.inputs[i].ingredient.selected = true;
+        return;
       }
    }
+   selectedRecipe.value = null;
+   selectedIngredient.value = null;
+   for (var i = 0; i < ingredients.length; i++) {
+    ingredients[i].isSelected = false;
+  }
 });

@@ -93,7 +93,7 @@ const filterApp = Vue.createApp({
       threeIngredientsEnabled: false,
       minProfitFilterEnabled: true,
       enableAllIngredients: true,
-      enableAllFamilies: false,
+      enableAllFamilies: true,
       minProfitFilter: 0,
       families: [
         { id: 'carbon-family', name:'Carbon' },
