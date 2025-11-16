@@ -10,6 +10,16 @@ const infoApp = Vue.createApp({
       recipe: selectedRecipe,
     }
   },
+  methods: {
+    selectRecipe(recipe) {
+      selectedRecipe.value = recipe;
+      selectedIngredient.value = null;
+    },
+    selectIngredient(ingredient) {
+      selectedRecipe.value = null;
+      selectedIngredient.value = ingredient;
+    },
+  }
 });
 infoApp.mount('#info')
 

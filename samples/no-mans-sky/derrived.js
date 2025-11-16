@@ -11,7 +11,7 @@ function lookupIngredient(name) {
 for (let i = 0; i < ingredients.length; i++) {
   const ingredient = ingredients[i];
   ingredient.index = i;
-  ingredient.recipeCount = 0
+  ingredient.recipes = []
 }
 
 for (let i = 0; i < recipies.length; i++) {
@@ -20,11 +20,6 @@ for (let i = 0; i < recipies.length; i++) {
   const outputQuantity = recipies[i][2]
   const inputQuantities = recipies[i][3]
   
-  if (!outputName) {
-    recipies.length = i;
-    break;
-  }
-
   const recipe = {
     index: i,
     output: {
@@ -37,14 +32,14 @@ for (let i = 0; i < recipies.length; i++) {
   recipies[i] = recipe;
 
   recipe.profit = recipe.output.ingredient.price * recipe.output.quantity;
-  recipe.output.ingredient.recipeCount++;
+  recipe.output.ingredient.recipes.push(recipe);
 
   for (let j = 0; j < inputNames.length; j++) {
     const input = {
       ingredient: lookupIngredient(inputNames[j]),
       quantity: inputQuantities[j],
     }
-    input.ingredient.recipeCount++
+    input.ingredient.recipes.push(recipe);
     recipe.inputs[j] = input;
     recipe.profit -= input.ingredient.price * input.quantity;
   }
@@ -52,8 +47,8 @@ for (let i = 0; i < recipies.length; i++) {
 
 for (let i = 0; i < ingredients.length; i++) {
   const ingredient = ingredients[i];
-  const recipeWeight = Math.sqrt(ingredient.recipeCount + 1);
-  ingredient.mass = 300 + ingredient.recipeCount * 150;
+  const recipeWeight = Math.sqrt(ingredient.recipes.length + 1);
+  ingredient.mass = 300 + ingredient.recipes.length * 150;
   ingredient.repulsion = repulsionStrength * recipeWeight;
   ingredient.recipeAttraction = recipeAttractionStrength / recipeWeight;
 }
