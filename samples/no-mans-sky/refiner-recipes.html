@@ -182,7 +182,7 @@
       <canvas id="scene"></canvas>
       <div id="info">
         <div v-if="recipe" class="recipe">
-          <h3 class="recipe-output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }}</h3>
+          <h3 class="recipe-output"><span>Recipe for {{ recipe.output.quantity }} x</span><br><span>{{ recipe.output.ingredient.name }}</span></h3>
           <img :src="recipe.output.ingredient.textureUrl">
           <div class="recipe-inputs">
             <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
