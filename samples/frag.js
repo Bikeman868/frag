@@ -2930,8 +2930,14 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
         }
 
         const moveHandler = function (evt) {
+            const rect = engine.canvas.getBoundingClientRect();
+            const x = evt.clientX - rect.left;
+            const y = evt.clientY - rect.top;
+            const width = rect.width;
+            const height = rect.height;
+
             if (buttons === 0) {
-                let fraction = vertical ? (engine.canvas.clientHeight - evt.clientY) / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                let fraction = vertical ? (height - y) / height : x / engine.canvas.clientWidth;
                 fraction *= options.scale;
                 if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
@@ -2940,8 +2946,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
                 private.analogState.setValue(evt, value, true);
             } else if ((evt.buttons & buttons) !== 0) {
                 let fraction = vertical 
-                    ? (inverted ? (evt.clientY - downPosition) : (downPosition - evt.clientY)) / engine.canvas.clientHeight
-                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                    ? (inverted ? (y - downPosition) : (downPosition - y)) / height
+                    : (inverted ? (downPosition - x) : (y - downPosition)) / width;
                 fraction *= options.scale;
                 if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
@@ -2952,8 +2958,12 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
         }
 
         const downHandler = function(evt) {
+            const rect = engine.canvas.getBoundingClientRect();
+            const x = evt.clientX - rect.left;
+            const y = evt.clientY - rect.top;
+
             if ((evt.buttons & buttons) !== 0) {
-                downPosition = vertical ? evt.clientY : evt.clientX;
+                downPosition = vertical ? y : x;
                 downValue = private.analogState.getValue();
             }
         }
@@ -3201,8 +3211,14 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
         }
 
         const moveHandler = function (evt) {
+            const rect = engine.canvas.getBoundingClientRect();
+            const x = evt.clientX - rect.left;
+            const y = evt.clientY - rect.top;
+            const width = rect.width;
+            const height = rect.height;
+
             if (buttons === 0) {
-                let fraction = vertical ? evt.clientY / engine.canvas.clientHeight : evt.clientX / engine.canvas.clientWidth;
+                let fraction = vertical ? y / height : x / width;
                 fraction *= options.scale;
                 if (fraction > 1) fraction = 1;
                 if (inverted) fraction = 1 - fraction;
@@ -3211,8 +3227,8 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
                 private.analogState.setValue(evt, value, true);
             } else if ((evt.buttons & buttons) !== 0) {
                 let fraction = vertical 
-                    ? (inverted ? (downPosition - evt.clientY) : (evt.clientY - downPosition)) / engine.canvas.clientHeight
-                    : (inverted ? (downPosition - evt.clientX) : (evt.clientX - downPosition)) / engine.canvas.clientWidth;
+                    ? (inverted ? (downPosition - y) : (y - downPosition)) / height
+                    : (inverted ? (downPosition - x) : (x - downPosition)) / width;
                 fraction *= options.scale;
                 if (fraction > 1) fraction = 1;
                 const value = downValue + ((private.analogState.maxValue - private.analogState.minValue) * fraction);
@@ -3224,7 +3240,11 @@ window.frag.AnalogInput = function(engine, inputName, analogState, options) {
 
         const downHandler = function(evt) {
             if ((evt.buttons & buttons) !== 0) {
-                downPosition = vertical ? evt.clientY : evt.clientX;
+                const rect = engine.canvas.getBoundingClientRect();
+                const x = evt.clientX - rect.left;
+                const y = evt.clientY - rect.top;
+
+                downPosition = vertical ? y : x;
                 downValue = private.analogState.getValue();
             }
         }
