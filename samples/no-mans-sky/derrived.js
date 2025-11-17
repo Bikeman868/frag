@@ -39,7 +39,8 @@ for (let i = 0; i < recipies.length; i++) {
       ingredient: lookupIngredient(inputNames[j]),
       quantity: inputQuantities[j],
     }
-    input.ingredient.recipes.push(recipe);
+    if (input.ingredient.index !== recipe.output.ingredient.index)
+      input.ingredient.recipes.push(recipe);
     recipe.inputs[j] = input;
     recipe.profit -= input.ingredient.price * input.quantity;
   }
