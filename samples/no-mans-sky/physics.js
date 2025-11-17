@@ -35,7 +35,7 @@ function updateIngredientPositions() {
     const distanceFromOrigin = Vector.length(vectorFromOrigin);
     const direction = Vector.normalize(vectorFromOrigin);
     let attractionMagnitude = -originAttractionStrength * distanceFromOrigin;
-    if (ingredient.isSelected) attractionMagnitude *= 5000;
+    if (ingredient.isSelected) attractionMagnitude *= 3000;
     const attractionForce = Vector.mult(direction, attractionMagnitude);
     forces[i] = Vector.add(forces[i], attractionForce);
   }
@@ -44,10 +44,10 @@ function updateIngredientPositions() {
   for (let i = 0; i < recipies.length; i++) {
     const recipe = recipies[i];
     const outputIngredient = recipe.output.ingredient;
-    if (outputIngredient.sceneObject.isDisabled()) continue
+    if (outputIngredient.sceneObject.isDisabled()) continue;
     for (let j = 0; j < recipe.inputs.length; j++) {
       const inputIngredient = recipe.inputs[j].ingredient;
-      if (inputIngredient.sceneObject.isDisabled()) continue
+      if (inputIngredient.sceneObject.isDisabled()) continue;
       const aMinusB = Vector.sub(outputIngredient.position, inputIngredient.position);
       const distance = Vector.length(aMinusB);
       const direction = Vector.normalize(aMinusB);
@@ -56,6 +56,23 @@ function updateIngredientPositions() {
       const attractionForce = Vector.mult(direction, attractionMagnitude);
       forces[outputIngredient.index] = Vector.add(forces[outputIngredient.index], attractionForce);
       forces[inputIngredient.index] = Vector.sub(forces[inputIngredient.index], attractionForce);
+    }
+  }
+
+  // Try to keep ingredients within the scena clipping region
+  for (let i = 0; i < ingredients.length; i++) {
+    const ingredient = ingredients[i];
+    if (ingredient.sceneObject.isDisabled()) continue;
+    const z = ingredient.position[2];
+    let magnitude = 0
+    if (z > 80) {
+      magnitude = -((z - 80) * (z - 80))
+    } else if (z < -80) {
+      magnitude = (z + 80) * (z + 80)
+    }
+    if (magnitude != 0) {
+      const force = [0, 0, magnitude * boundaryRepulsionStrength]
+      forces[i] = Vector.add(forces[i], force);
     }
   }
 

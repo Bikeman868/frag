@@ -38,7 +38,7 @@ function filter(oneIngredient, twoIngredients, threeIngredients, minProfit, enab
         if (recipe.inputs.length == 1 && !oneIngredient) recipeEnabled[i] = false;
         else if (recipe.inputs.length == 2 && !twoIngredients) recipeEnabled[i] = false;
         else if (recipe.inputs.length == 3 && !threeIngredients) recipeEnabled[i] = false;
-        else if (minProfit != undefined && recipe.profit < minProfit) recipeEnabled[i] = false;
+        else if (minProfit != undefined && recipe.profitPercent < minProfit) recipeEnabled[i] = false;
 
         if (!ingredientEnabled[recipe.output.ingredient.index]) recipeEnabled[i] = false;
         for (var j = 0; j < recipe.inputs.length; j++) {

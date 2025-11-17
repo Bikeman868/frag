@@ -77,6 +77,12 @@
     text-shadow: 0 1px 8px #181b2a99;
     margin-bottom: 6px;
   }
+  h4 {
+    font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+    color: #84deff;
+    text-shadow: 0 1px 8px #181b2a99;
+    margin-left: 10px;
+  }
   button, input, select {
     border-radius: 8px;
     border: 1px solid #345e91;
@@ -154,8 +160,8 @@
           </div>
           <div>
             <input type="checkbox" id="min-profit-filter" v-model="minProfitFilterEnabled">
-            <label for="min-profit-slider">Profit ≥ {{ minProfitFilter }}</label><br>
-            <input type="range" id="min-profit-slider" min="0" max="300" v-model="minProfitFilter">
+            <label for="min-profit-slider">Profit ≥ {{ minProfitFilter }}%</label><br>
+            <input type="range" id="min-profit-slider" min="0" max="500" v-model="minProfitFilter">
           </div>
         </div>
         <div>
@@ -186,16 +192,27 @@
           <img :src="recipe.output.ingredient.textureUrl">
           <div class="recipe-inputs">
             <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
+              <span>{{ input.quantity }}</span>
               <img :src="input.ingredient.textureUrl" class="icon">
-              <span>{{ input.quantity }} x</span><br><span>{{ input.ingredient.name }}</span>
+              <br>
+              <span>{{ input.ingredient.name }}</span>
             </div>
           </div>
           <h3>Accounting</h3>
+          <h4>Output value</h4>
           <div class="output">{{ recipe.output.quantity }} x {{ recipe.output.ingredient.name }} = {{ recipe.output.quantity * recipe.output.ingredient.price }}</div>
+          <h4>Ingredient cost</h4>
           <div v-for="input of recipe.inputs">
-            <div class="input">{{ input.quantity }} x {{ input.ingredient.name }} = -{{ input.quantity * input.ingredient.price }}</div>
+            <div class="input">{{ input.quantity }} x {{ input.ingredient.name }} = {{ input.quantity * input.ingredient.price }}</div>
           </div>
-          <div class="profit">Profit = {{ recipe.profit }}</div>
+          <div v-if="recipe.profit > 0">
+            <h4>Profit</h4>
+            <div class="profit">{{ recipe.profit }} ({{ recipe.profitPercent }}%)</div>
+          </div>
+          <div v-if="recipe.profit < 0">
+            <h4>Loss</h4>
+            <div class="profit">{{ -recipe.profit }} ({{ recipe.profitPercent }}%)</div>
+          </div>
         </div>
         <div v-if="ingredient" class="ingredient">
           <h3 class="name">{{ ingredient.name }}</h3>
@@ -206,9 +223,11 @@
           <div class="scrollable">
             <div v-for="recipe of ingredient.recipes">
               <div v-if="recipe.output.ingredient.index == ingredient.index" class="recipe-inputs" @click="selectRecipe(recipe)">
-                <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
+                <div v-for="input of recipe.inputs" class="recipe-input">
+                  <span>{{ input.quantity }}</span>
                   <img :src="input.ingredient.textureUrl" class="icon">
-                  <span>{{ input.quantity }} x</span><br><span>{{ input.ingredient.name }}</span>
+                  <br>
+                  <span>{{ input.ingredient.name }}</span>
                 </div>
               </div>
             </div>

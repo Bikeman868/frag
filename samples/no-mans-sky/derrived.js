@@ -31,8 +31,9 @@ for (let i = 0; i < recipies.length; i++) {
   }
   recipies[i] = recipe;
 
-  recipe.profit = recipe.output.ingredient.price * recipe.output.quantity;
   recipe.output.ingredient.recipes.push(recipe);
+  const outputValue = recipe.output.ingredient.price * recipe.output.quantity;
+  let ingredientCost = 0;
 
   for (let j = 0; j < inputNames.length; j++) {
     const input = {
@@ -42,8 +43,11 @@ for (let i = 0; i < recipies.length; i++) {
     if (input.ingredient.index !== recipe.output.ingredient.index)
       input.ingredient.recipes.push(recipe);
     recipe.inputs[j] = input;
-    recipe.profit -= input.ingredient.price * input.quantity;
+    ingredientCost += input.ingredient.price * input.quantity;
   }
+
+  recipe.profit = outputValue - ingredientCost;
+  recipe.profitPercent = Math.floor(recipe.profit / ingredientCost * 100);
 }
 
 for (let i = 0; i < ingredients.length; i++) {

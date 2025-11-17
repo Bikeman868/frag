@@ -6,6 +6,7 @@ const recipeRadius = 1.5;
 
 const repulsionStrength = 40000;
 const repulsionDecay = 0.03;
+const boundaryRepulsionStrength = 10;
 const recipeAttractionStrength = 3;
 const originAttractionStrength = 0.005;
 const velocityDamping = 0.995;
