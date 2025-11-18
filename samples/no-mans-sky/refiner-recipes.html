@@ -134,6 +134,15 @@
   }
   img.icon {
     width: 50px;
+    max-height: 50px;
+  }
+  div.ingredient > img {
+    max-width: 100%;
+    max-height: 250px;
+  }
+  div.recipe > img {
+    max-width: 100%;
+    max-height: 250px;
   }
 </style>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
@@ -189,7 +198,7 @@
       <div id="info">
         <div v-if="recipe" class="recipe">
           <h3 class="recipe-output"><span>Recipe for {{ recipe.output.quantity }} x</span><br><span>{{ recipe.output.ingredient.name }}</span></h3>
-          <img :src="recipe.output.ingredient.textureUrl">
+          <img class="ingredient" :src="recipe.output.ingredient.textureUrl">
           <div class="recipe-inputs">
             <div v-for="input of recipe.inputs" class="recipe-input" @click="selectIngredient(input.ingredient)">
               <span>{{ input.quantity }}</span>
